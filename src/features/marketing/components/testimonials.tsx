@@ -62,17 +62,15 @@ export function Testimonials() {
             Trusted by developers worldwide
           </h2>
           <p className="mx-auto max-w-2xl text-muted-foreground">
-            See what developers are saying about their experience with NextDevKit.
+            See what developers are saying about their experience with
+            NextDevKit.
           </p>
         </div>
 
         {/* Testimonials Grid */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {testimonials.map((testimonial, index) => (
-            <Card
-              key={index}
-              className="rounded-xl border-0 bg-muted/50"
-            >
+            <Card key={index} className="rounded-xl border-0 bg-muted/50">
               <CardContent className="p-6">
                 <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
                   &ldquo;{testimonial.content}&rdquo;

@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-} from "recharts";
+import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const data = [

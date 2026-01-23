@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # NextDevTpl - SaaS Boilerplate
 
 ## Tech Stack & Requirements
@@ -15,6 +19,30 @@
 9. **State Management**: Zustand, TanStack Query (只在必要时使用，优先 Server Components).
 10. **Tools**: Fumadocs (文档), Lucide React (图标).
 
+## Commands
+
+```bash
+pnpm dev          # 启动开发服务器 (Turbopack)
+pnpm build        # 生产构建
+pnpm start        # 启动生产服务器
+pnpm lint         # Biome 代码检查
+pnpm format       # Biome 格式化
+pnpm check        # Biome 检查并自动修复
+pnpm typecheck    # TypeScript 类型检查
+```
+
+## Architecture
+
+### Route Groups
+- `(marketing)` - 公开营销页面 (Header + Footer 布局)
+- `(dashboard)` - 需认证的仪表盘 (Sidebar + Topbar 布局)
+
+### Feature-based 结构
+每个功能模块在 `src/features/` 下独立组织，包含自己的 `components/`、`data/` 等子目录。
+
+### 路径别名
+使用 `@/*` 指向 `src/*`，例如 `@/components/ui`。
+
 ## Coding Standards
 
 - **App Router Only**: 严禁使用 `pages/` 目录。
@@ -22,28 +50,21 @@
 - **Data Fetching**: 在 Server Components 中直接调用 DB/Drizzle，不要使用 API Routes (`app/api/*`) 获取内部数据，除非是 Webhook 或对外 API。
 - **Server Actions**: 所有的变异操作（Mutations/POST）必须使用 Server Actions 配合 `next-safe-action`。
 - **Type Safety**: 所有的 Props、API 响应、DB Schema 必须有完整的类型定义。
-- **File Structure**: 使用 `src/` 目录结构。Feature-based 架构（例如 `src/features/auth`, `src/features/billing`）。
 
 ## Project Structure
 
 ```
 src/
-├── app/           # Next.js App Router
-├── components/    # 共享组件
-├── features/      # Feature-based 模块 (auth, billing, etc.)
-├── lib/           # 工具函数和配置
+├── app/           # Next.js App Router (route groups: marketing, dashboard)
+├── components/    # 共享组件 (ui/, marketing/, dashboard/)
+├── features/      # Feature-based 模块 (marketing, dashboard, blog, etc.)
+├── lib/           # 工具函数 (cn() 等)
 ├── db/            # Drizzle ORM schema 和配置
 ├── actions/       # Server Actions
 ├── hooks/         # 自定义 React Hooks
 └── types/         # TypeScript 类型定义
 ```
 
-## Key Dependencies
+## TODO
 
-- `next-safe-action` - 类型安全的 Server Actions
-- `drizzle-orm` + `drizzle-zod` - 类型安全的 ORM
-- `better-auth` - 现代化认证方案
-- `@tanstack/react-query` - 仅在必要时用于客户端数据
-- `zustand` - 轻量级状态管理
-- `framer-motion` - 动画
-- `lucide-react` - 图标
+- [ ] **Google OAuth 登录报错 `invalid_code`** - 配置看起来正确，但回调时返回无效代码错误。需要进一步排查 Better Auth 与 Google OAuth 的兼容性问题。GitHub OAuth 已正常工作。

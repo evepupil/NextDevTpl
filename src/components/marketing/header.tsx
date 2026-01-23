@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
   Box,
   Cpu,
@@ -11,6 +10,8 @@ import {
   Search,
   ShieldCheck,
 } from "lucide-react";
+import Link from "next/link";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
@@ -20,6 +21,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+import { useSession } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
 const productItems = {
@@ -120,6 +122,22 @@ function ListItem({ icon: Icon, title, description, href }: ListItemProps) {
 }
 
 export function Header() {
+  // 获取当前用户会话状态
+  const { data: session, isPending } = useSession();
+  const user = session?.user;
+
+  /**
+   * 获取用户名首字母作为头像回退
+   */
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
@@ -212,16 +230,40 @@ export function Header() {
           </NavigationMenu>
         </div>
 
+        {/* 右侧认证区域 */}
         <div className="flex items-center gap-4">
-          <Link
-            href="/login"
-            className="hidden text-sm font-medium text-muted-foreground transition-colors hover:text-foreground md:inline-block"
-          >
-            Login
-          </Link>
-          <Button asChild className="bg-violet-600 hover:bg-violet-700">
-            <Link href="/signup">Get Started</Link>
-          </Button>
+          {isPending ? (
+            // 加载状态 - 显示骨架
+            <div className="h-8 w-24 animate-pulse rounded-md bg-muted" />
+          ) : user ? (
+            // 已登录 - 显示 Dashboard 按钮和头像
+            <>
+              <Button asChild variant="ghost">
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+              <Link href="/dashboard">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={user.image || undefined} alt={user.name} />
+                  <AvatarFallback className="bg-violet-600 text-white text-xs">
+                    {getInitials(user.name)}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
+            </>
+          ) : (
+            // 未登录 - 显示登录和注册按钮
+            <>
+              <Link
+                href="/sign-in"
+                className="hidden text-sm font-medium text-muted-foreground transition-colors hover:text-foreground md:inline-block"
+              >
+                Log in
+              </Link>
+              <Button asChild className="bg-violet-600 hover:bg-violet-700">
+                <Link href="/sign-up">Get Started</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </header>

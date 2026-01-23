@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { Minus, Plus } from "lucide-react";
+import { useState } from "react";
 import { Bar, BarChart, ResponsiveContainer } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,7 +26,9 @@ export function GoalCard() {
     <Card className="rounded-xl">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium">Move Goal</CardTitle>
-        <p className="text-xs text-muted-foreground">Set your daily activity goal.</p>
+        <p className="text-xs text-muted-foreground">
+          Set your daily activity goal.
+        </p>
       </CardHeader>
       <CardContent>
         <div className="flex items-center justify-center gap-4 py-4">

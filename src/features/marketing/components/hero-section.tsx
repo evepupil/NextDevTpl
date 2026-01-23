@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
+import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,13 +37,18 @@ export function HeroSection() {
 
         {/* Subtext */}
         <p className="mb-8 max-w-2xl text-balance text-lg text-muted-foreground md:text-xl">
-          Build and ship faster with a production-ready foundation. Authentication,
-          payments, and beautiful UI components included out of the box.
+          Build and ship faster with a production-ready foundation.
+          Authentication, payments, and beautiful UI components included out of
+          the box.
         </p>
 
         {/* CTAs */}
         <div className="mb-12 flex flex-col gap-4 sm:flex-row">
-          <Button size="lg" className="gap-2 bg-violet-600 hover:bg-violet-700" asChild>
+          <Button
+            size="lg"
+            className="gap-2 bg-violet-600 hover:bg-violet-700"
+            asChild
+          >
             <Link href="/signup">
               Get Started
               <ArrowRight className="h-4 w-4" />
@@ -61,10 +66,7 @@ export function HeroSection() {
           </p>
           <div className="flex -space-x-3">
             {avatars.map((avatar, i) => (
-              <Avatar
-                key={i}
-                className="h-10 w-10 border-2 border-background"
-              >
+              <Avatar key={i} className="h-10 w-10 border-2 border-background">
                 <AvatarImage src={avatar.src} />
                 <AvatarFallback className="bg-violet-100 text-violet-700">
                   {avatar.fallback}

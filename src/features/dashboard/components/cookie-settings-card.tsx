@@ -9,21 +9,24 @@ const cookieOptions = [
   {
     id: "necessary",
     label: "Strictly Necessary",
-    description: "These cookies are essential for the website to function properly.",
+    description:
+      "These cookies are essential for the website to function properly.",
     defaultChecked: true,
     disabled: true,
   },
   {
     id: "functional",
     label: "Functional Cookies",
-    description: "These cookies enable personalized features and functionality.",
+    description:
+      "These cookies enable personalized features and functionality.",
     defaultChecked: false,
     disabled: false,
   },
   {
     id: "performance",
     label: "Performance Cookies",
-    description: "These cookies help us understand how visitors interact with the website.",
+    description:
+      "These cookies help us understand how visitors interact with the website.",
     defaultChecked: false,
     disabled: false,
   },

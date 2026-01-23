@@ -52,17 +52,23 @@ export function SubscriptionFormCard() {
           </div>
         </div>
 
-        <RadioGroup value={plan} onValueChange={setPlan} className="grid gap-4 md:grid-cols-2">
+        <RadioGroup
+          value={plan}
+          onValueChange={setPlan}
+          className="grid gap-4 md:grid-cols-2"
+        >
           <div>
-            <RadioGroupItem value="starter" id="starter" className="peer sr-only" />
+            <RadioGroupItem
+              value="starter"
+              id="starter"
+              className="peer sr-only"
+            />
             <Label
               htmlFor="starter"
               className="flex cursor-pointer flex-col rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary"
             >
               <span className="font-medium">Starter</span>
-              <span className="text-sm text-muted-foreground">
-                $9/month
-              </span>
+              <span className="text-sm text-muted-foreground">$9/month</span>
             </Label>
           </div>
           <div>
@@ -72,9 +78,7 @@ export function SubscriptionFormCard() {
               className="flex cursor-pointer flex-col rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary"
             >
               <span className="font-medium">Pro</span>
-              <span className="text-sm text-muted-foreground">
-                $29/month
-              </span>
+              <span className="text-sm text-muted-foreground">$29/month</span>
             </Label>
           </div>
         </RadioGroup>

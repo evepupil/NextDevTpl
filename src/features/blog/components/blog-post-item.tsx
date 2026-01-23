@@ -32,7 +32,9 @@ export function BlogPostItem({ post }: BlogPostItemProps) {
           </h2>
 
           {/* Excerpt */}
-          <p className="leading-relaxed text-muted-foreground">{post.excerpt}</p>
+          <p className="leading-relaxed text-muted-foreground">
+            {post.excerpt}
+          </p>
 
           {/* Metadata */}
           <p className="text-sm text-muted-foreground">

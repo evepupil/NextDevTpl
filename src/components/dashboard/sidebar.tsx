@@ -1,22 +1,22 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import {
   ChevronsUpDown,
   Image,
   LayoutDashboard,
+  LogOut,
   MessageSquare,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { signOut, useSession } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
 
 const navGroups = [
   {
     label: "Application",
-    items: [
-      { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    ],
+    items: [{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }],
   },
   {
     label: "AI Demo",
@@ -29,6 +29,36 @@ const navGroups = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  // 获取当前用户会话
+  const { data: session } = useSession();
+  const user = session?.user;
+
+  /**
+   * 获取用户名首字母作为头像回退
+   */
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  /**
+   * 处理登出
+   */
+  const handleSignOut = async () => {
+    await signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/");
+        },
+      },
+    });
+  };
 
   return (
     <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r bg-sidebar">
@@ -69,23 +99,47 @@ export function Sidebar() {
         ))}
       </nav>
 
+      {/* 用户信息区域 */}
       <div className="border-t p-4">
-        <button
-          type="button"
-          className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left hover:bg-sidebar-accent"
-        >
-          <Avatar className="h-8 w-8">
-            <AvatarImage src="/avatars/user.png" alt="叶桐" />
-            <AvatarFallback>叶</AvatarFallback>
-          </Avatar>
-          <div className="flex-1 truncate">
-            <p className="text-sm font-medium">叶桐</p>
-            <p className="truncate text-xs text-muted-foreground">
-              yetong@example.com
-            </p>
+        {user ? (
+          <div className="space-y-2">
+            {/* 用户信息 */}
+            <div className="flex items-center gap-3 rounded-md px-2 py-2">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={user.image || undefined} alt={user.name} />
+                <AvatarFallback className="bg-violet-600 text-white text-xs">
+                  {getInitials(user.name)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 truncate">
+                <p className="text-sm font-medium">{user.name}</p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {user.email}
+                </p>
+              </div>
+              <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+            </div>
+
+            {/* 登出按钮 */}
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            >
+              <LogOut className="h-4 w-4" />
+              Sign out
+            </button>
           </div>
-          <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
-        </button>
+        ) : (
+          // 加载状态或未登录状态
+          <div className="flex items-center gap-3 rounded-md px-2 py-2">
+            <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
+            <div className="flex-1 space-y-1">
+              <div className="h-4 w-20 animate-pulse rounded bg-muted" />
+              <div className="h-3 w-32 animate-pulse rounded bg-muted" />
+            </div>
+          </div>
+        )}
       </div>
     </aside>
   );

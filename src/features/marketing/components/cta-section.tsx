@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { MessageCircle } from "lucide-react";
+import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
@@ -23,17 +23,14 @@ export function CTASection() {
               Still have questions?
             </h2>
             <p className="mx-auto mb-8 max-w-xl text-white/80">
-              Our team is here to help. Reach out to us and we&apos;ll get back to
-              you as soon as possible.
+              Our team is here to help. Reach out to us and we&apos;ll get back
+              to you as soon as possible.
             </p>
 
             <div className="mb-8 flex items-center justify-center">
               <div className="flex -space-x-3">
                 {supportTeam.map((member, i) => (
-                  <Avatar
-                    key={i}
-                    className="h-12 w-12 border-2 border-white"
-                  >
+                  <Avatar key={i} className="h-12 w-12 border-2 border-white">
                     <AvatarImage src={member.src} />
                     <AvatarFallback className="bg-violet-400 text-white">
                       {member.fallback}

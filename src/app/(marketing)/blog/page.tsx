@@ -1,5 +1,3 @@
-import { BlogPostItem } from "@/features/blog/components";
-import { mockPosts } from "@/features/blog/data/mock-posts";
 import {
   Pagination,
   PaginationContent,
@@ -9,6 +7,8 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Separator } from "@/components/ui/separator";
+import { BlogPostItem } from "@/features/blog/components";
+import { mockPosts } from "@/features/blog/data/mock-posts";
 
 export default function BlogPage() {
   return (

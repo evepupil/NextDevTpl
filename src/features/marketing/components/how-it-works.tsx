@@ -46,10 +46,7 @@ export function HowItWorks() {
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
-              <div
-                key={step.step}
-                className="relative flex gap-6 md:gap-10"
-              >
+              <div key={step.step} className="relative flex gap-6 md:gap-10">
                 {/* Connector Line */}
                 {index < steps.length - 1 && (
                   <div className="absolute left-6 top-16 h-[calc(100%-2rem)] w-px bg-border md:left-10" />
