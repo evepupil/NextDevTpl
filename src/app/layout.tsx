@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "sonner";
 
-import { Providers } from "@/components/providers";
-import { CookieConsent } from "@/components/shared/cookie-consent";
 import { siteConfig } from "@/config";
 
 import "./globals.css";
@@ -63,6 +60,12 @@ export const metadata: Metadata = {
   manifest: "/site.webmanifest",
 };
 
+/**
+ * 根布局
+ *
+ * 提供基础 HTML 结构和字体配置
+ * 实际内容由 [locale]/layout.tsx 处理
+ */
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -73,11 +76,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
       >
-        <Providers>
-          {children}
-          <CookieConsent />
-          <Toaster richColors position="top-right" />
-        </Providers>
+        {children}
       </body>
     </html>
   );

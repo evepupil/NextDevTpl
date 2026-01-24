@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,9 +11,11 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { mainNav, productNav, siteConfig } from "@/config";
+import { Link } from "@/i18n/routing";
 import { useSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
 
+import { LanguageSwitcher } from "./language-switcher";
 import { ModeToggle } from "./mode-toggle";
 
 /**
@@ -59,6 +59,8 @@ function ListItem({ icon: Icon, title, description, href }: ListItemProps) {
  * - Logo 和站点名称
  * - Products Mega Menu
  * - 主导航链接
+ * - 语言切换
+ * - 主题切换
  * - 认证状态显示
  */
 export function Header() {
@@ -117,19 +119,25 @@ export function Header() {
               {/* 主导航链接 */}
               {mainNav.map((item) => (
                 <NavigationMenuItem key={item.href}>
-                  <Link href={item.href} legacyBehavior passHref>
-                    <NavigationMenuLink className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none">
+                  <NavigationMenuLink asChild>
+                    <Link
+                      href={item.href}
+                      className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none"
+                    >
                       {item.title}
-                    </NavigationMenuLink>
-                  </Link>
+                    </Link>
+                  </NavigationMenuLink>
                 </NavigationMenuItem>
               ))}
             </NavigationMenuList>
           </NavigationMenu>
         </div>
 
-        {/* 右侧认证区域 */}
-        <div className="flex items-center gap-4">
+        {/* 右侧区域 */}
+        <div className="flex items-center gap-2">
+          {/* 语言切换 */}
+          <LanguageSwitcher />
+
           {/* 主题切换 */}
           <ModeToggle />
 

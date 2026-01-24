@@ -1,0 +1,52 @@
+{
+  "HomePage": {
+    "title": "NextDevKit",
+    "subtitle": "终极启动模板",
+    "description": "使用我们现代化、生产就绪的模板构建您的下一个 SaaS 应用。"
+  },
+  "Hero": {
+    "badge": "全新：支持 AI 模型集成",
+    "title1": "终极",
+    "titleHighlight": "Next.js 启动模板",
+    "title2": "助力您的下一个项目",
+    "subtitle": "使用生产就绪的基础设施更快地构建和发布。开箱即用的认证、支付和精美 UI 组件。",
+    "getStarted": "开始使用",
+    "seeDemo": "查看演示",
+    "socialProof": "深受全球开发者喜爱"
+  },
+  "Common": {
+    "getStarted": "开始使用",
+    "login": "登录",
+    "dashboard": "控制台",
+    "products": "产品",
+    "pricing": "定价",
+    "blog": "博客",
+    "docs": "文档",
+    "features": "功能",
+    "changelog": "更新日志"
+  },
+  "Cookie": {
+    "title": "Cookie 设置",
+    "description": "我们使用 Cookie 来确保您在我们网站上获得最佳体验。继续使用本网站即表示您同意我们的",
+    "privacyPolicy": "隐私政策",
+    "acceptAll": "接受全部",
+    "rejectAll": "仅必要",
+    "managePreferences": "管理偏好",
+    "back": "返回",
+    "preferencesTitle": "Cookie 偏好设置",
+    "essential": {
+      "title": "必要 Cookie",
+      "description": "这些 Cookie 是网站正常运行所必需的，无法关闭。"
+    },
+    "analytics": {
+      "title": "分析 Cookie",
+      "description": "帮助我们了解访问者如何与网站互动，以便改进用户体验。"
+    },
+    "marketing": {
+      "title": "营销 Cookie",
+      "description": "用于向您展示相关广告和营销内容。"
+    },
+    "alwaysEnabled": "始终启用",
+    "saveSettings": "保存设置"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "HomePage": {
+    "title": "NextDevKit",
+    "subtitle": "The Ultimate Starter Kit",
+    "description": "Build your next SaaS application with our modern, production-ready boilerplate."
+  },
+  "Hero": {
+    "badge": "New: Introducing Support for AI Models",
+    "title1": "The Ultimate",
+    "titleHighlight": "Next.js Starter Kit",
+    "title2": "for Your Next Project",
+    "subtitle": "Build and ship faster with a production-ready foundation. Authentication, payments, and beautiful UI components included out of the box.",
+    "getStarted": "Get Started",
+    "seeDemo": "See Demo",
+    "socialProof": "Loved by developers worldwide"
+  },
+  "Common": {
+    "getStarted": "Get Started",
+    "login": "Log in",
+    "dashboard": "Dashboard",
+    "products": "Products",
+    "pricing": "Pricing",
+    "blog": "Blog",
+    "docs": "Documentation",
+    "features": "Features",
+    "changelog": "Changelog"
+  },
+  "Cookie": {
+    "title": "Cookie Settings",
+    "description": "We use cookies to ensure you get the best experience on our website. By continuing to use this site, you agree to our",
+    "privacyPolicy": "Privacy Policy",
+    "acceptAll": "Accept all",
+    "rejectAll": "Essential only",
+    "managePreferences": "Manage preferences",
+    "back": "Back",
+    "preferencesTitle": "Cookie Preferences",
+    "essential": {
+      "title": "Essential Cookies",
+      "description": "These cookies are necessary for the website to function and cannot be disabled."
+    },
+    "analytics": {
+      "title": "Analytics Cookies",
+      "description": "Help us understand how visitors interact with our website to improve user experience."
+    },
+    "marketing": {
+      "title": "Marketing Cookies",
+      "description": "Used to show you relevant ads and marketing content."
+    },
+    "alwaysEnabled": "Always enabled",
+    "saveSettings": "Save settings"
+  }
+}

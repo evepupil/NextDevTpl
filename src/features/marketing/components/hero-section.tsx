@@ -1,9 +1,16 @@
+"use client";
+
 import { ArrowRight, Sparkles } from "lucide-react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/routing";
 
+/**
+ * 头像数据
+ */
 const avatars = [
   { src: "/avatars/01.png", fallback: "A" },
   { src: "/avatars/02.png", fallback: "B" },
@@ -12,7 +19,17 @@ const avatars = [
   { src: "/avatars/05.png", fallback: "E" },
 ];
 
+/**
+ * Hero Section 组件
+ *
+ * 功能:
+ * - 展示产品主要价值主张
+ * - 支持国际化翻译
+ * - 包含 CTA 按钮和社交证明
+ */
 export function HeroSection() {
+  const t = useTranslations("Hero");
+
   return (
     <section className="container relative overflow-hidden py-24 md:py-32">
       <div className="mx-auto flex max-w-5xl flex-col items-center text-center">
@@ -22,24 +39,22 @@ export function HeroSection() {
           className="mb-6 gap-2 rounded-full px-4 py-2 text-sm font-medium"
         >
           <Sparkles className="h-4 w-4 text-violet-500" />
-          New: Introducing Support for AI Models
+          {t("badge")}
           <ArrowRight className="h-4 w-4" />
         </Badge>
 
         {/* Headline */}
         <h1 className="mb-6 text-balance text-4xl font-bold tracking-tight md:text-6xl lg:text-7xl">
-          The Ultimate{" "}
+          {t("title1")}{" "}
           <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-            Next.js Starter Kit
+            {t("titleHighlight")}
           </span>{" "}
-          for Your Next Project
+          {t("title2")}
         </h1>
 
         {/* Subtext */}
         <p className="mb-8 max-w-2xl text-balance text-lg text-muted-foreground md:text-xl">
-          Build and ship faster with a production-ready foundation.
-          Authentication, payments, and beautiful UI components included out of
-          the box.
+          {t("subtitle")}
         </p>
 
         {/* CTAs */}
@@ -49,20 +64,20 @@ export function HeroSection() {
             className="gap-2 bg-violet-600 hover:bg-violet-700"
             asChild
           >
-            <Link href="/signup">
-              Get Started
+            <Link href="/sign-up">
+              {t("getStarted")}
               <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
           <Button size="lg" variant="outline" asChild>
-            <Link href="/dashboard">See Demo</Link>
+            <Link href="/dashboard">{t("seeDemo")}</Link>
           </Button>
         </div>
 
         {/* Social Proof */}
         <div className="mb-16 flex flex-col items-center gap-4">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Loved by developers worldwide
+            {t("socialProof")}
           </p>
           <div className="flex -space-x-3">
             {avatars.map((avatar, i) => (

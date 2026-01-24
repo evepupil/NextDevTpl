@@ -8,5 +8,6 @@
 export { CookieConsent } from "./cookie-consent";
 export { Footer } from "./footer";
 export { Header } from "./header";
+export { LanguageSwitcher } from "./language-switcher";
 export { MaxWidthWrapper } from "./max-width-wrapper";
 export { ModeToggle } from "./mode-toggle";
