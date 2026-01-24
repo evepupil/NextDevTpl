@@ -15,3 +15,13 @@ export {
   dashboardNav,
   dashboardConfig,
 } from "./nav";
+export {
+  // 支付配置
+  paymentConfig,
+  STRIPE_PRICE_IDS,
+  getPricingPlans,
+  getPricingConfig,
+  findPlanByPriceId,
+  getPlanPrice,
+  getBaseUrl,
+} from "./payment";

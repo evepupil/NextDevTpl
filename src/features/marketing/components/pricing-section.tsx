@@ -9,93 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { getPricingPlans, paymentConfig, getPlanPrice } from "@/config/payment";
 import { useSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
-import {
-  createCheckoutSession,
-  createCustomerPortal,
-} from "@/payment/actions";
-import { STRIPE_PRICE_IDS } from "@/payment/config";
-
-/**
- * 价格计划配置
- */
-const plans = [
-  {
-    name: "Starter",
-    description: "Perfect for side projects",
-    monthlyPrice: 0,
-    yearlyPrice: 0,
-    monthlyPriceId: null,
-    yearlyPriceId: null,
-    features: [
-      "Up to 3 projects",
-      "Basic analytics",
-      "Community support",
-      "1GB storage",
-    ],
-    cta: "Get Started",
-    highlighted: false,
-    dark: false,
-  },
-  {
-    name: "Pro",
-    description: "For growing businesses",
-    monthlyPrice: 29,
-    yearlyPrice: 290,
-    monthlyPriceId: STRIPE_PRICE_IDS.PRO_MONTHLY,
-    yearlyPriceId: STRIPE_PRICE_IDS.PRO_YEARLY,
-    features: [
-      "Unlimited projects",
-      "Advanced analytics",
-      "Priority support",
-      "10GB storage",
-      "Custom domain",
-      "API access",
-    ],
-    cta: "Start Free Trial",
-    highlighted: true,
-    dark: false,
-  },
-  {
-    name: "Lifetime",
-    description: "Pay once, use forever",
-    monthlyPrice: 299,
-    yearlyPrice: 299,
-    monthlyPriceId: null,
-    yearlyPriceId: null,
-    isLifetime: true,
-    features: [
-      "Everything in Pro",
-      "Lifetime updates",
-      "Source code access",
-      "Private Discord",
-      "1-on-1 onboarding",
-    ],
-    cta: "Buy Now",
-    highlighted: false,
-    dark: false,
-  },
-  {
-    name: "Enterprise",
-    description: "For large organizations",
-    monthlyPrice: null,
-    yearlyPrice: null,
-    monthlyPriceId: STRIPE_PRICE_IDS.ENTERPRISE_MONTHLY,
-    yearlyPriceId: STRIPE_PRICE_IDS.ENTERPRISE_YEARLY,
-    features: [
-      "Everything in Lifetime",
-      "Custom integrations",
-      "SLA guarantee",
-      "Dedicated support",
-      "On-premise option",
-      "Security audit",
-    ],
-    cta: "Contact Sales",
-    highlighted: false,
-    dark: true,
-  },
-];
+import { createCheckoutSession, createCustomerPortal } from "@/payment/actions";
+import { PlanInterval, type Plan } from "@/payment/types";
 
 /**
  * 价格计划组件属性
@@ -109,8 +27,10 @@ interface PricingSectionProps {
  * 价格计划展示组件
  *
  * 功能:
- * - 展示不同的订阅计划
+ * - 从配置读取计划信息
  * - 支持月付/年付切换
+ * - 支持订阅和一次性购买
+ * - 支持试用期
  * - 集成 Stripe Checkout
  * - 已订阅用户显示管理订阅按钮
  */
@@ -121,39 +41,87 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
   const router = useRouter();
   const { data: session } = useSession();
 
+  // 从配置获取计划列表
+  const plans = getPricingPlans();
+  const { yearlyDiscount } = paymentConfig;
+
+  /**
+   * 获取计划的当前价格信息
+   */
+  const getCurrentPrice = (plan: Plan) => {
+    if (plan.isLifetime) {
+      return plan.prices?.[0] ?? null;
+    }
+    const interval = isYearly ? PlanInterval.YEAR : PlanInterval.MONTH;
+    return getPlanPrice(plan, interval);
+  };
+
+  /**
+   * 获取显示价格
+   */
+  const getDisplayPrice = (plan: Plan): number | null => {
+    if (plan.isFree) return 0;
+    if (plan.isEnterprise) return null;
+
+    const price = getCurrentPrice(plan);
+    return price?.amount ?? null;
+  };
+
+  /**
+   * 获取价格后缀文本
+   */
+  const getPriceSuffix = (plan: Plan): string => {
+    if (plan.isLifetime) return " one-time";
+    if (plan.isFree) return "/month";
+    return isYearly ? "/year" : "/month";
+  };
+
+  /**
+   * 获取试用期信息
+   */
+  const getTrialInfo = (plan: Plan): string | null => {
+    const price = getCurrentPrice(plan);
+    if (price?.trialPeriodDays) {
+      return `${price.trialPeriodDays}-day free trial`;
+    }
+    return null;
+  };
+
   /**
    * 处理订阅按钮点击
    */
-  const handleSubscribe = async (plan: (typeof plans)[number]) => {
+  const handleSubscribe = async (plan: Plan) => {
     // 如果是 Enterprise 计划，跳转到联系页面
-    if (plan.name === "Enterprise") {
+    if (plan.isEnterprise) {
       router.push("/contact");
       return;
     }
 
-    // 如果是免费计划或 Lifetime 计划，暂不处理
-    if (!plan.monthlyPriceId && !plan.yearlyPriceId) {
-      if (plan.name === "Starter") {
-        router.push("/sign-up");
-      }
+    // 如果是免费计划，跳转到注册页面
+    if (plan.isFree) {
+      router.push("/sign-up");
       return;
     }
 
     // 如果用户未登录，跳转到登录页面
     if (!session?.user) {
-      router.push("/sign-in?redirect=/pricing");
+      router.push("/sign-in?redirect=/#pricing");
       return;
     }
 
-    // 获取对应的价格 ID
-    const priceId = isYearly ? plan.yearlyPriceId : plan.monthlyPriceId;
-    if (!priceId) return;
+    // 获取当前价格
+    const price = getCurrentPrice(plan);
+    if (!price?.priceId) return;
 
-    setLoadingPlan(plan.name);
+    setLoadingPlan(plan.id);
 
     startTransition(async () => {
       try {
-        const result = await createCheckoutSession({ priceId });
+        const result = await createCheckoutSession({
+          priceId: price.priceId,
+          type: price.type,
+          trialPeriodDays: price.trialPeriodDays,
+        });
         if (result?.data?.url) {
           window.location.href = result.data.url;
         }
@@ -171,7 +139,7 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
   const handleManageSubscription = () => {
     startTransition(async () => {
       try {
-        const result = await createCustomerPortal();
+        const result = await createCustomerPortal({});
         if (result?.data?.url) {
           window.location.href = result.data.url;
         }
@@ -184,12 +152,9 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
   /**
    * 检查计划是否为当前订阅
    */
-  const isCurrentPlan = (plan: (typeof plans)[number]) => {
+  const isCurrentPlan = (plan: Plan) => {
     if (!currentPriceId) return false;
-    return (
-      plan.monthlyPriceId === currentPriceId ||
-      plan.yearlyPriceId === currentPriceId
-    );
+    return plan.prices?.some((p) => p.priceId === currentPriceId) ?? false;
   };
 
   return (
@@ -233,7 +198,7 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
           >
             Yearly
             <Badge variant="secondary" className="ml-2 text-xs">
-              Save 20%
+              Save {yearlyDiscount}%
             </Badge>
           </Label>
         </div>
@@ -241,27 +206,23 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
         {/* Cards */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {plans.map((plan) => {
-            const price = plan.isLifetime
-              ? plan.monthlyPrice
-              : isYearly
-                ? plan.yearlyPrice
-                : plan.monthlyPrice;
-
+            const price = getDisplayPrice(plan);
             const isCurrent = isCurrentPlan(plan);
-            const isLoading = loadingPlan === plan.name;
+            const isLoading = loadingPlan === plan.id;
+            const trialInfo = getTrialInfo(plan);
 
             return (
               <Card
-                key={plan.name}
+                key={plan.id}
                 className={cn(
                   "relative flex flex-col rounded-xl",
-                  plan.highlighted &&
+                  plan.popular &&
                     "border-violet-500 shadow-lg shadow-violet-500/10",
                   plan.dark && "border-0 bg-foreground text-background",
                   isCurrent && "ring-2 ring-green-500"
                 )}
               >
-                {plan.highlighted && !isCurrent && (
+                {plan.popular && !isCurrent && (
                   <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-violet-600">
                     Most Popular
                   </Badge>
@@ -309,12 +270,21 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
                               : "text-muted-foreground"
                           )}
                         >
-                          {plan.isLifetime
-                            ? " one-time"
-                            : isYearly
-                              ? "/year"
-                              : "/month"}
+                          {getPriceSuffix(plan)}
                         </span>
+                        {/* 试用期提示 */}
+                        {trialInfo && (
+                          <p
+                            className={cn(
+                              "mt-1 text-xs",
+                              plan.dark
+                                ? "text-background/60"
+                                : "text-muted-foreground"
+                            )}
+                          >
+                            {trialInfo}
+                          </p>
+                        )}
                       </>
                     ) : (
                       <span
@@ -367,12 +337,12 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
                     <Button
                       className={cn(
                         "w-full",
-                        plan.highlighted && "bg-violet-600 hover:bg-violet-700",
+                        plan.popular && "bg-violet-600 hover:bg-violet-700",
                         plan.dark &&
                           "bg-background text-foreground hover:bg-background/90"
                       )}
                       variant={
-                        plan.highlighted || plan.dark ? "default" : "outline"
+                        plan.popular || plan.dark ? "default" : "outline"
                       }
                       onClick={() => handleSubscribe(plan)}
                       disabled={isLoading || isPending}

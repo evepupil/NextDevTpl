@@ -4,6 +4,6 @@
  * 导出所有支付相关的功能
  */
 
-export * from "./config";
+export * from "./types";
 export * from "./stripe";
 export * from "./actions";

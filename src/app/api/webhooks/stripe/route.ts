@@ -5,13 +5,14 @@ import type Stripe from "stripe";
 
 import { db } from "@/db";
 import { subscription } from "@/db/schema";
+import { PaymentType } from "@/payment/types";
 import { stripe } from "@/payment/stripe";
 
 /**
  * Stripe Webhook 处理器
  *
  * 处理来自 Stripe 的事件通知
- * 用于同步订阅状态到数据库
+ * 支持订阅支付和一次性支付
  */
 export async function POST(req: Request) {
   const body = await req.text();
@@ -46,9 +47,29 @@ export async function POST(req: Request) {
   try {
     // 处理不同类型的事件
     switch (event.type) {
+      // ============================================
+      // Checkout 完成事件
+      // ============================================
       case "checkout.session.completed": {
-        await handleCheckoutSessionCompleted(
-          event.data.object as Stripe.Checkout.Session
+        const session = event.data.object as Stripe.Checkout.Session;
+        const paymentType = session.metadata?.paymentType;
+
+        if (paymentType === PaymentType.ONE_TIME) {
+          // 一次性支付（Lifetime 计划）
+          await handleOneTimePaymentCompleted(session);
+        } else {
+          // 订阅支付
+          await handleCheckoutSessionCompleted(session);
+        }
+        break;
+      }
+
+      // ============================================
+      // 订阅相关事件
+      // ============================================
+      case "customer.subscription.created": {
+        await handleSubscriptionCreated(
+          event.data.object as Stripe.Subscription
         );
         break;
       }
@@ -88,8 +109,73 @@ export async function POST(req: Request) {
   }
 }
 
+// ============================================
+// 一次性支付处理
+// ============================================
+
 /**
- * 处理 Checkout Session 完成事件
+ * 处理一次性支付完成事件（Lifetime 计划）
+ *
+ * 创建一个永久有效的订阅记录
+ */
+async function handleOneTimePaymentCompleted(
+  session: Stripe.Checkout.Session
+) {
+  const userId = session.metadata?.userId;
+  const planId = session.metadata?.planId;
+
+  if (!userId) {
+    console.error("Missing userId in checkout session metadata");
+    return;
+  }
+
+  // 获取支付信息
+  const paymentIntentId = session.payment_intent as string;
+
+  // 检查是否已存在订阅记录
+  const [existingSubscription] = await db
+    .select()
+    .from(subscription)
+    .where(eq(subscription.userId, userId))
+    .limit(1);
+
+  if (existingSubscription) {
+    // 更新现有记录为 Lifetime
+    await db
+      .update(subscription)
+      .set({
+        stripeSubscriptionId: `lifetime_${paymentIntentId}`,
+        stripePriceId: planId ?? "lifetime",
+        status: "lifetime",
+        currentPeriodStart: new Date(),
+        currentPeriodEnd: null, // Lifetime 没有结束时间
+        cancelAtPeriodEnd: false,
+        updatedAt: new Date(),
+      })
+      .where(eq(subscription.userId, userId));
+  } else {
+    // 创建新的 Lifetime 记录
+    await db.insert(subscription).values({
+      id: crypto.randomUUID(),
+      userId,
+      stripeSubscriptionId: `lifetime_${paymentIntentId}`,
+      stripePriceId: planId ?? "lifetime",
+      status: "lifetime",
+      currentPeriodStart: new Date(),
+      currentPeriodEnd: null,
+      cancelAtPeriodEnd: false,
+    });
+  }
+
+  console.log(`Lifetime plan activated for user ${userId}`);
+}
+
+// ============================================
+// 订阅支付处理
+// ============================================
+
+/**
+ * 处理 Checkout Session 完成事件（订阅）
  *
  * 当用户完成支付后，创建或更新订阅记录
  */
@@ -153,6 +239,47 @@ async function handleCheckoutSessionCompleted(
   }
 
   console.log(`Subscription created/updated for user ${userId}`);
+}
+
+/**
+ * 处理订阅创建事件
+ *
+ * 当订阅首次创建时触发（包括试用期开始）
+ */
+async function handleSubscriptionCreated(stripeSubscription: Stripe.Subscription) {
+  const userId = stripeSubscription.metadata?.userId;
+
+  if (!userId) {
+    console.log("No userId in subscription metadata, skipping...");
+    return;
+  }
+
+  const priceId = stripeSubscription.items.data[0]?.price.id;
+  const currentPeriodStart = stripeSubscription.items.data[0]?.current_period_start;
+  const currentPeriodEnd = stripeSubscription.items.data[0]?.current_period_end;
+
+  // 检查是否已存在订阅记录
+  const [existingSubscription] = await db
+    .select()
+    .from(subscription)
+    .where(eq(subscription.userId, userId))
+    .limit(1);
+
+  if (!existingSubscription) {
+    // 创建新订阅记录
+    await db.insert(subscription).values({
+      id: crypto.randomUUID(),
+      userId,
+      stripeSubscriptionId: stripeSubscription.id,
+      stripePriceId: priceId ?? "",
+      status: stripeSubscription.status,
+      currentPeriodStart: currentPeriodStart ? new Date(currentPeriodStart * 1000) : null,
+      currentPeriodEnd: currentPeriodEnd ? new Date(currentPeriodEnd * 1000) : null,
+      cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
+    });
+
+    console.log(`Subscription created for user ${userId}`);
+  }
 }
 
 /**
