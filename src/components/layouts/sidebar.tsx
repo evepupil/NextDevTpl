@@ -2,10 +2,7 @@
 
 import {
   ChevronsUpDown,
-  Image,
-  LayoutDashboard,
   LogOut,
-  MessageSquare,
   Monitor,
   Moon,
   Settings,
@@ -22,25 +19,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
+import { dashboardConfig, siteConfig } from "@/config";
 import { signOut, useSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
-
-/**
- * 导航分组配置
- */
-const navGroups = [
-  {
-    label: "Application",
-    items: [{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }],
-  },
-  {
-    label: "AI Demo",
-    items: [
-      { href: "/dashboard/chat", label: "Chat", icon: MessageSquare },
-      { href: "/dashboard/image", label: "Image", icon: Image },
-    ],
-  },
-];
 
 /**
  * 主题类型
@@ -51,7 +32,7 @@ type Theme = "light" | "dark" | "system";
  * Dashboard 侧边栏组件
  *
  * 功能:
- * - 导航菜单
+ * - 导航菜单 (从配置读取)
  * - 用户信息弹出菜单
  * - 主题切换
  * - 设置入口
@@ -110,16 +91,16 @@ export function Sidebar() {
       {/* Logo */}
       <div className="flex h-14 items-center border-b px-4">
         <Link href="/dashboard" className="text-lg font-bold tracking-tight">
-          NEXTDEVKIT
+          {siteConfig.name.toUpperCase()}
         </Link>
       </div>
 
       {/* 导航菜单 */}
       <nav className="flex-1 space-y-6 overflow-y-auto p-4">
-        {navGroups.map((group) => (
-          <div key={group.label}>
+        {dashboardConfig.sidebarNav.map((group) => (
+          <div key={group.title}>
             <p className="mb-2 px-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              {group.label}
+              {group.title}
             </p>
             <div className="space-y-1">
               {group.items.map((item) => {
@@ -136,8 +117,8 @@ export function Sidebar() {
                         : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                     )}
                   >
-                    <Icon className="h-4 w-4" />
-                    {item.label}
+                    {Icon && <Icon className="h-4 w-4" />}
+                    {item.title}
                   </Link>
                 );
               })}

@@ -1,16 +1,7 @@
 "use client";
 
-import {
-  Box,
-  Cpu,
-  Eye,
-  Globe,
-  Palette,
-  Rocket,
-  Search,
-  ShieldCheck,
-} from "lucide-react";
 import Link from "next/link";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,75 +12,13 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+import { mainNav, productNav, siteConfig } from "@/config";
 import { useSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
 
-const productItems = {
-  dxPlatform: {
-    title: "DX Platform",
-    items: [
-      {
-        icon: Cpu,
-        title: "Previews",
-        description: "Helping teams ship 6× faster",
-        href: "/products/previews",
-      },
-      {
-        icon: Search,
-        title: "AI",
-        description: "Powering breakthroughs",
-        href: "/products/ai",
-      },
-    ],
-  },
-  infrastructure: {
-    title: "Managed Infrastructure",
-    items: [
-      {
-        icon: Globe,
-        title: "Rendering",
-        description: "Fast, scalable, and reliable",
-        href: "/products/rendering",
-      },
-      {
-        icon: Eye,
-        title: "Observability",
-        description: "Trace every step",
-        href: "/products/observability",
-      },
-      {
-        icon: ShieldCheck,
-        title: "Security",
-        description: "Scale without compromising",
-        href: "/products/security",
-      },
-    ],
-  },
-  openSource: {
-    title: "Open Source",
-    items: [
-      {
-        icon: Rocket,
-        title: "Next.js",
-        description: "The native Next.js platform",
-        href: "/products/nextjs",
-      },
-      {
-        icon: Box,
-        title: "Turborepo",
-        description: "Speed with Enterprise scale",
-        href: "/products/turborepo",
-      },
-      {
-        icon: Palette,
-        title: "AI SDK",
-        description: "The AI Toolkit for TypeScript",
-        href: "/products/ai-sdk",
-      },
-    ],
-  },
-};
-
+/**
+ * Mega Menu 列表项组件
+ */
 interface ListItemProps {
   icon: React.ElementType;
   title: string;
@@ -121,6 +50,15 @@ function ListItem({ icon: Icon, title, description, href }: ListItemProps) {
   );
 }
 
+/**
+ * Marketing 页面顶部导航栏
+ *
+ * 功能:
+ * - Logo 和站点名称
+ * - Products Mega Menu
+ * - 主导航链接
+ * - 认证状态显示
+ */
 export function Header() {
   // 获取当前用户会话状态
   const { data: session, isPending } = useSession();
@@ -142,10 +80,12 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-8">
+          {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold">NextDevKit</span>
+            <span className="text-xl font-bold">{siteConfig.name}</span>
           </Link>
 
+          {/* 导航菜单 */}
           <NavigationMenu className="hidden md:flex">
             <NavigationMenuList>
               {/* Products Mega Menu */}
@@ -155,77 +95,33 @@ export function Header() {
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <div className="grid w-[750px] grid-cols-3 gap-3 p-4">
-                    {/* DX Platform */}
-                    <div>
-                      <h4 className="mb-3 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        {productItems.dxPlatform.title}
-                      </h4>
-                      <ul className="space-y-1">
-                        {productItems.dxPlatform.items.map((item) => (
-                          <ListItem key={item.title} {...item} />
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* Managed Infrastructure */}
-                    <div>
-                      <h4 className="mb-3 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        {productItems.infrastructure.title}
-                      </h4>
-                      <ul className="space-y-1">
-                        {productItems.infrastructure.items.map((item) => (
-                          <ListItem key={item.title} {...item} />
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* Open Source */}
-                    <div>
-                      <h4 className="mb-3 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        {productItems.openSource.title}
-                      </h4>
-                      <ul className="space-y-1">
-                        {productItems.openSource.items.map((item) => (
-                          <ListItem key={item.title} {...item} />
-                        ))}
-                      </ul>
-                    </div>
+                    {/* 遍历产品分组 */}
+                    {Object.values(productNav).map((group) => (
+                      <div key={group.title}>
+                        <h4 className="mb-3 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                          {group.title}
+                        </h4>
+                        <ul className="space-y-1">
+                          {group.items.map((item) => (
+                            <ListItem key={item.title} {...item} />
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
                   </div>
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
-              {/* Other Links */}
-              <NavigationMenuItem>
-                <Link href="/docs" legacyBehavior passHref>
-                  <NavigationMenuLink className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none">
-                    Docs
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-
-              <NavigationMenuItem>
-                <Link href="/pricing" legacyBehavior passHref>
-                  <NavigationMenuLink className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none">
-                    Pricing
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-
-              <NavigationMenuItem>
-                <Link href="/blog" legacyBehavior passHref>
-                  <NavigationMenuLink className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none">
-                    Blog
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-
-              <NavigationMenuItem>
-                <Link href="/about" legacyBehavior passHref>
-                  <NavigationMenuLink className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none">
-                    About
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
+              {/* 主导航链接 */}
+              {mainNav.map((item) => (
+                <NavigationMenuItem key={item.href}>
+                  <Link href={item.href} legacyBehavior passHref>
+                    <NavigationMenuLink className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none">
+                      {item.title}
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+              ))}
             </NavigationMenuList>
           </NavigationMenu>
         </div>
