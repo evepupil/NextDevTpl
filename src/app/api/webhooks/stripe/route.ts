@@ -3,6 +3,8 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 
+import { CREDITS_EXPIRY_DAYS } from "@/credits/config";
+import { grantCredits } from "@/credits/core";
 import { db } from "@/db";
 import { subscription } from "@/db/schema";
 import { PaymentType } from "@/payment/types";
@@ -53,8 +55,12 @@ export async function POST(req: Request) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         const paymentType = session.metadata?.paymentType;
+        const purchaseType = session.metadata?.type;
 
-        if (paymentType === PaymentType.ONE_TIME) {
+        // 检查是否为积分购买
+        if (purchaseType === "credit_purchase") {
+          await handleCreditPurchaseCompleted(session);
+        } else if (paymentType === PaymentType.ONE_TIME) {
           // 一次性支付（Lifetime 计划）
           await handleOneTimePaymentCompleted(session);
         } else {
@@ -361,4 +367,61 @@ async function handleSubscriptionDeleted(stripeSubscription: Stripe.Subscription
     .where(eq(subscription.stripeSubscriptionId, stripeSubscription.id));
 
   console.log(`Subscription canceled: ${stripeSubscription.id}`);
+}
+
+// ============================================
+// 积分购买处理
+// ============================================
+
+/**
+ * 处理积分购买完成事件
+ *
+ * 从 metadata 中获取积分数量并发放给用户
+ */
+async function handleCreditPurchaseCompleted(
+  session: Stripe.Checkout.Session
+) {
+  const userId = session.metadata?.userId;
+  const creditsStr = session.metadata?.credits;
+  const packageId = session.metadata?.packageId;
+
+  if (!userId || !creditsStr) {
+    console.error("Missing userId or credits in credit purchase session metadata");
+    return;
+  }
+
+  const credits = parseInt(creditsStr, 10);
+  if (isNaN(credits) || credits <= 0) {
+    console.error("Invalid credits value in session metadata:", creditsStr);
+    return;
+  }
+
+  // 计算过期时间
+  const expiresAt = CREDITS_EXPIRY_DAYS
+    ? new Date(Date.now() + CREDITS_EXPIRY_DAYS * 24 * 60 * 60 * 1000)
+    : null;
+
+  // 发放积分
+  try {
+    const result = await grantCredits({
+      userId,
+      amount: credits,
+      sourceType: "purchase",
+      debitAccount: `PAYMENT:${session.id}`,
+      transactionType: "purchase",
+      expiresAt,
+      sourceRef: session.id,
+      description: `购买 ${credits} 积分 (${packageId ?? "custom"})`,
+      metadata: {
+        sessionId: session.id,
+        packageId,
+        paymentIntent: session.payment_intent,
+      },
+    });
+
+    console.log(`Credits purchased for user ${userId}: ${credits} credits, batch ${result.batchId}`);
+  } catch (error) {
+    console.error("Failed to grant credits:", error);
+    throw error; // 让 Webhook 返回错误，Stripe 会重试
+  }
 }

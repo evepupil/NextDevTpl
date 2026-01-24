@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { dashboardConfig, siteConfig } from "@/config";
+import { CreditBalanceBadge } from "@/credits/components";
 import { signOut, useSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
 
@@ -143,7 +144,10 @@ export function Sidebar() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 truncate text-left">
-                  <p className="text-sm font-medium">{user.name}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium">{user.name}</p>
+                    <CreditBalanceBadge />
+                  </div>
                   <p className="truncate text-xs text-muted-foreground">
                     {user.email}
                   </p>

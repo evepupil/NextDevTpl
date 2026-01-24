@@ -1,4 +1,4 @@
-import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, integer, json, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 /**
  * Better Auth 核心表 Schema
@@ -177,3 +177,172 @@ export type NewVerification = typeof verification.$inferInsert;
 
 export type Subscription = typeof subscription.$inferSelect;
 export type NewSubscription = typeof subscription.$inferInsert;
+
+// ============================================
+// 积分系统枚举
+// ============================================
+
+/**
+ * 积分账户状态枚举
+ */
+export const creditsBalanceStatusEnum = pgEnum("credits_balance_status", [
+  "active",
+  "frozen",
+]);
+
+/**
+ * 积分批次状态枚举
+ */
+export const creditsBatchStatusEnum = pgEnum("credits_batch_status", [
+  "active",
+  "consumed",
+  "expired",
+]);
+
+/**
+ * 积分批次来源类型枚举
+ */
+export const creditsBatchSourceEnum = pgEnum("credits_batch_source", [
+  "purchase",
+  "subscription",
+  "bonus",
+  "refund",
+]);
+
+/**
+ * 积分交易类型枚举
+ */
+export const creditsTransactionTypeEnum = pgEnum("credits_transaction_type", [
+  "purchase",
+  "consumption",
+  "monthly_grant",
+  "registration_bonus",
+  "expiration",
+  "refund",
+]);
+
+// ============================================
+// 积分余额表 (Credits Balances)
+// ============================================
+/**
+ * 积分余额表 - 存储用户的积分账户信息
+ *
+ * 采用预计算余额模式，避免每次查询都需要聚合计算
+ *
+ * @field id - 记录唯一标识符
+ * @field userId - 关联的用户 ID（唯一）
+ * @field balance - 当前可用积分余额
+ * @field totalEarned - 累计获得积分
+ * @field totalSpent - 累计消费积分
+ * @field status - 账户状态（active/frozen）
+ * @field createdAt - 创建时间
+ * @field updatedAt - 更新时间
+ */
+export const creditsBalance = pgTable("credits_balance", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .unique()
+    .references(() => user.id, { onDelete: "cascade" }),
+  balance: integer("balance").notNull().default(0),
+  totalEarned: integer("total_earned").notNull().default(0),
+  totalSpent: integer("total_spent").notNull().default(0),
+  status: creditsBalanceStatusEnum("status").notNull().default("active"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// ============================================
+// 积分批次表 (Credits Batches)
+// ============================================
+/**
+ * 积分批次表 - 积分库存管理
+ *
+ * 每次获得积分都会创建一个批次记录
+ * 用于实现 FIFO (先进先出) 过期机制
+ *
+ * @field id - 批次唯一标识符
+ * @field userId - 关联的用户 ID
+ * @field amount - 原始积分数量
+ * @field remaining - 剩余积分数量
+ * @field issuedAt - 发放时间
+ * @field expiresAt - 过期时间（可为空，表示永不过期）
+ * @field status - 批次状态（active/consumed/expired）
+ * @field sourceType - 来源类型（purchase/subscription/bonus/refund）
+ * @field sourceRef - 来源引用（如订单ID、订阅ID等）
+ * @field createdAt - 创建时间
+ * @field updatedAt - 更新时间
+ */
+export const creditsBatch = pgTable("credits_batch", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  amount: integer("amount").notNull(),
+  remaining: integer("remaining").notNull(),
+  issuedAt: timestamp("issued_at").notNull().defaultNow(),
+  expiresAt: timestamp("expires_at"),
+  status: creditsBatchStatusEnum("status").notNull().default("active"),
+  sourceType: creditsBatchSourceEnum("source_type").notNull(),
+  sourceRef: text("source_ref"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// ============================================
+// 积分交易表 (Credits Transactions)
+// ============================================
+/**
+ * 积分交易表 - 双重记账账本
+ *
+ * 记录所有积分变动，采用借贷记账法
+ * 每笔交易都有明确的借方(debit)和贷方(credit)账户
+ *
+ * @field id - 交易唯一标识符
+ * @field userId - 关联的用户 ID
+ * @field type - 交易类型
+ * @field amount - 交易积分数量（始终为正数）
+ * @field debitAccount - 借方账户（资金来源）
+ * @field creditAccount - 贷方账户（资金去向）
+ * @field description - 交易描述
+ * @field metadata - 扩展元数据（JSON）
+ * @field createdAt - 创建时间
+ */
+export const creditsTransaction = pgTable("credits_transaction", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  type: creditsTransactionTypeEnum("type").notNull(),
+  amount: integer("amount").notNull(),
+  debitAccount: text("debit_account").notNull(),
+  creditAccount: text("credit_account").notNull(),
+  description: text("description"),
+  metadata: json("metadata").$type<Record<string, unknown>>(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// ============================================
+// 积分系统类型导出
+// ============================================
+
+export type CreditsBalance = typeof creditsBalance.$inferSelect;
+export type NewCreditsBalance = typeof creditsBalance.$inferInsert;
+
+export type CreditsBatch = typeof creditsBatch.$inferSelect;
+export type NewCreditsBatch = typeof creditsBatch.$inferInsert;
+
+export type CreditsTransaction = typeof creditsTransaction.$inferSelect;
+export type NewCreditsTransaction = typeof creditsTransaction.$inferInsert;
+
+/** 积分账户状态类型 */
+export type CreditsBalanceStatus = (typeof creditsBalanceStatusEnum.enumValues)[number];
+
+/** 积分批次状态类型 */
+export type CreditsBatchStatus = (typeof creditsBatchStatusEnum.enumValues)[number];
+
+/** 积分批次来源类型 */
+export type CreditsBatchSource = (typeof creditsBatchSourceEnum.enumValues)[number];
+
+/** 积分交易类型 */
+export type CreditsTransactionType = (typeof creditsTransactionTypeEnum.enumValues)[number];

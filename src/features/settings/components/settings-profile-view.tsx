@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CreditUsageSection } from "@/credits/components";
 import { updateProfileAction } from "@/features/settings/actions";
 import { updateProfileSchema } from "@/features/settings/schemas";
 
@@ -330,11 +331,9 @@ export function SettingsProfileView({ user }: SettingsProfileViewProps) {
           </div>
         </TabsContent>
 
-        {/* Usage Tab (空内容) */}
+        {/* Usage Tab - 积分使用情况 */}
         <TabsContent value="usage" className="mt-8">
-          <div className="flex h-40 items-center justify-center rounded-lg border border-dashed">
-            <p className="text-muted-foreground">Usage statistics coming soon...</p>
-          </div>
+          <CreditUsageSection />
         </TabsContent>
 
         {/* Notifications Tab (空内容) */}
