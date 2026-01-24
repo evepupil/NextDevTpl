@@ -6,13 +6,28 @@ import {
   LayoutDashboard,
   LogOut,
   MessageSquare,
+  Monitor,
+  Moon,
+  Settings,
+  Sun,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
 import { signOut, useSession } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
+/**
+ * 导航分组配置
+ */
 const navGroups = [
   {
     label: "Application",
@@ -27,6 +42,21 @@ const navGroups = [
   },
 ];
 
+/**
+ * 主题类型
+ */
+type Theme = "light" | "dark" | "system";
+
+/**
+ * Dashboard 侧边栏组件
+ *
+ * 功能:
+ * - 导航菜单
+ * - 用户信息弹出菜单
+ * - 主题切换
+ * - 设置入口
+ * - 登出功能
+ */
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -34,6 +64,12 @@ export function Sidebar() {
   // 获取当前用户会话
   const { data: session } = useSession();
   const user = session?.user;
+
+  // 主题状态 (简化版，实际应使用 next-themes)
+  const [theme, setTheme] = useState<Theme>("system");
+
+  // Popover 开关状态
+  const [open, setOpen] = useState(false);
 
   /**
    * 获取用户名首字母作为头像回退
@@ -51,6 +87,7 @@ export function Sidebar() {
    * 处理登出
    */
   const handleSignOut = async () => {
+    setOpen(false);
     await signOut({
       fetchOptions: {
         onSuccess: () => {
@@ -60,14 +97,24 @@ export function Sidebar() {
     });
   };
 
+  /**
+   * 处理设置点击
+   */
+  const handleSettingsClick = () => {
+    setOpen(false);
+    router.push("/dashboard/settings");
+  };
+
   return (
     <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r bg-sidebar">
+      {/* Logo */}
       <div className="flex h-14 items-center border-b px-4">
         <Link href="/dashboard" className="text-lg font-bold tracking-tight">
           NEXTDEVKIT
         </Link>
       </div>
 
+      {/* 导航菜单 */}
       <nav className="flex-1 space-y-6 overflow-y-auto p-4">
         {navGroups.map((group) => (
           <div key={group.label}>
@@ -102,36 +149,123 @@ export function Sidebar() {
       {/* 用户信息区域 */}
       <div className="border-t p-4">
         {user ? (
-          <div className="space-y-2">
-            {/* 用户信息 */}
-            <div className="flex items-center gap-3 rounded-md px-2 py-2">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={user.image || undefined} alt={user.name} />
-                <AvatarFallback className="bg-violet-600 text-white text-xs">
-                  {getInitials(user.name)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 truncate">
-                <p className="text-sm font-medium">{user.name}</p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {user.email}
-                </p>
-              </div>
-              <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
-            </div>
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className="flex w-full items-center gap-3 rounded-md px-2 py-2 hover:bg-sidebar-accent transition-colors"
+              >
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={user.image || undefined} alt={user.name} />
+                  <AvatarFallback className="bg-violet-600 text-white text-xs">
+                    {getInitials(user.name)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 truncate text-left">
+                  <p className="text-sm font-medium">{user.name}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {user.email}
+                  </p>
+                </div>
+                <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </PopoverTrigger>
 
-            {/* 登出按钮 */}
-            <button
-              type="button"
-              onClick={handleSignOut}
-              className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            <PopoverContent
+              side="top"
+              align="start"
+              sideOffset={8}
+              className="w-64 p-0"
             >
-              <LogOut className="h-4 w-4" />
-              Sign out
-            </button>
-          </div>
+              {/* 用户信息头部 */}
+              <div className="flex items-center gap-3 p-4">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={user.image || undefined} alt={user.name} />
+                  <AvatarFallback className="bg-violet-600 text-white">
+                    {getInitials(user.name)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 truncate">
+                  <p className="font-medium">{user.name}</p>
+                  <p className="truncate text-sm text-muted-foreground">
+                    {user.email}
+                  </p>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* 主题切换 */}
+              <div className="flex items-center justify-center gap-1 p-3">
+                <button
+                  type="button"
+                  onClick={() => setTheme("light")}
+                  className={cn(
+                    "flex h-9 w-9 items-center justify-center rounded-md transition-colors",
+                    theme === "light"
+                      ? "bg-muted text-foreground"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                  title="浅色模式"
+                >
+                  <Sun className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTheme("dark")}
+                  className={cn(
+                    "flex h-9 w-9 items-center justify-center rounded-md transition-colors",
+                    theme === "dark"
+                      ? "bg-muted text-foreground"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                  title="深色模式"
+                >
+                  <Moon className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTheme("system")}
+                  className={cn(
+                    "flex h-9 w-9 items-center justify-center rounded-md transition-colors",
+                    theme === "system"
+                      ? "bg-violet-100 text-violet-600 dark:bg-violet-900 dark:text-violet-300"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                  title="跟随系统"
+                >
+                  <Monitor className="h-4 w-4" />
+                </button>
+              </div>
+
+              <Separator />
+
+              {/* 菜单项 */}
+              <div className="p-2">
+                {/* 设置 */}
+                <button
+                  type="button"
+                  onClick={handleSettingsClick}
+                  className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-muted transition-colors"
+                >
+                  <Settings className="h-4 w-4" />
+                  Settings
+                </button>
+
+                {/* 登出 */}
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-muted transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
         ) : (
-          // 加载状态或未登录状态
+          // 加载状态
           <div className="flex items-center gap-3 rounded-md px-2 py-2">
             <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
             <div className="flex-1 space-y-1">
