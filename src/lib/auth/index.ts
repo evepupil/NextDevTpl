@@ -60,19 +60,6 @@ export const auth = betterAuth({
     github: {
       clientId: process.env.GITHUB_CLIENT_ID || "",
       clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
-      // 请求完整的用户信息和邮箱权限
-      scope: ["read:user", "user:email"],
-      // 当 GitHub 不返回邮箱时，使用 noreply 邮箱作为后备
-      mapProfileToUser(profile) {
-        return {
-          email:
-            profile.email ||
-            `${profile.id}+${profile.login}@users.noreply.github.com`,
-          name: profile.name || profile.login,
-          image: profile.avatar_url,
-          emailVerified: !!profile.email,
-        };
-      },
     },
 
     /**

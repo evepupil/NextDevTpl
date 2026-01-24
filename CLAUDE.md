@@ -67,4 +67,5 @@ src/
 
 ## TODO
 
-- [ ] **Google OAuth 登录报错 `invalid_code`** - 配置看起来正确，但回调时返回无效代码错误。需要进一步排查 Better Auth 与 Google OAuth 的兼容性问题。GitHub OAuth 已正常工作。
+- [ ] **Google OAuth 登录报错 `invalid_code`** - 配置看起来正确，但回调时返回无效代码错误。需要进一步排查 Better Auth 与 Google OAuth 的兼容性问题。
+- [ ] **GitHub OAuth 登录报错 `unable_to_get_user_info`** - 移除了 `mapProfileToUser` 配置后仍报错，可能是 GitHub 邮箱隐私设置或 OAuth App 配置问题。
