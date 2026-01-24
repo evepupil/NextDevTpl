@@ -157,9 +157,9 @@ src/lib/auth/
 - [ ] 添加 `[[...slug]]` catch-all 路由
 
 #### 3.3 法律页面
-- [ ] 创建 Terms of Service
-- [ ] 创建 Privacy Policy
-- [ ] 创建 Cookie Policy
+- [ x] 创建 Terms of Service
+- [ x] 创建 Privacy Policy
+- [ x] 创建 Cookie Policy
 
 ---
 
