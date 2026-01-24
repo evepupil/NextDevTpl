@@ -21,7 +21,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import { useSession } from "@/lib/auth-client";
+import { useSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
 
 const productItems = {

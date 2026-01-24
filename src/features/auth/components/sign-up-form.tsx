@@ -12,7 +12,7 @@ import {
   signInWithGitHub,
   signInWithGoogle,
   signUpWithEmail,
-} from "@/lib/auth-client";
+} from "@/lib/auth/client";
 
 /**
  * Google 图标组件

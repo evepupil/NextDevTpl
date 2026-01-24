@@ -1,7 +1,6 @@
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { auth } from "@/lib/auth";
+import { getServerSession } from "@/lib/auth/server";
 import { SettingsProfileView } from "@/features/settings/components";
 
 /**
@@ -20,9 +19,7 @@ export const metadata = {
  */
 export default async function SettingsPage() {
   // 获取当前用户会话
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await getServerSession();
 
   // 如果用户未登录，重定向到登录页
   if (!session || !session.user) {

@@ -98,3 +98,11 @@ export async function signUpWithEmail(
     name,
   });
 }
+
+/**
+ * 刷新会话
+ * 用于在会话数据更新后强制刷新客户端状态
+ */
+export async function reloadSession() {
+  return getSession();
+}

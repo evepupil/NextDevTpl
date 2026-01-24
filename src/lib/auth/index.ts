@@ -102,6 +102,6 @@ export const auth = betterAuth({
 });
 
 /**
- * 导出类型以供客户端使用
+ * 导出类型以供其他模块使用
  */
 export type Auth = typeof auth;
