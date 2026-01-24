@@ -18,6 +18,7 @@ import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
  * @field email - 用户邮箱 (唯一)
  * @field emailVerified - 邮箱是否已验证
  * @field image - 用户头像 URL
+ * @field stripeCustomerId - Stripe 客户 ID
  * @field createdAt - 创建时间
  * @field updatedAt - 更新时间
  */
@@ -27,6 +28,7 @@ export const user = pgTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").notNull().default(false),
   image: text("image"),
+  stripeCustomerId: text("stripe_customer_id").unique(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -123,6 +125,38 @@ export const verification = pgTable("verification", {
 });
 
 // ============================================
+// 订阅表 (Subscription)
+// ============================================
+/**
+ * 订阅表 - 存储用户的 Stripe 订阅信息
+ *
+ * @field id - 订阅记录唯一标识符
+ * @field userId - 关联的用户 ID
+ * @field stripeSubscriptionId - Stripe 订阅 ID (唯一)
+ * @field stripePriceId - Stripe 价格 ID
+ * @field status - 订阅状态 (active, canceled, past_due, etc.)
+ * @field currentPeriodStart - 当前计费周期开始时间
+ * @field currentPeriodEnd - 当前计费周期结束时间
+ * @field cancelAtPeriodEnd - 是否在周期结束时取消
+ * @field createdAt - 创建时间
+ * @field updatedAt - 更新时间
+ */
+export const subscription = pgTable("subscription", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  stripeSubscriptionId: text("stripe_subscription_id").notNull().unique(),
+  stripePriceId: text("stripe_price_id").notNull(),
+  status: text("status").notNull().default("incomplete"),
+  currentPeriodStart: timestamp("current_period_start"),
+  currentPeriodEnd: timestamp("current_period_end"),
+  cancelAtPeriodEnd: boolean("cancel_at_period_end").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// ============================================
 // 类型导出
 // ============================================
 /**
@@ -140,3 +174,6 @@ export type NewAccount = typeof account.$inferInsert;
 
 export type Verification = typeof verification.$inferSelect;
 export type NewVerification = typeof verification.$inferInsert;
+
+export type Subscription = typeof subscription.$inferSelect;
+export type NewSubscription = typeof subscription.$inferInsert;

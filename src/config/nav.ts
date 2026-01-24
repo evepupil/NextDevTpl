@@ -61,7 +61,7 @@ export interface ProductGroup {
  */
 export const mainNav: NavItem[] = [
   { title: "Docs", href: "/docs" },
-  { title: "Pricing", href: "/pricing" },
+  { title: "Pricing", href: "/#pricing" },
   { title: "Blog", href: "/blog" },
   { title: "About", href: "/about" },
 ];

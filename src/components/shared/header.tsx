@@ -1,5 +1,7 @@
 "use client";
 
+import { usePathname } from "next/navigation";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -67,6 +69,7 @@ export function Header() {
   // 获取当前用户会话状态
   const { data: session, isPending } = useSession();
   const user = session?.user;
+  const pathname = usePathname();
 
   /**
    * 获取用户名首字母作为头像回退
@@ -78,6 +81,29 @@ export function Header() {
       .join("")
       .toUpperCase()
       .slice(0, 2);
+  };
+
+  /**
+   * 处理锚点链接点击
+   * 如果已在首页，直接滚动到锚点位置
+   */
+  const handleAnchorClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => {
+    // 检查是否是锚点链接 (如 /#pricing)
+    if (href.startsWith("/#")) {
+      const anchor = href.substring(2); // 获取锚点 ID
+      const isHomePage = pathname === "/" || pathname.match(/^\/[a-z]{2}$/); // 匹配 / 或 /en, /zh 等
+
+      if (isHomePage) {
+        e.preventDefault();
+        const element = document.getElementById(anchor);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      }
+    }
   };
 
   return (
@@ -122,6 +148,7 @@ export function Header() {
                   <NavigationMenuLink asChild>
                     <Link
                       href={item.href}
+                      onClick={(e) => handleAnchorClick(e, item.href)}
                       className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none"
                     >
                       {item.title}

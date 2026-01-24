@@ -120,8 +120,15 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    scroll-behavior: smooth;
+  }
   body {
     @apply bg-background text-foreground;
+  }
+  /* 锚点跳转时考虑 sticky header 的高度 */
+  [id] {
+    scroll-margin-top: 5rem;
   }
   .container {
     width: 100%;
