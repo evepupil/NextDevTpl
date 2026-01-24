@@ -5,6 +5,7 @@
  * 包括布局组件、主题切换、页头页脚等
  */
 
+export { CookieConsent } from "./cookie-consent";
 export { Footer } from "./footer";
 export { Header } from "./header";
 export { MaxWidthWrapper } from "./max-width-wrapper";

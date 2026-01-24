@@ -16,6 +16,8 @@ import { mainNav, productNav, siteConfig } from "@/config";
 import { useSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
 
+import { ModeToggle } from "./mode-toggle";
+
 /**
  * Mega Menu 列表项组件
  */
@@ -128,6 +130,9 @@ export function Header() {
 
         {/* 右侧认证区域 */}
         <div className="flex items-center gap-4">
+          {/* 主题切换 */}
+          <ModeToggle />
+
           {isPending ? (
             // 加载状态 - 显示骨架
             <div className="h-8 w-24 animate-pulse rounded-md bg-muted" />

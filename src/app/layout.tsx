@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 
+import { Providers } from "@/components/providers";
+import { CookieConsent } from "@/components/shared/cookie-consent";
 import { siteConfig } from "@/config";
 
 import "./globals.css";
@@ -71,8 +73,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
       >
-        {children}
-        <Toaster richColors position="top-right" />
+        <Providers>
+          {children}
+          <CookieConsent />
+          <Toaster richColors position="top-right" />
+        </Providers>
       </body>
     </html>
   );
