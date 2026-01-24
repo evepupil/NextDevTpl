@@ -1,63 +1,77 @@
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { Separator } from "@/components/ui/separator";
-import { BlogPostItem } from "@/features/blog/components";
-import { mockPosts } from "@/features/blog/data/mock-posts";
+import { getBlogPosts } from "@/lib/source";
 
-export default function BlogPage() {
+import { BlogPostCard } from "./blog-post-card";
+
+/**
+ * 博客列表页面
+ *
+ * 显示当前语言的所有博客文章
+ */
+export default async function BlogPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const posts = getBlogPosts(locale);
+
+  // 按日期排序（最新的在前）
+  const sortedPosts = posts.sort((a, b) => {
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    return dateB.getTime() - dateA.getTime();
+  });
+
   return (
     <div className="container mx-auto max-w-5xl py-20">
       {/* Header */}
       <div className="mb-16 text-center">
         <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
-          Blog Posts
+          {locale === "zh" ? "博客文章" : "Blog Posts"}
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-          Discover the latest insights, tutorials, and updates from the
-          NEXTDEVKIT team. Learn how to build better SaaS applications.
+          {locale === "zh"
+            ? "发现 NextDevKit 团队的最新见解、教程和更新。了解如何构建更好的 SaaS 应用程序。"
+            : "Discover the latest insights, tutorials, and updates from the NextDevKit team. Learn how to build better SaaS applications."}
         </p>
       </div>
 
       {/* Posts List */}
-      <div className="space-y-12">
-        {mockPosts.map((post, index) => (
-          <div key={post.slug}>
-            <BlogPostItem post={post} />
-            {index < mockPosts.length - 1 && <Separator className="mt-12" />}
-          </div>
-        ))}
-      </div>
+      {sortedPosts.length > 0 ? (
+        <div className="space-y-12">
+          {sortedPosts.map((post, index) => {
+            // 从路径中提取 slug
+            const pathParts = post.info.path.split("/");
+            const fileName = pathParts[pathParts.length - 1] ?? "";
+            const slug = fileName.replace(/\.mdx$/, "");
 
-      {/* Pagination */}
-      <div className="mt-16">
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious href="#" />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#" isActive>
-                1
-              </PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#">2</PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#">3</PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationNext href="#" />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </div>
+            return (
+              <div key={post.info.path}>
+                <BlogPostCard
+                  slug={slug}
+                  title={post.title}
+                  description={post.description}
+                  date={
+                    typeof post.date === "string"
+                      ? post.date
+                      : post.date.toISOString().split("T")[0] ?? ""
+                  }
+                  author={post.author}
+                  tags={post.tags}
+                />
+                {index < sortedPosts.length - 1 && (
+                  <Separator className="mt-12" />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="text-center text-muted-foreground">
+          {locale === "zh" ? "暂无博客文章" : "No blog posts yet"}
+        </div>
+      )}
     </div>
   );
 }

@@ -89,8 +89,8 @@ export function Header() {
             <span className="text-xl font-bold">{siteConfig.name}</span>
           </Link>
 
-          {/* 导航菜单 */}
-          <NavigationMenu className="hidden md:flex">
+          {/* 导航菜单 - 使用 max-md:hidden 替代 hidden md:flex 避免 Fumadocs CSS 冲突 */}
+          <NavigationMenu className="flex max-md:hidden">
             <NavigationMenuList>
               {/* Products Mega Menu */}
               <NavigationMenuItem>

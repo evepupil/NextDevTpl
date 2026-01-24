@@ -1,3 +1,4 @@
+@import "fumadocs-ui/style.css";
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -142,4 +143,43 @@
       padding-right: 2rem;
     }
   }
+}
+
+/* 修复 Fumadocs 样式与 NavigationMenu 下拉菜单的冲突 */
+/*
+ * Fumadocs 的 style.css 包含 .hidden { display: none; } 规则，
+ * 这会影响 Radix UI NavigationMenu 的内部状态管理。
+ * 以下样式确保 NavigationMenu 的 viewport 和 content 正确显示。
+ */
+
+/* 重置 Fumadocs 的 .hidden 规则对 NavigationMenu 的影响 */
+[data-slot="navigation-menu"] .hidden,
+[data-slot="navigation-menu-viewport"].hidden,
+[data-slot="navigation-menu-content"].hidden {
+  display: revert !important;
+}
+
+/* NavigationMenu viewport 外层容器 - 确保始终可见并正确定位 */
+[data-slot="navigation-menu-viewport-wrapper"] {
+  display: flex !important;
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  z-index: 50 !important;
+  justify-content: center !important;
+}
+
+/* NavigationMenu viewport - 确保正确层级 */
+[data-slot="navigation-menu-viewport"] {
+  z-index: 100 !important;
+}
+
+/* NavigationMenu content - 确保内容正确显示 */
+[data-slot="navigation-menu-content"] {
+  width: auto !important;
+}
+
+/* 确保 NavigationMenuItem 的相对定位不被覆盖 */
+[data-slot="navigation-menu-item"] {
+  position: relative !important;
 }
