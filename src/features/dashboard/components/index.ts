@@ -1,3 +1,8 @@
+// 布局组件
+export { DashboardSidebar } from "./sidebar";
+export { DashboardTopbar } from "./topbar";
+
+// 卡片组件
 export { AuthCard } from "./auth-card";
 export { CookieSettingsCard } from "./cookie-settings-card";
 export { ExerciseChartCard } from "./exercise-chart-card";

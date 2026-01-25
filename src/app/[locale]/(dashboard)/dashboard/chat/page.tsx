@@ -1,4 +1,4 @@
-import { ChatInterface } from "@/components/ai-elements";
+import { ChatInterface } from "@/features/ai/components";
 
 /**
  * AI 聊天页面

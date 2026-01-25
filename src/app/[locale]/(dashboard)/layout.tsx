@@ -1,5 +1,4 @@
-import { Sidebar } from "@/components/layouts/sidebar";
-import { Topbar } from "@/components/layouts/topbar";
+import { DashboardSidebar, DashboardTopbar } from "@/features/dashboard/components";
 
 export default function DashboardLayout({
   children,
@@ -8,9 +7,9 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="min-h-screen bg-muted/40">
-      <Sidebar />
+      <DashboardSidebar />
       <div className="pl-64">
-        <Topbar />
+        <DashboardTopbar />
         <main className="p-6">{children}</main>
       </div>
     </div>

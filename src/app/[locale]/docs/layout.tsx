@@ -1,7 +1,7 @@
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import type { ReactNode } from "react";
 
-import { Header } from "@/components/shared/header";
+import { Header } from "@/features/marketing/components";
 import { docsSource } from "@/lib/source";
 
 /**

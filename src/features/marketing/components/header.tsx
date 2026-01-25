@@ -16,9 +16,7 @@ import { mainNav, productNav, siteConfig } from "@/config";
 import { Link } from "@/i18n/routing";
 import { useSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
-
-import { LanguageSwitcher } from "./language-switcher";
-import { ModeToggle } from "./mode-toggle";
+import { LanguageSwitcher, ModeToggle } from "@/shared";
 
 /**
  * Mega Menu 列表项组件

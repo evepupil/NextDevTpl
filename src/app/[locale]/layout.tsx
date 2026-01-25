@@ -3,8 +3,8 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { Toaster } from "sonner";
 
-import { Providers } from "@/components/providers";
-import { CookieConsent } from "@/components/shared/cookie-consent";
+import { Providers } from "@/shared";
+import { CookieConsent } from "@/features/marketing/components";
 import { routing } from "@/i18n/routing";
 
 /**

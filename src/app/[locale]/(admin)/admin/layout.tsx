@@ -1,4 +1,4 @@
-import { AdminSidebar } from "@/components/layouts/admin-sidebar";
+import { AdminSidebar } from "@/features/admin/components";
 import { checkAdmin } from "@/lib/auth/admin";
 
 /**

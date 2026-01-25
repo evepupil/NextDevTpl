@@ -110,28 +110,33 @@ pnpm dev
 
 ```
 src/
-├── app/                    # Next.js App Router
-│   └── [locale]/           # 国际化路由
-│       ├── (marketing)/    # 营销页面（公开）
-│       ├── (dashboard)/    # 用户仪表盘（需登录）
-│       └── (admin)/        # 管理后台（需管理员）
-├── components/
-│   ├── ui/                 # Shadcn/UI 组件
-│   ├── layouts/            # 布局组件
-│   └── marketing/          # 营销页面组件
-├── features/               # 功能模块
-│   ├── marketing/          # 营销相关
-│   ├── dashboard/          # 仪表盘相关
-│   ├── settings/           # 设置相关
-│   ├── blog/               # 博客相关
-│   └── support/            # 工单支持
-├── db/                     # 数据库 Schema
-├── lib/                    # 工具函数
-│   └── auth/               # 认证相关
-├── credits/                # 积分系统
-├── mail/                   # 邮件系统
-├── storage/                # 存储系统
-└── config/                 # 配置文件
+├── app/                          # Next.js App Router
+│   └── [locale]/                 # 国际化路由
+│       ├── (marketing)/          # 营销页面（公开）
+│       ├── (dashboard)/          # 用户仪表盘（需登录）
+│       └── (admin)/              # 管理后台（需管理员）
+├── components/ui/                # Shadcn/UI 基础组件
+├── shared/                       # 全局共享组件
+│   ├── providers.tsx             # 主题等 Provider
+│   ├── mode-toggle.tsx           # 暗色模式切换
+│   ├── language-switcher.tsx     # 语言切换
+│   └── icons/                    # 图标
+├── features/                     # Feature-based 模块
+│   ├── marketing/components/     # header, footer, hero, pricing...
+│   ├── dashboard/components/     # sidebar, topbar, cards...
+│   ├── admin/components/         # admin-sidebar
+│   ├── ai/components/            # chat-interface
+│   ├── auth/components/          # 认证相关
+│   ├── blog/components/          # 博客相关
+│   ├── settings/components/      # 设置相关
+│   └── support/components/       # 工单支持
+├── db/                           # 数据库 Schema
+├── lib/                          # 工具函数
+│   └── auth/                     # 认证相关
+├── credits/                      # 积分系统
+├── mail/                         # 邮件系统
+├── storage/                      # 存储系统
+└── config/                       # 配置文件
 ```
 
 ## 功能模块

@@ -39,7 +39,7 @@ type Theme = "light" | "dark" | "system";
  * - 设置入口
  * - 登出功能
  */
-export function Sidebar() {
+export function DashboardSidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
