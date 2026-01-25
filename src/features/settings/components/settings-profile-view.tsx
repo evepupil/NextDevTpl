@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Camera, Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -32,6 +32,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CreditUsageSection } from "@/credits/components";
 import { updateProfileAction } from "@/features/settings/actions";
 import { updateProfileSchema } from "@/features/settings/schemas";
+import {
+  ALLOWED_IMAGE_TYPES,
+  MAX_FILE_SIZE,
+  generateAvatarKey,
+  getAvatarUrl,
+  getSignedUploadUrlAction,
+} from "@/storage";
 
 /**
  * SettingsProfileView Props 类型
@@ -39,6 +46,7 @@ import { updateProfileSchema } from "@/features/settings/schemas";
 interface SettingsProfileViewProps {
   /** 用户初始数据 */
   user: {
+    id: string;
     name: string;
     email: string;
     image?: string | null | undefined;
@@ -67,6 +75,12 @@ export function SettingsProfileView({ user }: SettingsProfileViewProps) {
   // 语言选择状态
   const [language, setLanguage] = useState("en");
 
+  // 头像上传状态
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  // 头像预览 URL (本地预览)
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+
   /**
    * 获取用户名首字母作为头像回退
    */
@@ -80,6 +94,11 @@ export function SettingsProfileView({ user }: SettingsProfileViewProps) {
   };
 
   /**
+   * 获取当前显示的头像 URL
+   */
+  const currentAvatarUrl = avatarPreview ?? getAvatarUrl(user.image);
+
+  /**
    * 表单实例
    */
   const form = useForm<FormValues>({
@@ -90,9 +109,9 @@ export function SettingsProfileView({ user }: SettingsProfileViewProps) {
   });
 
   /**
-   * Server Action 绑定
+   * Server Action 绑定 - 更新资料
    */
-  const { execute, isPending } = useAction(updateProfileAction, {
+  const { execute: executeUpdateProfile, isPending } = useAction(updateProfileAction, {
     onSuccess: ({ data }) => {
       if (data?.message) {
         toast.success(data.message);
@@ -113,24 +132,84 @@ export function SettingsProfileView({ user }: SettingsProfileViewProps) {
    * 表单提交
    */
   const onSubmit = (values: FormValues) => {
-    execute(values);
+    executeUpdateProfile(values);
   };
 
   /**
    * 处理头像点击
    */
   const handleAvatarClick = () => {
-    fileInputRef.current?.click();
+    if (!isUploadingAvatar) {
+      fileInputRef.current?.click();
+    }
   };
 
   /**
-   * 处理文件选择
+   * 处理文件选择并上传头像
    */
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      // TODO: 实现头像上传功能
-      toast.info("头像上传功能即将推出");
+    if (!file) return;
+
+    // 验证文件类型
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type as typeof ALLOWED_IMAGE_TYPES[number])) {
+      toast.error(`不支持的文件类型。支持: ${ALLOWED_IMAGE_TYPES.join(", ")}`);
+      return;
+    }
+
+    // 验证文件大小
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error(`文件过大。最大支持 ${MAX_FILE_SIZE / 1024 / 1024}MB`);
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+
+    try {
+      // 1. 创建本地预览
+      const localPreviewUrl = URL.createObjectURL(file);
+      setAvatarPreview(localPreviewUrl);
+
+      // 2. 生成唯一文件名
+      const key = generateAvatarKey(user.id, file);
+
+      // 3. 获取签名上传 URL
+      const uploadUrlResult = await getSignedUploadUrlAction({
+        key,
+        contentType: file.type as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
+      });
+
+      if (!uploadUrlResult?.data?.uploadUrl) {
+        throw new Error("获取上传 URL 失败");
+      }
+
+      // 4. 直接上传文件到存储
+      const uploadResponse = await fetch(uploadUrlResult.data.uploadUrl, {
+        method: "PUT",
+        body: file,
+        headers: {
+          "Content-Type": file.type,
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error("文件上传失败");
+      }
+
+      // 5. 更新数据库中的头像字段
+      executeUpdateProfile({ image: uploadUrlResult.data.key });
+      toast.success("头像更新成功");
+    } catch (error) {
+      console.error("头像上传错误:", error);
+      toast.error(error instanceof Error ? error.message : "头像上传失败");
+      // 清除预览
+      setAvatarPreview(null);
+    } finally {
+      setIsUploadingAvatar(false);
+      // 重置文件输入
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
@@ -237,31 +316,39 @@ export function SettingsProfileView({ user }: SettingsProfileViewProps) {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/jpeg,image/png"
+                accept={ALLOWED_IMAGE_TYPES.join(",")}
                 className="hidden"
                 onChange={handleFileChange}
+                disabled={isUploadingAvatar}
               />
 
               {/* 可点击的头像 */}
               <button
                 type="button"
                 onClick={handleAvatarClick}
-                className="group relative cursor-pointer"
+                disabled={isUploadingAvatar}
+                className="group relative cursor-pointer disabled:cursor-not-allowed"
               >
-                <Avatar className="h-24 w-24 transition-opacity group-hover:opacity-80">
-                  <AvatarImage src={user.image || undefined} alt={user.name} />
+                <Avatar className="h-24 w-24 transition-opacity group-hover:opacity-80 group-disabled:opacity-60">
+                  <AvatarImage src={currentAvatarUrl} alt={user.name} />
                   <AvatarFallback className="bg-violet-600 text-white text-2xl">
                     {getInitials(user.name)}
                   </AvatarFallback>
                 </Avatar>
-                {/* Hover 遮罩 */}
-                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-                  <span className="text-xs text-white font-medium">Change</span>
+                {/* Hover 遮罩 / 上传中状态 */}
+                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 group-disabled:opacity-100">
+                  {isUploadingAvatar ? (
+                    <Loader2 className="h-6 w-6 text-white animate-spin" />
+                  ) : (
+                    <Camera className="h-6 w-6 text-white" />
+                  )}
                 </div>
               </button>
 
               <p className="text-sm text-muted-foreground">
-                Supports JPG, PNG up to 5MB
+                {isUploadingAvatar
+                  ? "上传中..."
+                  : `支持 JPG, PNG, GIF, WebP，最大 ${MAX_FILE_SIZE / 1024 / 1024}MB`}
               </p>
             </div>
           </section>
