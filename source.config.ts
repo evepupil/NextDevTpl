@@ -34,3 +34,22 @@ export const blog = defineCollections({
   schema: blogFrontmatter,
   type: "doc",
 });
+
+/**
+ * 法律文档 Frontmatter Schema
+ */
+const legalFrontmatter = frontmatterSchema.extend({
+  title: z.string(),
+  date: z.string().or(z.date()),
+  description: z.string().optional(),
+});
+
+/**
+ * 法律文档集合配置
+ * 包含 Terms of Service, Privacy Policy, Cookie Policy
+ */
+export const legal = defineCollections({
+  dir: "src/content/legal",
+  schema: legalFrontmatter,
+  type: "doc",
+});

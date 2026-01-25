@@ -25,19 +25,19 @@ export default function AuthLayout({
           </p>
           <nav className="flex gap-6">
             <Link
-              href="/privacy"
+              href="/legal/privacy"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Privacy Policy
             </Link>
             <Link
-              href="/terms"
+              href="/legal/terms"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Terms of Service
             </Link>
             <Link
-              href="/cookies"
+              href="/legal/cookie-policy"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Cookie Settings

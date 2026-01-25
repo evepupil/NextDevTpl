@@ -160,8 +160,9 @@ export const footerNav = {
 
   /** 法律链接 */
   legal: [
-    { title: "Privacy Policy", href: "/privacy" },
-    { title: "Terms of Service", href: "/terms" },
+    { title: "Terms of Service", href: "/legal/terms" },
+    { title: "Privacy Policy", href: "/legal/privacy" },
+    { title: "Cookie Policy", href: "/legal/cookie-policy" },
   ] as NavItem[],
 };
 

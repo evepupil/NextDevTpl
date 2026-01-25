@@ -17,7 +17,18 @@ var blog = defineCollections({
   schema: blogFrontmatter,
   type: "doc"
 });
+var legalFrontmatter = frontmatterSchema.extend({
+  title: z.string(),
+  date: z.string().or(z.date()),
+  description: z.string().optional()
+});
+var legal = defineCollections({
+  dir: "src/content/legal",
+  schema: legalFrontmatter,
+  type: "doc"
+});
 export {
   blog,
-  docs
+  docs,
+  legal
 };
