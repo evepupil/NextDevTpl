@@ -91,12 +91,17 @@ S3_BUCKET_NAME=""
 ### 数据库初始化
 
 ```bash
-# 生成迁移文件
-pnpm db:generate
-
-# 推送 schema 到数据库
+# 方式一：直接推送 schema（推荐新项目使用）
 pnpm db:push
+
+# 方式二：使用迁移文件
+pnpm db:migrate
 ```
+
+> **说明**：
+> - `db:push` 会直接将 schema 同步到数据库，适合新项目初始化
+> - `db:migrate` 会执行 `drizzle/` 目录下的迁移文件
+> - 开发过程中修改 schema 后，运行 `pnpm db:generate` 生成新的迁移文件
 
 ### 启动开发服务器
 
