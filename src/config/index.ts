@@ -14,6 +14,9 @@ export {
   // Dashboard 配置
   dashboardNav,
   dashboardConfig,
+  // Admin 配置
+  adminNav,
+  adminConfig,
 } from "./nav";
 export {
   // 支付配置

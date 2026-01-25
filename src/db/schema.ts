@@ -8,6 +8,15 @@ import { boolean, integer, json, pgEnum, pgTable, text, timestamp } from "drizzl
  */
 
 // ============================================
+// 用户角色枚举
+// ============================================
+
+/**
+ * 用户角色枚举
+ */
+export const userRoleEnum = pgEnum("user_role", ["user", "admin"]);
+
+// ============================================
 // 用户表 (User)
 // ============================================
 /**
@@ -18,6 +27,9 @@ import { boolean, integer, json, pgEnum, pgTable, text, timestamp } from "drizzl
  * @field email - 用户邮箱 (唯一)
  * @field emailVerified - 邮箱是否已验证
  * @field image - 用户头像 URL
+ * @field role - 用户角色 (user/admin)
+ * @field banned - 是否被封禁
+ * @field bannedReason - 封禁原因
  * @field stripeCustomerId - Stripe 客户 ID
  * @field createdAt - 创建时间
  * @field updatedAt - 更新时间
@@ -28,6 +40,9 @@ export const user = pgTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").notNull().default(false),
   image: text("image"),
+  role: userRoleEnum("role").notNull().default("user"),
+  banned: boolean("banned").notNull().default(false),
+  bannedReason: text("banned_reason"),
   stripeCustomerId: text("stripe_customer_id").unique(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -377,3 +392,113 @@ export const newsletterSubscriber = pgTable("newsletter_subscriber", {
 
 export type NewsletterSubscriber = typeof newsletterSubscriber.$inferSelect;
 export type NewNewsletterSubscriber = typeof newsletterSubscriber.$inferInsert;
+
+// ============================================
+// 工单系统枚举
+// ============================================
+
+/**
+ * 工单类别枚举
+ */
+export const ticketCategoryEnum = pgEnum("ticket_category", [
+  "billing",
+  "technical",
+  "bug",
+  "feature",
+  "other",
+]);
+
+/**
+ * 工单优先级枚举
+ */
+export const ticketPriorityEnum = pgEnum("ticket_priority", [
+  "low",
+  "medium",
+  "high",
+]);
+
+/**
+ * 工单状态枚举
+ */
+export const ticketStatusEnum = pgEnum("ticket_status", [
+  "open",
+  "in_progress",
+  "resolved",
+  "closed",
+]);
+
+// ============================================
+// 工单表 (Tickets)
+// ============================================
+/**
+ * 工单表 - 存储用户支持工单
+ *
+ * @field id - 工单唯一标识符
+ * @field userId - 创建工单的用户 ID
+ * @field subject - 工单主题
+ * @field category - 工单类别 (billing/technical/bug/feature/other)
+ * @field priority - 优先级 (low/medium/high)
+ * @field status - 状态 (open/in_progress/resolved/closed)
+ * @field createdAt - 创建时间
+ * @field updatedAt - 更新时间
+ */
+export const ticket = pgTable("ticket", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  subject: text("subject").notNull(),
+  category: ticketCategoryEnum("category").notNull().default("other"),
+  priority: ticketPriorityEnum("priority").notNull().default("medium"),
+  status: ticketStatusEnum("status").notNull().default("open"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// ============================================
+// 工单消息表 (Ticket Messages)
+// ============================================
+/**
+ * 工单消息表 - 存储工单对话记录
+ *
+ * @field id - 消息唯一标识符
+ * @field ticketId - 关联的工单 ID
+ * @field userId - 发送者用户 ID
+ * @field content - 消息内容
+ * @field isAdminResponse - 是否为管理员回复 (用于 UI 样式区分)
+ * @field createdAt - 创建时间
+ */
+export const ticketMessage = pgTable("ticket_message", {
+  id: text("id").primaryKey(),
+  ticketId: text("ticket_id")
+    .notNull()
+    .references(() => ticket.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  content: text("content").notNull(),
+  isAdminResponse: boolean("is_admin_response").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// ============================================
+// 工单系统类型导出
+// ============================================
+
+export type Ticket = typeof ticket.$inferSelect;
+export type NewTicket = typeof ticket.$inferInsert;
+
+export type TicketMessage = typeof ticketMessage.$inferSelect;
+export type NewTicketMessage = typeof ticketMessage.$inferInsert;
+
+/** 用户角色类型 */
+export type UserRole = (typeof userRoleEnum.enumValues)[number];
+
+/** 工单类别类型 */
+export type TicketCategory = (typeof ticketCategoryEnum.enumValues)[number];
+
+/** 工单优先级类型 */
+export type TicketPriority = (typeof ticketPriorityEnum.enumValues)[number];
+
+/** 工单状态类型 */
+export type TicketStatus = (typeof ticketStatusEnum.enumValues)[number];

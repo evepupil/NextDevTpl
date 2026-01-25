@@ -11,6 +11,7 @@ import * as schema from "@/db/schema";
  * - 数据库适配器 (Drizzle + PostgreSQL)
  * - OAuth 提供商 (GitHub, Google)
  * - 会话配置
+ * - 用户自定义字段
  */
 export const auth = betterAuth({
   /**
@@ -38,6 +39,32 @@ export const auth = betterAuth({
       verification: schema.verification,
     },
   }),
+
+  /**
+   * 用户自定义字段配置
+   * 将 role, banned, bannedReason 字段包含在会话用户中
+   */
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        required: false,
+        defaultValue: "user",
+        input: false, // 用户不能通过注册/更新设置此字段
+      },
+      banned: {
+        type: "boolean",
+        required: false,
+        defaultValue: false,
+        input: false, // 用户不能通过注册/更新设置此字段
+      },
+      bannedReason: {
+        type: "string",
+        required: false,
+        input: false, // 用户不能通过注册/更新设置此字段
+      },
+    },
+  },
 
   /**
    * 邮箱密码认证配置

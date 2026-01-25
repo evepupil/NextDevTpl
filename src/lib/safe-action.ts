@@ -57,3 +57,25 @@ export const protectedAction = actionClient.use(async ({ next }) => {
     },
   });
 });
+
+/**
+ * 管理员 Action 客户端
+ *
+ * 用于创建需要管理员权限的 Server Actions
+ * 在 protectedAction 基础上增加角色验证
+ */
+export const adminAction = protectedAction.use(async ({ next, ctx }) => {
+  // 检查用户是否为管理员
+  // 类型断言: role 字段在 Better Auth additionalFields 中定义
+  const userWithRole = ctx.user as { role?: string };
+  if (userWithRole.role !== "admin") {
+    throw new Error("此操作需要管理员权限");
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+      isAdmin: true,
+    },
+  });
+});

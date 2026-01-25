@@ -3,6 +3,7 @@ import {
   Cpu,
   Eye,
   Globe,
+  Headphones,
   Image,
   LayoutDashboard,
   MessageSquare,
@@ -11,6 +12,8 @@ import {
   Search,
   Settings,
   ShieldCheck,
+  Ticket,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 
@@ -200,6 +203,46 @@ export const dashboardNav: NavGroup[] = [
       },
     ],
   },
+  {
+    title: "Support",
+    items: [
+      {
+        title: "工单支持",
+        href: "/dashboard/support",
+        icon: Headphones,
+      },
+    ],
+  },
+];
+
+// ============================================
+// Admin 导航配置
+// ============================================
+
+/**
+ * Admin 侧边栏导航分组
+ */
+export const adminNav: NavGroup[] = [
+  {
+    title: "管理中心",
+    items: [
+      {
+        title: "控制面板",
+        href: "/admin",
+        icon: LayoutDashboard,
+      },
+      {
+        title: "用户管理",
+        href: "/admin/users",
+        icon: Users,
+      },
+      {
+        title: "工单管理",
+        href: "/admin/tickets",
+        icon: Ticket,
+      },
+    ],
+  },
 ];
 
 // ============================================
@@ -220,4 +263,11 @@ export const marketingConfig = {
  */
 export const dashboardConfig = {
   sidebarNav: dashboardNav,
+};
+
+/**
+ * Admin 页面配置
+ */
+export const adminConfig = {
+  sidebarNav: adminNav,
 };
