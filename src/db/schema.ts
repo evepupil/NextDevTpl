@@ -346,3 +346,34 @@ export type CreditsBatchSource = (typeof creditsBatchSourceEnum.enumValues)[numb
 
 /** 积分交易类型 */
 export type CreditsTransactionType = (typeof creditsTransactionTypeEnum.enumValues)[number];
+
+// ============================================
+// Newsletter 订阅表
+// ============================================
+/**
+ * Newsletter 订阅者表 - 存储邮件订阅信息
+ *
+ * @field id - 记录唯一标识符
+ * @field email - 订阅者邮箱 (唯一)
+ * @field isSubscribed - 是否订阅中 (用于取消订阅而不删除记录)
+ * @field subscribedAt - 订阅时间
+ * @field unsubscribedAt - 取消订阅时间 (可为空)
+ * @field createdAt - 创建时间
+ * @field updatedAt - 更新时间
+ */
+export const newsletterSubscriber = pgTable("newsletter_subscriber", {
+  id: text("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  isSubscribed: boolean("is_subscribed").notNull().default(true),
+  subscribedAt: timestamp("subscribed_at").notNull().defaultNow(),
+  unsubscribedAt: timestamp("unsubscribed_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// ============================================
+// Newsletter 类型导出
+// ============================================
+
+export type NewsletterSubscriber = typeof newsletterSubscriber.$inferSelect;
+export type NewNewsletterSubscriber = typeof newsletterSubscriber.$inferInsert;
