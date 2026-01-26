@@ -38,6 +38,59 @@ export const {
 } = authClient;
 
 /**
+ * 发送密码重置邮件
+ * 通过调用 Better Auth API 端点发送重置链接
+ * @param email - 用户邮箱
+ * @param redirectTo - 重置链接的跳转地址
+ */
+export async function forgetPassword(email: string, redirectTo = "/reset-password") {
+  const baseURL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+  const response = await fetch(`${baseURL}/api/auth/forget-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email,
+      redirectTo,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to send reset email");
+  }
+
+  return response.json();
+}
+
+/**
+ * 重置密码
+ * @param newPassword - 新密码
+ * @param token - 重置令牌 (从 URL 获取)
+ */
+export async function resetPassword(newPassword: string, token: string) {
+  const baseURL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+  const response = await fetch(`${baseURL}/api/auth/reset-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      newPassword,
+      token,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to reset password");
+  }
+
+  return response.json();
+}
+
+/**
  * 社交登录辅助函数
  */
 

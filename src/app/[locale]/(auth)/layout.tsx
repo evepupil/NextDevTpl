@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AuthFooter } from "@/features/auth/components/auth-footer";
 
 /**
  * Auth 路由组布局
@@ -18,33 +18,7 @@ export default function AuthLayout({
       </main>
 
       {/* 底部版权和法律链接 */}
-      <footer className="border-t bg-background py-6">
-        <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 sm:flex-row">
-          <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} Your Company. All rights reserved.
-          </p>
-          <nav className="flex gap-6">
-            <Link
-              href="/legal/privacy"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Privacy Policy
-            </Link>
-            <Link
-              href="/legal/terms"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Terms of Service
-            </Link>
-            <Link
-              href="/legal/cookie-policy"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Cookie Settings
-            </Link>
-          </nav>
-        </div>
-      </footer>
+      <AuthFooter />
     </div>
   );
 }

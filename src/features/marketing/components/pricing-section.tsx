@@ -15,6 +15,8 @@ import { cn } from "@/lib/utils";
 import { createCheckoutSession, createCustomerPortal } from "@/payment/actions";
 import { PlanInterval, type Plan } from "@/payment/types";
 
+import { AnimatedPrice } from "./animated-price";
+
 /**
  * 价格计划组件属性
  */
@@ -260,7 +262,7 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
                             plan.dark && "text-background"
                           )}
                         >
-                          ${price}
+                          $<AnimatedPrice value={price} />
                         </span>
                         <span
                           className={cn(
