@@ -1,19 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import {
+  COOKIE_CONSENT_KEY,
+  COOKIE_CONSENT_CHANGE_EVENT,
+  COOKIE_PREFERENCES_KEY,
+  type CookieConsentType,
+  type CookiePreferences,
+} from "@/features/marketing/constants";
 
 /**
- * Cookie 同意类型
+ * 默认 Cookie 偏好
  */
-type CookieConsent = "all" | "essential" | null;
-
-/**
- * Cookie 存储键名
- */
-const COOKIE_CONSENT_KEY = "cookie-consent";
+const DEFAULT_PREFERENCES: CookiePreferences = {
+  analytics: true,
+  marketing: true,
+};
 
 /**
  * Cookie Consent Banner 组件
@@ -23,12 +29,16 @@ const COOKIE_CONSENT_KEY = "cookie-consent";
  * - 用户可选择接受全部、仅必要或管理偏好
  * - 选择后存储到 localStorage
  * - 支持动画过渡效果
+ * - 跟踪用户的具体偏好设置
  */
 export function CookieConsent() {
   // 是否显示横幅
   const [isVisible, setIsVisible] = useState(false);
   // 是否显示详细设置面板
   const [showDetails, setShowDetails] = useState(false);
+  // Cookie 偏好设置
+  const [preferences, setPreferences] =
+    useState<CookiePreferences>(DEFAULT_PREFERENCES);
 
   /**
    * 检查是否已有 Cookie 同意记录
@@ -40,32 +50,77 @@ export function CookieConsent() {
       const timer = setTimeout(() => setIsVisible(true), 1000);
       return () => clearTimeout(timer);
     }
+    // 加载已保存的偏好设置
+    const savedPreferences = localStorage.getItem(COOKIE_PREFERENCES_KEY);
+    if (savedPreferences) {
+      try {
+        setPreferences(JSON.parse(savedPreferences));
+      } catch {
+        // 忽略解析错误
+      }
+    }
     return undefined;
   }, []);
 
   /**
+   * 保存 Cookie 同意设置
+   */
+  const saveConsent = useCallback(
+    (consent: CookieConsentType, prefs?: CookiePreferences) => {
+      localStorage.setItem(COOKIE_CONSENT_KEY, consent || "");
+      if (prefs) {
+        localStorage.setItem(COOKIE_PREFERENCES_KEY, JSON.stringify(prefs));
+      }
+      // 触发自定义事件通知 Analytics 组件
+      window.dispatchEvent(new CustomEvent(COOKIE_CONSENT_CHANGE_EVENT));
+      setIsVisible(false);
+    },
+    []
+  );
+
+  /**
    * 处理接受全部 Cookie
    */
-  const handleAcceptAll = () => {
-    saveConsent("all");
-  };
+  const handleAcceptAll = useCallback(() => {
+    const allPreferences: CookiePreferences = {
+      analytics: true,
+      marketing: true,
+    };
+    setPreferences(allPreferences);
+    saveConsent("all", allPreferences);
+  }, [saveConsent]);
 
   /**
    * 处理仅接受必要 Cookie
    */
-  const handleRejectAll = () => {
-    saveConsent("essential");
-  };
+  const handleRejectAll = useCallback(() => {
+    const essentialPreferences: CookiePreferences = {
+      analytics: false,
+      marketing: false,
+    };
+    setPreferences(essentialPreferences);
+    saveConsent("essential", essentialPreferences);
+  }, [saveConsent]);
 
   /**
-   * 保存 Cookie 同意设置
+   * 处理保存当前偏好设置
    */
-  const saveConsent = (consent: CookieConsent) => {
-    localStorage.setItem(COOKIE_CONSENT_KEY, consent || "");
-    // 触发自定义事件通知 Analytics 组件
-    window.dispatchEvent(new CustomEvent("cookie-consent-change"));
-    setIsVisible(false);
-  };
+  const handleSavePreferences = useCallback(() => {
+    // 根据偏好确定同意类型
+    const consentType: CookieConsentType =
+      preferences.analytics || preferences.marketing ? "all" : "essential";
+    saveConsent(consentType, preferences);
+  }, [preferences, saveConsent]);
+
+  /**
+   * 更新偏好设置
+   */
+  const updatePreference = useCallback(
+    (key: keyof CookiePreferences, value: boolean) => {
+      setPreferences((prev) => ({ ...prev, [key]: value }));
+    },
+    []
+  );
 
   // 不显示时返回 null
   if (!isVisible) return null;
@@ -85,7 +140,8 @@ export function CookieConsent() {
               <div className="flex-1">
                 <h3 className="text-lg font-semibold">Cookie 设置</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  我们使用 Cookie 来确保您在我们网站上获得最佳体验。继续使用本网站即表示您同意我们的
+                  我们使用 Cookie
+                  来确保您在我们网站上获得最佳体验。继续使用本网站即表示您同意我们的
                   <a
                     href="/privacy"
                     className="ml-1 underline underline-offset-4 hover:text-foreground"
@@ -152,10 +208,11 @@ export function CookieConsent() {
                     </p>
                   </div>
                   <div className="ml-4">
-                    <input
-                      type="checkbox"
-                      defaultChecked
-                      className="h-4 w-4 rounded border-gray-300"
+                    <Switch
+                      checked={preferences.analytics}
+                      onCheckedChange={(checked) =>
+                        updatePreference("analytics", checked)
+                      }
                     />
                   </div>
                 </div>
@@ -169,10 +226,11 @@ export function CookieConsent() {
                     </p>
                   </div>
                   <div className="ml-4">
-                    <input
-                      type="checkbox"
-                      defaultChecked
-                      className="h-4 w-4 rounded border-gray-300"
+                    <Switch
+                      checked={preferences.marketing}
+                      onCheckedChange={(checked) =>
+                        updatePreference("marketing", checked)
+                      }
                     />
                   </div>
                 </div>
@@ -185,7 +243,7 @@ export function CookieConsent() {
                 <Button
                   size="sm"
                   className="bg-violet-600 hover:bg-violet-700"
-                  onClick={handleAcceptAll}
+                  onClick={handleSavePreferences}
                 >
                   保存设置
                 </Button>

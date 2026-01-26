@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
-/**
- * Cookie 存储键名 - 与 CookieConsent 组件保持一致
- */
-const COOKIE_CONSENT_KEY = "cookie-consent";
+import {
+  COOKIE_CONSENT_KEY,
+  COOKIE_CONSENT_CHANGE_EVENT,
+} from "@/features/marketing/constants";
 
 /**
  * Analytics 组件
@@ -42,11 +42,14 @@ export function Analytics() {
     };
 
     window.addEventListener("storage", handleStorageChange);
-    window.addEventListener("cookie-consent-change", handleConsentChange);
+    window.addEventListener(COOKIE_CONSENT_CHANGE_EVENT, handleConsentChange);
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("cookie-consent-change", handleConsentChange);
+      window.removeEventListener(
+        COOKIE_CONSENT_CHANGE_EVENT,
+        handleConsentChange
+      );
     };
   }, []);
 
