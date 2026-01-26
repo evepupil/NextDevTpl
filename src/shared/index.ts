@@ -5,5 +5,5 @@ export { LanguageSwitcher } from "./language-switcher";
 export { MaxWidthWrapper } from "./max-width-wrapper";
 export { Providers } from "./providers";
 
-// OG 图片模板
-export { createOgImageResponse, OG_IMAGE_SIZE } from "./og-image-template";
+// 注意: og-image-template.tsx 不在此导出，因为它使用 next/og (Node.js 模块)
+// 请直接导入: import { createOgImageResponse } from "@/shared/og-image-template"
