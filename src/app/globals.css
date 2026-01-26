@@ -190,3 +190,9 @@
 [data-slot="navigation-menu-item"] {
   position: relative !important;
 }
+
+/* 修复 Fumadocs 搜索对话框位置 - 确保垂直居中 */
+[role="dialog"][data-state="open"] {
+  top: 50% !important;
+  --tw-translate-y: -50% !important;
+}
