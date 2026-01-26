@@ -62,6 +62,8 @@ export function CookieConsent() {
    */
   const saveConsent = (consent: CookieConsent) => {
     localStorage.setItem(COOKIE_CONSENT_KEY, consent || "");
+    // 触发自定义事件通知 Analytics 组件
+    window.dispatchEvent(new CustomEvent("cookie-consent-change"));
     setIsVisible(false);
   };
 

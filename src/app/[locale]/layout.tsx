@@ -3,7 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { Toaster } from "sonner";
 
-import { Providers } from "@/shared";
+import { Analytics, Providers } from "@/shared";
 import { CookieConsent } from "@/features/marketing/components";
 import { routing } from "@/i18n/routing";
 
@@ -48,6 +48,7 @@ export default async function LocaleLayout({
         {children}
         <CookieConsent />
         <Toaster richColors position="top-right" />
+        <Analytics />
       </Providers>
     </NextIntlClientProvider>
   );
