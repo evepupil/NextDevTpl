@@ -21,6 +21,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { dashboardConfig, siteConfig } from "@/config";
 import { CreditBalanceBadge } from "@/features/credits/components";
+import { useSidebar } from "@/features/dashboard/context";
 import { signOut, useSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
 
@@ -38,10 +39,12 @@ type Theme = "light" | "dark" | "system";
  * - 主题切换
  * - 设置入口
  * - 登出功能
+ * - 支持折叠/展开
  */
 export function DashboardSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { isCollapsed } = useSidebar();
 
   // 获取当前用户会话
   const { data: session } = useSession();
@@ -88,22 +91,36 @@ export function DashboardSidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r bg-sidebar">
+    <aside
+      className={cn(
+        "fixed left-0 top-0 z-40 flex h-screen flex-col bg-[#f5f5f5] transition-all duration-300",
+        isCollapsed ? "w-16" : "w-64"
+      )}
+    >
       {/* Logo */}
-      <div className="flex h-14 items-center border-b px-4">
-        <Link href="/dashboard" className="text-lg font-bold tracking-tight">
+      <div className="flex h-14 items-center px-4">
+        <Link
+          href="/dashboard"
+          className={cn(
+            "text-lg font-bold tracking-tight transition-opacity",
+            isCollapsed && "opacity-0"
+          )}
+        >
           {siteConfig.name.toUpperCase()}
         </Link>
       </div>
 
       {/* 导航菜单 */}
-      <nav className="flex-1 space-y-6 overflow-y-auto p-4">
+      <nav className="flex-1 space-y-4 overflow-y-auto p-3">
         {dashboardConfig.sidebarNav.map((group) => (
           <div key={group.title}>
-            <p className="mb-2 px-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              {group.title}
-            </p>
-            <div className="space-y-1">
+            {/* Group Label - 折叠时隐藏 */}
+            {!isCollapsed && (
+              <p className="mb-1.5 px-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                {group.title}
+              </p>
+            )}
+            <div className="space-y-0.5">
               {group.items.map((item) => {
                 const isActive = pathname === item.href;
                 const Icon = item.icon;
@@ -111,15 +128,17 @@ export function DashboardSidebar() {
                   <Link
                     key={item.href}
                     href={item.href}
+                    title={isCollapsed ? item.title : undefined}
                     className={cn(
-                      "flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors",
+                      "flex items-center gap-3 rounded-md px-2 py-1.5 text-sm font-medium transition-colors",
                       isActive
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                        ? "bg-white text-foreground shadow-sm"
+                        : "text-muted-foreground hover:bg-white/60 hover:text-foreground",
+                      isCollapsed && "justify-center px-0"
                     )}
                   >
-                    {Icon && <Icon className="h-4 w-4" />}
-                    {item.title}
+                    {Icon && <Icon className="h-4 w-4 shrink-0" />}
+                    {!isCollapsed && item.title}
                   </Link>
                 );
               })}
@@ -129,30 +148,37 @@ export function DashboardSidebar() {
       </nav>
 
       {/* 用户信息区域 */}
-      <div className="border-t p-4">
+      <div className="border-t border-neutral-200 p-3">
         {user ? (
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <button
                 type="button"
-                className="flex w-full items-center gap-3 rounded-md px-2 py-2 hover:bg-sidebar-accent transition-colors"
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-md px-2 py-1.5 hover:bg-white/60 transition-colors",
+                  isCollapsed && "justify-center px-0"
+                )}
               >
-                <Avatar className="h-8 w-8">
+                <Avatar className="h-8 w-8 shrink-0">
                   <AvatarImage src={user.image || undefined} alt={user.name} />
                   <AvatarFallback className="bg-violet-600 text-white text-xs">
                     {getInitials(user.name)}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1 truncate text-left">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium">{user.name}</p>
-                    <CreditBalanceBadge />
-                  </div>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {user.email}
-                  </p>
-                </div>
-                <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                {!isCollapsed && (
+                  <>
+                    <div className="flex-1 truncate text-left">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium">{user.name}</p>
+                        <CreditBalanceBadge />
+                      </div>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {user.email}
+                      </p>
+                    </div>
+                    <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                  </>
+                )}
               </button>
             </PopoverTrigger>
 
@@ -251,12 +277,17 @@ export function DashboardSidebar() {
           </Popover>
         ) : (
           // 加载状态
-          <div className="flex items-center gap-3 rounded-md px-2 py-2">
-            <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
-            <div className="flex-1 space-y-1">
-              <div className="h-4 w-20 animate-pulse rounded bg-muted" />
-              <div className="h-3 w-32 animate-pulse rounded bg-muted" />
-            </div>
+          <div className={cn(
+            "flex items-center gap-3 rounded-md px-2 py-1.5",
+            isCollapsed && "justify-center px-0"
+          )}>
+            <div className="h-8 w-8 animate-pulse rounded-full bg-neutral-200 shrink-0" />
+            {!isCollapsed && (
+              <div className="flex-1 space-y-1">
+                <div className="h-4 w-20 animate-pulse rounded bg-neutral-200" />
+                <div className="h-3 w-32 animate-pulse rounded bg-neutral-200" />
+              </div>
+            )}
           </div>
         )}
       </div>

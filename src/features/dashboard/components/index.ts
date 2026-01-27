@@ -1,6 +1,6 @@
 // 布局组件
 export { DashboardSidebar } from "./sidebar";
-export { DashboardTopbar } from "./topbar";
+export { DashboardMainWrapper } from "./main-wrapper";
 
 // 卡片组件
 export { AuthCard } from "./auth-card";
