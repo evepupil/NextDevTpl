@@ -1,6 +1,6 @@
 import { streamText } from "ai";
 
-import { gpt4oMini } from "@/ai";
+import { gpt4oMini } from "@/features/ai";
 
 /**
  * AI 聊天 API 路由

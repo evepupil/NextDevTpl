@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CreditUsageSection } from "@/credits/components";
+import { CreditUsageSection } from "@/features/credits/components";
 import { updateProfileAction } from "@/features/settings/actions";
 import { updateProfileSchema } from "@/features/settings/schemas";
 import {
@@ -38,7 +38,7 @@ import {
   generateAvatarKey,
   getAvatarUrl,
   getSignedUploadUrlAction,
-} from "@/storage";
+} from "@/features/storage";
 
 /**
  * SettingsProfileView Props 类型

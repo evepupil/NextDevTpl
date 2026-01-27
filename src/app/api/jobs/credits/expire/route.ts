@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
-import { processExpiredBatches } from "@/credits/core";
+import { processExpiredBatches } from "@/features/credits/core";
 
 /**
  * 积分过期处理 Cron Job API

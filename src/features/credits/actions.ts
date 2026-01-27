@@ -13,7 +13,7 @@ import { getBaseUrl } from "@/config/payment";
 import { db } from "@/db";
 import { user } from "@/db/schema";
 import { actionClient, protectedAction } from "@/lib/safe-action";
-import { stripe } from "@/payment/stripe";
+import { stripe } from "@/features/payment/stripe";
 
 import {
   CREDIT_PACKAGES,

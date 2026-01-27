@@ -16,8 +16,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { createCreditsPurchaseCheckout } from "@/credits/actions";
-import { CREDIT_PACKAGES } from "@/credits/config";
+import { createCreditsPurchaseCheckout } from "@/features/credits/actions";
+import { CREDIT_PACKAGES } from "@/features/credits/config";
 import { cn } from "@/lib/utils";
 
 /**

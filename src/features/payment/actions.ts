@@ -8,7 +8,7 @@ import { findPlanByPriceId, getBaseUrl, paymentConfig } from "@/config/payment";
 import { db } from "@/db";
 import { subscription, user } from "@/db/schema";
 import { protectedAction } from "@/lib/safe-action";
-import { PaymentType } from "@/payment/types";
+import { PaymentType } from "@/features/payment/types";
 
 import { stripe } from "./stripe";
 

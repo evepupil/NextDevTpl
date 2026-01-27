@@ -12,8 +12,8 @@ import { Switch } from "@/components/ui/switch";
 import { getPricingPlans, paymentConfig, getPlanPrice } from "@/config/payment";
 import { useSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
-import { createCheckoutSession, createCustomerPortal } from "@/payment/actions";
-import { PlanInterval, type Plan } from "@/payment/types";
+import { createCheckoutSession, createCustomerPortal } from "@/features/payment/actions";
+import { PlanInterval, type Plan } from "@/features/payment/types";
 
 import { AnimatedPrice } from "./animated-price";
 

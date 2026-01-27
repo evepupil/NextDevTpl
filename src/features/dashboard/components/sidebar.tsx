@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { dashboardConfig, siteConfig } from "@/config";
-import { CreditBalanceBadge } from "@/credits/components";
+import { CreditBalanceBadge } from "@/features/credits/components";
 import { signOut, useSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
 

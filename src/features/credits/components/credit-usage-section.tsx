@@ -20,7 +20,7 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { getMyActiveBatches, getMyCreditsBalance } from "@/credits/actions";
+import { getMyActiveBatches, getMyCreditsBalance } from "@/features/credits/actions";
 
 import { TransactionHistory } from "./transaction-history";
 

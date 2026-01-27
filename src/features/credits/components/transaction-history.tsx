@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { getMyTransactions } from "@/credits/actions";
+import { getMyTransactions } from "@/features/credits/actions";
 import { cn } from "@/lib/utils";
 
 /**

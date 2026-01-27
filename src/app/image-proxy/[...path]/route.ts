@@ -9,8 +9,8 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 
-import { getStorageProvider } from "@/storage/providers";
-import { DEFAULT_SIGNED_URL_EXPIRES } from "@/storage/types";
+import { getStorageProvider } from "@/features/storage/providers";
+import { DEFAULT_SIGNED_URL_EXPIRES } from "@/features/storage/types";
 
 // ============================================
 // 配置

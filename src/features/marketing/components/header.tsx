@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/config";
 import { Link } from "@/i18n/routing";
 import { useSession } from "@/lib/auth/client";
-import { LanguageSwitcher, ModeToggle } from "@/shared";
+import { LanguageSwitcher, ModeToggle } from "@/features/shared";
 
 import { NavMenu } from "./nav-menu";
 

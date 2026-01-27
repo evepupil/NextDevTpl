@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { CookieSettingsDialog } from "@/shared";
+import { CookieSettingsDialog } from "@/features/shared";
 
 /**
  * Auth 页面底部组件

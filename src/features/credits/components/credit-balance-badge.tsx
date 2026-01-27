@@ -11,7 +11,7 @@ import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
 
 import { Badge } from "@/components/ui/badge";
-import { getMyCreditsBalance } from "@/credits/actions";
+import { getMyCreditsBalance } from "@/features/credits/actions";
 
 /**
  * 积分余额徽章

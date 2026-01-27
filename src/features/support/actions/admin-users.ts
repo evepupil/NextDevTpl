@@ -7,8 +7,8 @@ import { z } from "zod";
 import { db } from "@/db";
 import { creditsBalance, subscription, user } from "@/db/schema";
 import { adminAction } from "@/lib/safe-action";
-import { grantCredits } from "@/credits/core";
-import { CREDITS_EXPIRY_DAYS } from "@/credits/config";
+import { grantCredits } from "@/features/credits/core";
+import { CREDITS_EXPIRY_DAYS } from "@/features/credits/config";
 
 /**
  * 更新用户角色 Schema

@@ -11,7 +11,7 @@ import {
   type Plan,
   type PriceConfig,
   type PricingConfig,
-} from "@/payment/types";
+} from "@/features/payment/types";
 
 // ============================================
 // 环境变量中的价格 ID

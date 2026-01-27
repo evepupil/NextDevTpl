@@ -3,12 +3,12 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 
-import { CREDITS_EXPIRY_DAYS } from "@/credits/config";
-import { grantCredits } from "@/credits/core";
+import { CREDITS_EXPIRY_DAYS } from "@/features/credits/config";
+import { grantCredits } from "@/features/credits/core";
 import { db } from "@/db";
 import { subscription } from "@/db/schema";
-import { PaymentType } from "@/payment/types";
-import { stripe } from "@/payment/stripe";
+import { PaymentType } from "@/features/payment/types";
+import { stripe } from "@/features/payment/stripe";
 
 /**
  * Stripe Webhook 处理器
