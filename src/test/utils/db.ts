@@ -2,15 +2,18 @@
  * 测试数据库工具
  *
  * 提供测试数据库连接、清理和辅助函数
+ * 使用 @neondatabase/serverless 的 WebSocket 模式以支持事务
  */
 
-import { neon } from "@neondatabase/serverless";
+import { neon, neonConfig, Pool } from "@neondatabase/serverless";
 import { eq, inArray, sql } from "drizzle-orm";
-import { drizzle as drizzleNeon } from "drizzle-orm/neon-http";
-import { drizzle as drizzlePg } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
+import { drizzle } from "drizzle-orm/neon-serverless";
+import ws from "ws";
 
 import * as schema from "@/db/schema";
+
+// 配置 WebSocket 以支持事务
+neonConfig.webSocketConstructor = ws;
 
 // ============================================
 // 数据库连接
@@ -35,18 +38,12 @@ function getTestDatabaseUrl(): string {
 
 /**
  * 创建测试数据库实例
+ * 使用 neon-serverless 驱动 (WebSocket) 以支持事务
  */
 function createTestDb() {
 	const databaseUrl = getTestDatabaseUrl();
-	const isNeon = databaseUrl.includes("neon.tech");
-
-	if (isNeon) {
-		const sql = neon(databaseUrl);
-		return drizzleNeon(sql, { schema });
-	}
-
 	pool = new Pool({ connectionString: databaseUrl });
-	return drizzlePg(pool, { schema });
+	return drizzle(pool, { schema });
 }
 
 /**
