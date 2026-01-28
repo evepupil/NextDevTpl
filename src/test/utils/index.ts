@@ -13,6 +13,7 @@ export {
 	getUserCreditsState,
 	getTicketWithMessages,
 	getUserTickets,
+	getUserSubscription,
 } from "./db";
 
 // 测试数据工厂
@@ -38,6 +39,9 @@ export {
 	type CreateTestTicketOptions,
 	type CreateTestTicketMessageOptions,
 	type CreateTestTicketWithMessageOptions,
+	// 订阅
+	createTestSubscription,
+	type CreateTestSubscriptionOptions,
 	// 时间工具
 	daysAgo,
 	daysFromNow,

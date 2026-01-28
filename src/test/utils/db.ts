@@ -126,7 +126,12 @@ export async function cleanupTestUsers(userIds: string[]) {
 		.delete(schema.creditsBalance)
 		.where(inArray(schema.creditsBalance.userId, userIds));
 
-	// 4. 清理认证相关
+	// 4. 清理订阅
+	await testDb
+		.delete(schema.subscription)
+		.where(inArray(schema.subscription.userId, userIds));
+
+	// 5. 清理认证相关
 	await testDb
 		.delete(schema.session)
 		.where(inArray(schema.session.userId, userIds));
@@ -135,7 +140,7 @@ export async function cleanupTestUsers(userIds: string[]) {
 		.delete(schema.account)
 		.where(inArray(schema.account.userId, userIds));
 
-	// 5. 最后删除用户
+	// 6. 最后删除用户
 	await testDb.delete(schema.user).where(inArray(schema.user.id, userIds));
 }
 
@@ -222,4 +227,17 @@ export async function getUserTickets(userId: string) {
 		.from(schema.ticket)
 		.where(eq(schema.ticket.userId, userId))
 		.orderBy(schema.ticket.createdAt);
+}
+
+/**
+ * 获取用户的订阅信息
+ */
+export async function getUserSubscription(userId: string) {
+	const [sub] = await testDb
+		.select()
+		.from(schema.subscription)
+		.where(eq(schema.subscription.userId, userId))
+		.limit(1);
+
+	return sub;
 }

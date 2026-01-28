@@ -373,3 +373,52 @@ export async function createTestTicketWithMessage(
 
 	return { ticket, message };
 }
+
+// ============================================
+// 订阅工厂
+// ============================================
+
+export interface CreateTestSubscriptionOptions {
+	userId: string;
+	stripeSubscriptionId?: string;
+	stripePriceId?: string;
+	status?: string;
+	currentPeriodStart?: Date;
+	currentPeriodEnd?: Date;
+	cancelAtPeriodEnd?: boolean;
+}
+
+/**
+ * 创建测试订阅
+ */
+export async function createTestSubscription(
+	options: CreateTestSubscriptionOptions
+): Promise<schema.Subscription> {
+	const id = generateTestId("test_sub");
+	const now = new Date();
+	const thirtyDaysLater = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+	const subscriptionData: schema.NewSubscription = {
+		id,
+		userId: options.userId,
+		stripeSubscriptionId: options.stripeSubscriptionId ?? `sub_test_${Date.now()}`,
+		stripePriceId: options.stripePriceId ?? "price_test_monthly",
+		status: options.status ?? "active",
+		currentPeriodStart: options.currentPeriodStart ?? now,
+		currentPeriodEnd: options.currentPeriodEnd ?? thirtyDaysLater,
+		cancelAtPeriodEnd: options.cancelAtPeriodEnd ?? false,
+		createdAt: now,
+		updatedAt: now,
+	};
+
+	const [sub] = await testDb
+		.insert(schema.subscription)
+		.values(subscriptionData)
+		.returning();
+
+	if (!sub) {
+		throw new Error("创建测试订阅失败");
+	}
+
+	return sub;
+}
