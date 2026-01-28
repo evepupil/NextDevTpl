@@ -241,3 +241,44 @@ export async function getUserSubscription(userId: string) {
 
 	return sub;
 }
+
+/**
+ * 清理测试 Newsletter 订阅者
+ */
+export async function cleanupTestNewsletterSubscribers(emails: string[]) {
+	if (emails.length === 0) return;
+
+	for (const email of emails) {
+		await testDb
+			.delete(schema.newsletterSubscriber)
+			.where(eq(schema.newsletterSubscriber.email, email.toLowerCase()));
+	}
+}
+
+/**
+ * 创建测试 Newsletter 订阅者
+ */
+export async function createTestNewsletterSubscriber(options: {
+	email: string;
+	isSubscribed?: boolean;
+}): Promise<schema.NewsletterSubscriber> {
+	const id = `test_newsletter_${Date.now()}`;
+	const normalizedEmail = options.email.toLowerCase().trim();
+
+	const data: schema.NewNewsletterSubscriber = {
+		id,
+		email: normalizedEmail,
+		isSubscribed: options.isSubscribed ?? true,
+	};
+
+	const [subscriber] = await testDb
+		.insert(schema.newsletterSubscriber)
+		.values(data)
+		.returning();
+
+	if (!subscriber) {
+		throw new Error("创建测试 Newsletter 订阅者失败");
+	}
+
+	return subscriber;
+}

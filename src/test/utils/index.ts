@@ -14,6 +14,8 @@ export {
 	getTicketWithMessages,
 	getUserTickets,
 	getUserSubscription,
+	cleanupTestNewsletterSubscribers,
+	createTestNewsletterSubscriber,
 } from "./db";
 
 // 测试数据工厂
