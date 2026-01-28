@@ -54,8 +54,18 @@ function validateUserOwnership(key: string, userId: string): boolean {
 
 /**
  * 验证文件键名格式
+ *
+ * 安全检查:
+ * - 只允许字母、数字、连字符、下划线、斜杠、点
+ * - 禁止路径遍历 (..)
+ * - 长度限制 1-255
  */
 function validateKeyFormat(key: string): boolean {
+	// 检查路径遍历攻击
+	if (key.includes("..")) {
+		return false;
+	}
+
 	const keyRegex = /^[a-zA-Z0-9\-_\/\.]+$/;
 	return keyRegex.test(key) && key.length >= 1 && key.length <= 255;
 }

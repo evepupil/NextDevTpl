@@ -11,21 +11,15 @@ import * as schema from "@/db/schema";
 // ID 生成
 // ============================================
 
-let testIdCounter = 0;
-
 /**
  * 生成唯一的测试 ID
+ *
+ * 使用时间戳 + 随机数确保唯一性，避免并行测试时的冲突
  */
 export function generateTestId(prefix = "test"): string {
-	testIdCounter++;
-	return `${prefix}_${Date.now()}_${testIdCounter}`;
-}
-
-/**
- * 重置测试 ID 计数器（在测试套件开始时调用）
- */
-export function resetTestIdCounter() {
-	testIdCounter = 0;
+	const timestamp = Date.now();
+	const random = Math.random().toString(36).substring(2, 8);
+	return `${prefix}_${timestamp}_${random}`;
 }
 
 // ============================================
@@ -47,13 +41,14 @@ export interface CreateTestUserOptions {
 export async function createTestUser(
 	options: CreateTestUserOptions = {}
 ): Promise<schema.User> {
-	const id = options.id ?? generateTestId("test_user");
 	const timestamp = Date.now();
+	const random = Math.random().toString(36).substring(2, 8);
+	const id = options.id ?? `test_user_${timestamp}_${random}`;
 
 	const userData: schema.NewUser = {
 		id,
 		name: options.name ?? `Test User ${timestamp}`,
-		email: options.email ?? `test_${timestamp}@test.local`,
+		email: options.email ?? `test_${timestamp}_${random}@test.local`,
 		emailVerified: options.emailVerified ?? true,
 		role: options.role ?? "user",
 		banned: options.banned ?? false,

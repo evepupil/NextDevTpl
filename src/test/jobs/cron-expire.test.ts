@@ -36,17 +36,26 @@ afterAll(async () => {
 
 /**
  * 验证 Cron Job 请求的 Bearer Token
+ *
+ * 安全检查:
+ * - 验证 Bearer Token 格式
+ * - 拒绝格式错误的请求 (如多余空格)
  */
 function validateCronSecret(authHeader: string | null, cronSecret: string | undefined): boolean {
 	if (!authHeader) return false;
 	if (!cronSecret) return false;
 
 	// 支持 Bearer Token 格式
-	const token = authHeader.startsWith("Bearer ")
-		? authHeader.slice(7)
-		: authHeader;
+	if (authHeader.startsWith("Bearer ")) {
+		// 必须是 "Bearer " + token，不允许多余空格
+		const token = authHeader.slice(7);
+		// 如果 token 以空格开头，说明原始格式是 "Bearer  xxx"，拒绝
+		if (token.startsWith(" ")) return false;
+		return token === cronSecret;
+	}
 
-	return token === cronSecret;
+	// 不带 Bearer 前缀的直接比较
+	return authHeader === cronSecret;
 }
 
 // ============================================

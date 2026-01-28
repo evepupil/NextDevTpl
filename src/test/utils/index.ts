@@ -22,7 +22,6 @@ export {
 export {
 	// ID 生成
 	generateTestId,
-	resetTestIdCounter,
 	// 用户
 	createTestUser,
 	createTestUsers,
