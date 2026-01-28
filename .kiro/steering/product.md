@@ -1,6 +1,6 @@
 # Product Overview
 
-NextDevKit is a modern SaaS boilerplate built with Next.js 15, designed to help developers ship products faster.
+NextDevTpl is a modern SaaS boilerplate built with Next.js 15, designed to help developers ship products faster.
 
 ## Core Features
 

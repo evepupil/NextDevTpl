@@ -105,7 +105,7 @@ export function HeroSection() {
                 <div className="h-3 w-3 rounded-full bg-green-500" />
               </div>
               <div className="flex-1 text-center text-sm text-muted-foreground">
-                dashboard.nextdevkit.com
+                dashboard.nextdevtpl.com
               </div>
             </div>
             <div className="aspect-[16/9] bg-gradient-to-br from-muted/50 to-muted p-8">

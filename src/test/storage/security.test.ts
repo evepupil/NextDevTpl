@@ -34,7 +34,7 @@ const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp
  */
 function getAllowedBuckets(): string[] {
 	// 在测试中，我们使用固定的白名单
-	return ["test-avatars-bucket", "nextdevkit-avatars"];
+	return ["test-avatars-bucket", "nextdevtpl-avatars"];
 }
 
 /**
@@ -141,7 +141,7 @@ function validateDeleteRequest(params: {
 describe("Storage Bucket Whitelist", () => {
 	it("应该允许白名单内的存储桶", () => {
 		expect(validateBucket("test-avatars-bucket")).toBe(true);
-		expect(validateBucket("nextdevkit-avatars")).toBe(true);
+		expect(validateBucket("nextdevtpl-avatars")).toBe(true);
 	});
 
 	it("应该拒绝不在白名单内的存储桶", () => {

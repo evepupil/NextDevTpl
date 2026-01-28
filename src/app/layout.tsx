@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     title: siteConfig.name,
     description: siteConfig.description,
     images: [siteConfig.ogImage],
-    creator: "@nextdevkit",
+    creator: "@nextdevtpl",
   },
   icons: {
     icon: "/favicon.ico",

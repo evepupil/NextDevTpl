@@ -7,7 +7,7 @@ import { SettingsProfileView } from "@/features/settings/components";
  * 设置页面元数据
  */
 export const metadata = {
-  title: "Settings | NextDevKit",
+  title: "Settings | NextDevTpl",
   description: "管理您的账户设置和偏好",
 };
 

@@ -1,4 +1,4 @@
-# NextDevKit
+# NextDevTpl
 
 一个现代化的 SaaS 全栈开发模板，基于 Next.js 15 构建，包含认证、支付、积分、邮件、存储、工单等完整的 SaaS 功能模块。
 
@@ -45,7 +45,7 @@
 ```bash
 # 克隆项目
 git clone <your-repo-url>
-cd nextdevkit
+cd nextdevtpl
 
 # 安装依赖
 pnpm install

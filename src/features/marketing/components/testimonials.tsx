@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 const testimonials = [
   {
     content:
-      "NextDevKit saved me weeks of setup time. The authentication and payment integrations work flawlessly out of the box.",
+      "NextDevTpl saved me weeks of setup time. The authentication and payment integrations work flawlessly out of the box.",
     author: "Sarah Chen",
     handle: "@sarahchen",
     avatar: "/avatars/01.png",
@@ -63,7 +63,7 @@ export function Testimonials() {
           </h2>
           <p className="mx-auto max-w-2xl text-muted-foreground">
             See what developers are saying about their experience with
-            NextDevKit.
+            NextDevTpl.
           </p>
         </div>
 

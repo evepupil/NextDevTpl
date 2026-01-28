@@ -7,7 +7,7 @@ const steps = [
     title: "Clone the Repository",
     description:
       "Get started in seconds by cloning the repository. All dependencies and configurations are pre-setup.",
-    code: "git clone https://github.com/nextdevkit/starter",
+    code: "git clone https://github.com/nextdevtpl/starter",
   },
   {
     icon: Settings,

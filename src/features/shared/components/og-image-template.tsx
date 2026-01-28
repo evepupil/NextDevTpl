@@ -14,7 +14,7 @@ export const OG_IMAGE_SIZE = {
  * 从 URL 提取主机名
  */
 function getHostname(url: string | undefined): string {
-  if (!url) return "nextdevkit.com";
+  if (!url) return "nextdevtpl.com";
   try {
     return new URL(url).hostname;
   } catch {

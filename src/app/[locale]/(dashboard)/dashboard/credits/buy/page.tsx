@@ -8,7 +8,7 @@ import { BuyCreditPackagesView } from "./buy-credits-view";
  * 购买积分页面元数据
  */
 export const metadata = {
-  title: "Buy Credits | NextDevKit",
+  title: "Buy Credits | NextDevTpl",
   description: "购买积分套餐以使用 AI 功能",
 };
 

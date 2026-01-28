@@ -7,14 +7,14 @@ import {
 
 const faqs = [
   {
-    question: "What is NextDevKit?",
+    question: "What is NextDevTpl?",
     answer:
-      "NextDevKit is a production-ready starter kit for building SaaS applications with Next.js 15. It includes authentication, payments, database setup, and beautiful UI components out of the box.",
+      "NextDevTpl is a production-ready starter kit for building SaaS applications with Next.js 15. It includes authentication, payments, database setup, and beautiful UI components out of the box.",
   },
   {
     question: "What technologies does it use?",
     answer:
-      "NextDevKit is built with Next.js 15, React 19, TypeScript, Tailwind CSS 4, Shadcn/UI, Drizzle ORM, and Better Auth. We use modern tools like Biome for linting and formatting.",
+      "NextDevTpl is built with Next.js 15, React 19, TypeScript, Tailwind CSS 4, Shadcn/UI, Drizzle ORM, and Better Auth. We use modern tools like Biome for linting and formatting.",
   },
   {
     question: "Do I need to know TypeScript?",
@@ -24,7 +24,7 @@ const faqs = [
   {
     question: "Can I use it for commercial projects?",
     answer:
-      "Yes! All paid plans include a commercial license. You can use NextDevKit to build and ship as many projects as you want.",
+      "Yes! All paid plans include a commercial license. You can use NextDevTpl to build and ship as many projects as you want.",
   },
   {
     question: "What kind of support is included?",
@@ -44,7 +44,7 @@ const faqs = [
   {
     question: "Is there a refund policy?",
     answer:
-      "Yes, we offer a 14-day money-back guarantee. If you're not satisfied with NextDevKit, contact us within 14 days of purchase for a full refund.",
+      "Yes, we offer a 14-day money-back guarantee. If you're not satisfied with NextDevTpl, contact us within 14 days of purchase for a full refund.",
   },
 ];
 
@@ -58,7 +58,7 @@ export function FAQSection() {
             Frequently asked questions
           </h2>
           <p className="mx-auto max-w-2xl text-muted-foreground">
-            Everything you need to know about NextDevKit.
+            Everything you need to know about NextDevTpl.
           </p>
         </div>
 

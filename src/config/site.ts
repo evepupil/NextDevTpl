@@ -5,30 +5,30 @@
  */
 export const siteConfig = {
   /** 站点名称 */
-  name: "NextDevKit",
+  name: "NextDevTpl",
 
   /** 站点描述 */
   description:
     "Modern SaaS Boilerplate with Next.js 15, TypeScript, Tailwind CSS, and more. Ship your product faster.",
 
   /** 站点 URL (生产环境) */
-  url: process.env.NEXT_PUBLIC_APP_URL || "https://nextdevkit.com",
+  url: process.env.NEXT_PUBLIC_APP_URL || "https://nextdevtpl.com",
 
   /** OG 图片 URL */
   ogImage: "/og-image.png",
 
   /** 作者信息 */
   author: {
-    name: "NextDevKit Team",
-    url: "https://nextdevkit.com",
-    email: "hello@nextdevkit.com",
+    name: "NextDevTpl Team",
+    url: "https://nextdevtpl.com",
+    email: "hello@nextdevtpl.com",
   },
 
   /** 社交链接 */
   links: {
-    twitter: "https://twitter.com/nextdevkit",
-    github: "https://github.com/nextdevkit/nextdevkit",
-    discord: "https://discord.gg/nextdevkit",
+    twitter: "https://twitter.com/nextdevtpl",
+    github: "https://github.com/nextdevtpl/nextdevtpl",
+    discord: "https://discord.gg/nextdevtpl",
   },
 
   /** 关键词 (SEO) */

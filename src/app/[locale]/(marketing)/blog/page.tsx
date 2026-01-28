@@ -32,8 +32,8 @@ export default async function BlogPage({
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
           {locale === "zh"
-            ? "发现 NextDevKit 团队的最新见解、教程和更新。了解如何构建更好的 SaaS 应用程序。"
-            : "Discover the latest insights, tutorials, and updates from the NextDevKit team. Learn how to build better SaaS applications."}
+            ? "发现 NextDevTpl 团队的最新见解、教程和更新。了解如何构建更好的 SaaS 应用程序。"
+            : "Discover the latest insights, tutorials, and updates from the NextDevTpl team. Learn how to build better SaaS applications."}
         </p>
       </div>
 
