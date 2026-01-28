@@ -11,23 +11,36 @@ export {
 	cleanupTestData,
 	checkDbConnection,
 	getUserCreditsState,
+	getTicketWithMessages,
+	getUserTickets,
 } from "./db";
 
 // 测试数据工厂
 export {
+	// ID 生成
 	generateTestId,
 	resetTestIdCounter,
+	// 用户
 	createTestUser,
 	createTestUsers,
+	type CreateTestUserOptions,
+	// 积分
 	createTestCreditsBatch,
 	createTestCreditsBalance,
 	createTestUserWithCredits,
+	type CreateCreditsBatchOptions,
+	type CreateCreditsBalanceOptions,
+	type CreateUserWithCreditsOptions,
+	// 工单
+	createTestTicket,
+	createTestTicketMessage,
+	createTestTicketWithMessage,
+	type CreateTestTicketOptions,
+	type CreateTestTicketMessageOptions,
+	type CreateTestTicketWithMessageOptions,
+	// 时间工具
 	daysAgo,
 	daysFromNow,
 	expiredDate,
 	soonExpiringDate,
-	type CreateTestUserOptions,
-	type CreateCreditsBatchOptions,
-	type CreateCreditsBalanceOptions,
-	type CreateUserWithCreditsOptions,
 } from "./fixtures";

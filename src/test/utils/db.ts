@@ -5,7 +5,7 @@
  * 使用 @neondatabase/serverless 的 WebSocket 模式以支持事务
  */
 
-import { neon, neonConfig, Pool } from "@neondatabase/serverless";
+import { neonConfig, Pool } from "@neondatabase/serverless";
 import { eq, inArray, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-serverless";
 import ws from "ws";
@@ -102,6 +102,18 @@ export async function cleanupTestUsers(userIds: string[]) {
 	if (userIds.length === 0) return;
 
 	// 按外键依赖顺序删除
+
+	// 1. 清理工单消息（依赖 ticket 和 user）
+	await testDb
+		.delete(schema.ticketMessage)
+		.where(inArray(schema.ticketMessage.userId, userIds));
+
+	// 2. 清理工单（依赖 user）
+	await testDb
+		.delete(schema.ticket)
+		.where(inArray(schema.ticket.userId, userIds));
+
+	// 3. 清理积分相关
 	await testDb
 		.delete(schema.creditsTransaction)
 		.where(inArray(schema.creditsTransaction.userId, userIds));
@@ -114,6 +126,7 @@ export async function cleanupTestUsers(userIds: string[]) {
 		.delete(schema.creditsBalance)
 		.where(inArray(schema.creditsBalance.userId, userIds));
 
+	// 4. 清理认证相关
 	await testDb
 		.delete(schema.session)
 		.where(inArray(schema.session.userId, userIds));
@@ -122,6 +135,7 @@ export async function cleanupTestUsers(userIds: string[]) {
 		.delete(schema.account)
 		.where(inArray(schema.account.userId, userIds));
 
+	// 5. 最后删除用户
 	await testDb.delete(schema.user).where(inArray(schema.user.id, userIds));
 }
 
@@ -178,4 +192,34 @@ export async function getUserCreditsState(userId: string) {
 		.where(eq(schema.creditsTransaction.userId, userId));
 
 	return { balance, batches, transactions };
+}
+
+/**
+ * 获取工单及其消息
+ */
+export async function getTicketWithMessages(ticketId: string) {
+	const [ticketData] = await testDb
+		.select()
+		.from(schema.ticket)
+		.where(eq(schema.ticket.id, ticketId))
+		.limit(1);
+
+	const messages = await testDb
+		.select()
+		.from(schema.ticketMessage)
+		.where(eq(schema.ticketMessage.ticketId, ticketId))
+		.orderBy(schema.ticketMessage.createdAt);
+
+	return { ticket: ticketData, messages };
+}
+
+/**
+ * 获取用户的所有工单
+ */
+export async function getUserTickets(userId: string) {
+	return await testDb
+		.select()
+		.from(schema.ticket)
+		.where(eq(schema.ticket.userId, userId))
+		.orderBy(schema.ticket.createdAt);
 }

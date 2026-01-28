@@ -268,3 +268,108 @@ export function expiredDate(): Date {
 export function soonExpiringDate(): Date {
 	return daysFromNow(1);
 }
+
+// ============================================
+// 工单工厂
+// ============================================
+
+export interface CreateTestTicketOptions {
+	userId: string;
+	subject?: string;
+	category?: schema.TicketCategory;
+	priority?: schema.TicketPriority;
+	status?: schema.TicketStatus;
+}
+
+/**
+ * 创建测试工单
+ */
+export async function createTestTicket(
+	options: CreateTestTicketOptions
+): Promise<schema.Ticket> {
+	const id = generateTestId("test_ticket");
+
+	const ticketData: schema.NewTicket = {
+		id,
+		userId: options.userId,
+		subject: options.subject ?? `Test Ticket ${Date.now()}`,
+		category: options.category ?? "other",
+		priority: options.priority ?? "medium",
+		status: options.status ?? "open",
+		createdAt: new Date(),
+		updatedAt: new Date(),
+	};
+
+	const [ticket] = await testDb
+		.insert(schema.ticket)
+		.values(ticketData)
+		.returning();
+
+	if (!ticket) {
+		throw new Error("创建测试工单失败");
+	}
+
+	return ticket;
+}
+
+export interface CreateTestTicketMessageOptions {
+	ticketId: string;
+	userId: string;
+	content?: string;
+	isAdminResponse?: boolean;
+}
+
+/**
+ * 创建测试工单消息
+ */
+export async function createTestTicketMessage(
+	options: CreateTestTicketMessageOptions
+): Promise<schema.TicketMessage> {
+	const id = generateTestId("test_message");
+
+	const messageData: schema.NewTicketMessage = {
+		id,
+		ticketId: options.ticketId,
+		userId: options.userId,
+		content: options.content ?? `Test message ${Date.now()}`,
+		isAdminResponse: options.isAdminResponse ?? false,
+		createdAt: new Date(),
+	};
+
+	const [message] = await testDb
+		.insert(schema.ticketMessage)
+		.values(messageData)
+		.returning();
+
+	if (!message) {
+		throw new Error("创建测试工单消息失败");
+	}
+
+	return message;
+}
+
+export interface CreateTestTicketWithMessageOptions
+	extends CreateTestTicketOptions {
+	message?: string;
+}
+
+/**
+ * 创建带初始消息的测试工单
+ */
+export async function createTestTicketWithMessage(
+	options: CreateTestTicketWithMessageOptions
+): Promise<{
+	ticket: schema.Ticket;
+	message: schema.TicketMessage;
+}> {
+	const ticket = await createTestTicket(options);
+
+	const message = await createTestTicketMessage({
+		ticketId: ticket.id,
+		userId: options.userId,
+		content: options.message ?? "Initial test message",
+		isAdminResponse: false,
+	});
+
+	return { ticket, message };
+}
