@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { forgetPassword } from "@/lib/auth/client";
 
+import { AuthErrorAlert } from "./auth-error-alert";
+
 /**
  * 忘记密码表单组件
  *
@@ -97,11 +99,7 @@ export function ForgotPasswordForm() {
       </div>
 
       {/* 错误提示 */}
-      {error && (
-        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-          {error}
-        </div>
-      )}
+      <AuthErrorAlert message={error} />
 
       {/* 表单 */}
       <form onSubmit={handleSubmit} className="space-y-4">

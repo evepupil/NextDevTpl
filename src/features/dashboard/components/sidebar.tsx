@@ -3,10 +3,7 @@
 import {
   ChevronsUpDown,
   LogOut,
-  Monitor,
-  Moon,
   Settings,
-  Sun,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -22,13 +19,9 @@ import { Separator } from "@/components/ui/separator";
 import { dashboardConfig, siteConfig } from "@/config";
 import { CreditBalanceBadge } from "@/features/credits/components";
 import { useSidebar } from "@/features/dashboard/context";
+import { ModeToggle } from "@/features/shared/components";
 import { signOut, useSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
-
-/**
- * 主题类型
- */
-type Theme = "light" | "dark" | "system";
 
 /**
  * Dashboard 侧边栏组件
@@ -49,9 +42,6 @@ export function DashboardSidebar() {
   // 获取当前用户会话
   const { data: session } = useSession();
   const user = session?.user;
-
-  // 主题状态 (简化版，实际应使用 next-themes)
-  const [theme, setTheme] = useState<Theme>("system");
 
   // Popover 开关状态
   const [open, setOpen] = useState(false);
@@ -206,47 +196,9 @@ export function DashboardSidebar() {
 
               <Separator />
 
-              {/* 主题切换 */}
-              <div className="flex items-center justify-center gap-1 p-3">
-                <button
-                  type="button"
-                  onClick={() => setTheme("light")}
-                  className={cn(
-                    "flex h-9 w-9 items-center justify-center rounded-md transition-colors",
-                    theme === "light"
-                      ? "bg-muted text-foreground"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  )}
-                  title="浅色模式"
-                >
-                  <Sun className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTheme("dark")}
-                  className={cn(
-                    "flex h-9 w-9 items-center justify-center rounded-md transition-colors",
-                    theme === "dark"
-                      ? "bg-muted text-foreground"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  )}
-                  title="深色模式"
-                >
-                  <Moon className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTheme("system")}
-                  className={cn(
-                    "flex h-9 w-9 items-center justify-center rounded-md transition-colors",
-                    theme === "system"
-                      ? "bg-violet-100 text-violet-600 dark:bg-violet-900 dark:text-violet-300"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  )}
-                  title="跟随系统"
-                >
-                  <Monitor className="h-4 w-4" />
-                </button>
+              {/* 主题切换 - 使用共享 ModeToggle 组件 */}
+              <div className="flex items-center justify-center p-3">
+                <ModeToggle variant="inline" />
               </div>
 
               <Separator />
