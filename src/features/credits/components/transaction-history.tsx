@@ -10,7 +10,6 @@ import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Inbox } from "l
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -19,20 +18,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { getMyTransactions } from "@/features/credits/actions";
 import { cn } from "@/lib/utils";
 
 /**
- * 交易类型映射
+ * 交易类型映射 - 使用更丰富的颜色
  */
-const TRANSACTION_TYPE_MAP: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  registration_bonus: { label: "Registration Bonus", variant: "default" },
-  monthly_grant: { label: "Monthly Grant", variant: "default" },
-  purchase: { label: "Purchase", variant: "secondary" },
-  consumption: { label: "Usage", variant: "destructive" },
-  expiration: { label: "Expired", variant: "outline" },
-  refund: { label: "Refund", variant: "secondary" },
+const TRANSACTION_TYPE_MAP: Record<string, { label: string; className: string }> = {
+  registration_bonus: {
+    label: "Registration Bonus",
+    className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
+  },
+  monthly_grant: {
+    label: "Monthly Grant",
+    className: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
+  },
+  purchase: {
+    label: "Purchase",
+    className: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
+  },
+  consumption: {
+    label: "Consumption",
+    className: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
+  },
+  expiration: {
+    label: "Expired",
+    className: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",
+  },
+  refund: {
+    label: "Refund",
+    className: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
+  },
 };
 
 /**
@@ -79,17 +95,17 @@ export function TransactionHistory() {
       <div className="space-y-4">
         {/* 标题 */}
         <div>
-          <h3 className="text-lg font-semibold">Transaction History</h3>
-          <p className="text-sm text-muted-foreground">
+          <h3 className="text-lg font-semibold tracking-tight">Transaction History</h3>
+          <p className="text-sm text-muted-foreground mt-1">
             View all your credit transactions including grants and consumption
           </p>
         </div>
 
         {/* 空状态 */}
-        <div className="flex flex-col items-center justify-center py-12 text-center border rounded-lg">
-          <Inbox className="h-12 w-12 text-muted-foreground/50 mb-4" />
-          <p className="text-muted-foreground">No transactions yet</p>
-          <p className="text-sm text-muted-foreground/70">
+        <div className="flex flex-col items-center justify-center py-16 text-center border rounded-lg bg-muted/20">
+          <Inbox className="h-12 w-12 text-muted-foreground/40 mb-4" />
+          <p className="text-muted-foreground font-medium">No transactions yet</p>
+          <p className="text-sm text-muted-foreground/70 mt-1">
             Your credit transactions will appear here
           </p>
         </div>
@@ -101,29 +117,30 @@ export function TransactionHistory() {
     <div className="space-y-4">
       {/* 标题 */}
       <div>
-        <h3 className="text-lg font-semibold">Transaction History</h3>
-        <p className="text-sm text-muted-foreground">
+        <h3 className="text-lg font-semibold tracking-tight">Transaction History</h3>
+        <p className="text-sm text-muted-foreground mt-1">
           View all your credit transactions including grants and consumption
         </p>
       </div>
 
       {/* 表格 */}
-      <div className="rounded-lg border">
+      <div className="rounded-lg border overflow-hidden">
         {/* 表头 */}
-        <div className="grid grid-cols-12 gap-4 px-4 py-3 bg-muted/50 text-sm font-medium text-muted-foreground">
+        <div className="grid grid-cols-12 gap-4 px-4 py-3 bg-muted/40 text-sm font-medium text-muted-foreground border-b">
           <div className="col-span-3">Date</div>
           <div className="col-span-2">Type</div>
           <div className="col-span-4">Description</div>
           <div className="col-span-2 text-right">Amount</div>
-          <div className="col-span-1 text-center">Status</div>
+          <div className="col-span-1 text-right">Status</div>
         </div>
-
-        <Separator />
 
         {/* 加载状态 */}
         {isPending ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-pulse text-muted-foreground">Loading...</div>
+          <div className="flex items-center justify-center py-12">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+              <span>Loading...</span>
+            </div>
           </div>
         ) : (
           /* 表格内容 */
@@ -131,51 +148,53 @@ export function TransactionHistory() {
             {transactions.map((tx) => {
               const typeInfo = TRANSACTION_TYPE_MAP[tx.type] ?? {
                 label: tx.type,
-                variant: "outline" as const,
+                className: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
               };
               const isIncome = isIncomeType(tx.type);
 
               return (
                 <div
                   key={tx.id}
-                  className="grid grid-cols-12 gap-4 px-4 py-3 text-sm hover:bg-muted/30 transition-colors"
+                  className="grid grid-cols-12 gap-4 px-4 py-3.5 text-sm hover:bg-muted/30 transition-colors items-center"
                 >
                   {/* 日期 */}
-                  <div className="col-span-3 text-muted-foreground">
+                  <div className="col-span-3 text-muted-foreground font-mono text-xs">
                     {formatDateTime(tx.createdAt)}
                   </div>
 
-                  {/* 类型 */}
+                  {/* 类型 - 使用更精致的标签样式 */}
                   <div className="col-span-2">
-                    <Badge variant={typeInfo.variant} className="text-xs">
+                    <span
+                      className={cn(
+                        "inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium",
+                        typeInfo.className
+                      )}
+                    >
                       {typeInfo.label}
-                    </Badge>
+                    </span>
                   </div>
 
                   {/* 描述 */}
-                  <div className="col-span-4 truncate" title={tx.description ?? ""}>
+                  <div className="col-span-4 truncate text-foreground/80" title={tx.description ?? ""}>
                     {tx.description ?? "-"}
                   </div>
 
                   {/* 金额 */}
                   <div
                     className={cn(
-                      "col-span-2 text-right font-medium",
-                      isIncome ? "text-emerald-600" : "text-red-500"
+                      "col-span-2 text-right font-semibold tabular-nums",
+                      isIncome ? "text-emerald-600 dark:text-emerald-400" : "text-foreground/70"
                     )}
                   >
-                    {isIncome ? "+" : "-"}
+                    {isIncome ? "+" : ""}
                     {tx.amount}
                   </div>
 
                   {/* 状态 */}
-                  <div className="col-span-1 text-center">
-                    <Badge
-                      variant="outline"
-                      className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800"
-                    >
+                  <div className="col-span-1 text-right">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary">
                       COMPLETED
-                    </Badge>
+                    </span>
                   </div>
                 </div>
               );
@@ -185,8 +204,8 @@ export function TransactionHistory() {
       </div>
 
       {/* 分页 */}
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <div>
+      <div className="flex items-center justify-between text-sm text-muted-foreground pt-2">
+        <div className="text-xs">
           Showing {Math.min((page - 1) * pageSize + 1, totalCount)} to{" "}
           {Math.min(page * pageSize, totalCount)} of {totalCount} transactions
         </div>
@@ -194,7 +213,7 @@ export function TransactionHistory() {
         <div className="flex items-center gap-4">
           {/* 每页数量选择 */}
           <div className="flex items-center gap-2">
-            <span>Rows per page</span>
+            <span className="text-xs">Rows per page</span>
             <Select
               value={String(pageSize)}
               onValueChange={(v) => {
@@ -202,7 +221,7 @@ export function TransactionHistory() {
                 setPage(1);
               }}
             >
-              <SelectTrigger className="w-16 h-8">
+              <SelectTrigger className="w-16 h-8 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -214,7 +233,7 @@ export function TransactionHistory() {
           </div>
 
           {/* 页码信息 */}
-          <span>
+          <span className="text-xs">
             Page {page} of {totalPages}
           </span>
 
@@ -223,38 +242,38 @@ export function TransactionHistory() {
             <Button
               variant="outline"
               size="icon"
-              className="h-8 w-8"
+              className="h-7 w-7"
               onClick={() => setPage(1)}
               disabled={page === 1}
             >
-              <ChevronsLeft className="h-4 w-4" />
+              <ChevronsLeft className="h-3.5 w-3.5" />
             </Button>
             <Button
               variant="outline"
               size="icon"
-              className="h-8 w-8"
+              className="h-7 w-7"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-3.5 w-3.5" />
             </Button>
             <Button
               variant="outline"
               size="icon"
-              className="h-8 w-8"
+              className="h-7 w-7"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-3.5 w-3.5" />
             </Button>
             <Button
               variant="outline"
               size="icon"
-              className="h-8 w-8"
+              className="h-7 w-7"
               onClick={() => setPage(totalPages)}
               disabled={page === totalPages}
             >
-              <ChevronsRight className="h-4 w-4" />
+              <ChevronsRight className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>

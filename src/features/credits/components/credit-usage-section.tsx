@@ -72,55 +72,57 @@ export function CreditUsageSection() {
     })[0];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* 标题 */}
       <div>
-        <h2 className="text-xl font-semibold">Compute Credit Usage</h2>
-        <p className="text-sm text-muted-foreground">
+        <h2 className="text-xl font-semibold tracking-tight">Compute Credit Usage</h2>
+        <p className="text-sm text-muted-foreground mt-1">
           Credits used for AI dialogue, image and etc.
         </p>
       </div>
 
-      {/* 可用积分 */}
-      <div className="flex items-center justify-between py-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
-            <Coins className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+      {/* 可用积分 - 更精致的设计 */}
+      <div className="flex items-center justify-between py-6 px-1">
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/40 dark:to-purple-900/40 shadow-sm">
+            <Coins className="h-6 w-6 text-violet-600 dark:text-violet-400" />
           </div>
-          <span className="font-medium">Available Credits</span>
+          <span className="text-base font-medium text-foreground">Available Credits</span>
         </div>
 
         <div className="text-right">
           {isBalanceLoading ? (
             <div className="animate-pulse">
-              <div className="h-10 w-16 bg-muted rounded" />
+              <div className="h-12 w-20 bg-muted rounded" />
             </div>
           ) : (
             <>
-              <div className="text-4xl font-bold">{balance.toLocaleString()}</div>
-              <div className="text-sm text-muted-foreground">credits available</div>
+              <div className="text-5xl font-bold tracking-tight text-foreground">
+                {balance.toLocaleString()}
+              </div>
+              <div className="text-sm text-muted-foreground mt-0.5">credits available</div>
             </>
           )}
         </div>
       </div>
 
-      <Separator />
-
-      {/* 购买更多积分 */}
-      <Card className="border-dashed">
-        <CardContent className="pt-6">
-          <div className="flex items-start gap-3">
-            <ShoppingCart className="h-5 w-5 text-muted-foreground mt-0.5" />
-            <div className="flex-1 space-y-3">
+      {/* 购买更多积分 - 更现代的卡片设计 */}
+      <Card className="border shadow-sm">
+        <CardContent className="p-6">
+          <div className="flex items-start gap-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted/80">
+              <ShoppingCart className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div className="flex-1 space-y-4">
               <div>
-                <h3 className="font-medium">Purchase More Credits</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="font-semibold text-foreground">Purchase More Credits</h3>
+                <p className="text-sm text-muted-foreground mt-1">
                   Get more credits to unlock advanced AI features and capabilities.
                 </p>
               </div>
 
-              <div className="flex gap-3">
-                <Button asChild>
+              <div className="flex flex-wrap gap-3">
+                <Button asChild className="bg-primary hover:bg-primary/90">
                   <Link href="/pricing">View Subscription Plans</Link>
                 </Button>
                 <Button variant="outline" asChild>
@@ -132,20 +134,19 @@ export function CreditUsageSection() {
         </CardContent>
       </Card>
 
-      {/* 即将过期积分提示 */}
+      {/* 即将过期积分提示 - 更简洁的警告样式 */}
       {expiringBatch && (
-        <Card className="border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-900/10">
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-3">
-              <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5" />
-              <div>
-                <h3 className="font-medium text-amber-800 dark:text-amber-300">
+        <Card className="border-orange-200/60 bg-orange-50/50 dark:border-orange-800/40 dark:bg-orange-950/20">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <Clock className="h-5 w-5 text-orange-500 dark:text-orange-400 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <span className="font-medium text-orange-700 dark:text-orange-300">
                   Credits Expiring Soon
-                </h3>
-                <p className="text-sm text-amber-700 dark:text-amber-400">
-                  {expiringBatch.remaining} credits will expire on{" "}
-                  {formatDate(expiringBatch.expiresAt)}
-                </p>
+                </span>
+                <span className="text-orange-600/80 dark:text-orange-400/80 ml-2 text-sm">
+                  {expiringBatch.remaining} credits will expire on {formatDate(expiringBatch.expiresAt)}
+                </span>
               </div>
             </div>
           </CardContent>
@@ -153,7 +154,7 @@ export function CreditUsageSection() {
       )}
 
       {/* 订阅状态提示 */}
-      <Card className="border-dashed">
+      <Card className="border-dashed bg-muted/30">
         <CardContent className="py-4">
           <p className="text-center text-sm text-muted-foreground">
             No active subscription. Purchase a plan to receive monthly credits.
@@ -161,7 +162,7 @@ export function CreditUsageSection() {
         </CardContent>
       </Card>
 
-      <Separator />
+      <Separator className="my-2" />
 
       {/* 交易历史 */}
       <TransactionHistory />
