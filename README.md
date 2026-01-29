@@ -1,6 +1,8 @@
 # NextDevTpl
 
-一个现代化的 SaaS 全栈开发模板，基于 Next.js 15 构建，包含认证、支付、积分、邮件、存储、工单等完整的 SaaS 功能模块。
+一个现代化的 SaaS 全栈开发模板，基于 Next.js 15 构建，包含认证、支付、积分、邮件、存储、工单、API 限流、日志、错误监控等完整的 SaaS 功能模块。
+
+> **开箱即用**：所有可选服务（限流、日志、监控）在未配置时自动降级为本地模式，不影响使用。配置对应环境变量即可启用完整功能。
 
 ## 特性
 
@@ -17,6 +19,9 @@
 - **工单系统** - 用户支持
 - **管理后台** - 用户管理、数据统计
 - **国际化** - next-intl 多语言支持
+- **API 限流** - Upstash Redis，全局自动保护（可选）
+- **结构化日志** - Pino + Axiom 云日志（可选）
+- **错误监控** - Sentry 自动捕获（可选）
 
 ## 技术栈
 
@@ -30,6 +35,9 @@
 | 邮件 | Resend, React Email |
 | 存储 | AWS S3 / Cloudflare R2 |
 | 验证 | Zod, React Hook Form, next-safe-action |
+| 限流 | Upstash Redis, @upstash/ratelimit |
+| 日志 | Pino, Axiom |
+| 监控 | Sentry |
 | 工具 | Biome, pnpm |
 
 ## 快速开始
@@ -59,33 +67,43 @@ cp .env.example .env.local
 编辑 `.env.local` 文件：
 
 ```env
-# 数据库
+# 数据库（必填）
 DATABASE_URL="postgresql://..."
 
-# Better Auth
+# Better Auth（必填）
 BETTER_AUTH_SECRET="your-secret-key"
 BETTER_AUTH_URL="http://localhost:3000"
 
-# OAuth (可选)
+# OAuth（可选）
 GITHUB_CLIENT_ID=""
 GITHUB_CLIENT_SECRET=""
 GOOGLE_CLIENT_ID=""
 GOOGLE_CLIENT_SECRET=""
 
-# Stripe
+# Stripe（可选）
 STRIPE_SECRET_KEY=""
 STRIPE_WEBHOOK_SECRET=""
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=""
 
-# Resend
+# Resend 邮件（可选）
 RESEND_API_KEY=""
 
-# S3/R2 存储
-S3_ENDPOINT=""
-S3_REGION=""
-S3_ACCESS_KEY_ID=""
-S3_SECRET_ACCESS_KEY=""
-S3_BUCKET_NAME=""
+# S3/R2 存储（可选）
+STORAGE_ENDPOINT=""
+STORAGE_REGION=""
+STORAGE_ACCESS_KEY_ID=""
+STORAGE_SECRET_ACCESS_KEY=""
+
+# API 限流 - Upstash Redis（可选，未配置时跳过限流）
+# UPSTASH_REDIS_REST_URL=""
+# UPSTASH_REDIS_REST_TOKEN=""
+
+# 日志 - Axiom（可选，未配置时使用 console）
+# AXIOM_TOKEN=""
+# AXIOM_DATASET="nextdevtpl"
+
+# 错误监控 - Sentry（可选，未配置时使用 console）
+# NEXT_PUBLIC_SENTRY_DSN=""
+# SENTRY_AUTH_TOKEN=""
 ```
 
 ### 数据库初始化
@@ -137,7 +155,10 @@ src/
 │   └── support/components/       # 工单支持
 ├── db/                           # 数据库 Schema
 ├── lib/                          # 工具函数
-│   └── auth/                     # 认证相关
+│   ├── auth/                     # 认证相关
+│   ├── rate-limit/               # API 限流
+│   ├── logger/                   # 结构化日志
+│   └── monitoring/               # 错误监控 (Sentry)
 ├── credits/                      # 积分系统
 ├── mail/                         # 邮件系统
 ├── storage/                      # 存储系统
@@ -192,6 +213,27 @@ src/
 - 用户管理（搜索、角色、封禁）
 - 积分充值
 - 工单处理
+
+### API 限流
+
+- Upstash Redis 滑动窗口
+- Middleware 全局自动保护
+- 路由级别差异化限制
+- 未配置时自动跳过
+
+### 日志系统
+
+- Pino 结构化日志
+- Axiom 云日志集成
+- Server Action 错误自动记录
+- 未配置时回退 console
+
+### 错误监控
+
+- Sentry 自动捕获
+- Server Action 错误自动上报
+- 用户上下文关联
+- 未配置时回退 console
 
 ## 命令
 
