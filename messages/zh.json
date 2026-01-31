@@ -47,6 +47,24 @@
       "description": "用于向您展示相关广告和营销内容。"
     },
     "alwaysEnabled": "始终启用",
-    "saveSettings": "保存设置"
+    "saveSettings": "保存设置",
+    "dialog": {
+      "title": "管理 Cookie 偏好",
+      "privacyTitle": "您的隐私选择",
+      "privacyDescription": "在此面板中，您可以表达有关处理您个人信息的一些偏好。您可以随时通过提供的链接重新打开此面板来查看和更改已表达的选择。如要拒绝同意下述特定处理活动，请将开关切换为关闭或使用"仅必要"按钮并确认您要保存您的选择。",
+      "acceptCurrent": "接受当前选择",
+      "necessary": {
+        "title": "严格必要",
+        "description": "这些 Cookie 对于网站的正常运行至关重要，无法禁用。"
+      },
+      "analytics": {
+        "title": "分析与性能",
+        "description": "这些 Cookie 通过匿名收集和报告信息，帮助我们了解访问者如何与网站互动。这有助于我们改进网站和服务。"
+      },
+      "marketing": {
+        "title": "定向与广告",
+        "description": "这些 Cookie 用于使广告信息与您和您的兴趣更相关。目的是展示对个人用户相关且有吸引力的广告，从而对发布商和第三方广告商更有价值。"
+      }
+    }
   }
 }

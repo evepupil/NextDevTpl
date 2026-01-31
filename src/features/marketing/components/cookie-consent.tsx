@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -30,8 +31,11 @@ const DEFAULT_PREFERENCES: CookiePreferences = {
  * - 选择后存储到 localStorage
  * - 支持动画过渡效果
  * - 跟踪用户的具体偏好设置
+ * - 支持 i18n 国际化
  */
 export function CookieConsent() {
+  const t = useTranslations("Cookie");
+
   // 是否显示横幅
   const [isVisible, setIsVisible] = useState(false);
   // 是否显示详细设置面板
@@ -138,15 +142,14 @@ export function CookieConsent() {
             // 简洁视图
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex-1">
-                <h3 className="text-lg font-semibold">Cookie 设置</h3>
+                <h3 className="text-lg font-semibold">{t("title")}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  我们使用 Cookie
-                  来确保您在我们网站上获得最佳体验。继续使用本网站即表示您同意我们的
+                  {t("description")}
                   <a
                     href="/privacy"
                     className="ml-1 underline underline-offset-4 hover:text-foreground"
                   >
-                    隐私政策
+                    {t("privacyPolicy")}
                   </a>
                   。
                 </p>
@@ -157,17 +160,17 @@ export function CookieConsent() {
                   size="sm"
                   onClick={() => setShowDetails(true)}
                 >
-                  管理偏好
+                  {t("managePreferences")}
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleRejectAll}>
-                  仅必要
+                  {t("rejectAll")}
                 </Button>
                 <Button
                   size="sm"
                   className="bg-violet-600 hover:bg-violet-700"
                   onClick={handleAcceptAll}
                 >
-                  接受全部
+                  {t("acceptAll")}
                 </Button>
               </div>
             </div>
@@ -175,13 +178,13 @@ export function CookieConsent() {
             // 详细设置视图
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Cookie 偏好设置</h3>
+                <h3 className="text-lg font-semibold">{t("preferencesTitle")}</h3>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowDetails(false)}
                 >
-                  返回
+                  {t("back")}
                 </Button>
               </div>
 
@@ -189,22 +192,22 @@ export function CookieConsent() {
                 {/* 必要 Cookie */}
                 <div className="flex items-start justify-between rounded-md border p-4">
                   <div className="flex-1">
-                    <h4 className="font-medium">必要 Cookie</h4>
+                    <h4 className="font-medium">{t("essential.title")}</h4>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      这些 Cookie 是网站正常运行所必需的，无法关闭。
+                      {t("essential.description")}
                     </p>
                   </div>
                   <div className="ml-4 text-sm text-muted-foreground">
-                    始终启用
+                    {t("alwaysEnabled")}
                   </div>
                 </div>
 
                 {/* 分析 Cookie */}
                 <div className="flex items-start justify-between rounded-md border p-4">
                   <div className="flex-1">
-                    <h4 className="font-medium">分析 Cookie</h4>
+                    <h4 className="font-medium">{t("analytics.title")}</h4>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      帮助我们了解访问者如何与网站互动，以便改进用户体验。
+                      {t("analytics.description")}
                     </p>
                   </div>
                   <div className="ml-4">
@@ -220,9 +223,9 @@ export function CookieConsent() {
                 {/* 营销 Cookie */}
                 <div className="flex items-start justify-between rounded-md border p-4">
                   <div className="flex-1">
-                    <h4 className="font-medium">营销 Cookie</h4>
+                    <h4 className="font-medium">{t("marketing.title")}</h4>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      用于向您展示相关广告和营销内容。
+                      {t("marketing.description")}
                     </p>
                   </div>
                   <div className="ml-4">
@@ -238,14 +241,14 @@ export function CookieConsent() {
 
               <div className="flex justify-end gap-2 pt-2">
                 <Button variant="outline" size="sm" onClick={handleRejectAll}>
-                  仅必要
+                  {t("rejectAll")}
                 </Button>
                 <Button
                   size="sm"
                   className="bg-violet-600 hover:bg-violet-700"
                   onClick={handleSavePreferences}
                 >
-                  保存设置
+                  {t("saveSettings")}
                 </Button>
               </div>
             </div>
