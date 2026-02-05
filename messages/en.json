@@ -48,6 +48,25 @@
     },
     "alwaysEnabled": "Always enabled",
     "saveSettings": "Save settings",
+    "card": {
+      "title": "Cookie Settings",
+      "description": "Manage your cookie settings here.",
+      "options": {
+        "necessary": {
+          "title": "Strictly Necessary",
+          "description": "These cookies are essential for the website to function properly."
+        },
+        "functional": {
+          "title": "Functional Cookies",
+          "description": "These cookies enable personalized features and functionality."
+        },
+        "performance": {
+          "title": "Performance Cookies",
+          "description": "These cookies help us understand how visitors interact with the website."
+        }
+      },
+      "save": "Save preferences"
+    },
     "dialog": {
       "title": "Manage cookie preferences",
       "privacyTitle": "Your Privacy Choices",
@@ -66,5 +85,31 @@
         "description": "These cookies are used to make advertising messages more relevant to you and your interests. The intention is to display ads that are relevant and engaging for the individual user and thereby more valuable for publishers and third party advertisers."
       }
     }
+  },
+  "Footer": {
+    "newsletter": {
+      "description": "Subscribe to our newsletter for updates, tips, and exclusive content for building better SaaS applications.",
+      "placeholder": "Enter your email",
+      "submit": "Subscribe"
+    },
+    "sections": {
+      "quickLinks": "Quick Links",
+      "resources": "Resources",
+      "legal": "Legal"
+    },
+    "links": {
+      "features": "Features",
+      "pricing": "Pricing",
+      "documentation": "Documentation",
+      "changelog": "Changelog",
+      "blog": "Blog",
+      "guides": "Guides",
+      "support": "Support",
+      "api": "API Reference",
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy",
+      "cookie": "Cookie Policy"
+    },
+    "copyright": "© {year} {name}. All rights reserved."
   }
 }

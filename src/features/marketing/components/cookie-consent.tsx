@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Link } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 import {
   COOKIE_CONSENT_KEY,
@@ -145,12 +146,12 @@ export function CookieConsent() {
                 <h3 className="text-lg font-semibold">{t("title")}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {t("description")}
-                  <a
-                    href="/privacy"
+                  <Link
+                    href="/legal/privacy"
                     className="ml-1 underline underline-offset-4 hover:text-foreground"
                   >
                     {t("privacyPolicy")}
-                  </a>
+                  </Link>
                   。
                 </p>
               </div>

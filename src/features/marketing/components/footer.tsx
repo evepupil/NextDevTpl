@@ -1,9 +1,10 @@
 import { Github, Linkedin, Twitter } from "lucide-react";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { footerNav, siteConfig } from "@/config";
+import { Link } from "@/i18n/routing";
 
 /**
  * Marketing 页面底部
@@ -14,7 +15,23 @@ import { footerNav, siteConfig } from "@/config";
  * - 社交媒体链接
  * - 版权信息
  */
-export function Footer() {
+export async function Footer() {
+  const t = await getTranslations("Footer");
+  const year = new Date().getFullYear();
+  const linkLabels: Record<string, string> = {
+    "/features": t("links.features"),
+    "/pricing": t("links.pricing"),
+    "/docs": t("links.documentation"),
+    "/changelog": t("links.changelog"),
+    "/blog": t("links.blog"),
+    "/guides": t("links.guides"),
+    "/support": t("links.support"),
+    "/api": t("links.api"),
+    "/legal/terms": t("links.terms"),
+    "/legal/privacy": t("links.privacy"),
+    "/legal/cookie-policy": t("links.cookie"),
+  };
+
   return (
     <footer className="border-t bg-background">
       <div className="container py-16">
@@ -25,17 +42,16 @@ export function Footer() {
               {siteConfig.name}
             </Link>
             <p className="mb-6 text-muted-foreground">
-              Subscribe to our newsletter for updates, tips, and exclusive
-              content for building better SaaS applications.
+              {t("newsletter.description")}
             </p>
             <form className="flex gap-2">
               <Input
                 type="email"
-                placeholder="Enter your email"
+                placeholder={t("newsletter.placeholder")}
                 className="flex-1"
               />
               <Button className="bg-violet-600 hover:bg-violet-700">
-                Subscribe
+                {t("newsletter.submit")}
               </Button>
             </form>
           </div>
@@ -44,7 +60,9 @@ export function Footer() {
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
             {/* Quick Links */}
             <div>
-              <h3 className="mb-4 text-sm font-semibold">Quick Links</h3>
+              <h3 className="mb-4 text-sm font-semibold">
+                {t("sections.quickLinks")}
+              </h3>
               <ul className="space-y-3">
                 {footerNav.quickLinks.map((link) => (
                   <li key={link.href}>
@@ -52,7 +70,7 @@ export function Footer() {
                       href={link.href}
                       className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
-                      {link.title}
+                      {linkLabels[link.href] ?? link.title}
                     </Link>
                   </li>
                 ))}
@@ -61,7 +79,9 @@ export function Footer() {
 
             {/* Resources */}
             <div>
-              <h3 className="mb-4 text-sm font-semibold">Resources</h3>
+              <h3 className="mb-4 text-sm font-semibold">
+                {t("sections.resources")}
+              </h3>
               <ul className="space-y-3">
                 {footerNav.resources.map((link) => (
                   <li key={link.href}>
@@ -69,7 +89,7 @@ export function Footer() {
                       href={link.href}
                       className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
-                      {link.title}
+                      {linkLabels[link.href] ?? link.title}
                     </Link>
                   </li>
                 ))}
@@ -78,7 +98,9 @@ export function Footer() {
 
             {/* Legal */}
             <div>
-              <h3 className="mb-4 text-sm font-semibold">Legal</h3>
+              <h3 className="mb-4 text-sm font-semibold">
+                {t("sections.legal")}
+              </h3>
               <ul className="space-y-3">
                 {footerNav.legal.map((link) => (
                   <li key={link.href}>
@@ -86,7 +108,7 @@ export function Footer() {
                       href={link.href}
                       className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
-                      {link.title}
+                      {linkLabels[link.href] ?? link.title}
                     </Link>
                   </li>
                 ))}
@@ -98,8 +120,10 @@ export function Footer() {
         {/* Bottom */}
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 sm:flex-row">
           <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} {siteConfig.name}. All rights
-            reserved.
+            {t("copyright", {
+              year,
+              name: siteConfig.name,
+            })}
           </p>
 
           {/* 社交链接 */}

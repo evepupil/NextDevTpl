@@ -20,8 +20,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/docs",
     "/features",
     "/changelog",
-    "/privacy",
-    "/terms",
+    "/legal/privacy",
+    "/legal/terms",
+    "/legal/cookie-policy",
   ];
 
   // 生成 sitemap 条目

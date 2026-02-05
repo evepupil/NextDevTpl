@@ -1,7 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useTranslations } from "next-intl";
+
+import { Link } from "@/i18n/routing";
+import { siteConfig } from "@/config";
 
 import { CookieSettingsDialog } from "@/features/shared";
 
@@ -13,25 +15,30 @@ import { CookieSettingsDialog } from "@/features/shared";
  */
 export function AuthFooter() {
   const t = useTranslations("Cookie");
+  const tFooter = useTranslations("Footer");
+  const year = new Date().getFullYear();
 
   return (
     <footer className="border-t bg-background py-6">
       <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 sm:flex-row">
         <p className="text-sm text-muted-foreground">
-          &copy; {new Date().getFullYear()} Your Company. All rights reserved.
+          {tFooter("copyright", {
+            year,
+            name: siteConfig.name,
+          })}
         </p>
         <nav className="flex gap-6">
           <Link
             href="/legal/privacy"
             className="text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
-            Privacy Policy
+            {tFooter("links.privacy")}
           </Link>
           <Link
             href="/legal/terms"
             className="text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
-            Terms of Service
+            {tFooter("links.terms")}
           </Link>
           <CookieSettingsDialog>
             <button

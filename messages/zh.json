@@ -48,10 +48,29 @@
     },
     "alwaysEnabled": "始终启用",
     "saveSettings": "保存设置",
+    "card": {
+      "title": "Cookie 设置",
+      "description": "在此管理您的 Cookie 设置。",
+      "options": {
+        "necessary": {
+          "title": "严格必要",
+          "description": "这些 Cookie 对于网站正常运行必不可少。"
+        },
+        "functional": {
+          "title": "功能性 Cookie",
+          "description": "这些 Cookie 用于启用个性化功能。"
+        },
+        "performance": {
+          "title": "性能 Cookie",
+          "description": "这些 Cookie 帮助我们了解访问情况以改进体验。"
+        }
+      },
+      "save": "保存偏好"
+    },
     "dialog": {
       "title": "管理 Cookie 偏好",
       "privacyTitle": "您的隐私选择",
-      "privacyDescription": "在此面板中，您可以表达有关处理您个人信息的一些偏好。您可以随时通过提供的链接重新打开此面板来查看和更改已表达的选择。如要拒绝同意下述特定处理活动，请将开关切换为关闭或使用"仅必要"按钮并确认您要保存您的选择。",
+      "privacyDescription": "在此面板中，您可以表达有关处理您个人信息的一些偏好。您可以随时通过提供的链接重新打开此面板来查看和更改已表达的选择。如要拒绝同意下述特定处理活动，请将开关切换为关闭或使用“仅必要”按钮并确认您要保存您的选择。",
       "acceptCurrent": "接受当前选择",
       "necessary": {
         "title": "严格必要",
@@ -66,5 +85,31 @@
         "description": "这些 Cookie 用于使广告信息与您和您的兴趣更相关。目的是展示对个人用户相关且有吸引力的广告，从而对发布商和第三方广告商更有价值。"
       }
     }
+  },
+  "Footer": {
+    "newsletter": {
+      "description": "订阅我们的新闻通讯，获取构建更好 SaaS 应用的更新、技巧和独家内容。",
+      "placeholder": "输入邮箱",
+      "submit": "订阅"
+    },
+    "sections": {
+      "quickLinks": "快速链接",
+      "resources": "资源",
+      "legal": "法律"
+    },
+    "links": {
+      "features": "功能",
+      "pricing": "定价",
+      "documentation": "文档",
+      "changelog": "更新日志",
+      "blog": "博客",
+      "guides": "指南",
+      "support": "支持",
+      "api": "API 参考",
+      "terms": "服务条款",
+      "privacy": "隐私政策",
+      "cookie": "Cookie 政策"
+    },
+    "copyright": "© {year} {name}。保留所有权利。"
   }
 }
