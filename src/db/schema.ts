@@ -30,7 +30,7 @@ export const userRoleEnum = pgEnum("user_role", ["user", "admin"]);
  * @field role - 用户角色 (user/admin)
  * @field banned - 是否被封禁
  * @field bannedReason - 封禁原因
- * @field stripeCustomerId - Stripe 客户 ID
+ * @field stripeCustomerId - 支付客户 ID (Stripe/Creem)
  * @field createdAt - 创建时间
  * @field updatedAt - 更新时间
  */
@@ -143,12 +143,12 @@ export const verification = pgTable("verification", {
 // 订阅表 (Subscription)
 // ============================================
 /**
- * 订阅表 - 存储用户的 Stripe 订阅信息
+ * 订阅表 - 存储用户的订阅信息
  *
  * @field id - 订阅记录唯一标识符
  * @field userId - 关联的用户 ID
- * @field stripeSubscriptionId - Stripe 订阅 ID (唯一)
- * @field stripePriceId - Stripe 价格 ID
+ * @field stripeSubscriptionId - 订阅 ID (Stripe/Creem, 唯一)
+ * @field stripePriceId - 价格/产品 ID (Stripe/Creem)
  * @field status - 订阅状态 (active, canceled, past_due, etc.)
  * @field currentPeriodStart - 当前计费周期开始时间
  * @field currentPeriodEnd - 当前计费周期结束时间

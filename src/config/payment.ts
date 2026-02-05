@@ -14,6 +14,15 @@ import {
 } from "@/features/payment/types";
 
 // ============================================
+// 支付提供商配置
+// ============================================
+
+export const PAYMENT_PROVIDER: PaymentConfig["provider"] =
+  process.env.NEXT_PUBLIC_PAYMENT_PROVIDER?.toLowerCase() === "creem"
+    ? "creem"
+    : "stripe";
+
+// ============================================
 // 环境变量中的价格 ID
 // ============================================
 
@@ -28,6 +37,21 @@ export const STRIPE_PRICE_IDS = {
   ENTERPRISE_YEARLY: process.env.NEXT_PUBLIC_STRIPE_PRICE_ENTERPRISE_YEARLY ?? "",
 } as const;
 
+/**
+ * Creem 产品 ID（从环境变量读取）
+ */
+export const CREEM_PRODUCT_IDS = {
+  PRO_MONTHLY: process.env.NEXT_PUBLIC_CREEM_PRODUCT_PRO_MONTHLY ?? "",
+  PRO_YEARLY: process.env.NEXT_PUBLIC_CREEM_PRODUCT_PRO_YEARLY ?? "",
+  LIFETIME: process.env.NEXT_PUBLIC_CREEM_PRODUCT_LIFETIME ?? "",
+  ENTERPRISE_MONTHLY: process.env.NEXT_PUBLIC_CREEM_PRODUCT_ENTERPRISE_MONTHLY ?? "",
+  ENTERPRISE_YEARLY: process.env.NEXT_PUBLIC_CREEM_PRODUCT_ENTERPRISE_YEARLY ?? "",
+} as const;
+
+const ACTIVE_PRICE_IDS =
+  PAYMENT_PROVIDER === "creem" ? CREEM_PRODUCT_IDS : STRIPE_PRICE_IDS;
+const SUPPORTS_TRIAL = PAYMENT_PROVIDER === "stripe";
+
 // ============================================
 // 支付系统配置
 // ============================================
@@ -37,7 +61,7 @@ export const STRIPE_PRICE_IDS = {
  */
 export const paymentConfig: PaymentConfig = {
   /** 支付提供商 */
-  provider: "stripe",
+  provider: PAYMENT_PROVIDER,
 
   /** 货币 */
   currency: "USD",
@@ -66,17 +90,17 @@ export const paymentConfig: PaymentConfig = {
       prices: [
         {
           type: PaymentType.SUBSCRIPTION,
-          priceId: STRIPE_PRICE_IDS.PRO_MONTHLY,
+          priceId: ACTIVE_PRICE_IDS.PRO_MONTHLY,
           amount: 29,
           interval: PlanInterval.MONTH,
-          trialPeriodDays: 7,
+          ...(SUPPORTS_TRIAL ? { trialPeriodDays: 7 } : {}),
         },
         {
           type: PaymentType.SUBSCRIPTION,
-          priceId: STRIPE_PRICE_IDS.PRO_YEARLY,
+          priceId: ACTIVE_PRICE_IDS.PRO_YEARLY,
           amount: 290,
           interval: PlanInterval.YEAR,
-          trialPeriodDays: 14,
+          ...(SUPPORTS_TRIAL ? { trialPeriodDays: 14 } : {}),
         },
       ],
     },
@@ -88,7 +112,7 @@ export const paymentConfig: PaymentConfig = {
       prices: [
         {
           type: PaymentType.ONE_TIME,
-          priceId: STRIPE_PRICE_IDS.LIFETIME,
+          priceId: ACTIVE_PRICE_IDS.LIFETIME,
           amount: 299,
         },
       ],

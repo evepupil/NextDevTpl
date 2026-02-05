@@ -10,6 +10,7 @@ import { subscription, user } from "@/db/schema";
 import { protectedAction } from "@/lib/safe-action";
 import { PaymentType } from "@/features/payment/types";
 
+import { createCreemCheckout, createCreemCustomerPortal } from "./creem";
 import { stripe } from "./stripe";
 
 /**
@@ -41,6 +42,33 @@ export const createCheckoutSession = protectedAction
     // 确定试用期天数（优先使用传入的，否则从配置获取）
     const trialDays = trialPeriodDays ?? price?.trialPeriodDays;
 
+    const baseUrl = getBaseUrl();
+
+    if (paymentConfig.provider === "creem") {
+      const successRedirect =
+        successUrl ?? `${baseUrl}${paymentConfig.redirectAfterCheckout}?success=true`;
+      const requestId = `checkout_${userId}_${Date.now()}`;
+
+      const metadata: Record<string, string> = {
+        userId,
+        planId: plan?.id ?? "unknown",
+        paymentType: paymentType,
+        priceId,
+      };
+
+      const checkout = await createCreemCheckout({
+        productId: priceId,
+        requestId,
+        successUrl: successRedirect,
+        customer: {
+          email: currentUser.email,
+        },
+        metadata,
+      });
+
+      return { url: checkout.checkoutUrl };
+    }
+
     // 查询用户的 Stripe Customer ID
     const [dbUser] = await db
       .select({ stripeCustomerId: user.stripeCustomerId })
@@ -68,8 +96,6 @@ export const createCheckoutSession = protectedAction
         .set({ stripeCustomerId })
         .where(eq(user.id, userId));
     }
-
-    const baseUrl = getBaseUrl();
 
     // 根据支付类型创建不同的 Checkout Session
     if (paymentType === PaymentType.ONE_TIME) {
@@ -159,6 +185,14 @@ export const createCustomerPortal = protectedAction
     }
 
     const baseUrl = getBaseUrl();
+
+    if (paymentConfig.provider === "creem") {
+      const portal = await createCreemCustomerPortal({
+        customerId: dbUser.stripeCustomerId,
+      });
+
+      return { url: portal.url };
+    }
 
     // 创建 Customer Portal Session
     const session = await stripe.billingPortal.sessions.create({

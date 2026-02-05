@@ -26,7 +26,7 @@ const API_RATE_LIMITS: Array<{ pattern: RegExp; type: RateLimitType }> = [
 	// AI 相关
 	{ pattern: /^\/api\/ai\//, type: "ai" },
 	// 支付相关
-	{ pattern: /^\/api\/(webhooks\/stripe|payment)/, type: "payment" },
+	{ pattern: /^\/api\/(webhooks\/(stripe|creem)|payment)/, type: "payment" },
 	// 上传相关
 	{ pattern: /^\/api\/upload/, type: "upload" },
 ];
@@ -62,7 +62,11 @@ export async function middleware(request: NextRequest) {
 	if (pathname.startsWith("/api/")) {
 		// 跳过健康检查和 webhook 验证请求（让业务逻辑处理）
 		// Webhook 需要验证签名，不应被限流阻断
-		if (pathname === "/api/health" || pathname === "/api/webhooks/stripe") {
+		if (
+			pathname === "/api/health" ||
+			pathname === "/api/webhooks/stripe" ||
+			pathname === "/api/webhooks/creem"
+		) {
 			return NextResponse.next();
 		}
 

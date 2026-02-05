@@ -21,7 +21,9 @@ export {
 export {
   // 支付配置
   paymentConfig,
+  PAYMENT_PROVIDER,
   STRIPE_PRICE_IDS,
+  CREEM_PRODUCT_IDS,
   getPricingPlans,
   getPricingConfig,
   findPlanByPriceId,

@@ -12,7 +12,7 @@
 - **Shadcn/UI** - 高质量组件库
 - **Better Auth** - 现代认证方案（邮箱密码 + OAuth）
 - **Drizzle ORM** - 类型安全的数据库操作
-- **Stripe** - 订阅支付集成
+- **Stripe / Creem** - 订阅支付集成
 - **积分系统** - FIFO 过期 + 复式记账
 - **邮件系统** - Resend + React Email
 - **存储系统** - S3/R2 兼容
@@ -31,7 +31,7 @@
 | 样式 | Tailwind CSS 4, Shadcn/UI, Radix UI |
 | 数据库 | PostgreSQL, Drizzle ORM, Neon |
 | 认证 | Better Auth |
-| 支付 | Stripe |
+| 支付 | Stripe / Creem |
 | 邮件 | Resend, React Email |
 | 存储 | AWS S3 / Cloudflare R2 |
 | 验证 | Zod, React Hook Form, next-safe-action |
@@ -80,9 +80,16 @@ GITHUB_CLIENT_SECRET=""
 GOOGLE_CLIENT_ID=""
 GOOGLE_CLIENT_SECRET=""
 
+# 支付提供商 (stripe / creem)
+NEXT_PUBLIC_PAYMENT_PROVIDER="stripe"
+
 # Stripe（可选）
 STRIPE_SECRET_KEY=""
 STRIPE_WEBHOOK_SECRET=""
+
+# Creem（可选）
+CREEM_API_KEY=""
+CREEM_WEBHOOK_SECRET=""
 
 # Resend 邮件（可选）
 RESEND_API_KEY=""
@@ -176,7 +183,7 @@ src/
 
 ### 支付系统
 
-- Stripe 订阅
+- Stripe / Creem 订阅
 - 多种定价方案
 - Webhook 处理
 - 订阅管理

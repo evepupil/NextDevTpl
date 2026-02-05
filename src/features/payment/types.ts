@@ -19,6 +19,11 @@ export enum PaymentType {
 }
 
 /**
+ * 支付提供商类型
+ */
+export type PaymentProvider = "stripe" | "creem";
+
+/**
  * 计划周期
  */
 export enum PlanInterval {
@@ -60,7 +65,7 @@ export enum SubscriptionStatus {
 export interface PriceConfig {
   /** 支付类型 */
   type: PaymentType;
-  /** 价格 ID（来自 Stripe） */
+  /** 价格/产品 ID（Stripe Price ID 或 Creem Product ID） */
   priceId: string;
   /** 金额 */
   amount: number;
@@ -120,7 +125,7 @@ export interface Plan extends PlanConfig, PlanDisplayInfo {}
  */
 export interface PaymentConfig {
   /** 支付提供商 */
-  provider: "stripe" | "creem";
+  provider: PaymentProvider;
   /** 货币 */
   currency: string;
   /** 年付折扣百分比 */

@@ -9,10 +9,12 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
-import { getBaseUrl } from "@/config/payment";
+import { getBaseUrl, paymentConfig } from "@/config/payment";
 import { db } from "@/db";
 import { user } from "@/db/schema";
 import { actionClient, protectedAction } from "@/lib/safe-action";
+import { PaymentType } from "@/features/payment/types";
+import { createCreemCheckout } from "@/features/payment/creem";
 import { stripe } from "@/features/payment/stripe";
 
 import {
@@ -338,6 +340,42 @@ export const createCreditsPurchaseCheckout = protectedAction
     const pkg = CREDIT_PACKAGES.find((p) => p.id === packageId);
     if (!pkg) {
       throw new Error("无效的积分套餐");
+    }
+
+    if (paymentConfig.provider === "creem") {
+      const productIdMap: Record<string, string> = {
+        lite: process.env.CREEM_PRODUCT_CREDITS_LITE ?? "",
+        standard: process.env.CREEM_PRODUCT_CREDITS_STANDARD ?? "",
+        pro: process.env.CREEM_PRODUCT_CREDITS_PRO ?? "",
+      };
+
+      const productId = productIdMap[packageId];
+      if (!productId) {
+        throw new Error("Creem 积分套餐产品 ID 未配置");
+      }
+
+      const baseUrl = getBaseUrl();
+      const successRedirect =
+        successUrl ??
+        `${baseUrl}/dashboard/settings?tab=usage&success=true&credits=${pkg.credits}`;
+
+      const checkout = await createCreemCheckout({
+        productId,
+        requestId: `credits_${userId}_${Date.now()}`,
+        successUrl: successRedirect,
+        customer: {
+          email: currentUser.email,
+        },
+        metadata: {
+          userId,
+          type: "credit_purchase",
+          paymentType: PaymentType.ONE_TIME,
+          credits: String(pkg.credits),
+          packageId: pkg.id,
+        },
+      });
+
+      return { url: checkout.checkoutUrl };
     }
 
     // 查询用户的 Stripe Customer ID
