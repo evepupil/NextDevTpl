@@ -1,7 +1,7 @@
-import { notFound, redirect } from "next/navigation";
-import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { and, eq } from "drizzle-orm";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,12 +10,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { db } from "@/db";
 import { ticket, ticketMessage, user } from "@/db/schema";
 import { getServerSession } from "@/lib/auth/server";
-import {
-  ticketCategories,
-  ticketPriorities,
-  ticketStatuses,
-} from "@/features/support/schemas";
 import { TicketMessageForm } from "@/features/support/components/ticket-message-form";
+import { Link, redirect } from "@/i18n/routing";
 
 interface TicketDetailPageProps {
   params: Promise<{
@@ -31,19 +27,23 @@ interface TicketDetailPageProps {
 export default async function TicketDetailPage({
   params,
 }: TicketDetailPageProps) {
+  const t = await getTranslations("Support");
+  const locale = await getLocale();
   const { id } = await params;
 
   // 获取当前用户会话
   const session = await getServerSession();
-  if (!session?.user) {
-    redirect("/sign-in");
+  const userSession = session?.user;
+  if (!userSession) {
+    redirect({ href: "/sign-in", locale });
   }
+  const safeUser = userSession!;
 
   // 获取工单信息
   const ticketResult = await db
     .select()
     .from(ticket)
-    .where(and(eq(ticket.id, id), eq(ticket.userId, session.user.id)))
+    .where(and(eq(ticket.id, id), eq(ticket.userId, safeUser.id)))
     .limit(1);
 
   const ticketData = ticketResult[0];
@@ -73,7 +73,6 @@ export default async function TicketDetailPage({
    * 获取状态徽章样式
    */
   const getStatusBadge = (status: string) => {
-    const statusConfig = ticketStatuses.find((s) => s.value === status);
     const colorMap: Record<string, string> = {
       open: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
       in_progress:
@@ -84,7 +83,7 @@ export default async function TicketDetailPage({
     };
     return (
       <Badge className={colorMap[status] || colorMap.closed} variant="secondary">
-        {statusConfig?.label || status}
+        {t(`statuses.${status}`)}
       </Badge>
     );
   };
@@ -93,7 +92,6 @@ export default async function TicketDetailPage({
    * 获取优先级徽章样式
    */
   const getPriorityBadge = (priority: string) => {
-    const priorityConfig = ticketPriorities.find((p) => p.value === priority);
     const colorMap: Record<string, string> = {
       low: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
       medium:
@@ -102,7 +100,7 @@ export default async function TicketDetailPage({
     };
     return (
       <Badge className={colorMap[priority] || colorMap.medium} variant="secondary">
-        {priorityConfig?.label || priority}
+        {t(`priorities.${priority}`)}
       </Badge>
     );
   };
@@ -111,8 +109,7 @@ export default async function TicketDetailPage({
    * 获取类别标签
    */
   const getCategoryLabel = (category: string) => {
-    const categoryConfig = ticketCategories.find((c) => c.value === category);
-    return categoryConfig?.label || category;
+    return t(`categories.${category}`);
   };
 
   /**
@@ -144,7 +141,9 @@ export default async function TicketDetailPage({
           </h2>
           <p className="text-muted-foreground">
             {getCategoryLabel(ticketData.category)} ·{" "}
-            创建于 {new Date(ticketData.createdAt).toLocaleDateString("zh-CN")}
+            {t("detail.createdAt", {
+              date: new Date(ticketData.createdAt).toLocaleDateString(locale),
+            })}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -156,7 +155,7 @@ export default async function TicketDetailPage({
       {/* 消息列表 */}
       <Card>
         <CardHeader>
-          <CardTitle>对话记录</CardTitle>
+          <CardTitle>{t("detail.conversation")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {messages.map((msg) => (
@@ -171,7 +170,7 @@ export default async function TicketDetailPage({
               <Avatar className="h-10 w-10">
                 <AvatarImage
                   src={msg.user?.image || undefined}
-                  alt={msg.user?.name || "用户"}
+                  alt={msg.user?.name || t("detail.unknownUser")}
                 />
                 <AvatarFallback
                   className={
@@ -180,21 +179,21 @@ export default async function TicketDetailPage({
                       : "bg-violet-600 text-white"
                   }
                 >
-                  {msg.user?.name ? getInitials(msg.user.name) : "U"}
+                  {msg.user?.name ? getInitials(msg.user.name) : t("detail.userInitial")}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">
-                    {msg.user?.name || "用户"}
+                    {msg.user?.name || t("detail.unknownUser")}
                   </span>
                   {msg.isAdminResponse && (
                     <Badge variant="secondary" className="text-xs">
-                      客服
+                      {t("detail.supportBadge")}
                     </Badge>
                   )}
                   <span className="text-xs text-muted-foreground">
-                    {new Date(msg.createdAt).toLocaleString("zh-CN")}
+                    {new Date(msg.createdAt).toLocaleString(locale)}
                   </span>
                 </div>
                 <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
@@ -208,7 +207,7 @@ export default async function TicketDetailPage({
       {isClosed ? (
         <Card>
           <CardContent className="py-6 text-center text-muted-foreground">
-            此工单已关闭，无法添加新消息
+            {t("detail.closed")}
           </CardContent>
         </Card>
       ) : (

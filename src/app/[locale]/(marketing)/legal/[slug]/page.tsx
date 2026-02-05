@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/routing";
 import { getAllLegalSlugs, getLegalDoc } from "@/lib/source";
@@ -22,10 +23,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, slug } = await params;
   const doc = getLegalDoc(slug, locale);
+  const t = await getTranslations({ locale, namespace: "Legal" });
 
   if (!doc) {
     return {
-      title: "Document Not Found",
+      title: t("notFound"),
     };
   }
 
@@ -48,6 +50,7 @@ export default async function LegalPage({
 }) {
   const { locale, slug } = await params;
   const doc = getLegalDoc(slug, locale);
+  const t = await getTranslations("Legal");
 
   // 文档不存在时返回 404
   if (!doc) {
@@ -74,7 +77,7 @@ export default async function LegalPage({
         href="/"
         className="mb-8 inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
       >
-        ← {locale === "zh" ? "返回首页" : "Back to Home"}
+        ← {t("back")}
       </Link>
 
       {/* 文档头部 */}
@@ -86,7 +89,7 @@ export default async function LegalPage({
 
         {/* 最后更新日期 */}
         <p className="text-sm text-muted-foreground">
-          {locale === "zh" ? "最后更新：" : "Last Updated: "}
+          {t("lastUpdated")}
           <time dateTime={formattedDate}>{formattedDate}</time>
         </p>
       </header>
@@ -100,14 +103,14 @@ export default async function LegalPage({
       <footer className="mt-12 border-t pt-8">
         <div className="flex flex-wrap gap-4 text-sm">
           <span className="text-muted-foreground">
-            {locale === "zh" ? "其他法律文档：" : "Other Legal Documents:"}
+            {t("otherDocs")}
           </span>
           {slug !== "terms" && (
             <Link
               href="/legal/terms"
               className="text-violet-600 hover:underline"
             >
-              {locale === "zh" ? "服务条款" : "Terms of Service"}
+              {t("links.terms")}
             </Link>
           )}
           {slug !== "privacy" && (
@@ -115,7 +118,7 @@ export default async function LegalPage({
               href="/legal/privacy"
               className="text-violet-600 hover:underline"
             >
-              {locale === "zh" ? "隐私政策" : "Privacy Policy"}
+              {t("links.privacy")}
             </Link>
           )}
           {slug !== "cookie-policy" && (
@@ -123,7 +126,7 @@ export default async function LegalPage({
               href="/legal/cookie-policy"
               className="text-violet-600 hover:underline"
             >
-              {locale === "zh" ? "Cookie 政策" : "Cookie Policy"}
+              {t("links.cookie")}
             </Link>
           )}
         </div>

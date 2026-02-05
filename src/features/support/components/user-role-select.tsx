@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import {
   Select,
@@ -14,6 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { updateUserRoleAction } from "@/features/support/actions";
 import { toast } from "sonner";
+import { useRouter } from "@/i18n/routing";
 
 interface UserRoleSelectProps {
   /** 用户 ID */
@@ -29,6 +30,8 @@ interface UserRoleSelectProps {
  */
 export function UserRoleSelect({ userId, currentRole }: UserRoleSelectProps) {
   const router = useRouter();
+  const t = useTranslations("Admin.roles");
+  const tToast = useTranslations("Admin.toasts");
   const [isLoading, setIsLoading] = useState(false);
   const [role, setRole] = useState(currentRole);
 
@@ -47,14 +50,15 @@ export function UserRoleSelect({ userId, currentRole }: UserRoleSelectProps) {
       });
 
       if (result?.data) {
-        toast.success(result.data.message);
+        toast.success(tToast("roleUpdated", { role: t(newRole) }));
         setRole(newRole as "user" | "admin");
         router.refresh();
       } else if (result?.serverError) {
-        toast.error(result.serverError);
+        toast.error(tToast("roleUpdateFailed"));
+        console.error(result.serverError);
       }
     } catch (error) {
-      toast.error("角色更新失败");
+      toast.error(tToast("roleUpdateFailed"));
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -66,7 +70,7 @@ export function UserRoleSelect({ userId, currentRole }: UserRoleSelectProps) {
     if (r === "admin") {
       return (
         <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
-          管理员
+          {t("admin")}
         </Badge>
       );
     }
@@ -75,7 +79,7 @@ export function UserRoleSelect({ userId, currentRole }: UserRoleSelectProps) {
         variant="secondary"
         className="bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
       >
-        普通用户
+        {t("user")}
       </Badge>
     );
   };
@@ -84,7 +88,9 @@ export function UserRoleSelect({ userId, currentRole }: UserRoleSelectProps) {
     return (
       <div className="flex items-center gap-2">
         <Loader2 className="h-4 w-4 animate-spin" />
-        <span className="text-sm text-muted-foreground">更新中...</span>
+        <span className="text-sm text-muted-foreground">
+          {tToast("updating")}
+        </span>
       </div>
     );
   }
@@ -100,12 +106,12 @@ export function UserRoleSelect({ userId, currentRole }: UserRoleSelectProps) {
             variant="secondary"
             className="bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
           >
-            普通用户
+            {t("user")}
           </Badge>
         </SelectItem>
         <SelectItem value="admin">
           <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
-            管理员
+            {t("admin")}
           </Badge>
         </SelectItem>
       </SelectContent>

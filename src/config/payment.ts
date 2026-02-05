@@ -138,8 +138,10 @@ export const paymentConfig: PaymentConfig = {
  * 可以通过传入翻译函数实现国际化
  */
 export function getPricingPlans(
-  _t?: (key: string) => string
+  t?: (key: string) => string
 ): Plan[] {
+  const translate = (key: string, fallback: string) =>
+    t ? t(key) : fallback;
   const plans: Plan[] = [];
   const config = paymentConfig;
 
@@ -147,15 +149,18 @@ export function getPricingPlans(
   if (config.plans.free) {
     plans.push({
       ...config.plans.free,
-      name: "Starter",
-      description: "Perfect for side projects",
+      name: translate("plans.free.name", "Starter"),
+      description: translate(
+        "plans.free.description",
+        "Perfect for side projects"
+      ),
       features: [
-        "Up to 3 projects",
-        "Basic analytics",
-        "Community support",
-        "1GB storage",
+        translate("plans.free.features.projects", "Up to 3 projects"),
+        translate("plans.free.features.analytics", "Basic analytics"),
+        translate("plans.free.features.support", "Community support"),
+        translate("plans.free.features.storage", "1GB storage"),
       ],
-      cta: "Get Started",
+      cta: translate("plans.free.cta", "Get Started"),
     });
   }
 
@@ -163,17 +168,20 @@ export function getPricingPlans(
   if (config.plans.pro) {
     plans.push({
       ...config.plans.pro,
-      name: "Pro",
-      description: "For growing businesses",
+      name: translate("plans.pro.name", "Pro"),
+      description: translate(
+        "plans.pro.description",
+        "For growing businesses"
+      ),
       features: [
-        "Unlimited projects",
-        "Advanced analytics",
-        "Priority support",
-        "10GB storage",
-        "Custom domain",
-        "API access",
+        translate("plans.pro.features.projects", "Unlimited projects"),
+        translate("plans.pro.features.analytics", "Advanced analytics"),
+        translate("plans.pro.features.support", "Priority support"),
+        translate("plans.pro.features.storage", "10GB storage"),
+        translate("plans.pro.features.domain", "Custom domain"),
+        translate("plans.pro.features.api", "API access"),
       ],
-      cta: "Start Free Trial",
+      cta: translate("plans.pro.cta", "Start Free Trial"),
     });
   }
 
@@ -181,16 +189,19 @@ export function getPricingPlans(
   if (config.plans.lifetime) {
     plans.push({
       ...config.plans.lifetime,
-      name: "Lifetime",
-      description: "Pay once, use forever",
+      name: translate("plans.lifetime.name", "Lifetime"),
+      description: translate(
+        "plans.lifetime.description",
+        "Pay once, use forever"
+      ),
       features: [
-        "Everything in Pro",
-        "Lifetime updates",
-        "Source code access",
-        "Private Discord",
-        "1-on-1 onboarding",
+        translate("plans.lifetime.features.everything", "Everything in Pro"),
+        translate("plans.lifetime.features.updates", "Lifetime updates"),
+        translate("plans.lifetime.features.source", "Source code access"),
+        translate("plans.lifetime.features.discord", "Private Discord"),
+        translate("plans.lifetime.features.onboarding", "1-on-1 onboarding"),
       ],
-      cta: "Buy Now",
+      cta: translate("plans.lifetime.cta", "Buy Now"),
     });
   }
 
@@ -198,17 +209,32 @@ export function getPricingPlans(
   if (config.plans.enterprise) {
     plans.push({
       ...config.plans.enterprise,
-      name: "Enterprise",
-      description: "For large organizations",
+      name: translate("plans.enterprise.name", "Enterprise"),
+      description: translate(
+        "plans.enterprise.description",
+        "For large organizations"
+      ),
       features: [
-        "Everything in Lifetime",
-        "Custom integrations",
-        "SLA guarantee",
-        "Dedicated support",
-        "On-premise option",
-        "Security audit",
+        translate(
+          "plans.enterprise.features.everything",
+          "Everything in Lifetime"
+        ),
+        translate(
+          "plans.enterprise.features.integrations",
+          "Custom integrations"
+        ),
+        translate("plans.enterprise.features.sla", "SLA guarantee"),
+        translate(
+          "plans.enterprise.features.support",
+          "Dedicated support"
+        ),
+        translate(
+          "plans.enterprise.features.onPremise",
+          "On-premise option"
+        ),
+        translate("plans.enterprise.features.audit", "Security audit"),
       ],
-      cta: "Contact Sales",
+      cta: translate("plans.enterprise.cta", "Contact Sales"),
       dark: true,
     });
   }
@@ -219,13 +245,23 @@ export function getPricingPlans(
 /**
  * 获取定价页面完整配置
  */
-export function getPricingConfig(): PricingConfig {
+export function getPricingConfig(
+  t?: (key: string) => string
+): PricingConfig {
+  const translate = (key: string, fallback: string) =>
+    t ? t(key) : fallback;
   return {
-    title: "Simple, transparent pricing",
-    subtitle: "Choose the plan that works best for you. All plans include a 14-day free trial.",
-    frequencies: ["Monthly", "Yearly"],
+    title: translate("title", "Simple, transparent pricing"),
+    subtitle: translate(
+      "subtitle",
+      "Choose the plan that works best for you. All plans include a 14-day free trial."
+    ),
+    frequencies: [
+      translate("billing.monthly", "Monthly"),
+      translate("billing.yearly", "Yearly"),
+    ],
     yearlyDiscount: paymentConfig.yearlyDiscount,
-    plans: getPricingPlans(),
+    plans: getPricingPlans(t),
   };
 }
 

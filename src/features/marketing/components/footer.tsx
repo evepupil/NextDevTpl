@@ -135,7 +135,7 @@ export async function Footer() {
               className="text-muted-foreground transition-colors hover:text-foreground"
             >
               <Twitter className="h-5 w-5" />
-              <span className="sr-only">Twitter</span>
+              <span className="sr-only">{t("social.twitter")}</span>
             </Link>
             <Link
               href={siteConfig.links.github}
@@ -144,7 +144,7 @@ export async function Footer() {
               className="text-muted-foreground transition-colors hover:text-foreground"
             >
               <Github className="h-5 w-5" />
-              <span className="sr-only">GitHub</span>
+              <span className="sr-only">{t("social.github")}</span>
             </Link>
             <Link
               href="https://linkedin.com"
@@ -153,7 +153,7 @@ export async function Footer() {
               className="text-muted-foreground transition-colors hover:text-foreground"
             >
               <Linkedin className="h-5 w-5" />
-              <span className="sr-only">LinkedIn</span>
+              <span className="sr-only">{t("social.linkedin")}</span>
             </Link>
           </div>
         </div>

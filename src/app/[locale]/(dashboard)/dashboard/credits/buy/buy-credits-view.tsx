@@ -7,7 +7,8 @@
  */
 
 import { Check, Coins, Loader2, Sparkles } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
 import { toast } from "sonner";
@@ -19,11 +20,13 @@ import { Separator } from "@/components/ui/separator";
 import { createCreditsPurchaseCheckout } from "@/features/credits/actions";
 import { CREDIT_PACKAGES } from "@/features/credits/config";
 import { cn } from "@/lib/utils";
+import { useRouter } from "@/i18n/routing";
 
 /**
  * 购买积分套餐视图
  */
 export function BuyCreditPackagesView() {
+  const t = useTranslations("Credits.buy");
   const router = useRouter();
   const searchParams = useSearchParams();
   const canceled = searchParams.get("canceled");
@@ -36,14 +39,14 @@ export function BuyCreditPackagesView() {
       }
     },
     onError: ({ error }) => {
-      toast.error(error.serverError ?? "创建支付会话失败");
+      toast.error(error.serverError ?? t("toast.checkoutFailed"));
     },
   });
 
   // 显示取消提示
   useEffect(() => {
     if (canceled) {
-      toast.info("支付已取消");
+      toast.info(t("toast.canceled"));
       // 清除 URL 参数
       router.replace("/dashboard/credits/buy");
     }
@@ -60,9 +63,9 @@ export function BuyCreditPackagesView() {
     <div className="max-w-4xl mx-auto space-y-8">
       {/* 页面标题 */}
       <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold">Purchase Credits</h1>
+        <h1 className="text-3xl font-bold">{t("title")}</h1>
         <p className="text-muted-foreground">
-          Choose a credit package to unlock AI features and capabilities
+          {t("subtitle")}
         </p>
       </div>
 
@@ -70,6 +73,8 @@ export function BuyCreditPackagesView() {
       <div className="grid gap-6 md:grid-cols-3">
         {CREDIT_PACKAGES.map((pkg) => {
           const isPopular = "popular" in pkg && pkg.popular;
+          const packageName = t(`packages.${pkg.id}.name`);
+          const packageDescription = t(`packages.${pkg.id}.description`);
 
           return (
             <Card
@@ -85,13 +90,13 @@ export function BuyCreditPackagesView() {
                   className="absolute -top-3 left-1/2 -translate-x-1/2 gap-1"
                 >
                   <Sparkles className="h-3 w-3" />
-                  Most Popular
+                  {t("popular")}
                 </Badge>
               )}
 
               <CardHeader className="text-center pb-4">
-                <CardTitle className="text-xl">{pkg.name}</CardTitle>
-                <CardDescription>{pkg.description}</CardDescription>
+                <CardTitle className="text-xl">{packageName}</CardTitle>
+                <CardDescription>{packageDescription}</CardDescription>
               </CardHeader>
 
               <CardContent className="flex-1 space-y-4">
@@ -99,7 +104,7 @@ export function BuyCreditPackagesView() {
                 <div className="flex items-center justify-center gap-2">
                   <Coins className="h-6 w-6 text-amber-500" />
                   <span className="text-4xl font-bold">{pkg.credits}</span>
-                  <span className="text-muted-foreground">credits</span>
+                  <span className="text-muted-foreground">{t("credits")}</span>
                 </div>
 
                 <Separator />
@@ -107,22 +112,24 @@ export function BuyCreditPackagesView() {
                 {/* 价格 */}
                 <div className="text-center">
                   <span className="text-3xl font-bold">${pkg.price}</span>
-                  <span className="text-muted-foreground"> USD</span>
+                  <span className="text-muted-foreground">
+                    {" "}{t("currency")}
+                  </span>
                 </div>
 
                 {/* 特性列表 */}
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-emerald-500" />
-                    <span>Instant delivery</span>
+                    <span>{t("features.instant")}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-emerald-500" />
-                    <span>Valid for 90 days</span>
+                    <span>{t("features.validity")}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-emerald-500" />
-                    <span>Use for all AI features</span>
+                    <span>{t("features.aiUsage")}</span>
                   </li>
                 </ul>
               </CardContent>
@@ -137,10 +144,10 @@ export function BuyCreditPackagesView() {
                   {isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Processing...
+                      {t("processing")}
                     </>
                   ) : (
-                    `Buy ${pkg.name}`
+                    t("buyButton", { name: packageName })
                   )}
                 </Button>
               </CardFooter>
@@ -152,7 +159,7 @@ export function BuyCreditPackagesView() {
       {/* 返回链接 */}
       <div className="text-center">
         <Button variant="ghost" onClick={() => router.push("/dashboard/settings?tab=usage")}>
-          ← Back to Usage
+          ← {t("backToUsage")}
         </Button>
       </div>
     </div>

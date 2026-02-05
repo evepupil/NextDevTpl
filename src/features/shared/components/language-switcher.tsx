@@ -1,7 +1,7 @@
 "use client";
 
 import { Globe } from "lucide-react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import { useTransition } from "react";
 
@@ -15,14 +15,6 @@ import {
 import { usePathname, useRouter } from "@/i18n/routing";
 
 /**
- * 支持的语言配置
- */
-const locales = [
-  { code: "en", label: "English", flag: "🇺🇸" },
-  { code: "zh", label: "中文", flag: "🇨🇳" },
-] as const;
-
-/**
  * 语言切换器组件
  *
  * 功能:
@@ -32,10 +24,19 @@ const locales = [
  */
 export function LanguageSwitcher() {
   const locale = useLocale();
+  const t = useTranslations("Common.language");
   const router = useRouter();
   const pathname = usePathname();
   const params = useParams();
   const [isPending, startTransition] = useTransition();
+
+  /**
+   * 支持的语言配置
+   */
+  const locales = [
+    { code: "en", label: t("english"), flag: "🇺🇸" },
+    { code: "zh", label: t("chinese"), flag: "🇨🇳" },
+  ] as const;
 
   /**
    * 切换语言
@@ -62,7 +63,7 @@ export function LanguageSwitcher() {
           className="relative"
         >
           <Globe className="h-5 w-5" />
-          <span className="sr-only">切换语言</span>
+          <span className="sr-only">{t("switch")}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

@@ -1,5 +1,6 @@
 import { Separator } from "@/components/ui/separator";
 import { getBlogPosts } from "@/lib/source";
+import { getTranslations } from "next-intl/server";
 
 import { BlogPostCard } from "./blog-post-card";
 
@@ -13,6 +14,7 @@ export default async function BlogPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
+  const t = await getTranslations("Blog.list");
   const { locale } = await params;
   const posts = getBlogPosts(locale);
 
@@ -28,12 +30,10 @@ export default async function BlogPage({
       {/* Header */}
       <div className="mb-16 text-center">
         <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
-          {locale === "zh" ? "博客文章" : "Blog Posts"}
+          {t("title")}
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-          {locale === "zh"
-            ? "发现 NextDevTpl 团队的最新见解、教程和更新。了解如何构建更好的 SaaS 应用程序。"
-            : "Discover the latest insights, tutorials, and updates from the NextDevTpl team. Learn how to build better SaaS applications."}
+          {t("subtitle")}
         </p>
       </div>
 
@@ -69,7 +69,7 @@ export default async function BlogPage({
         </div>
       ) : (
         <div className="text-center text-muted-foreground">
-          {locale === "zh" ? "暂无博客文章" : "No blog posts yet"}
+          {t("empty")}
         </div>
       )}
     </div>

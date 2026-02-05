@@ -1,13 +1,14 @@
 "use client";
 
 import { KeyRound, Loader2, Mail } from "lucide-react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { forgetPassword } from "@/lib/auth/client";
+import { Link } from "@/i18n/routing";
 
 import { AuthErrorAlert } from "./auth-error-alert";
 
@@ -20,6 +21,9 @@ import { AuthErrorAlert } from "./auth-error-alert";
  * - 显示成功/错误状态
  */
 export function ForgotPasswordForm() {
+  const t = useTranslations("Auth.forgot");
+  const tCommon = useTranslations("Auth.common");
+
   // 表单状态
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -33,7 +37,7 @@ export function ForgotPasswordForm() {
     e.preventDefault();
 
     if (!email) {
-      setError("Please enter your email address");
+      setError(t("errors.emailRequired"));
       return;
     }
 
@@ -45,7 +49,7 @@ export function ForgotPasswordForm() {
 
       setIsSuccess(true);
     } catch {
-      setError("Failed to send reset link. Please try again.");
+      setError(t("errors.sendFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -61,10 +65,10 @@ export function ForgotPasswordForm() {
             <Mail className="h-6 w-6" />
           </div>
           <h1 className="text-2xl font-semibold tracking-tight">
-            Check your email
+            {t("success.title")}
           </h1>
           <p className="text-sm text-muted-foreground">
-            We&apos;ve sent a password reset link to{" "}
+            {t("success.description")}{" "}
             <span className="font-medium text-foreground">{email}</span>
           </p>
         </div>
@@ -75,7 +79,7 @@ export function ForgotPasswordForm() {
             href="/sign-in"
             className="text-sm text-muted-foreground hover:text-foreground"
           >
-            <span className="underline">Back to Login</span>
+            <span className="underline">{tCommon("backToLogin")}</span>
           </Link>
         </div>
       </div>
@@ -91,10 +95,10 @@ export function ForgotPasswordForm() {
           <KeyRound className="h-6 w-6" />
         </div>
         <h1 className="text-2xl font-semibold tracking-tight">
-          Forgot your password?
+          {t("title")}
         </h1>
         <p className="text-sm text-muted-foreground">
-          Enter your email below and we&apos;ll send you a link to reset it.
+          {t("subtitle")}
         </p>
       </div>
 
@@ -105,11 +109,11 @@ export function ForgotPasswordForm() {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* 邮箱输入 */}
         <div className="space-y-2">
-          <Label htmlFor="email">Email address</Label>
+          <Label htmlFor="email">{t("form.emailLabel")}</Label>
           <Input
             id="email"
             type="email"
-            placeholder="jane@example.com"
+            placeholder={t("form.emailPlaceholder")}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={isLoading}
@@ -127,22 +131,22 @@ export function ForgotPasswordForm() {
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Sending...
+              {t("form.sending")}
             </>
           ) : (
-            "Send reset password link"
+            t("form.submit")
           )}
         </Button>
       </form>
 
       {/* 返回登录链接 */}
       <p className="text-center text-sm text-muted-foreground">
-        Remember your password?{" "}
+        {t("footer.remember")}{" "}
         <Link
           href="/sign-in"
           className="font-medium text-foreground hover:underline"
         >
-          Back to Login
+          {tCommon("backToLogin")}
         </Link>
       </p>
     </div>

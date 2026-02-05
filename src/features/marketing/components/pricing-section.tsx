@@ -1,8 +1,8 @@
 "use client";
 
 import { Check, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { useSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
 import { createCheckoutSession, createCustomerPortal } from "@/features/payment/actions";
 import { PlanInterval, type Plan } from "@/features/payment/types";
+import { useRouter } from "@/i18n/routing";
 
 import { AnimatedPrice } from "./animated-price";
 
@@ -42,9 +43,10 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const router = useRouter();
   const { data: session } = useSession();
+  const t = useTranslations("Pricing");
 
   // 从配置获取计划列表
-  const plans = getPricingPlans();
+  const plans = getPricingPlans(t);
   const { yearlyDiscount } = paymentConfig;
 
   /**
@@ -73,9 +75,9 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
    * 获取价格后缀文本
    */
   const getPriceSuffix = (plan: Plan): string => {
-    if (plan.isLifetime) return " one-time";
-    if (plan.isFree) return "/month";
-    return isYearly ? "/year" : "/month";
+    if (plan.isLifetime) return t("suffix.oneTime");
+    if (plan.isFree) return t("suffix.month");
+    return isYearly ? t("suffix.year") : t("suffix.month");
   };
 
   /**
@@ -84,7 +86,7 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
   const getTrialInfo = (plan: Plan): string | null => {
     const price = getCurrentPrice(plan);
     if (price?.trialPeriodDays) {
-      return `${price.trialPeriodDays}-day free trial`;
+      return t("trial", { days: price.trialPeriodDays });
     }
     return null;
   };
@@ -165,11 +167,10 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
         {/* Header */}
         <div className="mb-12 text-center">
           <h2 className="mb-4 text-balance text-3xl font-bold tracking-tight md:text-4xl">
-            Simple, transparent pricing
+            {t("title")}
           </h2>
           <p className="mx-auto max-w-2xl text-muted-foreground">
-            Choose the plan that works best for you. All plans include a 14-day
-            free trial.
+            {t("subtitle")}
           </p>
         </div>
 
@@ -183,7 +184,7 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
               isYearly && "text-muted-foreground"
             )}
           >
-            Monthly
+            {t("billing.monthly")}
           </Label>
           <Switch
             id="billing-toggle"
@@ -198,9 +199,9 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
               !isYearly && "text-muted-foreground"
             )}
           >
-            Yearly
+            {t("billing.yearly")}
             <Badge variant="secondary" className="ml-2 text-xs">
-              Save {yearlyDiscount}%
+              {t("billing.save", { discount: yearlyDiscount })}
             </Badge>
           </Label>
         </div>
@@ -226,12 +227,12 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
               >
                 {plan.popular && !isCurrent && (
                   <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-violet-600">
-                    Most Popular
+                    {t("badges.popular")}
                   </Badge>
                 )}
                 {isCurrent && (
                   <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-600">
-                    Current Plan
+                    {t("badges.current")}
                   </Badge>
                 )}
                 <CardHeader>
@@ -295,7 +296,7 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
                           plan.dark && "text-background"
                         )}
                       >
-                        Custom
+                        {t("custom")}
                       </span>
                     )}
                   </div>
@@ -333,7 +334,7 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
                       {isPending ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       ) : null}
-                      Manage Subscription
+                      {t("manage")}
                     </Button>
                   ) : (
                     <Button

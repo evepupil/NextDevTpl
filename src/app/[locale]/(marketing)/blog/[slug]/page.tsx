@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/routing";
 import { getAllBlogSlugs, getBlogPost } from "@/lib/source";
@@ -21,10 +22,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, slug } = await params;
   const post = getBlogPost(slug, locale);
+  const t = await getTranslations({ locale, namespace: "Blog" });
 
   if (!post) {
     return {
-      title: "Post Not Found",
+      title: t("post.notFound"),
     };
   }
 
@@ -44,6 +46,7 @@ export default async function BlogPostPage({
 }) {
   const { locale, slug } = await params;
   const post = getBlogPost(slug, locale);
+  const t = await getTranslations("Blog");
 
   if (!post) {
     notFound();
@@ -69,7 +72,7 @@ export default async function BlogPostPage({
         href="/blog"
         className="mb-8 inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
       >
-        ← {locale === "zh" ? "返回博客" : "Back to Blog"}
+        ← {t("post.back")}
       </Link>
 
       {/* 文章头部 */}

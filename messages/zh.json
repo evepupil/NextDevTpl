@@ -23,7 +23,29 @@
     "blog": "博客",
     "docs": "文档",
     "features": "功能",
-    "changelog": "更新日志"
+    "changelog": "更新日志",
+    "language": {
+      "switch": "切换语言",
+      "english": "English",
+      "chinese": "中文"
+    },
+    "theme": {
+      "switch": "切换主题",
+      "light": "浅色",
+      "dark": "深色",
+      "system": "跟随系统"
+    },
+    "dialog": {
+      "close": "关闭"
+    },
+    "pagination": {
+      "label": "分页",
+      "previous": "上一页",
+      "next": "下一页",
+      "previousAria": "前往上一页",
+      "nextAria": "前往下一页",
+      "more": "更多页面"
+    }
   },
   "Cookie": {
     "title": "Cookie 设置",
@@ -109,6 +131,11 @@
       "terms": "服务条款",
       "privacy": "隐私政策",
       "cookie": "Cookie 政策"
+    },
+    "social": {
+      "twitter": "Twitter",
+      "github": "GitHub",
+      "linkedin": "LinkedIn"
     },
     "copyright": "© {year} {name}。保留所有权利。"
   },
@@ -274,6 +301,7 @@
         }
       },
       "repo": {
+        "title": "tweakcn",
         "description": "一个用于 shadcn/ui 组件的 AI 主题编辑器。",
         "star": "Star",
         "language": "TypeScript",
@@ -388,7 +416,8 @@
         "description": "每个计费周期自动续订。",
         "label": "启用自动续订"
       },
-      "save": "保存计费设置"
+      "save": "保存计费设置",
+      "saved": "计费设置已保存。"
     },
     "notifications": {
       "title": "通知偏好",
@@ -411,7 +440,27 @@
           "description": "异常活动与登录警告。"
         }
       },
-      "save": "保存通知设置"
+      "save": "保存通知设置",
+      "saved": "通知设置已保存。"
+    },
+    "meta": {
+      "title": "设置 | NextDevTpl",
+      "description": "管理您的账户设置和偏好。"
+    },
+    "profileForm": {
+      "title": "通用设置",
+      "description": "更新展示在账户中的个人资料信息。",
+      "fields": {
+        "name": {
+          "label": "显示名称",
+          "placeholder": "输入您的名称",
+          "hint": "这是公开显示名称，至少 2 个字符。"
+        }
+      },
+      "actions": {
+        "saving": "保存中...",
+        "save": "保存更改"
+      }
     }
   },
   "Credits": {
@@ -464,6 +513,668 @@
         "expiration": "过期",
         "refund": "退款"
       }
+    },
+    "buy": {
+      "title": "购买积分",
+      "subtitle": "选择合适的积分套餐以解锁 AI 功能。",
+      "popular": "最受欢迎",
+      "credits": "积分",
+      "currency": "USD",
+      "features": {
+        "instant": "即时到账",
+        "validity": "有效期 90 天",
+        "aiUsage": "适用于所有 AI 功能"
+      },
+      "processing": "处理中...",
+      "buyButton": "购买 {name}",
+      "backToUsage": "返回用量",
+      "packages": {
+        "lite": {
+          "name": "轻量版",
+          "description": "适合轻度使用"
+        },
+        "standard": {
+          "name": "标准版",
+          "description": "最受欢迎的选择"
+        },
+        "pro": {
+          "name": "专业版",
+          "description": "适合高频使用"
+        }
+      },
+      "toast": {
+        "checkoutFailed": "创建支付会话失败。",
+        "canceled": "支付已取消。"
+      },
+      "meta": {
+        "title": "购买积分 | NextDevTpl",
+        "description": "购买积分套餐以使用 AI 功能。"
+      }
+    }
+  },
+  "Marketing": {
+    "cta": {
+      "title": "还有疑问？",
+      "description": "我们的团队随时为您提供帮助。联系我们，我们会尽快回复您。",
+      "supportTeam": "我们的支持团队",
+      "contactButton": "联系支持"
+    },
+    "faq": {
+      "title": "常见问题",
+      "subtitle": "关于 NextDevTpl 的一切。",
+      "items": {
+        "what": {
+          "question": "什么是 NextDevTpl？",
+          "answer": "NextDevTpl 是用于构建 SaaS 应用的生产级启动套件，基于 Next.js 15。它开箱即用地包含认证、支付、数据库配置和精美的 UI 组件。"
+        },
+        "tech": {
+          "question": "使用了哪些技术？",
+          "answer": "NextDevTpl 基于 Next.js 15、React 19、TypeScript、Tailwind CSS 4、Shadcn/UI、Drizzle ORM 与 Better Auth 构建，并使用 Biome 等现代工具进行格式化与检查。"
+        },
+        "typescript": {
+          "question": "需要会 TypeScript 吗？",
+          "answer": "了解 TypeScript 会有帮助，但代码库有清晰的注释和一致的模式。你可以在使用过程中学习，严格类型检查还能提前发现问题。"
+        },
+        "commercial": {
+          "question": "可以用于商业项目吗？",
+          "answer": "可以！所有付费计划都包含商业授权，允许你构建并发布任意数量的项目。"
+        },
+        "support": {
+          "question": "包含哪些支持？",
+          "answer": "所有计划都可访问文档与社区 Discord。Pro 与终身计划提供优先支持和团队直连。"
+        },
+        "updates": {
+          "question": "更新频率如何？",
+          "answer": "我们会定期发布更新以跟进最新的 Next.js 功能与安全补丁。终身计划可获得所有未来更新。"
+        },
+        "customize": {
+          "question": "可以自定义 UI 吗？",
+          "answer": "当然可以！UI 基于 Tailwind CSS 与 Shadcn/UI 构建，完全可自定义。你可以调整颜色、字体、间距和组件来匹配品牌。"
+        },
+        "refund": {
+          "question": "是否支持退款？",
+          "answer": "支持。我们提供 14 天退款保证，如对 NextDevTpl 不满意，可在购买后 14 天内联系我们退款。"
+        }
+      }
+    },
+    "featureGrid": {
+      "title": "基于",
+      "titleHighlight": "Shadcn & Tailwind",
+      "subtitle": "构建现代 Web 应用所需的一切，已预配置并可直接使用。",
+      "items": {
+        "themes": {
+          "title": "可定制主题",
+          "description": "使用 Tailwind CSS 构建的响应式主题，轻松调整颜色、字体与样式。"
+        },
+        "auth": {
+          "title": "认证就绪",
+          "description": "内置 Better Auth 认证，支持社交登录、魔法链接等。"
+        },
+        "fast": {
+          "title": "极速性能",
+          "description": "基于 Next.js 15 与 Turbopack，面向边缘优化的高性能架构。"
+        },
+        "typeSafe": {
+          "title": "类型安全",
+          "description": "端到端 TypeScript 严格模式，提前捕获错误。"
+        },
+        "deploy": {
+          "title": "多平台部署",
+          "description": "可部署至 Vercel、Netlify、AWS 或自建环境，并兼容边缘运行时。"
+        },
+        "database": {
+          "title": "数据库无关",
+          "description": "使用 Drizzle ORM 兼容 PostgreSQL、MySQL 或 SQLite，迁移与查询更安全。"
+        },
+        "dx": {
+          "title": "开发体验",
+          "description": "ESLint、Prettier、Biome 已配置，Husky Git hooks 保证代码质量。"
+        },
+        "ai": {
+          "title": "AI 集成",
+          "description": "内置 AI 组件与 hooks，支持 OpenAI、Anthropic 等。"
+        },
+        "production": {
+          "title": "生产就绪",
+          "description": "SEO 优化、分析就绪、无障碍支持，放心上线。"
+        }
+      }
+    },
+    "howItWorks": {
+      "title": "如何开始",
+      "subtitle": "三步即可让项目启动运行。",
+      "stepLabel": "步骤 {step}",
+      "steps": {
+        "clone": {
+          "title": "克隆仓库",
+          "description": "克隆仓库即可快速开始，依赖与配置已预设。"
+        },
+        "configure": {
+          "title": "配置项目",
+          "description": "设置环境变量、数据库连接以及认证提供方。"
+        },
+        "deploy": {
+          "title": "部署到生产环境",
+          "description": "推送到代码仓库即可部署至 Vercel、Netlify 或其他平台。"
+        }
+      },
+      "completion": {
+        "title": "一切就绪！",
+        "description": "现在就可以使用内置功能开始构建应用。"
+      }
+    },
+    "testimonials": {
+      "title": "深受全球开发者信赖",
+      "subtitle": "看看开发者们如何评价他们的 NextDevTpl 体验。",
+      "items": {
+        "sarah": {
+          "content": "NextDevTpl 为我节省了数周的配置时间。认证与支付集成开箱即用且稳定。",
+          "role": "TechStart 创始人"
+        },
+        "michael": {
+          "content": "代码质量非常出色，架构思考清晰。这是我为 SaaS 做过的最佳投资。",
+          "role": "高级开发者"
+        },
+        "emily": {
+          "content": "试过很多启动模板，但这个最突出。文档全面，支持也非常好。",
+          "role": "独立开发者"
+        },
+        "david": {
+          "content": "两周内就发布了 MVP。预置组件和模式让开发变得轻松。",
+          "role": "StartupXYZ CTO"
+        },
+        "lisa": {
+          "content": "Tailwind + Shadcn 的组合非常完美，可定制性强，暗色模式也很漂亮。",
+          "role": "UI 设计师"
+        },
+        "james": {
+          "content": "终于有一个使用现代最佳实践的模板，严格 TypeScript、错误处理完善，开发体验很棒。",
+          "role": "全栈开发者"
+        }
+      }
+    }
+  },
+  "Pricing": {
+    "title": "简单透明的定价",
+    "subtitle": "选择最适合您的计划。所有计划包含 14 天免费试用。",
+    "billing": {
+      "monthly": "月付",
+      "yearly": "年付",
+      "save": "节省 {discount}%"
+    },
+    "badges": {
+      "popular": "最受欢迎",
+      "current": "当前计划"
+    },
+    "suffix": {
+      "oneTime": " 一次性",
+      "month": "/月",
+      "year": "/年"
+    },
+    "trial": "{days} 天免费试用",
+    "custom": "定制",
+    "manage": "管理订阅",
+    "plans": {
+      "free": {
+        "name": "入门版",
+        "description": "适合个人项目",
+        "cta": "开始使用",
+        "features": {
+          "projects": "最多 3 个项目",
+          "analytics": "基础分析",
+          "support": "社区支持",
+          "storage": "1GB 存储"
+        }
+      },
+      "pro": {
+        "name": "专业版",
+        "description": "适合成长型团队",
+        "cta": "开始免费试用",
+        "features": {
+          "projects": "不限项目数量",
+          "analytics": "高级分析",
+          "support": "优先支持",
+          "storage": "10GB 存储",
+          "domain": "自定义域名",
+          "api": "API 访问"
+        }
+      },
+      "lifetime": {
+        "name": "终身版",
+        "description": "一次购买，永久使用",
+        "cta": "立即购买",
+        "features": {
+          "everything": "包含专业版所有功能",
+          "updates": "终身更新",
+          "source": "源码访问",
+          "discord": "专属 Discord",
+          "onboarding": "一对一上手指导"
+        }
+      },
+      "enterprise": {
+        "name": "企业版",
+        "description": "适合大型组织",
+        "cta": "联系销售",
+        "features": {
+          "everything": "包含终身版所有功能",
+          "integrations": "自定义集成",
+          "sla": "SLA 保障",
+          "support": "专属支持",
+          "onPremise": "本地部署选项",
+          "audit": "安全审计"
+        }
+      }
+    }
+  },
+  "Auth": {
+    "common": {
+      "or": "或",
+      "loading": "加载中...",
+      "continue": "继续",
+      "createAccount": "创建账户",
+      "creatingAccount": "创建账户中...",
+      "backToLogin": "返回登录"
+    },
+    "oauth": {
+      "google": "Google",
+      "github": "GitHub"
+    },
+    "signIn": {
+      "title": "欢迎回来",
+      "subtitle": "请输入账号信息以登录。",
+      "errors": {
+        "google": "Google 登录失败，请重试。",
+        "github": "GitHub 登录失败，请重试。",
+        "missingFields": "请填写邮箱和密码。",
+        "invalidCredentials": "邮箱或密码错误。"
+      },
+      "form": {
+        "emailLabel": "邮箱地址",
+        "emailPlaceholder": "jane@example.com",
+        "passwordLabel": "密码",
+        "forgotPassword": "忘记密码"
+      },
+      "footer": {
+        "noAccount": "还没有账户？",
+        "signUp": "注册"
+      }
+    },
+    "signUp": {
+      "title": "创建账户",
+      "subtitle": "填写信息即可开始使用。",
+      "errors": {
+        "google": "Google 注册失败，请重试。",
+        "github": "GitHub 注册失败，请重试。",
+        "missingFields": "请填写所有字段。",
+        "passwordLength": "密码至少需要 8 个字符。",
+        "emailInUse": "注册失败，该邮箱可能已被使用。"
+      },
+      "form": {
+        "nameLabel": "姓名",
+        "namePlaceholder": "张三",
+        "emailLabel": "邮箱地址",
+        "emailPlaceholder": "jane@example.com",
+        "passwordLabel": "密码",
+        "passwordPlaceholder": "至少 8 个字符"
+      },
+      "footer": {
+        "haveAccount": "已有账户？",
+        "signIn": "登录"
+      }
+    },
+    "forgot": {
+      "title": "忘记密码？",
+      "subtitle": "输入邮箱，我们会发送重置链接。",
+      "errors": {
+        "emailRequired": "请输入邮箱地址。",
+        "sendFailed": "发送失败，请重试。"
+      },
+      "success": {
+        "title": "查看邮箱",
+        "description": "我们已发送重置链接到"
+      },
+      "form": {
+        "emailLabel": "邮箱地址",
+        "emailPlaceholder": "jane@example.com",
+        "sending": "发送中...",
+        "submit": "发送重置链接"
+      },
+      "footer": {
+        "remember": "想起密码了？"
+      }
+    }
+  },
+  "Blog": {
+    "list": {
+      "title": "博客文章",
+      "subtitle": "发现 NextDevTpl 团队的最新见解、教程和更新，了解如何构建更好的 SaaS 应用。",
+      "empty": "暂无博客文章"
+    },
+    "post": {
+      "back": "返回博客",
+      "notFound": "未找到文章"
+    }
+  },
+  "Docs": {
+    "notFound": "未找到文档"
+  },
+  "Legal": {
+    "notFound": "未找到文档",
+    "back": "返回首页",
+    "lastUpdated": "最后更新：",
+    "otherDocs": "其他法律文档：",
+    "links": {
+      "terms": "服务条款",
+      "privacy": "隐私政策",
+      "cookie": "Cookie 政策"
+    }
+  },
+  "Support": {
+    "list": {
+      "title": "支持中心",
+      "subtitle": "查看和管理您的支持工单。",
+      "newTicket": "新建工单"
+    },
+    "empty": {
+      "title": "暂无工单",
+      "description": "您还没有提交过任何支持工单。",
+      "action": "创建第一个工单"
+    },
+    "statuses": {
+      "open": "待处理",
+      "in_progress": "处理中",
+      "resolved": "已解决",
+      "closed": "已关闭"
+    },
+    "priorities": {
+      "low": "低",
+      "medium": "中",
+      "high": "高"
+    },
+    "categories": {
+      "billing": "账单问题",
+      "technical": "技术支持",
+      "bug": "Bug 报告",
+      "feature": "功能建议",
+      "other": "其他"
+    },
+    "new": {
+      "title": "新建工单",
+      "subtitle": "描述您遇到的问题，我们会尽快回复。",
+      "cardTitle": "工单信息",
+      "fields": {
+        "subject": {
+          "label": "主题 *",
+          "placeholder": "简要描述您的问题"
+        },
+        "category": {
+          "label": "类别",
+          "placeholder": "选择类别"
+        },
+        "priority": {
+          "label": "优先级",
+          "placeholder": "选择优先级"
+        },
+        "message": {
+          "label": "详细描述 *",
+          "placeholder": "请详细描述您遇到的问题，包括：\n- 问题发生的时间\n- 具体的错误信息\n- 您已尝试的解决方法",
+          "count": "{count}/5000 字符"
+        }
+      },
+      "actions": {
+        "cancel": "取消",
+        "submit": "提交工单"
+      },
+      "toast": {
+        "success": "工单创建成功。",
+        "error": "创建工单失败，请重试。"
+      }
+    },
+    "detail": {
+      "createdAt": "创建于 {date}",
+      "conversation": "对话记录",
+      "unknownUser": "用户",
+      "userInitial": "U",
+      "supportBadge": "客服",
+      "closed": "此工单已关闭，无法添加新消息。"
+    },
+    "messageForm": {
+      "titleUser": "添加回复",
+      "titleAdmin": "回复用户",
+      "placeholderUser": "输入您的消息...",
+      "placeholderAdmin": "输入您的回复...",
+      "count": "{count}/5000 字符",
+      "send": "发送",
+      "success": "消息发送成功。",
+      "errors": {
+        "empty": "请输入消息内容。",
+        "sendFailed": "发送失败，请重试。"
+      }
+    },
+    "adminReply": {
+      "title": "回复用户",
+      "placeholder": "输入您的回复...",
+      "count": "{count}/5000 字符",
+      "send": "发送回复",
+      "closed": "此工单已关闭，无法添加新回复。",
+      "success": "回复成功。",
+      "errors": {
+        "empty": "请输入回复内容。",
+        "sendFailed": "回复失败，请重试。"
+      }
+    },
+    "adminStatus": {
+      "label": "选择新状态",
+      "loading": "更新中...",
+      "toast": {
+        "updated": "状态更新成功。",
+        "failed": "状态更新失败。"
+      }
+    }
+  },
+  "Admin": {
+    "layout": {
+      "title": "管理后台"
+    },
+    "sidebar": {
+      "badge": "ADMIN",
+      "groups": {
+        "management": "管理中心"
+      },
+      "items": {
+        "dashboard": "控制面板",
+        "users": "用户管理",
+        "tickets": "工单管理"
+      },
+      "backToUser": "返回用户端",
+      "role": "管理员",
+      "theme": {
+        "light": "浅色模式",
+        "dark": "深色模式",
+        "system": "跟随系统"
+      },
+      "logout": "退出登录"
+    },
+    "dashboard": {
+      "title": "控制面板",
+      "subtitle": "欢迎来到管理后台，这里是系统概览。",
+      "cards": {
+        "totalUsers": {
+          "title": "总用户数",
+          "subtext": "本周新增 {count} 位"
+        },
+        "openTickets": {
+          "title": "待处理工单",
+          "subtext": "今日新增 {count} 个"
+        },
+        "activeSubscriptions": {
+          "title": "活跃订阅",
+          "subtext": "总订阅 {count} 个"
+        },
+        "credits": {
+          "title": "积分流通",
+          "subtext": "当前用户持有总积分"
+        }
+      },
+      "sections": {
+        "users": {
+          "title": "用户统计",
+          "total": "总用户",
+          "admins": "管理员",
+          "regular": "普通用户",
+          "banned": "已封禁",
+          "newThisWeek": "本周新增"
+        },
+        "tickets": {
+          "title": "工单统计",
+          "open": "待处理",
+          "inProgress": "处理中",
+          "total": "总工单",
+          "newToday": "今日新增"
+        },
+        "credits": {
+          "title": "积分流水",
+          "balance": "当前持有",
+          "earned": "累计发放",
+          "spent": "累计消费",
+          "subscribers": "订阅用户",
+          "subscribersValue": "{count} 活跃"
+        }
+      },
+      "quickActions": {
+        "title": "快速操作",
+        "manageUsers": "管理用户",
+        "userCount": "{count} 位",
+        "handleTickets": "处理工单",
+        "pending": "{count} 待处理"
+      },
+      "systemInfo": {
+        "title": "系统信息",
+        "version": "版本",
+        "environment": "环境",
+        "database": "数据库"
+      }
+    },
+    "users": {
+      "title": "用户管理",
+      "subtitle": "查看和管理系统中的所有用户。",
+      "stats": {
+        "total": "总用户数",
+        "admins": "管理员",
+        "subscribers": "订阅用户",
+        "banned": "已封禁"
+      },
+      "search": {
+        "placeholder": "搜索邮箱或用户名...",
+        "submit": "搜索",
+        "clear": "清除"
+      },
+      "table": {
+        "title": "用户列表",
+        "search": "搜索: \"{query}\"",
+        "emptySearch": "没有找到匹配的用户",
+        "empty": "暂无用户",
+        "user": "用户",
+        "status": "状态",
+        "credits": "积分",
+        "subscription": "订阅",
+        "role": "角色",
+        "actions": "操作"
+      },
+      "status": {
+        "banned": "已封禁",
+        "verified": "已验证",
+        "unverified": "未验证"
+      },
+      "subscription": {
+        "none": "无订阅",
+        "status": {
+          "active": "订阅中",
+          "canceled": "已取消",
+          "pastDue": "逾期",
+          "incomplete": "未完成"
+        }
+      },
+      "actions": {
+        "grant": "充值积分",
+        "ban": "封禁",
+        "unban": "解封",
+        "cancel": "取消"
+      },
+      "banDialog": {
+        "unbanTitle": "解除封禁",
+        "banTitle": "封禁用户",
+        "unbanDescription": "确定要解除用户 {name} 的封禁吗？",
+        "banDescription": "确定要封禁用户 {name} 吗？封禁后该用户将无法登录。",
+        "reasonLabel": "封禁原因 (可选)",
+        "reasonPlaceholder": "请输入封禁原因...",
+        "confirmUnban": "确认解封",
+        "confirmBan": "确认封禁"
+      },
+      "grantDialog": {
+        "title": "手动充值积分",
+        "description": "为用户 {name} 充值积分",
+        "amountLabel": "积分数量 *",
+        "amountPlaceholder": "请输入积分数量",
+        "reasonLabel": "充值原因 *",
+        "reasonPlaceholder": "请输入充值原因 (如：客服补偿、活动奖励等)",
+        "confirm": "确认充值"
+      }
+    },
+    "roles": {
+      "admin": "管理员",
+      "user": "普通用户"
+    },
+    "toasts": {
+      "loadUsersFailed": "加载用户列表失败。",
+      "banned": "用户已被封禁。",
+      "unbanned": "用户已解除封禁。",
+      "actionFailed": "操作失败，请重试。",
+      "invalidCreditAmount": "请输入有效的积分数量。",
+      "missingGrantReason": "请填写充值原因。",
+      "grantFailed": "充值失败。",
+      "creditsGranted": "成功为用户充值 {amount} 积分。",
+      "roleUpdated": "用户角色已更新为 {role}。",
+      "roleUpdateFailed": "角色更新失败。",
+      "updating": "更新中..."
+    },
+    "tickets": {
+      "title": "工单管理",
+      "subtitle": "查看和处理用户提交的支持工单。",
+      "stats": {
+        "open": "待处理",
+        "inProgress": "处理中",
+        "resolved": "已解决",
+        "total": "总工单"
+      },
+      "table": {
+        "title": "工单列表",
+        "empty": "暂无工单",
+        "subject": "工单主题",
+        "user": "用户",
+        "category": "类别",
+        "priority": "优先级",
+        "status": "状态",
+        "createdAt": "创建时间"
+      },
+      "detail": {
+        "userInfo": "用户信息",
+        "status": "工单状态"
+      }
+    }
+  },
+  "Chat": {
+    "welcome": {
+      "title": "你好！",
+      "subtitle": "今天我能帮你做点什么？"
+    },
+    "examples": {
+      "advantages": "使用 Next.js 的优势有哪些？",
+      "essay": "帮我写一篇关于硅谷的短文",
+      "weather": "查询旧金山 (37.7749° N, 122.4194° W) 的天气情况"
+    },
+    "input": {
+      "placeholder": "发送消息..."
     }
   }
 }

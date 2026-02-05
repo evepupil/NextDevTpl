@@ -1,7 +1,8 @@
 import { MessageCircle } from "lucide-react";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/routing";
 
 const supportTeam = [
   { src: "/avatars/01.png", fallback: "A" },
@@ -9,7 +10,9 @@ const supportTeam = [
   { src: "/avatars/03.png", fallback: "C" },
 ];
 
-export function CTASection() {
+export async function CTASection() {
+  const t = await getTranslations("Marketing.cta");
+
   return (
     <section className="container py-24">
       <div className="mx-auto max-w-4xl">
@@ -20,11 +23,10 @@ export function CTASection() {
 
           <div className="relative">
             <h2 className="mb-4 text-balance text-3xl font-bold tracking-tight md:text-4xl">
-              Still have questions?
+              {t("title")}
             </h2>
             <p className="mx-auto mb-8 max-w-xl text-white/80">
-              Our team is here to help. Reach out to us and we&apos;ll get back
-              to you as soon as possible.
+              {t("description")}
             </p>
 
             <div className="mb-8 flex items-center justify-center">
@@ -39,7 +41,7 @@ export function CTASection() {
                 ))}
               </div>
               <span className="ml-4 text-sm text-white/80">
-                Our support team
+                {t("supportTeam")}
               </span>
             </div>
 
@@ -50,7 +52,7 @@ export function CTASection() {
             >
               <Link href="/contact">
                 <MessageCircle className="h-4 w-4" />
-                Contact Support
+                {t("contactButton")}
               </Link>
             </Button>
           </div>

@@ -8,9 +8,8 @@ import {
   Moon,
   Sun,
 } from "lucide-react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -21,6 +20,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { adminConfig, siteConfig } from "@/config";
 import { signOut, useSession } from "@/lib/auth/client";
+import { Link, usePathname, useRouter } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
 /**
@@ -44,6 +44,15 @@ type Theme = "light" | "dark" | "system";
 export function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const t = useTranslations("Admin.sidebar");
+  const groupLabels: Record<string, string> = {
+    管理中心: t("groups.management"),
+  };
+  const itemLabels: Record<string, string> = {
+    "/admin": t("items.dashboard"),
+    "/admin/users": t("items.users"),
+    "/admin/tickets": t("items.tickets"),
+  };
 
   // 获取当前用户会话
   const { data: session } = useSession();
@@ -87,7 +96,7 @@ export function AdminSidebar() {
       <div className="flex h-14 items-center border-b border-slate-700 px-4">
         <Link href="/admin" className="flex items-center gap-2 text-lg font-bold tracking-tight">
           <span className="rounded bg-red-600 px-2 py-0.5 text-xs font-medium text-white">
-            ADMIN
+            {t("badge")}
           </span>
           {siteConfig.name}
         </Link>
@@ -98,12 +107,14 @@ export function AdminSidebar() {
         {adminConfig.sidebarNav.map((group) => (
           <div key={group.title}>
             <p className="mb-2 px-2 text-xs font-medium uppercase tracking-wider text-slate-400">
-              {group.title}
+              {groupLabels[group.title] ?? group.title}
             </p>
             <div className="space-y-1">
               {group.items.map((item) => {
-                const isActive = pathname === item.href;
+                const cleanPath = pathname.replace(/^\/[a-z]{2}\//, "/");
+                const isActive = cleanPath === item.href;
                 const Icon = item.icon;
+                const itemLabel = itemLabels[item.href] ?? item.title;
                 return (
                   <Link
                     key={item.href}
@@ -116,7 +127,7 @@ export function AdminSidebar() {
                     )}
                   >
                     {Icon && <Icon className="h-4 w-4" />}
-                    {item.title}
+                    {itemLabel}
                   </Link>
                 );
               })}
@@ -131,7 +142,7 @@ export function AdminSidebar() {
             className="flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
-            返回用户端
+            {t("backToUser")}
           </Link>
         </div>
       </nav>
@@ -155,7 +166,7 @@ export function AdminSidebar() {
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium text-white">{user.name}</p>
                     <span className="rounded bg-red-600/20 px-1.5 py-0.5 text-xs font-medium text-red-400">
-                      Admin
+                      {t("role")}
                     </span>
                   </div>
                   <p className="truncate text-xs text-slate-400">
@@ -201,7 +212,7 @@ export function AdminSidebar() {
                       ? "bg-muted text-foreground"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
-                  title="浅色模式"
+                  title={t("theme.light")}
                 >
                   <Sun className="h-4 w-4" />
                 </button>
@@ -214,7 +225,7 @@ export function AdminSidebar() {
                       ? "bg-muted text-foreground"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
-                  title="深色模式"
+                  title={t("theme.dark")}
                 >
                   <Moon className="h-4 w-4" />
                 </button>
@@ -227,7 +238,7 @@ export function AdminSidebar() {
                       ? "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
-                  title="跟随系统"
+                  title={t("theme.system")}
                 >
                   <Monitor className="h-4 w-4" />
                 </button>
@@ -244,7 +255,7 @@ export function AdminSidebar() {
                   className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-muted transition-colors"
                 >
                   <LogOut className="h-4 w-4" />
-                  退出登录
+                  {t("logout")}
                 </button>
               </div>
             </PopoverContent>

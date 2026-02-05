@@ -1,9 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +19,7 @@ import {
 import { ticketCategories, ticketPriorities } from "@/features/support/schemas";
 import { createTicketAction } from "@/features/support/actions";
 import { toast } from "sonner";
+import { Link, useRouter } from "@/i18n/routing";
 
 /**
  * 新建工单页面
@@ -28,6 +28,9 @@ import { toast } from "sonner";
  */
 export default function NewTicketPage() {
   const router = useRouter();
+  const t = useTranslations("Support.new");
+  const tCategories = useTranslations("Support.categories");
+  const tPriorities = useTranslations("Support.priorities");
   const [isLoading, setIsLoading] = useState(false);
 
   // 表单状态
@@ -52,13 +55,14 @@ export default function NewTicketPage() {
       });
 
       if (result?.data) {
-        toast.success("工单创建成功");
+        toast.success(t("toast.success"));
         router.push(`/dashboard/support/${result.data.ticketId}`);
       } else if (result?.serverError) {
-        toast.error(result.serverError);
+        toast.error(t("toast.error"));
+        console.error(result.serverError);
       }
     } catch (error) {
-      toast.error("创建工单失败，请重试");
+      toast.error(t("toast.error"));
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -75,9 +79,9 @@ export default function NewTicketPage() {
           </Button>
         </Link>
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">新建工单</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t("title")}</h2>
           <p className="text-muted-foreground">
-            描述您遇到的问题，我们会尽快回复
+            {t("subtitle")}
           </p>
         </div>
       </div>
@@ -85,16 +89,16 @@ export default function NewTicketPage() {
       {/* 工单表单 */}
       <Card>
         <CardHeader>
-          <CardTitle>工单信息</CardTitle>
+          <CardTitle>{t("cardTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* 主题 */}
             <div className="space-y-2">
-              <Label htmlFor="subject">主题 *</Label>
+              <Label htmlFor="subject">{t("fields.subject.label")}</Label>
               <Input
                 id="subject"
-                placeholder="简要描述您的问题"
+                placeholder={t("fields.subject.placeholder")}
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 required
@@ -106,15 +110,15 @@ export default function NewTicketPage() {
             {/* 类别和优先级 */}
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="category">类别</Label>
+                <Label htmlFor="category">{t("fields.category.label")}</Label>
                 <Select value={category} onValueChange={setCategory}>
                   <SelectTrigger id="category">
-                    <SelectValue placeholder="选择类别" />
+                    <SelectValue placeholder={t("fields.category.placeholder")} />
                   </SelectTrigger>
                   <SelectContent>
                     {ticketCategories.map((cat) => (
                       <SelectItem key={cat.value} value={cat.value}>
-                        {cat.label}
+                        {tCategories(cat.value)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -122,15 +126,15 @@ export default function NewTicketPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="priority">优先级</Label>
+                <Label htmlFor="priority">{t("fields.priority.label")}</Label>
                 <Select value={priority} onValueChange={setPriority}>
                   <SelectTrigger id="priority">
-                    <SelectValue placeholder="选择优先级" />
+                    <SelectValue placeholder={t("fields.priority.placeholder")} />
                   </SelectTrigger>
                   <SelectContent>
                     {ticketPriorities.map((pri) => (
                       <SelectItem key={pri.value} value={pri.value}>
-                        {pri.label}
+                        {tPriorities(pri.value)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -140,10 +144,10 @@ export default function NewTicketPage() {
 
             {/* 详细描述 */}
             <div className="space-y-2">
-              <Label htmlFor="message">详细描述 *</Label>
+              <Label htmlFor="message">{t("fields.message.label")}</Label>
               <Textarea
                 id="message"
-                placeholder="请详细描述您遇到的问题，包括：&#10;- 问题发生的时间&#10;- 具体的错误信息&#10;- 您已尝试的解决方法"
+                placeholder={t("fields.message.placeholder")}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 required
@@ -152,7 +156,7 @@ export default function NewTicketPage() {
                 rows={8}
               />
               <p className="text-xs text-muted-foreground">
-                {message.length}/5000 字符
+                {t("fields.message.count", { count: message.length })}
               </p>
             </div>
 
@@ -160,12 +164,12 @@ export default function NewTicketPage() {
             <div className="flex justify-end gap-4">
               <Link href="/dashboard/support">
                 <Button type="button" variant="outline">
-                  取消
+                  {t("actions.cancel")}
                 </Button>
               </Link>
               <Button type="submit" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                提交工单
+                {t("actions.submit")}
               </Button>
             </div>
           </form>

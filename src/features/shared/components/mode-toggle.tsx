@@ -1,6 +1,7 @@
 "use client";
 
 import { Monitor, Moon, Sun } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ interface ModeToggleProps {
 
 export function ModeToggle({ variant = "dropdown", className }: ModeToggleProps) {
   const { theme, setTheme } = useTheme();
+  const t = useTranslations("Common.theme");
 
   // 内联按钮模式
   if (variant === "inline") {
@@ -50,10 +52,10 @@ export function ModeToggle({ variant = "dropdown", className }: ModeToggleProps)
               ? "bg-muted text-foreground"
               : "text-muted-foreground hover:bg-muted hover:text-foreground"
           )}
-          title="浅色模式"
+          title={t("light")}
         >
           <Sun className="h-4 w-4" />
-          <span className="sr-only">浅色模式</span>
+          <span className="sr-only">{t("light")}</span>
         </button>
         <button
           type="button"
@@ -64,10 +66,10 @@ export function ModeToggle({ variant = "dropdown", className }: ModeToggleProps)
               ? "bg-muted text-foreground"
               : "text-muted-foreground hover:bg-muted hover:text-foreground"
           )}
-          title="深色模式"
+          title={t("dark")}
         >
           <Moon className="h-4 w-4" />
-          <span className="sr-only">深色模式</span>
+          <span className="sr-only">{t("dark")}</span>
         </button>
         <button
           type="button"
@@ -78,10 +80,10 @@ export function ModeToggle({ variant = "dropdown", className }: ModeToggleProps)
               ? "bg-violet-100 text-violet-600 dark:bg-violet-900 dark:text-violet-300"
               : "text-muted-foreground hover:bg-muted hover:text-foreground"
           )}
-          title="跟随系统"
+          title={t("system")}
         >
           <Monitor className="h-4 w-4" />
-          <span className="sr-only">跟随系统</span>
+          <span className="sr-only">{t("system")}</span>
         </button>
       </div>
     );
@@ -94,21 +96,21 @@ export function ModeToggle({ variant = "dropdown", className }: ModeToggleProps)
         <Button variant="ghost" size="icon" className={className}>
           <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
           <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          <span className="sr-only">切换主题</span>
+          <span className="sr-only">{t("switch")}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => setTheme("light")}>
           <Sun className="mr-2 h-4 w-4" />
-          浅色
+          {t("light")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme("dark")}>
           <Moon className="mr-2 h-4 w-4" />
-          深色
+          {t("dark")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme("system")}>
           <Monitor className="mr-2 h-4 w-4" />
-          跟随系统
+          {t("system")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

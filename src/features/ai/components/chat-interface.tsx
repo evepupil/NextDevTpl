@@ -9,6 +9,7 @@ import {
   ChevronDown,
   ArrowUp,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useRef, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -24,11 +25,7 @@ import { cn } from "@/lib/utils";
 /**
  * 示例问题列表
  */
-const exampleQuestions = [
-  "What are the advantages of using Next.js?",
-  "Help me write an essay about Silicon Valley",
-  "What is the weather in San Francisco with 37.7749° N, 122.4194° W?",
-];
+const exampleQuestionKeys = ["advantages", "essay", "weather"] as const;
 
 /**
  * AI 模型类型定义
@@ -54,6 +51,7 @@ const chatModels: ChatModel[] = [
  * 支持流式响应和消息历史
  */
 export function ChatInterface() {
+  const t = useTranslations("Chat");
   // 输入框状态
   const [input, setInput] = useState("");
   // 选中的模型
@@ -136,9 +134,9 @@ export function ChatInterface() {
           <div className="flex h-full flex-col">
             {/* 顶部欢迎语 */}
             <div className="px-4 pt-8 md:px-8">
-              <h1 className="text-2xl font-bold">Hello there!</h1>
+              <h1 className="text-2xl font-bold">{t("welcome.title")}</h1>
               <p className="text-muted-foreground">
-                How can I help you today?
+                {t("welcome.subtitle")}
               </p>
             </div>
 
@@ -148,14 +146,14 @@ export function ChatInterface() {
             {/* 示例问题 */}
             <div className="px-4 pb-4 md:px-8">
               <div className="mx-auto max-w-2xl space-y-2">
-                {exampleQuestions.map((question) => (
+                {exampleQuestionKeys.map((key) => (
                   <button
-                    key={question}
+                    key={key}
                     type="button"
-                    onClick={() => handleExampleClick(question)}
+                    onClick={() => handleExampleClick(t(`examples.${key}`))}
                     className="w-full rounded-lg border bg-background px-4 py-3 text-center text-sm transition-colors hover:bg-muted"
                   >
-                    {question}
+                    {t(`examples.${key}`)}
                   </button>
                 ))}
               </div>
@@ -233,7 +231,7 @@ export function ChatInterface() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Send a message..."
+                placeholder={t("input.placeholder")}
                 className="min-h-[60px] resize-none border-0 bg-transparent px-4 py-3 text-sm focus-visible:ring-0"
                 disabled={isLoading}
                 rows={2}

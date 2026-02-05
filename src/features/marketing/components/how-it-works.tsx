@@ -1,43 +1,40 @@
 import { Check, GitBranch, Rocket, Settings } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 const steps = [
   {
     icon: GitBranch,
     step: "01",
-    title: "Clone the Repository",
-    description:
-      "Get started in seconds by cloning the repository. All dependencies and configurations are pre-setup.",
     code: "git clone https://github.com/nextdevtpl/starter",
+    id: "clone",
   },
   {
     icon: Settings,
     step: "02",
-    title: "Configure Your Project",
-    description:
-      "Set up your environment variables, database connection, and authentication providers.",
     code: "cp .env.example .env.local",
+    id: "configure",
   },
   {
     icon: Rocket,
     step: "03",
-    title: "Deploy to Production",
-    description:
-      "Push to your git provider and deploy instantly to Vercel, Netlify, or your preferred platform.",
     code: "vercel deploy --prod",
+    id: "deploy",
   },
 ];
 
-export function HowItWorks() {
+export async function HowItWorks() {
+  const t = await getTranslations("Marketing.howItWorks");
+
   return (
     <section className="container py-24">
       <div className="mx-auto max-w-4xl">
         {/* Header */}
         <div className="mb-16 text-center">
           <h2 className="mb-4 text-balance text-3xl font-bold tracking-tight md:text-4xl">
-            How to get started
+            {t("title")}
           </h2>
           <p className="mx-auto max-w-2xl text-muted-foreground">
-            Get your project up and running in three simple steps.
+            {t("subtitle")}
           </p>
         </div>
 
@@ -61,12 +58,14 @@ export function HowItWorks() {
                 <div className="flex-1 pb-8">
                   <div className="mb-2 flex items-center gap-3">
                     <span className="text-sm font-medium text-violet-600">
-                      Step {step.step}
+                      {t("stepLabel", { step: step.step })}
                     </span>
                   </div>
-                  <h3 className="mb-2 text-xl font-semibold">{step.title}</h3>
+                  <h3 className="mb-2 text-xl font-semibold">
+                    {t(`steps.${step.id}.title`)}
+                  </h3>
                   <p className="mb-4 text-muted-foreground">
-                    {step.description}
+                    {t(`steps.${step.id}.description`)}
                   </p>
                   <div className="inline-flex items-center gap-2 rounded-lg bg-muted px-4 py-2 font-mono text-sm">
                     <code>{step.code}</code>
@@ -83,9 +82,9 @@ export function HowItWorks() {
             <Check className="h-5 w-5" />
           </div>
           <div>
-            <p className="font-medium">You&apos;re all set!</p>
+            <p className="font-medium">{t("completion.title")}</p>
             <p className="text-sm text-muted-foreground">
-              Start building your application with all the features included.
+              {t("completion.description")}
             </p>
           </div>
         </div>

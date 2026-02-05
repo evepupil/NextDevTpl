@@ -1,6 +1,7 @@
 import { DocsBody, DocsPage, DocsTitle } from "fumadocs-ui/page";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 import { docsSource } from "@/lib/source";
 
@@ -17,14 +18,15 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug?: string[] }>;
+  params: Promise<{ locale: string; slug?: string[] }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const page = docsSource.getPage(slug);
+  const t = await getTranslations({ locale, namespace: "Docs" });
 
   if (!page) {
     return {
-      title: "Not Found",
+      title: t("notFound"),
     };
   }
 
@@ -43,7 +45,7 @@ export async function generateMetadata({
 export default async function Page({
   params,
 }: {
-  params: Promise<{ slug?: string[] }>;
+  params: Promise<{ locale: string; slug?: string[] }>;
 }) {
   const { slug } = await params;
   const page = docsSource.getPage(slug);

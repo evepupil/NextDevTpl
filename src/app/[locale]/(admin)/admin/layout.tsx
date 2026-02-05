@@ -1,5 +1,6 @@
 import { AdminSidebar } from "@/features/admin/components";
 import { checkAdmin } from "@/lib/auth/admin";
+import { getTranslations } from "next-intl/server";
 
 /**
  * Admin 布局组件
@@ -14,6 +15,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const t = await getTranslations("Admin.layout");
   // 权限检查 - 非管理员会被重定向
   await checkAdmin();
 
@@ -23,7 +25,7 @@ export default async function AdminLayout({
       <div className="pl-64">
         {/* Admin 顶栏 */}
         <header className="sticky top-0 z-30 flex h-14 items-center border-b bg-white/80 px-6 backdrop-blur dark:bg-slate-900/80">
-          <h1 className="text-lg font-semibold">管理后台</h1>
+          <h1 className="text-lg font-semibold">{t("title")}</h1>
         </header>
         {/* 主内容区域 */}
         <main className="p-6">{children}</main>

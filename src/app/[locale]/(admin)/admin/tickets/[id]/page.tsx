@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { eq } from "drizzle-orm";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,13 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { db } from "@/db";
 import { ticket, ticketMessage, user } from "@/db/schema";
-import {
-  ticketCategories,
-  ticketPriorities,
-  ticketStatuses,
-} from "@/features/support/schemas";
 import { AdminTicketReplyForm } from "@/features/support/components/admin-ticket-reply-form";
 import { AdminTicketStatusSelect } from "@/features/support/components/admin-ticket-status-select";
+import { Link } from "@/i18n/routing";
 
 interface AdminTicketDetailPageProps {
   params: Promise<{
@@ -31,6 +27,9 @@ interface AdminTicketDetailPageProps {
 export default async function AdminTicketDetailPage({
   params,
 }: AdminTicketDetailPageProps) {
+  const t = await getTranslations("Admin.tickets");
+  const tSupport = await getTranslations("Support");
+  const locale = await getLocale();
   const { id } = await params;
 
   // 获取工单信息（包含用户信息）
@@ -79,7 +78,6 @@ export default async function AdminTicketDetailPage({
    * 获取状态徽章样式
    */
   const getStatusBadge = (status: string) => {
-    const statusConfig = ticketStatuses.find((s) => s.value === status);
     const colorMap: Record<string, string> = {
       open: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
       in_progress:
@@ -90,7 +88,7 @@ export default async function AdminTicketDetailPage({
     };
     return (
       <Badge className={colorMap[status] || colorMap.closed} variant="secondary">
-        {statusConfig?.label || status}
+        {tSupport(`statuses.${status}`)}
       </Badge>
     );
   };
@@ -99,7 +97,6 @@ export default async function AdminTicketDetailPage({
    * 获取优先级徽章样式
    */
   const getPriorityBadge = (priority: string) => {
-    const priorityConfig = ticketPriorities.find((p) => p.value === priority);
     const colorMap: Record<string, string> = {
       low: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
       medium:
@@ -108,7 +105,7 @@ export default async function AdminTicketDetailPage({
     };
     return (
       <Badge className={colorMap[priority] || colorMap.medium} variant="secondary">
-        {priorityConfig?.label || priority}
+        {tSupport(`priorities.${priority}`)}
       </Badge>
     );
   };
@@ -117,8 +114,7 @@ export default async function AdminTicketDetailPage({
    * 获取类别标签
    */
   const getCategoryLabel = (category: string) => {
-    const categoryConfig = ticketCategories.find((c) => c.value === category);
-    return categoryConfig?.label || category;
+    return tSupport(`categories.${category}`);
   };
 
   /**
@@ -148,7 +144,9 @@ export default async function AdminTicketDetailPage({
           </h2>
           <p className="text-muted-foreground">
             {getCategoryLabel(ticketData.category)} ·{" "}
-            创建于 {new Date(ticketData.createdAt).toLocaleDateString("zh-CN")}
+            {tSupport("detail.createdAt", {
+              date: new Date(ticketData.createdAt).toLocaleDateString(locale),
+            })}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -161,21 +159,25 @@ export default async function AdminTicketDetailPage({
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>用户信息</CardTitle>
+            <CardTitle>{t("detail.userInfo")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4">
               <Avatar className="h-12 w-12">
                 <AvatarImage
                   src={ticketUser?.image || undefined}
-                  alt={ticketUser?.name || "用户"}
+                  alt={ticketUser?.name || tSupport("detail.unknownUser")}
                 />
                 <AvatarFallback className="bg-violet-600 text-white">
-                  {ticketUser?.name ? getInitials(ticketUser.name) : "U"}
+                  {ticketUser?.name
+                    ? getInitials(ticketUser.name)
+                    : tSupport("detail.userInitial")}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-medium">{ticketUser?.name || "未知用户"}</p>
+                <p className="font-medium">
+                  {ticketUser?.name || tSupport("detail.unknownUser")}
+                </p>
                 <p className="text-sm text-muted-foreground">
                   {ticketUser?.email}
                 </p>
@@ -186,7 +188,7 @@ export default async function AdminTicketDetailPage({
 
         <Card>
           <CardHeader>
-            <CardTitle>工单状态</CardTitle>
+            <CardTitle>{t("detail.status")}</CardTitle>
           </CardHeader>
           <CardContent>
             <AdminTicketStatusSelect
@@ -200,7 +202,7 @@ export default async function AdminTicketDetailPage({
       {/* 消息列表 */}
       <Card>
         <CardHeader>
-          <CardTitle>对话记录</CardTitle>
+          <CardTitle>{tSupport("detail.conversation")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {messages.map((msg) => (
@@ -215,7 +217,7 @@ export default async function AdminTicketDetailPage({
               <Avatar className="h-10 w-10">
                 <AvatarImage
                   src={msg.user?.image || undefined}
-                  alt={msg.user?.name || "用户"}
+                  alt={msg.user?.name || tSupport("detail.unknownUser")}
                 />
                 <AvatarFallback
                   className={
@@ -224,21 +226,23 @@ export default async function AdminTicketDetailPage({
                       : "bg-violet-600 text-white"
                   }
                 >
-                  {msg.user?.name ? getInitials(msg.user.name) : "U"}
+                  {msg.user?.name
+                    ? getInitials(msg.user.name)
+                    : tSupport("detail.userInitial")}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">
-                    {msg.user?.name || "用户"}
+                    {msg.user?.name || tSupport("detail.unknownUser")}
                   </span>
                   {msg.isAdminResponse && (
                     <Badge variant="secondary" className="text-xs">
-                      客服
+                      {tSupport("detail.supportBadge")}
                     </Badge>
                   )}
                   <span className="text-xs text-muted-foreground">
-                    {new Date(msg.createdAt).toLocaleString("zh-CN")}
+                    {new Date(msg.createdAt).toLocaleString(locale)}
                   </span>
                 </div>
                 <p className="text-sm whitespace-pre-wrap">{msg.content}</p>

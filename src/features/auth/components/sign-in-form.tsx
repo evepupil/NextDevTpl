@@ -1,7 +1,7 @@
 "use client";
 
 import { Eye, EyeOff, Github } from "lucide-react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { GoogleIcon } from "@/features/shared/icons";
+import { Link } from "@/i18n/routing";
 import {
   signInWithEmail,
   signInWithGitHub,
@@ -27,6 +28,10 @@ import { AuthLogo } from "./auth-logo";
  * - 邮箱密码登录
  */
 export function SignInForm() {
+  const t = useTranslations("Auth.signIn");
+  const tCommon = useTranslations("Auth.common");
+  const tOauth = useTranslations("Auth.oauth");
+
   // 表单状态
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,7 +48,7 @@ export function SignInForm() {
       setError(null);
       await signInWithGoogle();
     } catch {
-      setError("Google 登录失败，请重试");
+      setError(t("errors.google"));
     } finally {
       setIsLoading(false);
     }
@@ -58,7 +63,7 @@ export function SignInForm() {
       setError(null);
       await signInWithGitHub();
     } catch {
-      setError("GitHub 登录失败，请重试");
+      setError(t("errors.github"));
     } finally {
       setIsLoading(false);
     }
@@ -71,7 +76,7 @@ export function SignInForm() {
     e.preventDefault();
 
     if (!email || !password) {
-      setError("请填写邮箱和密码");
+      setError(t("errors.missingFields"));
       return;
     }
 
@@ -80,7 +85,7 @@ export function SignInForm() {
       setError(null);
       await signInWithEmail(email, password);
     } catch {
-      setError("邮箱或密码错误");
+      setError(t("errors.invalidCredentials"));
     } finally {
       setIsLoading(false);
     }
@@ -91,9 +96,9 @@ export function SignInForm() {
       {/* Logo 和标题 */}
       <div className="flex flex-col items-center space-y-2 text-center">
         <AuthLogo />
-        <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
         <p className="text-sm text-muted-foreground">
-          Please enter your credentials to sign in.
+          {t("subtitle")}
         </p>
       </div>
 
@@ -109,7 +114,7 @@ export function SignInForm() {
           disabled={isLoading}
         >
           <GoogleIcon className="mr-2 h-4 w-4" />
-          Google
+          {tOauth("google")}
         </Button>
         <Button
           variant="outline"
@@ -118,7 +123,7 @@ export function SignInForm() {
           disabled={isLoading}
         >
           <Github className="mr-2 h-4 w-4" />
-          GitHub
+          {tOauth("github")}
         </Button>
       </div>
 
@@ -128,7 +133,9 @@ export function SignInForm() {
           <Separator className="w-full" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-muted/30 px-2 text-muted-foreground">or</span>
+          <span className="bg-muted/30 px-2 text-muted-foreground">
+            {tCommon("or")}
+          </span>
         </div>
       </div>
 
@@ -136,11 +143,11 @@ export function SignInForm() {
       <form onSubmit={handleEmailSignIn} className="space-y-4">
         {/* 邮箱输入 */}
         <div className="space-y-2">
-          <Label htmlFor="email">Email address</Label>
+          <Label htmlFor="email">{t("form.emailLabel")}</Label>
           <Input
             id="email"
             type="email"
-            placeholder="jane@example.com"
+            placeholder={t("form.emailPlaceholder")}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={isLoading}
@@ -150,7 +157,7 @@ export function SignInForm() {
 
         {/* 密码输入 */}
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">{t("form.passwordLabel")}</Label>
           <div className="relative">
             <Input
               id="password"
@@ -182,7 +189,7 @@ export function SignInForm() {
             href="/forgot-password"
             className="text-sm text-muted-foreground underline hover:text-foreground transition-colors"
           >
-            Forgot my password
+            {t("form.forgotPassword")}
           </Link>
         </div>
 
@@ -192,18 +199,18 @@ export function SignInForm() {
           className="w-full bg-indigo-500 hover:bg-indigo-600"
           disabled={isLoading}
         >
-          {isLoading ? "Loading..." : "Continue"}
+          {isLoading ? tCommon("loading") : tCommon("continue")}
         </Button>
       </form>
 
       {/* 注册链接 */}
       <p className="text-center text-sm text-muted-foreground">
-        Don&apos;t have an account?{" "}
+        {t("footer.noAccount")}{" "}
         <Link
           href="/sign-up"
           className="font-medium text-foreground hover:underline"
         >
-          Sign up
+          {t("footer.signUp")}
         </Link>
       </p>
     </div>

@@ -12,7 +12,9 @@ export function RepoCard() {
     <Card className="rounded-xl">
       <CardHeader className="flex flex-row items-start justify-between space-y-0">
         <div>
-          <CardTitle className="text-base font-semibold">tweakcn</CardTitle>
+          <CardTitle className="text-base font-semibold">
+            {t("cards.repo.title")}
+          </CardTitle>
           <p className="text-sm text-muted-foreground">
             {t("cards.repo.description")}
           </p>

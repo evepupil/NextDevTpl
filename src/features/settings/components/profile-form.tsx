@@ -6,6 +6,7 @@ import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type { z } from "zod";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -57,6 +58,8 @@ type FormValues = z.infer<typeof updateProfileSchema>;
  * - 显示成功/错误 Toast 通知
  */
 export function ProfileForm({ initialData }: ProfileFormProps) {
+  const t = useTranslations("Settings.profileForm");
+  const tMessages = useTranslations("Settings.messages");
   /**
    * 使用 react-hook-form 创建表单实例
    * - zodResolver: 使用 Zod schema 进行验证
@@ -79,7 +82,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
      */
     onSuccess: ({ data }) => {
       if (data?.message) {
-        toast.success(data.message);
+        toast.success(tMessages("updateSuccess"));
       }
     },
     /**
@@ -88,12 +91,12 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
     onError: ({ error }) => {
       // 显示服务器返回的错误信息
       if (error.serverError) {
-        toast.error(error.serverError);
+        toast.error(tMessages("validationFailed"));
+        console.error(error.serverError);
       }
       // 显示验证错误信息
       if (error.validationErrors) {
-        const errors = Object.values(error.validationErrors).flat();
-        toast.error(errors.join(", ") || "验证失败");
+        toast.error(tMessages("validationFailed"));
       }
     },
   });
@@ -109,9 +112,9 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
     <Card className="max-w-2xl">
       {/* 卡片头部 */}
       <CardHeader>
-        <CardTitle>General Settings</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
         <CardDescription>
-          更新您的个人资料信息。这些信息将在您的公开资料中显示。
+          {t("description")}
         </CardDescription>
       </CardHeader>
 
@@ -125,16 +128,16 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Display Name</FormLabel>
+                  <FormLabel>{t("fields.name.label")}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="请输入您的名称"
+                      placeholder={t("fields.name.placeholder")}
                       disabled={isPending}
                       {...field}
                     />
                   </FormControl>
                   <FormDescription>
-                    这是您的公开显示名称，最少 2 个字符。
+                    {t("fields.name.hint")}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -146,7 +149,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
           <CardFooter className="border-t pt-6">
             <Button type="submit" disabled={isPending}>
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isPending ? "Saving..." : "Save Changes"}
+              {isPending ? t("actions.saving") : t("actions.save")}
             </Button>
           </CardFooter>
         </form>

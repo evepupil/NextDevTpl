@@ -142,11 +142,11 @@ export function SettingsProfileView({ user }: SettingsProfileViewProps) {
     },
     onError: ({ error }) => {
       if (error.serverError) {
-        toast.error(error.serverError);
+        toast.error(t("messages.validationFailed"));
+        console.error(error.serverError);
       }
       if (error.validationErrors) {
-        const errors = Object.values(error.validationErrors).flat();
-        toast.error(errors.join(", ") || t("messages.validationFailed"));
+        toast.error(t("messages.validationFailed"));
       }
     },
   });

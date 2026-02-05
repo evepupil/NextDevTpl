@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import {
   Select,
@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { updateTicketStatusAction } from "@/features/support/actions";
 import { ticketStatuses } from "@/features/support/schemas";
 import { toast } from "sonner";
+import { useRouter } from "@/i18n/routing";
 
 interface AdminTicketStatusSelectProps {
   /** 工单 ID */
@@ -33,6 +34,8 @@ export function AdminTicketStatusSelect({
   currentStatus,
 }: AdminTicketStatusSelectProps) {
   const router = useRouter();
+  const t = useTranslations("Support.adminStatus");
+  const tStatuses = useTranslations("Support.statuses");
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState(currentStatus);
 
@@ -53,7 +56,7 @@ export function AdminTicketStatusSelect({
    */
   const getStatusLabel = (s: string) => {
     const statusConfig = ticketStatuses.find((item) => item.value === s);
-    return statusConfig?.label || s;
+    return statusConfig ? tStatuses(statusConfig.value) : s;
   };
 
   /**
@@ -71,14 +74,15 @@ export function AdminTicketStatusSelect({
       });
 
       if (result?.data) {
-        toast.success(result.data.message);
+        toast.success(t("toast.updated"));
         setStatus(newStatus as "open" | "in_progress" | "resolved" | "closed");
         router.refresh();
       } else if (result?.serverError) {
-        toast.error(result.serverError);
+        toast.error(t("toast.failed"));
+        console.error(result.serverError);
       }
     } catch (error) {
-      toast.error("状态更新失败");
+      toast.error(t("toast.failed"));
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -89,14 +93,14 @@ export function AdminTicketStatusSelect({
     return (
       <div className="flex items-center gap-2">
         <Loader2 className="h-4 w-4 animate-spin" />
-        <span className="text-sm text-muted-foreground">更新中...</span>
+        <span className="text-sm text-muted-foreground">{t("loading")}</span>
       </div>
     );
   }
 
   return (
     <div className="space-y-2">
-      <p className="text-sm text-muted-foreground">选择新状态</p>
+      <p className="text-sm text-muted-foreground">{t("label")}</p>
       <Select value={status} onValueChange={handleStatusChange}>
         <SelectTrigger className="w-full">
           <SelectValue>
@@ -109,7 +113,7 @@ export function AdminTicketStatusSelect({
           {ticketStatuses.map((s) => (
             <SelectItem key={s.value} value={s.value}>
               <Badge className={colorMap[s.value]} variant="secondary">
-                {s.label}
+                {tStatuses(s.value)}
               </Badge>
             </SelectItem>
           ))}
