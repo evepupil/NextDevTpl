@@ -111,5 +111,63 @@
       "cookie": "Cookie Policy"
     },
     "copyright": "© {year} {name}. All rights reserved."
+  },
+  "Header": {
+    "nav": {
+      "products": "Products",
+      "docs": "Docs",
+      "pricing": "Pricing",
+      "blog": "Blog",
+      "about": "About"
+    },
+    "products": {
+      "dxPlatform": {
+        "title": "DX Platform",
+        "items": {
+          "previews": {
+            "title": "Previews",
+            "description": "Helping teams ship 6× faster"
+          },
+          "ai": {
+            "title": "AI",
+            "description": "Powering breakthroughs"
+          }
+        }
+      },
+      "infrastructure": {
+        "title": "Managed Infrastructure",
+        "items": {
+          "rendering": {
+            "title": "Rendering",
+            "description": "Fast, scalable, and reliable"
+          },
+          "observability": {
+            "title": "Observability",
+            "description": "Trace every step"
+          },
+          "security": {
+            "title": "Security",
+            "description": "Scale without compromising"
+          }
+        }
+      },
+      "openSource": {
+        "title": "Open Source",
+        "items": {
+          "nextjs": {
+            "title": "Next.js",
+            "description": "The native Next.js platform"
+          },
+          "turborepo": {
+            "title": "Turborepo",
+            "description": "Speed with Enterprise scale"
+          },
+          "ai-sdk": {
+            "title": "AI SDK",
+            "description": "The AI Toolkit for TypeScript"
+          }
+        }
+      }
+    }
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
@@ -58,8 +59,17 @@ function ListItem({ icon: Icon, title, description, href }: ListItemProps) {
  */
 export function NavMenu() {
   const pathname = usePathname();
+  const tNav = useTranslations("Header.nav");
+  const tProducts = useTranslations("Header.products");
   // 当前悬停的导航项 (不包括 Products 下拉菜单)
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const navLabels: Record<string, string> = {
+    "/docs": tNav("docs"),
+    "/#pricing": tNav("pricing"),
+    "/pricing": tNav("pricing"),
+    "/blog": tNav("blog"),
+    "/about": tNav("about"),
+  };
 
   /**
    * 检查链接是否处于激活状态
@@ -96,19 +106,31 @@ export function NavMenu() {
         {/* Products Mega Menu */}
         <NavigationMenuItem>
           <NavigationMenuTrigger className="bg-transparent px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground data-[state=open]:bg-muted data-[state=open]:text-foreground">
-            Products
+            {tNav("products")}
           </NavigationMenuTrigger>
           <NavigationMenuContent>
             <div className="grid w-[750px] grid-cols-3 gap-3 p-4">
-              {Object.values(productNav).map((group) => (
-                <div key={group.title}>
+              {Object.entries(productNav).map(([groupKey, group]) => (
+                <div key={groupKey}>
                   <h4 className="mb-3 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                    {group.title}
+                    {tProducts(`${groupKey}.title`)}
                   </h4>
                   <ul className="space-y-1">
-                    {group.items.map((item) => (
-                      <ListItem key={item.title} {...item} />
-                    ))}
+                    {group.items.map((item) => {
+                      const slug = item.href.split("/").filter(Boolean).pop() ?? "";
+                      const titleKey = `${groupKey}.items.${slug}.title`;
+                      const descriptionKey = `${groupKey}.items.${slug}.description`;
+
+                      return (
+                        <ListItem
+                          key={item.href}
+                          icon={item.icon}
+                          title={tProducts(titleKey)}
+                          description={tProducts(descriptionKey)}
+                          href={item.href}
+                        />
+                      );
+                    })}
                   </ul>
                 </div>
               ))}
@@ -154,7 +176,7 @@ export function NavMenu() {
                     />
                   )}
 
-                  {item.title}
+                  {navLabels[item.href] ?? item.title}
                 </Link>
               </NavigationMenuLink>
             </NavigationMenuItem>

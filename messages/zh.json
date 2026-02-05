@@ -111,5 +111,63 @@
       "cookie": "Cookie 政策"
     },
     "copyright": "© {year} {name}。保留所有权利。"
+  },
+  "Header": {
+    "nav": {
+      "products": "产品",
+      "docs": "文档",
+      "pricing": "定价",
+      "blog": "博客",
+      "about": "关于"
+    },
+    "products": {
+      "dxPlatform": {
+        "title": "DX 平台",
+        "items": {
+          "previews": {
+            "title": "预览",
+            "description": "帮助团队以 6 倍速度交付"
+          },
+          "ai": {
+            "title": "AI",
+            "description": "驱动突破"
+          }
+        }
+      },
+      "infrastructure": {
+        "title": "托管基础设施",
+        "items": {
+          "rendering": {
+            "title": "渲染",
+            "description": "快速、可扩展且可靠"
+          },
+          "observability": {
+            "title": "可观测性",
+            "description": "跟踪每一步"
+          },
+          "security": {
+            "title": "安全",
+            "description": "规模化而不妥协"
+          }
+        }
+      },
+      "openSource": {
+        "title": "开源",
+        "items": {
+          "nextjs": {
+            "title": "Next.js",
+            "description": "原生的 Next.js 平台"
+          },
+          "turborepo": {
+            "title": "Turborepo",
+            "description": "企业级规模的速度"
+          },
+          "ai-sdk": {
+            "title": "AI SDK",
+            "description": "面向 TypeScript 的 AI 工具包"
+          }
+        }
+      }
+    }
   }
 }

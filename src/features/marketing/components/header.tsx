@@ -1,6 +1,7 @@
 "use client";
 
 import { Blocks } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ import { NavMenu } from "./nav-menu";
  * 布局: [Logo + Nav 靠左] -------- [Actions 靠右]
  */
 export function Header() {
+  const t = useTranslations("Common");
   // 获取当前用户会话状态
   const { data: session, isPending } = useSession();
   const user = session?.user;
@@ -67,7 +69,7 @@ export function Header() {
             // 已登录 - 显示 Dashboard 按钮和头像
             <>
               <Button asChild variant="ghost" className="text-muted-foreground">
-                <Link href="/dashboard">Dashboard</Link>
+                <Link href="/dashboard">{t("dashboard")}</Link>
               </Button>
               <Link href="/dashboard">
                 <Avatar className="h-8 w-8">
@@ -86,13 +88,13 @@ export function Header() {
                 variant="ghost"
                 className="hidden text-muted-foreground hover:text-foreground md:inline-flex"
               >
-                <Link href="/sign-in">Log in</Link>
+                <Link href="/sign-in">{t("login")}</Link>
               </Button>
               <Button
                 asChild
                 className="bg-indigo-600 px-6 text-white hover:bg-indigo-700"
               >
-                <Link href="/sign-up">Get Started</Link>
+                <Link href="/sign-up">{t("getStarted")}</Link>
               </Button>
             </>
           )}
