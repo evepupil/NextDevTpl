@@ -1,25 +1,27 @@
 "use client";
 
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from "recharts";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const data = [
-  { day: "Mon", thisWeek: 30, lastWeek: 20 },
-  { day: "Tue", thisWeek: 45, lastWeek: 35 },
-  { day: "Wed", thisWeek: 35, lastWeek: 40 },
-  { day: "Thu", thisWeek: 50, lastWeek: 30 },
-  { day: "Fri", thisWeek: 40, lastWeek: 45 },
-  { day: "Sat", thisWeek: 60, lastWeek: 50 },
-  { day: "Sun", thisWeek: 55, lastWeek: 40 },
-];
-
 export function ExerciseChartCard() {
+  const t = useTranslations("Dashboard");
+  const data = [
+    { day: t("cards.exercise.days.mon"), thisWeek: 30, lastWeek: 20 },
+    { day: t("cards.exercise.days.tue"), thisWeek: 45, lastWeek: 35 },
+    { day: t("cards.exercise.days.wed"), thisWeek: 35, lastWeek: 40 },
+    { day: t("cards.exercise.days.thu"), thisWeek: 50, lastWeek: 30 },
+    { day: t("cards.exercise.days.fri"), thisWeek: 40, lastWeek: 45 },
+    { day: t("cards.exercise.days.sat"), thisWeek: 60, lastWeek: 50 },
+    { day: t("cards.exercise.days.sun"), thisWeek: 55, lastWeek: 40 },
+  ];
+
   return (
     <Card className="rounded-xl">
       <CardHeader>
-        <CardTitle className="text-base">Exercise Minutes</CardTitle>
+        <CardTitle className="text-base">{t("cards.exercise.title")}</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Your exercise minutes are ahead of where you normally are.
+          {t("cards.exercise.description")}
         </p>
       </CardHeader>
       <CardContent>
@@ -46,7 +48,7 @@ export function ExerciseChartCard() {
                 stroke="hsl(var(--primary))"
                 strokeWidth={2}
                 dot={false}
-                name="This Week"
+                name={t("cards.exercise.thisWeek")}
               />
               <Line
                 type="monotone"
@@ -55,7 +57,7 @@ export function ExerciseChartCard() {
                 strokeWidth={2}
                 strokeDasharray="5 5"
                 dot={false}
-                name="Last Week"
+                name={t("cards.exercise.lastWeek")}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -63,11 +65,11 @@ export function ExerciseChartCard() {
         <div className="mt-4 flex items-center justify-center gap-6 text-sm">
           <div className="flex items-center gap-2">
             <span className="h-3 w-3 rounded-full bg-primary" />
-            This Week
+            {t("cards.exercise.thisWeek")}
           </div>
           <div className="flex items-center gap-2">
             <span className="h-3 w-3 rounded-full bg-muted-foreground" />
-            Last Week
+            {t("cards.exercise.lastWeek")}
           </div>
         </div>
       </CardContent>

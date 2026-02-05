@@ -169,5 +169,300 @@
         }
       }
     }
+  },
+  "Dashboard": {
+    "page": {
+      "stats": {
+        "revenueTitle": "Total Revenue",
+        "revenueChange": "+20.1% from last month",
+        "subscriptionsTitle": "Subscriptions",
+        "subscriptionsChange": "+180.1% from last month"
+      }
+    },
+    "mainTitle": {
+      "dashboard": "Dashboard",
+      "chat": "Chat",
+      "image": "Image",
+      "settings": "Settings",
+      "profile": "Profile",
+      "security": "Security",
+      "billing": "Billing",
+      "notifications": "Notifications"
+    },
+    "sidebar": {
+      "groups": {
+        "application": "Application",
+        "aiDemo": "AI Demo",
+        "support": "Support"
+      },
+      "items": {
+        "dashboard": "Dashboard",
+        "settings": "Settings",
+        "chat": "Chat",
+        "image": "Image",
+        "support": "Support Tickets"
+      },
+      "menu": {
+        "settings": "Settings",
+        "logout": "Log out"
+      }
+    },
+    "cards": {
+      "auth": {
+        "title": "Create an account",
+        "subtitle": "Enter your email below to create your account",
+        "github": "GitHub",
+        "google": "Google",
+        "orContinue": "Or continue with",
+        "email": "Email",
+        "password": "Password",
+        "emailPlaceholder": "m@example.com",
+        "submit": "Create account"
+      },
+      "subscription": {
+        "title": "Upgrade your subscription",
+        "subtitle": "You are currently on the free plan.",
+        "fields": {
+          "name": "Name",
+          "email": "Email",
+          "card": "Card number",
+          "expires": "Expires",
+          "year": "Year",
+          "cvc": "CVC",
+          "notes": "Notes"
+        },
+        "placeholders": {
+          "name": "First Last",
+          "email": "email@example.com",
+          "card": "1234 5678 9012 3456",
+          "month": "MM",
+          "year": "YY",
+          "cvc": "123",
+          "notes": "Add any additional notes..."
+        },
+        "plan": {
+          "starter": {
+            "title": "Starter",
+            "price": "$9/month"
+          },
+          "pro": {
+            "title": "Pro",
+            "price": "$29/month"
+          }
+        },
+        "terms": "I agree to the terms and conditions",
+        "submit": "Upgrade Plan"
+      },
+      "goal": {
+        "title": "Move Goal",
+        "description": "Set your daily activity goal.",
+        "unit": "Calories/day"
+      },
+      "exercise": {
+        "title": "Exercise Minutes",
+        "description": "Your exercise minutes are ahead of where you normally are.",
+        "thisWeek": "This Week",
+        "lastWeek": "Last Week",
+        "days": {
+          "mon": "Mon",
+          "tue": "Tue",
+          "wed": "Wed",
+          "thu": "Thu",
+          "fri": "Fri",
+          "sat": "Sat",
+          "sun": "Sun"
+        }
+      },
+      "repo": {
+        "description": "An AI-powered theme editor for shadcn/ui components.",
+        "star": "Star",
+        "language": "TypeScript",
+        "updated": "Updated Apr 2024"
+      },
+      "share": {
+        "title": "Share this document",
+        "description": "Anyone with the link can view this document.",
+        "people": "People with access",
+        "permissions": {
+          "edit": "Can edit",
+          "view": "Can view"
+        }
+      }
+    }
+  },
+  "Settings": {
+    "tabs": {
+      "account": "Account",
+      "security": "Security",
+      "billing": "Billing",
+      "usage": "Usage",
+      "notifications": "Notifications"
+    },
+    "general": {
+      "title": "General",
+      "description": "Update your account settings.",
+      "save": "Save"
+    },
+    "form": {
+      "name": {
+        "label": "Name",
+        "placeholder": "Enter your name",
+        "hint": "Name is required and must be at least 2 characters."
+      },
+      "email": {
+        "label": "Email",
+        "hint": "To change your email, please contact support."
+      }
+    },
+    "avatar": {
+      "title": "Avatar",
+      "uploading": "Uploading...",
+      "hint": "Supports JPG, PNG, GIF, WebP up to {size}MB",
+      "success": "Avatar updated successfully"
+    },
+    "language": {
+      "title": "Language Settings",
+      "description": "Select your preferred language.",
+      "placeholder": "Select language",
+      "options": {
+        "en": "English",
+        "zh": "中文"
+      }
+    },
+    "danger": {
+      "title": "Delete Account",
+      "description": "We'd hate to see you go, but you can delete your account here. This action is irreversible.",
+      "button": "Delete Account",
+      "confirm": "This action is irreversible. Please proceed with caution."
+    },
+    "messages": {
+      "updateSuccess": "Profile updated successfully.",
+      "validationFailed": "Validation failed",
+      "invalidFileType": "Unsupported file type. Supported: {types}",
+      "fileTooLarge": "File is too large. Max {size}MB",
+      "uploadUrlFailed": "Failed to get upload URL",
+      "uploadFailed": "Avatar upload failed"
+    },
+    "security": {
+      "password": {
+        "title": "Password",
+        "description": "Update your password regularly to keep your account secure.",
+        "current": "Current password",
+        "new": "New password",
+        "confirm": "Confirm new password",
+        "action": "Update password",
+        "saved": "Security settings saved."
+      },
+      "twoFactor": {
+        "title": "Two-factor authentication",
+        "description": "Require a code at login for extra security."
+      },
+      "alerts": {
+        "title": "Login alerts",
+        "description": "Get an email when a new device signs in."
+      }
+    },
+    "billing": {
+      "plan": {
+        "title": "Plan",
+        "description": "Manage your current plan and billing cycle.",
+        "current": "Current plan: {plan}",
+        "nextBill": "Next billing date: {date}",
+        "manage": "Manage subscription"
+      },
+      "payment": {
+        "title": "Payment method",
+        "description": "Update your default payment method for invoices.",
+        "cardholder": "Cardholder name",
+        "cardNumber": "Card number",
+        "expiry": "Expiry",
+        "cvc": "CVC"
+      },
+      "invoices": {
+        "title": "Billing email",
+        "description": "Receipts and invoices will be sent here.",
+        "placeholder": "billing@example.com"
+      },
+      "autoRenew": {
+        "title": "Auto-renew",
+        "description": "Automatically renew your plan each billing cycle."
+      },
+      "save": "Save billing settings"
+    },
+    "notifications": {
+      "title": "Notification Preferences",
+      "description": "Choose how we keep you informed.",
+      "items": {
+        "product": {
+          "title": "Product updates",
+          "description": "News about features and releases."
+        },
+        "usage": {
+          "title": "Usage reports",
+          "description": "Weekly summary of usage and credits."
+        },
+        "billing": {
+          "title": "Billing alerts",
+          "description": "Invoices, payments, and renewal notices."
+        },
+        "security": {
+          "title": "Security alerts",
+          "description": "Suspicious activity and sign-in warnings."
+        }
+      },
+      "save": "Save notification settings"
+    }
+  },
+  "Credits": {
+    "usage": {
+      "title": "Compute Credit Usage",
+      "subtitle": "Credits used for AI dialogue, image and etc.",
+      "available": "Available Credits",
+      "availableSuffix": "credits available",
+      "purchase": {
+        "title": "Purchase More Credits",
+        "description": "Get more credits to unlock advanced AI features and capabilities.",
+        "viewPlans": "View Subscription Plans",
+        "buyPackages": "Buy Credit Packages"
+      },
+      "expiring": {
+        "title": "Credits Expiring Soon",
+        "message": "{amount} credits will expire on {date}"
+      },
+      "noSubscription": "No active subscription. Purchase a plan to receive monthly credits.",
+      "date": {
+        "never": "Never"
+      }
+    },
+    "transactions": {
+      "title": "Transaction History",
+      "subtitle": "View all your credit transactions including grants and consumption",
+      "empty": {
+        "title": "No transactions yet",
+        "description": "Your credit transactions will appear here"
+      },
+      "table": {
+        "date": "Date",
+        "type": "Type",
+        "description": "Description",
+        "amount": "Amount",
+        "status": "Status"
+      },
+      "loading": "Loading...",
+      "statusCompleted": "COMPLETED",
+      "pagination": {
+        "showing": "Showing {from} to {to} of {total} transactions",
+        "rowsPerPage": "Rows per page",
+        "page": "Page {page} of {totalPages}"
+      },
+      "types": {
+        "registration_bonus": "Registration Bonus",
+        "monthly_grant": "Monthly Grant",
+        "purchase": "Purchase",
+        "consumption": "Consumption",
+        "expiration": "Expired",
+        "refund": "Refund"
+      }
+    }
   }
 }

@@ -1,27 +1,28 @@
 "use client";
 
 import { PanelLeftClose, PanelLeft } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 
+import { usePathname } from "@/i18n/routing";
 import { useSidebar } from "@/features/dashboard/context";
 import { cn } from "@/lib/utils";
 
 /**
  * 从路径名获取页面标题
  */
-function getPageTitle(pathname: string): string {
+function getPageTitle(pathname: string, t: (key: string) => string): string {
   const path = pathname.replace(/^\/[a-z]{2}\//, "/");
   const titleMap: Record<string, string> = {
-    "/dashboard": "Dashboard",
-    "/dashboard/chat": "Chat",
-    "/dashboard/image": "Image",
-    "/dashboard/settings": "Settings",
-    "/dashboard/settings/profile": "Profile",
-    "/dashboard/settings/security": "Security",
-    "/dashboard/settings/billing": "Billing",
-    "/dashboard/settings/notifications": "Notifications",
+    "/dashboard": t("mainTitle.dashboard"),
+    "/dashboard/chat": t("mainTitle.chat"),
+    "/dashboard/image": t("mainTitle.image"),
+    "/dashboard/settings": t("mainTitle.settings"),
+    "/dashboard/settings/profile": t("mainTitle.profile"),
+    "/dashboard/settings/security": t("mainTitle.security"),
+    "/dashboard/settings/billing": t("mainTitle.billing"),
+    "/dashboard/settings/notifications": t("mainTitle.notifications"),
   };
-  return titleMap[path] || "Dashboard";
+  return titleMap[path] ?? t("mainTitle.dashboard");
 }
 
 /**
@@ -37,7 +38,8 @@ export function DashboardMainWrapper({
 }) {
   const { isCollapsed, toggleSidebar } = useSidebar();
   const pathname = usePathname();
-  const pageTitle = getPageTitle(pathname);
+  const t = useTranslations("Dashboard");
+  const pageTitle = getPageTitle(pathname, t);
 
   return (
     <main

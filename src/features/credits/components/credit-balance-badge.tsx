@@ -7,6 +7,7 @@
  */
 
 import { Coins } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
 
@@ -22,6 +23,7 @@ import { getMyCreditsBalance } from "@/features/credits/actions";
  * - 支持 Tooltip 显示详情
  */
 export function CreditBalanceBadge() {
+  const t = useTranslations("Credits");
   const { execute, result, isPending } = useAction(getMyCreditsBalance);
 
   // 组件挂载时获取余额
@@ -45,7 +47,7 @@ export function CreditBalanceBadge() {
     <Badge
       variant="secondary"
       className="gap-1 px-2 py-1 bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-400"
-      title="Available Credits"
+      title={t("usage.available")}
     >
       <Coins className="h-3 w-3" />
       <span className="text-xs font-medium">{balance.toLocaleString()}</span>

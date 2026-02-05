@@ -1,6 +1,7 @@
 "use client";
 
 import { Github } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,19 +9,21 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
 export function AuthCard() {
+  const t = useTranslations("Dashboard");
+
   return (
     <Card className="rounded-xl">
       <CardHeader className="text-center">
-        <CardTitle className="text-xl">Create an account</CardTitle>
+        <CardTitle className="text-xl">{t("cards.auth.title")}</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Enter your email below to create your account
+          {t("cards.auth.subtitle")}
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <Button variant="outline" className="w-full">
             <Github className="mr-2 h-4 w-4" />
-            Github
+            {t("cards.auth.github")}
           </Button>
           <Button variant="outline" className="w-full">
             <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
@@ -41,7 +44,7 @@ export function AuthCard() {
                 fill="#EA4335"
               />
             </svg>
-            Google
+            {t("cards.auth.google")}
           </Button>
         </div>
 
@@ -51,22 +54,26 @@ export function AuthCard() {
           </div>
           <div className="relative flex justify-center text-xs uppercase">
             <span className="bg-card px-2 text-muted-foreground">
-              Or continue with
+              {t("cards.auth.orContinue")}
             </span>
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="auth-email">Email</Label>
-          <Input id="auth-email" type="email" placeholder="m@example.com" />
+          <Label htmlFor="auth-email">{t("cards.auth.email")}</Label>
+          <Input
+            id="auth-email"
+            type="email"
+            placeholder={t("cards.auth.emailPlaceholder")}
+          />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="auth-password">Password</Label>
+          <Label htmlFor="auth-password">{t("cards.auth.password")}</Label>
           <Input id="auth-password" type="password" />
         </div>
 
-        <Button className="w-full">Create account</Button>
+        <Button className="w-full">{t("cards.auth.submit")}</Button>
       </CardContent>
     </Card>
   );

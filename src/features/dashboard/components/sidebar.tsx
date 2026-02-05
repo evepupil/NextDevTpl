@@ -1,12 +1,7 @@
 "use client";
 
-import {
-  ChevronsUpDown,
-  LogOut,
-  Settings,
-} from "lucide-react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { ChevronsUpDown, LogOut, Settings } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,6 +15,7 @@ import { dashboardConfig, siteConfig } from "@/config";
 import { CreditBalanceBadge } from "@/features/credits/components";
 import { useSidebar } from "@/features/dashboard/context";
 import { ModeToggle } from "@/features/shared/components";
+import { Link, usePathname, useRouter } from "@/i18n/routing";
 import { signOut, useSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +34,19 @@ export function DashboardSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { isCollapsed } = useSidebar();
+  const t = useTranslations("Dashboard");
+  const groupLabels: Record<string, string> = {
+    Application: t("sidebar.groups.application"),
+    "AI Demo": t("sidebar.groups.aiDemo"),
+    Support: t("sidebar.groups.support"),
+  };
+  const itemLabels: Record<string, string> = {
+    "/dashboard": t("sidebar.items.dashboard"),
+    "/dashboard/settings": t("sidebar.items.settings"),
+    "/dashboard/chat": t("sidebar.items.chat"),
+    "/dashboard/image": t("sidebar.items.image"),
+    "/dashboard/support": t("sidebar.items.support"),
+  };
 
   // 获取当前用户会话
   const { data: session } = useSession();
@@ -107,18 +116,20 @@ export function DashboardSidebar() {
             {/* Group Label - 折叠时隐藏 */}
             {!isCollapsed && (
               <p className="mb-1.5 px-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                {group.title}
+                {groupLabels[group.title] ?? group.title}
               </p>
             )}
             <div className="space-y-0.5">
               {group.items.map((item) => {
-                const isActive = pathname === item.href;
+                const cleanPath = pathname.replace(/^\/[a-z]{2}\//, "/");
+                const isActive = cleanPath === item.href;
                 const Icon = item.icon;
+                const itemLabel = itemLabels[item.href] ?? item.title;
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    title={isCollapsed ? item.title : undefined}
+                    title={isCollapsed ? itemLabel : undefined}
                     className={cn(
                       "flex items-center gap-3 rounded-md px-2 py-1.5 text-sm font-medium transition-colors",
                       isActive
@@ -128,7 +139,7 @@ export function DashboardSidebar() {
                     )}
                   >
                     {Icon && <Icon className="h-4 w-4 shrink-0" />}
-                    {!isCollapsed && item.title}
+                    {!isCollapsed && itemLabel}
                   </Link>
                 );
               })}
@@ -212,7 +223,7 @@ export function DashboardSidebar() {
                   className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-muted transition-colors"
                 >
                   <Settings className="h-4 w-4" />
-                  Settings
+                  {t("sidebar.menu.settings")}
                 </button>
 
                 {/* 登出 */}
@@ -222,7 +233,7 @@ export function DashboardSidebar() {
                   className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-muted transition-colors"
                 >
                   <LogOut className="h-4 w-4" />
-                  Logout
+                  {t("sidebar.menu.logout")}
                 </button>
               </div>
             </PopoverContent>

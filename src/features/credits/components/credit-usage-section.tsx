@@ -13,7 +13,7 @@
  */
 
 import { Clock, Coins, ShoppingCart } from "lucide-react";
-import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
 
@@ -21,26 +21,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getMyActiveBatches, getMyCreditsBalance } from "@/features/credits/actions";
+import { Link } from "@/i18n/routing";
 
 import { TransactionHistory } from "./transaction-history";
-
-/**
- * 格式化日期
- */
-function formatDate(date: Date | string | null): string {
-  if (!date) return "Never";
-  const d = new Date(date);
-  return d.toLocaleDateString("zh-CN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-}
 
 /**
  * 积分使用情况组件
  */
 export function CreditUsageSection() {
+  const t = useTranslations("Credits");
+  const locale = useLocale();
   // 获取积分余额
   const {
     execute: fetchBalance,
@@ -71,13 +61,25 @@ export function CreditUsageSection() {
       return new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime();
     })[0];
 
+  const formatDate = (date: Date | string | null): string => {
+    if (!date) return t("usage.date.never");
+    const d = new Date(date);
+    return new Intl.DateTimeFormat(locale, {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(d);
+  };
+
   return (
     <div className="space-y-6">
       {/* 标题 */}
       <div>
-        <h2 className="text-xl font-semibold tracking-tight">Compute Credit Usage</h2>
+        <h2 className="text-xl font-semibold tracking-tight">
+          {t("usage.title")}
+        </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Credits used for AI dialogue, image and etc.
+          {t("usage.subtitle")}
         </p>
       </div>
 
@@ -87,7 +89,9 @@ export function CreditUsageSection() {
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/40 dark:to-purple-900/40 shadow-sm">
             <Coins className="h-6 w-6 text-violet-600 dark:text-violet-400" />
           </div>
-          <span className="text-base font-medium text-foreground">Available Credits</span>
+          <span className="text-base font-medium text-foreground">
+            {t("usage.available")}
+          </span>
         </div>
 
         <div className="text-right">
@@ -98,9 +102,11 @@ export function CreditUsageSection() {
           ) : (
             <>
               <div className="text-5xl font-bold tracking-tight text-foreground">
-                {balance.toLocaleString()}
+                {balance.toLocaleString(locale)}
               </div>
-              <div className="text-sm text-muted-foreground mt-0.5">credits available</div>
+              <div className="text-sm text-muted-foreground mt-0.5">
+                {t("usage.availableSuffix")}
+              </div>
             </>
           )}
         </div>
@@ -115,18 +121,22 @@ export function CreditUsageSection() {
             </div>
             <div className="flex-1 space-y-4">
               <div>
-                <h3 className="font-semibold text-foreground">Purchase More Credits</h3>
+                <h3 className="font-semibold text-foreground">
+                  {t("usage.purchase.title")}
+                </h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Get more credits to unlock advanced AI features and capabilities.
+                  {t("usage.purchase.description")}
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-3">
                 <Button asChild className="bg-primary hover:bg-primary/90">
-                  <Link href="/pricing">View Subscription Plans</Link>
+                  <Link href="/pricing">{t("usage.purchase.viewPlans")}</Link>
                 </Button>
                 <Button variant="outline" asChild>
-                  <Link href="/dashboard/credits/buy">Buy Credit Packages</Link>
+                  <Link href="/dashboard/credits/buy">
+                    {t("usage.purchase.buyPackages")}
+                  </Link>
                 </Button>
               </div>
             </div>
@@ -142,10 +152,13 @@ export function CreditUsageSection() {
               <Clock className="h-5 w-5 text-orange-500 dark:text-orange-400 flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <span className="font-medium text-orange-700 dark:text-orange-300">
-                  Credits Expiring Soon
+                  {t("usage.expiring.title")}
                 </span>
                 <span className="text-orange-600/80 dark:text-orange-400/80 ml-2 text-sm">
-                  {expiringBatch.remaining} credits will expire on {formatDate(expiringBatch.expiresAt)}
+                  {t("usage.expiring.message", {
+                    amount: expiringBatch.remaining,
+                    date: formatDate(expiringBatch.expiresAt),
+                  })}
                 </span>
               </div>
             </div>
@@ -157,7 +170,7 @@ export function CreditUsageSection() {
       <Card className="border-dashed bg-muted/30">
         <CardContent className="py-4">
           <p className="text-center text-sm text-muted-foreground">
-            No active subscription. Purchase a plan to receive monthly credits.
+            {t("usage.noSubscription")}
           </p>
         </CardContent>
       </Card>

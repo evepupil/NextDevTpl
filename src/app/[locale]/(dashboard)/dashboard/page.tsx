@@ -8,6 +8,7 @@ import {
   StatsChartCard,
   SubscriptionFormCard,
 } from "@/features/dashboard/components";
+import { getTranslations } from "next-intl/server";
 
 const revenueData = [
   { value: 100 },
@@ -39,23 +40,25 @@ const subscriptionData = [
   { value: 250 },
 ];
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const t = await getTranslations("Dashboard");
+
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {/* Column 1 */}
       <div className="space-y-6">
         <StatsChartCard
-          title="Total Revenue"
+          title={t("page.stats.revenueTitle")}
           value="$15,231.89"
-          change="+20.1% from last month"
+          change={t("page.stats.revenueChange")}
           changeType="positive"
           chartType="line"
           data={revenueData}
         />
         <StatsChartCard
-          title="Subscriptions"
+          title={t("page.stats.subscriptionsTitle")}
           value="+2,350"
-          change="+180.1% from last month"
+          change={t("page.stats.subscriptionsChange")}
           changeType="positive"
           chartType="area"
           data={subscriptionData}

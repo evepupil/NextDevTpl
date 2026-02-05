@@ -1,6 +1,7 @@
 "use client";
 
 import { Copy } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,12 +36,14 @@ const users = [
 ];
 
 export function ShareDocumentCard() {
+  const t = useTranslations("Dashboard");
+
   return (
     <Card className="rounded-xl">
       <CardHeader>
-        <CardTitle className="text-base">Share this document</CardTitle>
+        <CardTitle className="text-base">{t("cards.share.title")}</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Anyone with the link can view this document.
+          {t("cards.share.description")}
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -56,7 +59,7 @@ export function ShareDocumentCard() {
         </div>
 
         <div className="space-y-4">
-          <p className="text-sm font-medium">People with access</p>
+          <p className="text-sm font-medium">{t("cards.share.people")}</p>
           {users.map((user) => (
             <div
               key={user.email}
@@ -77,8 +80,12 @@ export function ShareDocumentCard() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="edit">Can edit</SelectItem>
-                  <SelectItem value="view">Can view</SelectItem>
+                  <SelectItem value="edit">
+                    {t("cards.share.permissions.edit")}
+                  </SelectItem>
+                  <SelectItem value="view">
+                    {t("cards.share.permissions.view")}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>

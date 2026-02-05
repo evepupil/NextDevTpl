@@ -1,6 +1,7 @@
 "use client";
 
 import { Minus, Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Bar, BarChart, ResponsiveContainer } from "recharts";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ const initialData = [
 
 export function GoalCard() {
   const [goal, setGoal] = useState(350);
+  const t = useTranslations("Dashboard");
 
   const decrease = () => setGoal((prev) => Math.max(100, prev - 10));
   const increase = () => setGoal((prev) => Math.min(500, prev + 10));
@@ -25,9 +27,11 @@ export function GoalCard() {
   return (
     <Card className="rounded-xl">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium">Move Goal</CardTitle>
+        <CardTitle className="text-sm font-medium">
+          {t("cards.goal.title")}
+        </CardTitle>
         <p className="text-xs text-muted-foreground">
-          Set your daily activity goal.
+          {t("cards.goal.description")}
         </p>
       </CardHeader>
       <CardContent>
@@ -43,7 +47,7 @@ export function GoalCard() {
           <div className="text-center">
             <div className="text-5xl font-bold tracking-tighter">{goal}</div>
             <div className="text-xs uppercase text-muted-foreground">
-              Calories/day
+              {t("cards.goal.unit")}
             </div>
           </div>
           <Button

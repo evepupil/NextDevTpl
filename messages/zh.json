@@ -169,5 +169,301 @@
         }
       }
     }
+  },
+  "Dashboard": {
+    "page": {
+      "stats": {
+        "revenueTitle": "总收入",
+        "revenueChange": "+20.1% 较上月",
+        "subscriptionsTitle": "订阅",
+        "subscriptionsChange": "+180.1% 较上月"
+      }
+    },
+    "mainTitle": {
+      "dashboard": "控制台",
+      "chat": "聊天",
+      "image": "图像",
+      "settings": "设置",
+      "profile": "资料",
+      "security": "安全",
+      "billing": "计费",
+      "notifications": "通知"
+    },
+    "sidebar": {
+      "groups": {
+        "application": "应用",
+        "aiDemo": "AI 演示",
+        "support": "支持"
+      },
+      "items": {
+        "dashboard": "控制台",
+        "settings": "设置",
+        "chat": "聊天",
+        "image": "图像",
+        "support": "工单支持"
+      },
+      "menu": {
+        "settings": "设置",
+        "logout": "退出登录"
+      }
+    },
+    "cards": {
+      "auth": {
+        "title": "创建账户",
+        "subtitle": "输入邮箱以创建您的账户",
+        "github": "GitHub",
+        "google": "Google",
+        "orContinue": "或继续使用",
+        "email": "邮箱",
+        "password": "密码",
+        "emailPlaceholder": "m@example.com",
+        "submit": "创建账户"
+      },
+      "subscription": {
+        "title": "升级订阅",
+        "subtitle": "您当前使用免费计划。",
+        "fields": {
+          "name": "姓名",
+          "email": "邮箱",
+          "card": "卡号",
+          "expires": "到期",
+          "year": "年份",
+          "cvc": "CVC",
+          "notes": "备注"
+        },
+        "placeholders": {
+          "name": "名 姓",
+          "email": "email@example.com",
+          "card": "1234 5678 9012 3456",
+          "month": "MM",
+          "year": "YY",
+          "cvc": "123",
+          "notes": "添加备注..."
+        },
+        "plan": {
+          "starter": {
+            "title": "入门版",
+            "price": "¥9/月"
+          },
+          "pro": {
+            "title": "专业版",
+            "price": "¥29/月"
+          }
+        },
+        "terms": "我同意条款和条件",
+        "submit": "升级计划"
+      },
+      "goal": {
+        "title": "运动目标",
+        "description": "设置每日活动目标。",
+        "unit": "卡路里/天"
+      },
+      "exercise": {
+        "title": "运动时长",
+        "description": "你的运动时长高于平时水平。",
+        "thisWeek": "本周",
+        "lastWeek": "上周",
+        "days": {
+          "mon": "周一",
+          "tue": "周二",
+          "wed": "周三",
+          "thu": "周四",
+          "fri": "周五",
+          "sat": "周六",
+          "sun": "周日"
+        }
+      },
+      "repo": {
+        "description": "一个用于 shadcn/ui 组件的 AI 主题编辑器。",
+        "star": "Star",
+        "language": "TypeScript",
+        "updated": "更新于 2024年4月"
+      },
+      "share": {
+        "title": "分享此文档",
+        "description": "拥有链接的任何人都可以查看此文档。",
+        "people": "有访问权限的人员",
+        "permissions": {
+          "edit": "可编辑",
+          "view": "可查看"
+        }
+      }
+    }
+  },
+  "Settings": {
+    "tabs": {
+      "account": "账户",
+      "security": "安全",
+      "billing": "计费",
+      "usage": "用量",
+      "notifications": "通知"
+    },
+    "general": {
+      "title": "通用",
+      "description": "更新您的账户设置。",
+      "save": "保存"
+    },
+    "form": {
+      "name": {
+        "label": "姓名",
+        "placeholder": "输入您的姓名",
+        "hint": "姓名为必填项，至少 2 个字符。"
+      },
+      "email": {
+        "label": "邮箱",
+        "hint": "如需修改邮箱，请联系支持。"
+      }
+    },
+    "avatar": {
+      "title": "头像",
+      "uploading": "上传中...",
+      "hint": "支持 JPG、PNG、GIF、WebP，最大 {size}MB",
+      "success": "头像更新成功"
+    },
+    "language": {
+      "title": "语言设置",
+      "description": "选择您的首选语言。",
+      "placeholder": "选择语言",
+      "options": {
+        "en": "English",
+        "zh": "中文"
+      }
+    },
+    "danger": {
+      "title": "删除账户",
+      "description": "我们很遗憾看到你离开，但你可以在此删除账户。此操作不可逆。",
+      "button": "删除账户",
+      "confirm": "此操作不可逆，请谨慎操作。"
+    },
+    "messages": {
+      "updateSuccess": "资料更新成功。",
+      "validationFailed": "验证失败",
+      "invalidFileType": "不支持的文件类型。支持: {types}",
+      "fileTooLarge": "文件过大。最大 {size}MB",
+      "uploadUrlFailed": "获取上传 URL 失败",
+      "uploadFailed": "头像上传失败"
+    },
+    "security": {
+      "password": {
+        "title": "密码",
+        "description": "定期更新密码以确保账户安全。",
+        "current": "当前密码",
+        "new": "新密码",
+        "confirm": "确认新密码",
+        "action": "更新密码",
+        "saved": "安全设置已保存。"
+      },
+      "twoFactor": {
+        "title": "两步验证",
+        "description": "登录时需要验证码以提升安全性。"
+      },
+      "alerts": {
+        "title": "登录提醒",
+        "description": "当新设备登录时发送邮件提醒。"
+      }
+    },
+    "billing": {
+      "plan": {
+        "title": "计划",
+        "description": "管理当前计划与计费周期。",
+        "current": "当前计划：{plan}",
+        "nextBill": "下一次账单日期：{date}",
+        "manage": "管理订阅"
+      },
+      "payment": {
+        "title": "支付方式",
+        "description": "更新默认支付方式。",
+        "cardholder": "持卡人姓名",
+        "cardNumber": "卡号",
+        "expiry": "到期日",
+        "cvc": "CVC"
+      },
+      "invoices": {
+        "title": "账单邮箱",
+        "description": "收据和账单将发送到此邮箱。",
+        "placeholder": "billing@example.com"
+      },
+      "autoRenew": {
+        "title": "自动续订",
+        "description": "每个计费周期自动续订。",
+        "label": "启用自动续订"
+      },
+      "save": "保存计费设置"
+    },
+    "notifications": {
+      "title": "通知偏好",
+      "description": "选择我们与您保持联系的方式。",
+      "items": {
+        "product": {
+          "title": "产品更新",
+          "description": "新功能与版本发布消息。"
+        },
+        "usage": {
+          "title": "用量报告",
+          "description": "每周用量与积分汇总。"
+        },
+        "billing": {
+          "title": "账单提醒",
+          "description": "发票、付款与续订通知。"
+        },
+        "security": {
+          "title": "安全提醒",
+          "description": "异常活动与登录警告。"
+        }
+      },
+      "save": "保存通知设置"
+    }
+  },
+  "Credits": {
+    "usage": {
+      "title": "计算积分用量",
+      "subtitle": "积分用于 AI 对话、图像等功能。",
+      "available": "可用积分",
+      "availableSuffix": "积分可用",
+      "purchase": {
+        "title": "购买更多积分",
+        "description": "获取更多积分以解锁高级 AI 功能。",
+        "viewPlans": "查看订阅计划",
+        "buyPackages": "购买积分套餐"
+      },
+      "expiring": {
+        "title": "积分即将过期",
+        "message": "{amount} 积分将于 {date} 过期"
+      },
+      "noSubscription": "当前无有效订阅。购买计划以获得每月积分。",
+      "date": {
+        "never": "从不"
+      }
+    },
+    "transactions": {
+      "title": "交易历史",
+      "subtitle": "查看所有积分交易记录，包括发放与消费",
+      "empty": {
+        "title": "暂无交易记录",
+        "description": "您的积分交易将显示在这里"
+      },
+      "table": {
+        "date": "日期",
+        "type": "类型",
+        "description": "描述",
+        "amount": "数量",
+        "status": "状态"
+      },
+      "loading": "加载中...",
+      "statusCompleted": "已完成",
+      "pagination": {
+        "showing": "显示 {from} 至 {to}，共 {total} 条",
+        "rowsPerPage": "每页行数",
+        "page": "第 {page} 页，共 {totalPages} 页"
+      },
+      "types": {
+        "registration_bonus": "注册奖励",
+        "monthly_grant": "月度发放",
+        "purchase": "购买",
+        "consumption": "消费",
+        "expiration": "过期",
+        "refund": "退款"
+      }
+    }
   }
 }
