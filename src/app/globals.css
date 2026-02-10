@@ -1,0 +1,256 @@
+@import "fumadocs-ui/style.css";
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+}
+
+:root {
+  /* Linear-style: smaller radius, more restrained */
+  --radius: 0.375rem;
+
+  /* Light Mode - Linear Blue theme */
+  --background: oklch(0.995 0 0);
+  --foreground: oklch(0.15 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.15 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.15 0 0);
+
+  /* Primary - Linear Blue */
+  --primary: oklch(0.55 0.2 250);
+  --primary-foreground: oklch(1 0 0);
+
+  --secondary: oklch(0.97 0.005 250);
+  --secondary-foreground: oklch(0.15 0 0);
+
+  /* Muted - subtle blue-tinted gray */
+  --muted: oklch(0.97 0.005 250);
+  --muted-foreground: oklch(0.45 0 0);
+
+  --accent: oklch(0.97 0.005 250);
+  --accent-foreground: oklch(0.15 0 0);
+
+  /* Semantic colors */
+  --destructive: oklch(0.6 0.2 25);
+  --success: oklch(0.65 0.2 145);
+  --warning: oklch(0.75 0.15 85);
+
+  /* Borders - very subtle */
+  --border: oklch(0.92 0.005 250);
+  --input: oklch(0.92 0.005 250);
+  --ring: oklch(0.55 0.2 250);
+
+  /* Charts */
+  --chart-1: oklch(0.55 0.2 250);
+  --chart-2: oklch(0.65 0.2 145);
+  --chart-3: oklch(0.75 0.15 85);
+  --chart-4: oklch(0.6 0.2 25);
+  --chart-5: oklch(0.6 0.15 300);
+
+  /* Sidebar - light mode */
+  --sidebar: oklch(0.98 0.005 250);
+  --sidebar-foreground: oklch(0.15 0 0);
+  --sidebar-primary: oklch(0.55 0.2 250);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.95 0.005 250);
+  --sidebar-accent-foreground: oklch(0.15 0 0);
+  --sidebar-border: oklch(0.92 0.005 250);
+  --sidebar-ring: oklch(0.55 0.2 250);
+}
+
+.dark {
+  /* Dark Mode - Linear's distinctive deep blue-black */
+  --background: oklch(0.13 0.01 250);
+  --foreground: oklch(0.93 0 0);
+  --card: oklch(0.16 0.01 250);
+  --card-foreground: oklch(0.93 0 0);
+  --popover: oklch(0.16 0.01 250);
+  --popover-foreground: oklch(0.93 0 0);
+
+  /* Primary - brighter blue for dark mode */
+  --primary: oklch(0.65 0.18 250);
+  --primary-foreground: oklch(0.13 0 0);
+
+  --secondary: oklch(0.2 0.01 250);
+  --secondary-foreground: oklch(0.93 0 0);
+
+  /* Muted - slightly lighter dark */
+  --muted: oklch(0.18 0.01 250);
+  --muted-foreground: oklch(0.6 0 0);
+
+  --accent: oklch(0.2 0.01 250);
+  --accent-foreground: oklch(0.93 0 0);
+
+  /* Semantic colors - adjusted for dark mode */
+  --destructive: oklch(0.65 0.2 25);
+  --success: oklch(0.65 0.2 145);
+  --warning: oklch(0.75 0.15 85);
+
+  /* Borders - subtle glow effect */
+  --border: oklch(0.25 0.01 250);
+  --input: oklch(0.22 0.01 250);
+  --ring: oklch(0.65 0.18 250);
+
+  /* Charts - vibrant for dark mode */
+  --chart-1: oklch(0.65 0.18 250);
+  --chart-2: oklch(0.65 0.2 145);
+  --chart-3: oklch(0.75 0.15 85);
+  --chart-4: oklch(0.65 0.2 25);
+  --chart-5: oklch(0.65 0.15 300);
+
+  /* Sidebar - dark mode uses deep color */
+  --sidebar: oklch(0.11 0.01 250);
+  --sidebar-foreground: oklch(0.93 0 0);
+  --sidebar-primary: oklch(0.65 0.18 250);
+  --sidebar-primary-foreground: oklch(0.93 0 0);
+  --sidebar-accent: oklch(0.18 0.01 250);
+  --sidebar-accent-foreground: oklch(0.93 0 0);
+  --sidebar-border: oklch(0.25 0.01 250);
+  --sidebar-ring: oklch(0.65 0.18 250);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  /* 锚点跳转时考虑 sticky header 的高度 */
+  [id] {
+    scroll-margin-top: 5rem;
+  }
+  .container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    max-width: 1536px;
+  }
+  @media (min-width: 640px) {
+    .container {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
+  @media (min-width: 768px) {
+    .container {
+      padding-left: 1.2rem;
+      padding-right: 1.2rem;
+    }
+  }
+}
+
+/* 修复 Fumadocs 样式与 NavigationMenu 下拉菜单的冲突 */
+/*
+ * Fumadocs 的 style.css 包含 .hidden { display: none; } 规则，
+ * 这会影响 Radix UI NavigationMenu 的内部状态管理。
+ * 以下样式确保 NavigationMenu 的 viewport 和 content 正确显示。
+ */
+
+/* 重置 Fumadocs 的 .hidden 规则对 NavigationMenu 的影响 */
+[data-slot="navigation-menu"] .hidden,
+[data-slot="navigation-menu-viewport"].hidden,
+[data-slot="navigation-menu-content"].hidden {
+  display: revert !important;
+}
+
+/* NavigationMenu viewport 外层容器 - 确保始终可见并正确定位 */
+[data-slot="navigation-menu-viewport-wrapper"] {
+  display: flex !important;
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  z-index: 50 !important;
+  justify-content: center !important;
+}
+
+/* NavigationMenu viewport - 确保正确层级 */
+[data-slot="navigation-menu-viewport"] {
+  z-index: 100 !important;
+}
+
+/* NavigationMenu content - 确保内容正确显示 */
+[data-slot="navigation-menu-content"] {
+  width: auto !important;
+}
+
+/* 确保 NavigationMenuItem 的相对定位不被覆盖 */
+[data-slot="navigation-menu-item"] {
+  position: relative !important;
+}
+
+/* 修复 Fumadocs 搜索对话框位置 - 确保垂直居中 */
+[role="dialog"][data-state="open"] {
+  top: 50% !important;
+  --tw-translate-y: -50% !important;
+}
+
+/* 闪卡翻转动画 - 使用 scale 过渡模拟翻转 */
+.flip-card {
+  perspective: 800px;
+}
+
+.flip-card-face {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.flip-card-face-hidden {
+  transform: rotateY(90deg);
+  opacity: 0;
+  position: absolute;
+  inset: 0;
+}
+
+.flip-card-face-visible {
+  transform: rotateY(0deg);
+  opacity: 1;
+  position: relative;
+}

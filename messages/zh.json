@@ -1,0 +1,642 @@
+{
+  "HomePage": {
+    "title": "NextDevTpl",
+    "subtitle": "生产就绪的 Next.js SaaS 模板",
+    "description": "开箱即用的全栈 SaaS 模板，快速启动你的下一个项目。"
+  },
+  "Hero": {
+    "badge": "全新：支持 AI 模型集成",
+    "title1": "终极 Next.js 启动模板",
+    "titleHighlight": "助力您的下一个项目",
+    "subtitle": "使用生产就绪的基础设施更快地构建和发布。开箱即用的认证、支付和精美 UI 组件。",
+    "getStarted": "开始使用",
+    "seeDemo": "查看演示",
+    "trustLine": "深受全球开发者喜爱",
+    "stats": {
+      "cards": "已创建项目",
+      "users": "开发者",
+      "rating": "满意度"
+    }
+  },
+  "Features": {
+    "label": "核心功能",
+    "title": "开箱即用的完整功能",
+    "subtitle": "从认证到支付，从国际化到管理后台，每个模块都经过精心打磨，让你专注于业务本身。",
+    "items": {
+      "ai": {
+        "title": "认证与安全",
+        "description": "集成 Better Auth，支持邮箱密码、Google、GitHub OAuth 登录，开箱即用的会话管理与权限控制。"
+      },
+      "multiSource": {
+        "title": "支付与订阅",
+        "description": "集成 Creem 支付，支持订阅和一次性购买，内置 Webhook 处理和订阅生命周期管理。"
+      },
+      "outline": {
+        "title": "积分系统",
+        "description": "基于双重记账法的积分系统，支持 FIFO 批次过期、积分发放、消耗追踪和余额管理。"
+      },
+      "export": {
+        "title": "异步处理",
+        "description": "集成 Inngest 后台任务引擎，支持异步处理、任务队列和状态轮询，突破请求超时限制。"
+      },
+      "batch": {
+        "title": "国际化",
+        "description": "集成 next-intl 多语言支持，内置中英双语翻译，轻松扩展更多语言。"
+      },
+      "multilingual": {
+        "title": "管理后台",
+        "description": "完整的管理后台，支持用户管理、工单系统、数据统计，一键掌控全局。"
+      }
+    }
+  },
+  "HowItWorks": {
+    "label": "使用流程",
+    "title": "三步启动你的 SaaS",
+    "subtitle": "从模板到上线，只需要几步简单操作。",
+    "steps": {
+      "upload": {
+        "title": "克隆 & 配置",
+        "description": "克隆模板仓库，配置环境变量（数据库、认证密钥等），运行 pnpm install 安装依赖。"
+      },
+      "generate": {
+        "title": "定制 & 开发",
+        "description": "根据你的业务需求定制功能模块，修改品牌信息、配色、定价方案，添加自定义业务逻辑。"
+      },
+      "export": {
+        "title": "部署 & 上线",
+        "description": "一键部署到 Vercel 或自有服务器，连接 Neon PostgreSQL 数据库，配置域名即可上线。"
+      }
+    },
+    "completion": {
+      "title": "就是这么简单",
+      "description": "你的 SaaS 产品已准备就绪，随时可以上线运营。"
+    }
+  },
+  "UseCases": {
+    "label": "适用场景",
+    "title": "适合各种 SaaS 产品",
+    "subtitle": "NextDevTpl 模板适用于多种类型的 SaaS 产品和业务场景。",
+    "items": {
+      "students": {
+        "title": "AI 产品",
+        "subtitle": "快速构建 AI 应用",
+        "description": "利用内置的异步任务处理和积分系统，快速构建 AI 驱动的 SaaS 产品，支持长时间运行的 AI 任务。",
+        "examples": ["AI 内容生成", "AI 数据分析", "AI 辅助工具"]
+      },
+      "professionals": {
+        "title": "效率工具",
+        "subtitle": "打造专业工具",
+        "description": "完善的认证、订阅和积分系统，让你专注于核心工具逻辑的开发，快速推出你的效率工具产品。",
+        "examples": ["项目管理工具", "文档协作平台", "自动化工作流"]
+      },
+      "language": {
+        "title": "创作者平台",
+        "subtitle": "支持内容创作",
+        "description": "内置文件上传、存储管理和用户系统，适合构建创作者经济平台，支持内容发布和变现。",
+        "examples": ["在线课程平台", "知识付费社区", "数字内容市场"]
+      },
+      "knowledge": {
+        "title": "内部工具",
+        "subtitle": "企业内部系统",
+        "description": "完整的管理后台、权限控制和工单系统，适合快速搭建企业内部管理工具和运营平台。",
+        "examples": ["CRM 客户管理", "运营数据看板", "内部审批系统"]
+      }
+    }
+  },
+  "Testimonials": {
+    "label": "用户评价",
+    "title": "听听开发者们怎么说",
+    "subtitle": "来自不同领域的开发者正在使用 NextDevTpl 模板快速构建产品。",
+    "items": [
+      {
+        "content": "用这个模板两周就上线了一个 AI 写作工具，认证、支付、积分系统全都不用自己写，节省了至少一个月的开发时间。",
+        "author": "林小雨",
+        "role": "独立开发者"
+      },
+      {
+        "content": "之前自己搭 SaaS 框架花了三个月，用了这个模板后发现认证、订阅、积分这些通用模块的完成度远超预期，代码质量也很高。",
+        "author": "张明远",
+        "role": "全栈工程师"
+      },
+      {
+        "content": "国际化方案开箱即用，中英双语直接可用，扩展其他语言也很方便。对需要做多语言市场的 SaaS 产品来说非常省心。",
+        "author": "陈思琪",
+        "role": "产品经理"
+      },
+      {
+        "content": "Inngest 异步任务的集成方案非常优雅，完美解决了 Vercel 60 秒超时的问题。我的 AI 产品不再需要担心长任务处理了。",
+        "author": "王浩然",
+        "role": "技术负责人"
+      },
+      {
+        "content": "积分系统的双重记账法实现得很专业，FIFO 批次过期逻辑也考虑到了。直接拿来用，不需要自己设计积分消费方案。",
+        "author": "李雨桐",
+        "role": "后端开发者"
+      },
+      {
+        "content": "管理后台已经有了用户管理和工单系统，对小团队来说已经足够用了。部署到自有服务器也很简单，文档写得很清楚。",
+        "author": "赵一鸣",
+        "role": "创业者"
+      }
+    ]
+  },
+  "FAQ": {
+    "label": "常见问题",
+    "title": "你可能想了解的",
+    "subtitle": "关于 NextDevTpl 模板的常见问题与解答。",
+    "items": [
+      {
+        "question": "NextDevTpl 是什么？",
+        "answer": "NextDevTpl 是一个基于 Next.js 15、React 19、TypeScript 的生产就绪 SaaS 模板。内置认证（Better Auth）、支付（Creem）、积分系统、异步任务处理（Inngest）、国际化、管理后台等完整功能，帮助开发者快速启动 SaaS 项目。"
+      },
+      {
+        "question": "需要哪些技术基础？",
+        "answer": "你需要熟悉 React、TypeScript 和 Next.js 的基础知识。模板使用 Tailwind CSS 做样式，Drizzle ORM 做数据库操作，了解这些技术栈会帮助你更快上手。"
+      },
+      {
+        "question": "可以部署到哪些平台？",
+        "answer": "模板可以部署到 Vercel（推荐）、自有服务器或任何支持 Node.js 的平台。数据库推荐使用 Neon PostgreSQL（Serverless），文件存储使用 Cloudflare R2。"
+      },
+      {
+        "question": "积分系统是怎样的？",
+        "answer": "模板内置基于双重记账法的积分系统，支持积分发放、消耗、FIFO 批次过期、余额查询等完整功能。注册用户会获得免费积分，你可以根据业务需求自定义积分规则和定价方案。"
+      },
+      {
+        "question": "如何定制支付方案？",
+        "answer": "模板集成 Creem 支付，支持订阅和一次性购买。你可以在配置文件中自定义套餐名称、价格、积分额度和功能权限。Webhook 处理和订阅生命周期管理已经内置。"
+      },
+      {
+        "question": "支持哪些认证方式？",
+        "answer": "模板集成 Better Auth，支持邮箱密码注册登录、Google OAuth 和 GitHub OAuth。你可以轻松扩展其他 OAuth 提供商。会话管理、密码重置、邮箱验证等功能开箱即用。"
+      }
+    ]
+  },
+  "Auth": {
+    "common": {
+      "or": "或",
+      "google": "Google",
+      "github": "GitHub"
+    },
+    "signIn": {
+      "title": "欢迎回来",
+      "subtitle": "请输入你的账号信息以继续登录。",
+      "emailLabel": "邮箱",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "密码",
+      "forgotPassword": "忘记密码",
+      "loading": "登录中...",
+      "submit": "继续",
+      "success": "登录成功！",
+      "resendVerification": "重新发送验证邮件",
+      "resendCooldown": "{seconds}秒后可重新发送",
+      "noAccount": "还没有账号？",
+      "signUpLink": "注册",
+      "errors": {
+        "google": "Google 登录失败，请重试",
+        "github": "GitHub 登录失败，请重试",
+        "missingFields": "请填写邮箱和密码",
+        "invalidCredentials": "邮箱或密码错误",
+        "emailNotVerified": "请先验证邮箱后再登录。请查看收件箱中的验证链接。"
+      }
+    },
+    "signUp": {
+      "title": "创建账号",
+      "subtitle": "填写信息即可开始使用。",
+      "nameLabel": "姓名",
+      "namePlaceholder": "张三",
+      "emailLabel": "邮箱",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "密码",
+      "passwordPlaceholder": "至少 8 个字符",
+      "confirmPasswordLabel": "确认密码",
+      "confirmPasswordPlaceholder": "再次输入密码",
+      "loading": "正在创建...",
+      "submit": "创建账号",
+      "success": "注册成功！",
+      "haveAccount": "已有账号？",
+      "signInLink": "登录",
+      "errors": {
+        "google": "Google 注册失败，请重试",
+        "github": "GitHub 注册失败，请重试",
+        "missingFields": "请填写所有字段",
+        "passwordTooShort": "密码至少需要 8 个字符",
+        "passwordMismatch": "两次输入的密码不一致",
+        "emailInUse": "注册失败，该邮箱可能已被使用"
+      },
+      "verifyEmail": {
+        "title": "请查收邮件",
+        "description": "我们已向 {email} 发送了一封验证邮件，请点击邮件中的链接完成验证。",
+        "hint": "没有收到邮件？请检查垃圾邮件文件夹。",
+        "resend": "重新发送验证邮件",
+        "resendCooldown": "{seconds}秒后可重新发送",
+        "backToSignIn": "返回登录"
+      }
+    },
+    "footer": {
+      "copyright": "© {year} {name}。保留所有权利。",
+      "privacy": "隐私政策",
+      "terms": "服务条款",
+      "cookies": "Cookie 设置"
+    }
+  },
+  "CTA": {
+    "badge": "免费开始，无需信用卡",
+    "title": "准备好启动你的 SaaS 了吗？",
+    "subtitle": "注册即可获得免费积分，立即体验完整功能。用生产就绪的模板快速构建你的下一个产品。",
+    "getStarted": "免费注册",
+    "seeDemo": "查看演示"
+  },
+  "DashboardPages": {
+    "dashboard": {
+      "title": "控制台",
+      "subtitle": "欢迎回来！这里是你的概览。",
+      "stats": {
+        "credits": {
+          "title": "积分余额",
+          "description": "可用余额"
+        }
+      },
+      "actions": {
+        "credits": "积分",
+        "settings": "设置",
+        "support": "支持"
+      }
+    }
+  },
+  "Flashcards": {},
+  "Decks": {},
+  "AnonymousGenerate": {},
+  "Solutions": {},
+  "CreditTransactions": {
+    "anonymous_migration": "迁移 {cardCount} 条匿名生成的数据",
+    "anonymous_migration_bonus": "新用户福利：免费保存 {cardCount} 条数据"
+  },
+  "Common": {
+    "getStarted": "开始使用",
+    "login": "登录",
+    "dashboard": "控制台",
+    "products": "产品",
+    "pricing": "定价",
+    "blog": "博客",
+    "docs": "文档",
+    "features": "功能",
+    "changelog": "更新日志",
+    "relativeTime": {
+      "justNow": "刚刚",
+      "minutesAgo": "{count} 分钟前",
+      "hoursAgo": "{count} 小时前",
+      "daysAgo": "{count} 天前",
+      "monthsAgo": "{count} 个月前",
+      "yearsAgo": "{count} 年前"
+    }
+  },
+  "Cookie": {
+    "title": "Cookie 设置",
+    "description": "我们使用 Cookie 来确保您在我们网站上获得最佳体验。继续使用本网站即表示您同意我们的",
+    "privacyPolicy": "隐私政策",
+    "acceptAll": "接受全部",
+    "rejectAll": "仅必要",
+    "managePreferences": "管理偏好",
+    "back": "返回",
+    "preferencesTitle": "Cookie 偏好设置",
+    "essential": {
+      "title": "必要 Cookie",
+      "description": "这些 Cookie 是网站正常运行所必需的，无法关闭。"
+    },
+    "analytics": {
+      "title": "分析 Cookie",
+      "description": "帮助我们了解访问者如何与网站互动，以便改进用户体验。"
+    },
+    "marketing": {
+      "title": "营销 Cookie",
+      "description": "用于向您展示相关广告和营销内容。"
+    },
+    "alwaysEnabled": "始终启用",
+    "saveSettings": "保存设置"
+  },
+  "Pricing": {
+    "title": "简单透明的定价",
+    "subtitle": "按积分付费，<strong>永久有效</strong>，没用完也不浪费。年付立省 40%。",
+    "creditsUpfront": "一次性到账",
+    "creditsPerYear": "积分 / 年",
+    "monthly": "月付",
+    "yearly": "年付",
+    "save": "省",
+    "mostPopular": "性价比最高",
+    "currentPlan": "当前套餐",
+    "alreadySubscribed": "已订阅",
+    "manageSubscription": "管理订阅",
+    "booksNote": "≈ {count} 万次 API 调用",
+    "cardsNote": "≈ {count} 积分",
+    "plans": {
+      "free": {
+        "name": "免费版",
+        "description": "无负担体验基础功能",
+        "cta": "免费开始",
+        "creditsAmount": "200",
+        "creditsLabel": "积分",
+        "creditsNote": "一次性",
+        "features": {
+          "creditsNeverExpire": "积分永久有效，不清零",
+          "credits": "200 积分（一次性）",
+          "input": "基础功能访问",
+          "characters": "标准处理额度",
+          "fileSize": "最大 5MB 文件",
+          "export": "数据导出",
+          "history": "历史数据永久保存"
+        }
+      },
+      "starter": {
+        "name": "入门版",
+        "description": "适合个人开发者和小项目",
+        "cta": "订阅",
+        "creditsAmount": "3,000",
+        "creditsLabel": "积分 / 月",
+        "booksCount": "8",
+        "features": {
+          "creditsNeverExpire": "积分永久有效，不清零",
+          "credits": "每月 3,000 积分",
+          "input": "全部基础功能",
+          "characters": "标准处理额度",
+          "fileSize": "最大 20MB 文件",
+          "export": "数据导出",
+          "history": "历史数据永久保存",
+          "support": "邮件支持"
+        }
+      },
+      "pro": {
+        "name": "专业版",
+        "description": "性价比最高，适合成长中的产品",
+        "cta": "订阅",
+        "creditsAmount": "8,000",
+        "creditsLabel": "积分 / 月",
+        "booksCount": "23",
+        "features": {
+          "creditsNeverExpire": "积分永久有效，不清零",
+          "credits": "每月 8,000 积分",
+          "input": "全部高级功能",
+          "characters": "更大处理额度",
+          "fileSize": "最大 50MB 文件",
+          "queue": "优先处理队列",
+          "export": "数据导出",
+          "history": "历史数据永久保存",
+          "customCards": "自定义功能扩展",
+          "support": "优先支持"
+        }
+      },
+      "ultra": {
+        "name": "旗舰版",
+        "description": "适合高频使用和企业团队",
+        "cta": "订阅",
+        "creditsAmount": "16,000",
+        "creditsLabel": "积分 / 月",
+        "booksCount": "46",
+        "features": {
+          "creditsNeverExpire": "积分永久有效，不清零",
+          "credits": "每月 16,000 积分",
+          "input": "全部高级功能",
+          "characters": "最大处理额度",
+          "fileSize": "最大 100MB 文件",
+          "queue": "最高优先队列",
+          "export": "数据导出",
+          "history": "历史数据永久保存",
+          "customCards": "自定义功能扩展",
+          "aiAssist": "高级 AI 功能",
+          "support": "专属支持"
+        }
+      }
+    }
+  },
+  "Header": {
+    "dashboard": "控制台",
+    "login": "登录",
+    "getStarted": "免费开始",
+    "docs": "文档"
+  },
+  "Navigation": {
+    "products": "产品",
+    "docs": "文档",
+    "pricing": "定价",
+    "blog": "博客",
+    "about": "关于",
+    "productsMenu": {
+      "core": {
+        "title": "核心功能",
+        "auth": "认证系统",
+        "authDesc": "多方式登录与会话管理",
+        "payments": "支付集成",
+        "paymentsDesc": "订阅和一次性支付",
+        "credits": "积分系统",
+        "creditsDesc": "双重记账法与 FIFO 批次过期"
+      },
+      "dx": {
+        "title": "开发体验",
+        "jobs": "异步处理",
+        "jobsDesc": "Inngest 后台任务引擎",
+        "i18n": "国际化",
+        "i18nDesc": "next-intl 多语言支持",
+        "ai": "AI 集成",
+        "aiDesc": "多模型 LLM 抽象层"
+      },
+      "infra": {
+        "title": "基础设施",
+        "admin": "管理后台",
+        "adminDesc": "用户与工单管理",
+        "storage": "文件存储",
+        "storageDesc": "S3/R2 云存储",
+        "monitoring": "监控日志",
+        "monitoringDesc": "日志与错误追踪"
+      }
+    }
+  },
+  "Subscription": {
+    "plans": {
+      "free": "免费版",
+      "starter": "入门版",
+      "pro": "专业版",
+      "ultra": "旗舰版"
+    }
+  },
+  "Dashboard": {
+    "nav": {
+      "dashboard": "控制台",
+      "support": "支持",
+      "newTicket": "新建工单"
+    },
+    "pages": {
+      "dashboard": "控制台",
+      "support": "支持",
+      "newTicket": "新建工单",
+      "settings": "设置",
+      "profile": "个人资料",
+      "security": "安全",
+      "billing": "账单",
+      "notifications": "通知",
+      "ticketDetails": "工单详情"
+    },
+    "sidebar": {
+      "settings": "设置",
+      "logout": "退出登录"
+    }
+  },
+  "Settings": {
+    "tabs": {
+      "account": "账户",
+      "security": "安全",
+      "billing": "账单",
+      "usage": "用量"
+    },
+    "general": {
+      "title": "基本信息",
+      "description": "更新您的个人信息和账户设置。",
+      "save": "保存",
+      "name": "姓名",
+      "namePlaceholder": "请输入您的姓名",
+      "nameDescription": "姓名为必填项，至少需要 2 个字符。",
+      "email": "邮箱",
+      "emailDescription": "如需更改邮箱，请联系客服。"
+    },
+    "avatar": {
+      "title": "头像",
+      "description": "上传头像以个性化您的账户。",
+      "uploading": "上传中...",
+      "supportedFormats": "支持 JPG、PNG、GIF、WebP，最大 {size}MB"
+    },
+    "language": {
+      "title": "语言设置",
+      "description": "选择您偏好的界面语言。",
+      "placeholder": "选择语言"
+    },
+    "deleteAccount": {
+      "title": "删除账户",
+      "description": "永久删除您的账户及所有相关数据。此操作无法撤销。",
+      "button": "删除账户",
+      "warning": "此操作不可逆，请谨慎操作。"
+    },
+    "security": {
+      "changePassword": {
+        "title": "修改密码",
+        "description": "更新密码以确保账户安全。",
+        "currentPassword": "当前密码",
+        "currentPasswordPlaceholder": "输入当前密码",
+        "newPassword": "新密码",
+        "newPasswordPlaceholder": "输入新密码",
+        "confirmPassword": "确认新密码",
+        "confirmPasswordPlaceholder": "再次输入新密码",
+        "submit": "更新密码",
+        "updating": "更新中..."
+      },
+      "errors": {
+        "missingFields": "请填写所有密码字段。",
+        "passwordTooShort": "新密码至少需要 8 个字符。",
+        "passwordMismatch": "两次输入的新密码不一致。",
+        "samePassword": "新密码不能与当前密码相同。",
+        "wrongPassword": "当前密码不正确。"
+      },
+      "success": "密码修改成功。"
+    },
+    "errors": {
+      "unsupportedFileType": "不支持的文件类型。支持：{types}",
+      "fileTooLarge": "文件过大。最大支持：{size}MB",
+      "uploadFailed": "获取上传 URL 失败",
+      "fileUploadFailed": "文件上传失败",
+      "avatarUploadError": "头像上传失败",
+      "validationFailed": "验证失败"
+    },
+    "success": {
+      "avatarUpdated": "头像更新成功"
+    },
+    "billing": {
+      "currentPlan": {
+        "title": "当前套餐",
+        "description": "管理您的订阅和账单周期。",
+        "freePlan": "免费版",
+        "current": "当前",
+        "basicFeatures": "基础功能，积分有限",
+        "premiumFeatures": "完整访问所有高级功能",
+        "upgradePlan": "升级套餐",
+        "managePlan": "管理套餐",
+        "monthlyCredits": "每月积分",
+        "renewalDate": "续费日期",
+        "notApplicable": "无",
+        "price": "价格",
+        "perMonth": "月",
+        "perYear": "年",
+        "cancelSubscription": "取消订阅",
+        "cancelPending": "将于 {date} 到期取消",
+        "cancelDialog": {
+          "title": "确认取消订阅？",
+          "description": "订阅将在当前计费周期结束时（{date}）自动取消，届时套餐将恢复为免费版。",
+          "keepBenefits": "在 {date} 之前，您仍可享受当前套餐的全部权益",
+          "confirm": "确认取消",
+          "cancel": "保留订阅"
+        }
+      },
+      "paymentMethods": {
+        "title": "支付方式",
+        "description": "添加或管理您的支付方式，用于订阅和购买。",
+        "addMethod": "添加支付方式",
+        "noMethods": "暂无支付方式",
+        "noMethodsHint": "添加支付方式以升级套餐或购买积分"
+      },
+      "history": {
+        "title": "账单历史",
+        "description": "查看和下载您的历史发票。",
+        "date": "日期",
+        "historyDescription": "描述",
+        "amount": "金额",
+        "status": "状态",
+        "invoice": "发票",
+        "noHistory": "暂无账单记录",
+        "noHistoryHint": "首次购买后，发票将显示在此处"
+      }
+    },
+    "usage": {
+      "title": "积分使用情况",
+      "description": "用于各项服务的积分消耗概览。",
+      "availableCredits": "可用积分",
+      "creditsAvailable": "积分可用",
+      "getMoreCredits": {
+        "title": "获取更多积分",
+        "description": "订阅套餐以获取每月积分并解锁高级功能",
+        "viewPlans": "查看订阅套餐"
+      },
+      "expiringSoon": {
+        "title": "积分即将过期",
+        "message": "{count} 积分将于 {date} 过期"
+      },
+      "transactions": {
+        "title": "交易记录",
+        "description": "查看所有积分交易，包括发放和消耗",
+        "date": "日期",
+        "type": "类型",
+        "transactionDescription": "描述",
+        "transactionAmount": "数量",
+        "noTransactions": "暂无交易记录",
+        "noTransactionsHint": "您的积分交易将显示在此处",
+        "loading": "加载中...",
+        "showing": "显示第 {from} 至 {to} 条，共 {total} 条交易",
+        "rowsPerPage": "每页显示",
+        "pageOf": "第 {page} 页，共 {total} 页",
+        "types": {
+          "registration_bonus": "注册奖励",
+          "admin_grant": "管理员发放",
+          "monthly_grant": "每月发放",
+          "purchase": "购买",
+          "consumption": "消耗",
+          "expiration": "已过期",
+          "refund": "退款"
+        },
+        "descriptions": {
+          "registration_bonus": "新用户注册奖励",
+          "monthly_grant": "{plan} 月度订阅积分",
+          "yearly_grant": "{plan} 年度订阅积分 ({monthly} x 12)",
+          "consumption": "服务消耗",
+          "expiration": "积分已过期",
+          "admin_grant": "管理员发放积分",
+          "refund": "积分退款"
+        }
+      }
+    }
+  }
+}

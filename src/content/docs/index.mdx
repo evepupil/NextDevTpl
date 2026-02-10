@@ -1,0 +1,73 @@
+---
+title: Introduction
+description: Welcome to NextDevTpl documentation. Learn how to get started with our SaaS boilerplate.
+---
+
+# Introduction
+
+Welcome to the NextDevTpl documentation! This guide will help you get started with building your SaaS application.
+
+## Overview
+
+NextDevTpl is a comprehensive starter kit designed to accelerate your SaaS development. It includes everything you need to build a modern web application:
+
+- **Authentication** - Secure user authentication with Better Auth
+- **Database** - PostgreSQL with Drizzle ORM for type-safe queries
+- **UI Components** - Beautiful components built with Shadcn UI
+- **Internationalization** - Multi-language support with next-intl
+- **Content Management** - Blog and docs powered by Fumadocs
+
+## Quick Start
+
+### Prerequisites
+
+Before you begin, make sure you have:
+
+- Node.js 18+ installed
+- pnpm package manager
+- PostgreSQL database
+
+### Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/nextdevtpl/nextdevtpl.git
+cd nextdevtpl
+```
+
+2. Install dependencies:
+
+```bash
+pnpm install
+```
+
+3. Set up environment variables:
+
+```bash
+cp .env.example .env.local
+```
+
+4. Start the development server:
+
+```bash
+pnpm dev
+```
+
+## Project Structure
+
+```
+src/
+├── app/           # Next.js App Router
+├── components/    # Shared components
+├── features/      # Feature modules
+├── lib/           # Utilities
+├── db/            # Database schema
+└── content/       # MDX content
+```
+
+## Next Steps
+
+- [Authentication](/docs/authentication) - Set up user authentication
+- [Database](/docs/database) - Configure your database
+- [Deployment](/docs/deployment) - Deploy to production

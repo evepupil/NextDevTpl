@@ -1,0 +1,136 @@
+/**
+ * 订阅等级徽章动画样式
+ */
+
+/* Starter - 微光扫过效果 */
+.plan-badge-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.plan-badge-shimmer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  50%,
+  100% {
+    left: 100%;
+  }
+}
+
+/* Pro - 金色流光效果 */
+.plan-badge-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.plan-badge-shine::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 150%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 215, 0, 0.3),
+    rgba(255, 255, 255, 0.5),
+    rgba(255, 215, 0, 0.3),
+    transparent
+  );
+  animation: shine 2.5s infinite;
+}
+
+@keyframes shine {
+  0% {
+    left: -150%;
+  }
+  50%,
+  100% {
+    left: 150%;
+  }
+}
+
+/* Ultra - 极光渐变效果 */
+.plan-badge-aurora {
+  position: relative;
+  overflow: hidden;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.plan-badge-aurora::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    transparent,
+    rgba(168, 85, 247, 0.3),
+    rgba(236, 72, 153, 0.3),
+    rgba(168, 85, 247, 0.3),
+    transparent
+  );
+  animation: aurora-rotate 4s linear infinite;
+}
+
+@keyframes aurora-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(168, 85, 247, 0.6), 0 0 35px rgba(236, 72, 153, 0.3);
+  }
+}
+
+/* 暗色模式调整 */
+@media (prefers-color-scheme: dark) {
+  .plan-badge-shimmer::before {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+  }
+
+  .plan-badge-shine::before {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 215, 0, 0.2),
+      rgba(255, 255, 255, 0.3),
+      rgba(255, 215, 0, 0.2),
+      transparent
+    );
+  }
+}

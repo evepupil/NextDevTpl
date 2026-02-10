@@ -1,0 +1,642 @@
+{
+  "HomePage": {
+    "title": "NextDevTpl",
+    "subtitle": "Production-Ready Next.js SaaS Template",
+    "description": "Ship your SaaS product faster with a production-ready full-stack template."
+  },
+  "Hero": {
+    "badge": "New: AI Model Integration",
+    "title1": "The Ultimate Next.js",
+    "titleHighlight": "Starter Template",
+    "subtitle": "Build and ship faster with production-ready infrastructure. Authentication, payments, and beautiful UI components out of the box.",
+    "getStarted": "Get Started",
+    "seeDemo": "View Demo",
+    "trustLine": "Trusted by developers worldwide",
+    "stats": {
+      "cards": "Projects Built",
+      "users": "Developers",
+      "rating": "Satisfaction"
+    }
+  },
+  "Features": {
+    "label": "Core Features",
+    "title": "Everything You Need to Launch",
+    "subtitle": "Every essential SaaS feature, pre-built and production-ready, so you can focus on what makes your product unique.",
+    "items": {
+      "ai": {
+        "title": "Auth & Security",
+        "description": "Better Auth with email/password, Google and GitHub OAuth, email verification, and role-based access control out of the box."
+      },
+      "multiSource": {
+        "title": "Payment & Subscription",
+        "description": "Creem integration for subscriptions and one-time purchases. Four plan tiers with automatic billing cycle management."
+      },
+      "outline": {
+        "title": "Credits System",
+        "description": "Double-entry bookkeeping with FIFO batch expiration. Grant, consume, and track credits with full transaction history."
+      },
+      "export": {
+        "title": "Async Processing",
+        "description": "Inngest-powered background jobs that bypass serverless timeouts. Built-in task queue with status polling and progress tracking."
+      },
+      "batch": {
+        "title": "Internationalization",
+        "description": "Full i18n support via next-intl with locale-prefixed routes. Ship in multiple languages from day one."
+      },
+      "multilingual": {
+        "title": "Admin Dashboard",
+        "description": "Built-in admin panel for user management, support tickets, and platform statistics. Role-based access with admin-only routes."
+      }
+    }
+  },
+  "HowItWorks": {
+    "label": "How It Works",
+    "title": "From Zero to Production in Three Steps",
+    "subtitle": "Get your SaaS up and running in minutes, not months.",
+    "steps": {
+      "upload": {
+        "title": "Clone & Configure",
+        "description": "Clone the repository, install dependencies with pnpm, and set your environment variables. Database, auth, and payments are ready to connect."
+      },
+      "generate": {
+        "title": "Customize & Build",
+        "description": "Replace the example features with your own business logic. The modular architecture keeps everything organized by feature domain."
+      },
+      "export": {
+        "title": "Deploy & Launch",
+        "description": "Deploy to Vercel, your own server, or any Node.js host. Push your Drizzle schema, configure webhooks, and go live."
+      }
+    },
+    "completion": {
+      "title": "That's it!",
+      "description": "Your SaaS is live. Focus on growing your product and acquiring customers."
+    }
+  },
+  "UseCases": {
+    "label": "Use Cases",
+    "title": "Build Any SaaS Product",
+    "subtitle": "NextDevTpl provides the foundation for a wide range of SaaS applications.",
+    "items": {
+      "students": {
+        "title": "AI Products",
+        "subtitle": "AI-Powered Applications",
+        "description": "Build AI wrappers, content generators, or intelligent assistants. The credits system and async processing handle LLM calls and usage metering out of the box.",
+        "examples": ["AI content tools", "Chatbot platforms", "Image generators"]
+      },
+      "professionals": {
+        "title": "Productivity Tools",
+        "subtitle": "Workflow & Collaboration",
+        "description": "Create project management, note-taking, or team collaboration tools. Auth, roles, and subscription tiers are already wired up.",
+        "examples": ["Task managers", "Document editors", "Scheduling apps"]
+      },
+      "language": {
+        "title": "Creator Platforms",
+        "subtitle": "Content & Community",
+        "description": "Launch platforms for creators, educators, or communities. Payment processing, user dashboards, and file storage are ready to use.",
+        "examples": ["Course platforms", "Newsletter tools", "Membership sites"]
+      },
+      "knowledge": {
+        "title": "Internal Tools",
+        "subtitle": "Business Operations",
+        "description": "Build internal dashboards, admin panels, or data management tools. The admin module and role-based access provide a solid starting point.",
+        "examples": ["Admin dashboards", "CRM systems", "Reporting tools"]
+      }
+    }
+  },
+  "Testimonials": {
+    "label": "Testimonials",
+    "title": "What Developers Say",
+    "subtitle": "Developers around the world are using NextDevTpl to ship their SaaS products faster.",
+    "items": [
+      {
+        "content": "I went from idea to paying customers in under a week. The auth, payments, and credits system saved me at least a month of development time.",
+        "author": "Sarah Lin",
+        "role": "Indie Hacker · AI Tools"
+      },
+      {
+        "content": "The Inngest integration for background jobs is a game-changer. I no longer worry about serverless timeouts when processing large tasks for my users.",
+        "author": "Michael Zhang",
+        "role": "Full-Stack Developer"
+      },
+      {
+        "content": "Having i18n baked in from the start made expanding to international markets seamless. We launched in English and Chinese simultaneously.",
+        "author": "Emily Chen",
+        "role": "Startup Founder"
+      },
+      {
+        "content": "The credits system with double-entry bookkeeping is incredibly well-designed. It took me five minutes to wire up usage metering for my API product.",
+        "author": "David Wang",
+        "role": "Senior Engineer · API Platform"
+      },
+      {
+        "content": "The modular feature architecture is exactly what I needed. Each domain is self-contained, so onboarding new developers to the codebase is effortless.",
+        "author": "Lisa Li",
+        "role": "Tech Lead · SaaS Startup"
+      },
+      {
+        "content": "I've tried dozens of SaaS boilerplates. This one stands out because it doesn't cut corners — the admin panel, support tickets, and subscription management all work end-to-end.",
+        "author": "Kevin Zhao",
+        "role": "Solo Developer · Productivity Tools"
+      }
+    ]
+  },
+  "FAQ": {
+    "label": "FAQ",
+    "title": "Questions You Might Have",
+    "subtitle": "Common questions and answers about NextDevTpl.",
+    "items": [
+      {
+        "question": "What is NextDevTpl?",
+        "answer": "NextDevTpl is a production-ready Next.js SaaS starter template. It includes authentication, payment processing, a credits system, background job processing, internationalization, an admin dashboard, and more — everything you need to launch a SaaS product quickly."
+      },
+      {
+        "question": "What tech stack does it use?",
+        "answer": "Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS 4, Shadcn/UI, Drizzle ORM with PostgreSQL, Better Auth for authentication, Creem for payments, Inngest for async processing, next-intl for i18n, and Biome for linting and formatting."
+      },
+      {
+        "question": "How is the credits system designed?",
+        "answer": "The credits system uses double-entry bookkeeping with FIFO batch expiration. Every credit movement creates a transaction with debit and credit accounts. Credits can be granted via subscriptions, purchases, or admin actions, and consumed by any feature you build."
+      },
+      {
+        "question": "Can I customize the subscription plans?",
+        "answer": "Absolutely. The subscription plan configuration is centralized in a single config file. You can adjust plan names, pricing, credit allocations, feature limits, and billing cycles to match your product's needs."
+      },
+      {
+        "question": "Does it support background processing?",
+        "answer": "Yes. Inngest handles all background jobs, solving the serverless timeout problem. Tasks run asynchronously with status polling and progress tracking built in. You can easily add your own Inngest functions for any long-running work."
+      },
+      {
+        "question": "Is it ready for production?",
+        "answer": "Yes. The template includes rate limiting, error monitoring (Sentry), structured logging (Pino + Axiom), secure file storage (Cloudflare R2), and graceful degradation for optional services. It's designed to run on a VPS or any Node.js hosting platform."
+      }
+    ]
+  },
+  "Auth": {
+    "common": {
+      "or": "or",
+      "google": "Google",
+      "github": "GitHub"
+    },
+    "signIn": {
+      "title": "Welcome back",
+      "subtitle": "Please enter your credentials to sign in.",
+      "emailLabel": "Email address",
+      "emailPlaceholder": "jane@example.com",
+      "passwordLabel": "Password",
+      "forgotPassword": "Forgot my password",
+      "loading": "Signing in...",
+      "submit": "Continue",
+      "success": "Signed in successfully!",
+      "resendVerification": "Resend verification email",
+      "resendCooldown": "Resend in {seconds}s",
+      "noAccount": "Don\u0027t have an account?",
+      "signUpLink": "Sign up",
+      "errors": {
+        "google": "Google sign-in failed. Please try again.",
+        "github": "GitHub sign-in failed. Please try again.",
+        "missingFields": "Please enter email and password.",
+        "invalidCredentials": "Invalid email or password.",
+        "emailNotVerified": "Please verify your email before signing in. Check your inbox for the verification link."
+      }
+    },
+    "signUp": {
+      "title": "Create an account",
+      "subtitle": "Enter your details to get started.",
+      "nameLabel": "Full name",
+      "namePlaceholder": "Jane Doe",
+      "emailLabel": "Email address",
+      "emailPlaceholder": "jane@example.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "confirmPasswordLabel": "Confirm password",
+      "confirmPasswordPlaceholder": "Re-enter your password",
+      "loading": "Creating account...",
+      "submit": "Create account",
+      "success": "Account created successfully!",
+      "haveAccount": "Already have an account?",
+      "signInLink": "Sign in",
+      "errors": {
+        "google": "Google sign-up failed. Please try again.",
+        "github": "GitHub sign-up failed. Please try again.",
+        "missingFields": "Please fill in all fields.",
+        "passwordTooShort": "Password must be at least 8 characters.",
+        "passwordMismatch": "Passwords do not match.",
+        "emailInUse": "Sign-up failed. This email may already be in use."
+      },
+      "verifyEmail": {
+        "title": "Check your email",
+        "description": "We've sent a verification link to {email}. Please click the link to verify your account.",
+        "hint": "Didn't receive the email? Check your spam folder.",
+        "resend": "Resend verification email",
+        "resendCooldown": "Resend in {seconds}s",
+        "backToSignIn": "Back to sign in"
+      }
+    },
+    "footer": {
+      "copyright": "\u00a9 {year} {name}. All rights reserved.",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "cookies": "Cookie Settings"
+    }
+  },
+  "CTA": {
+    "badge": "Start free, no credit card required",
+    "title": "Ready to Launch Your SaaS?",
+    "subtitle": "Get started with a production-ready template and ship your product in days, not months. Everything you need is already built in.",
+    "getStarted": "Get Started Free",
+    "seeDemo": "Live Demo"
+  },
+  "DashboardPages": {
+    "dashboard": {
+      "title": "Dashboard",
+      "subtitle": "Welcome back! Here's an overview of your account.",
+      "stats": {
+        "credits": {
+          "title": "Credits",
+          "description": "Available balance"
+        }
+      },
+      "actions": {
+        "credits": "View Credits",
+        "settings": "Account Settings",
+        "support": "Get Support"
+      }
+    }
+  },
+  "Flashcards": {},
+  "Decks": {},
+  "AnonymousGenerate": {},
+  "Solutions": {},
+  "CreditTransactions": {
+    "anonymous_migration": "Migrated {cardCount} items from anonymous session",
+    "anonymous_migration_bonus": "New user bonus: Saved {cardCount} items for free"
+  },
+  "Header": {
+    "dashboard": "Dashboard",
+    "login": "Login",
+    "getStarted": "Get Started",
+    "docs": "Docs"
+  },
+  "Navigation": {
+    "products": "Products",
+    "docs": "Docs",
+    "pricing": "Pricing",
+    "blog": "Blog",
+    "about": "About",
+    "productsMenu": {
+      "core": {
+        "title": "Core",
+        "auth": "Authentication",
+        "authDesc": "Multi-provider auth with session management",
+        "payments": "Payments",
+        "paymentsDesc": "Subscriptions and one-time purchases",
+        "credits": "Credits",
+        "creditsDesc": "Double-entry bookkeeping with FIFO expiration"
+      },
+      "dx": {
+        "title": "DX Platform",
+        "jobs": "Background Jobs",
+        "jobsDesc": "Async processing with Inngest",
+        "i18n": "Internationalization",
+        "i18nDesc": "Multi-language with next-intl",
+        "ai": "AI Integration",
+        "aiDesc": "Multi-model LLM abstraction"
+      },
+      "infra": {
+        "title": "Infrastructure",
+        "admin": "Admin Panel",
+        "adminDesc": "User and ticket management",
+        "storage": "File Storage",
+        "storageDesc": "S3/R2 cloud storage",
+        "monitoring": "Monitoring",
+        "monitoringDesc": "Logging and error tracking"
+      }
+    }
+  },
+  "Common": {
+    "getStarted": "Get Started",
+    "login": "Log in",
+    "dashboard": "Dashboard",
+    "products": "Products",
+    "pricing": "Pricing",
+    "blog": "Blog",
+    "docs": "Documentation",
+    "features": "Features",
+    "changelog": "Changelog",
+    "relativeTime": {
+      "justNow": "Just now",
+      "minutesAgo": "{count, plural, one {# minute ago} other {# minutes ago}}",
+      "hoursAgo": "{count, plural, one {# hour ago} other {# hours ago}}",
+      "daysAgo": "{count, plural, one {# day ago} other {# days ago}}",
+      "monthsAgo": "{count, plural, one {# month ago} other {# months ago}}",
+      "yearsAgo": "{count, plural, one {# year ago} other {# years ago}}"
+    }
+  },
+  "Cookie": {
+    "title": "Cookie Settings",
+    "description": "We use cookies to ensure you get the best experience on our website. By continuing to use this site, you agree to our",
+    "privacyPolicy": "Privacy Policy",
+    "acceptAll": "Accept all",
+    "rejectAll": "Essential only",
+    "managePreferences": "Manage preferences",
+    "back": "Back",
+    "preferencesTitle": "Cookie Preferences",
+    "essential": {
+      "title": "Essential Cookies",
+      "description": "These cookies are necessary for the website to function and cannot be disabled."
+    },
+    "analytics": {
+      "title": "Analytics Cookies",
+      "description": "Help us understand how visitors interact with our website to improve user experience."
+    },
+    "marketing": {
+      "title": "Marketing Cookies",
+      "description": "Used to show you relevant ads and marketing content."
+    },
+    "alwaysEnabled": "Always enabled",
+    "saveSettings": "Save settings"
+  },
+  "Pricing": {
+    "title": "Simple, transparent pricing",
+    "subtitle": "Pay by credits — <strong>never expire</strong>, so unused credits aren't wasted. Use credits for any metered feature in your app. Save 40% with yearly billing.",
+    "creditsUpfront": "all at once",
+    "creditsPerYear": "credits / year",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "save": "Save",
+    "mostPopular": "Best Value",
+    "currentPlan": "Current Plan",
+    "alreadySubscribed": "Already Subscribed",
+    "manageSubscription": "Manage Subscription",
+    "booksNote": "≈ {count} units of usage",
+    "cardsNote": "≈ {count} operations",
+    "plans": {
+      "free": {
+        "name": "Free",
+        "description": "Try the platform with no commitment",
+        "cta": "Get Started",
+        "creditsAmount": "200",
+        "creditsLabel": "credits",
+        "creditsNote": "one-time",
+        "features": {
+          "creditsNeverExpire": "Credits never expire",
+          "credits": "200 credits (one-time)",
+          "input": "Core features access",
+          "characters": "Standard usage limits",
+          "fileSize": "Max 5MB file size",
+          "export": "Data export",
+          "history": "History saved forever"
+        }
+      },
+      "starter": {
+        "name": "Starter",
+        "description": "Great for getting started",
+        "cta": "Subscribe",
+        "creditsAmount": "3,000",
+        "creditsLabel": "credits / month",
+        "booksCount": "8",
+        "features": {
+          "creditsNeverExpire": "Credits never expire",
+          "credits": "3,000 credits / month",
+          "input": "Core features access",
+          "characters": "Standard usage limits",
+          "fileSize": "Max 20MB file size",
+          "export": "Data export",
+          "history": "History saved forever",
+          "support": "Email support"
+        }
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "Best value for growing projects",
+        "cta": "Subscribe",
+        "creditsAmount": "8,000",
+        "creditsLabel": "credits / month",
+        "booksCount": "23",
+        "features": {
+          "creditsNeverExpire": "Credits never expire",
+          "credits": "8,000 credits / month",
+          "input": "All features unlocked",
+          "characters": "Extended usage limits",
+          "fileSize": "Max 50MB file size",
+          "queue": "Priority processing queue",
+          "export": "Data export",
+          "history": "History saved forever",
+          "customCards": "Custom integrations (coming soon)",
+          "support": "Priority support"
+        }
+      },
+      "ultra": {
+        "name": "Ultra",
+        "description": "For power users and teams",
+        "cta": "Subscribe",
+        "creditsAmount": "16,000",
+        "creditsLabel": "credits / month",
+        "booksCount": "46",
+        "features": {
+          "creditsNeverExpire": "Credits never expire",
+          "credits": "16,000 credits / month",
+          "input": "All features unlocked",
+          "characters": "Maximum usage limits",
+          "fileSize": "Max 100MB file size",
+          "queue": "Highest priority queue",
+          "export": "Data export",
+          "history": "History saved forever",
+          "customCards": "Custom integrations (coming soon)",
+          "aiAssist": "Advanced API access (coming soon)",
+          "support": "Dedicated support"
+        }
+      }
+    }
+  },
+  "Subscription": {
+    "plans": {
+      "free": "Free",
+      "starter": "Starter",
+      "pro": "Pro",
+      "ultra": "Ultra"
+    }
+  },
+  "Dashboard": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "support": "Support",
+      "newTicket": "New Ticket"
+    },
+    "pages": {
+      "dashboard": "Dashboard",
+      "support": "Support",
+      "newTicket": "New Ticket",
+      "settings": "Settings",
+      "profile": "Profile",
+      "security": "Security",
+      "billing": "Billing",
+      "notifications": "Notifications",
+      "ticketDetails": "Ticket Details"
+    },
+    "sidebar": {
+      "settings": "Settings",
+      "logout": "Logout"
+    }
+  },
+  "Settings": {
+    "tabs": {
+      "account": "Account",
+      "security": "Security",
+      "billing": "Billing",
+      "usage": "Usage"
+    },
+    "general": {
+      "title": "General",
+      "description": "Update your personal information and account settings.",
+      "save": "Save",
+      "name": "Name",
+      "namePlaceholder": "Enter your name",
+      "nameDescription": "Name is required and must be at least 2 characters.",
+      "email": "Email",
+      "emailDescription": "To change your email, please contact support."
+    },
+    "avatar": {
+      "title": "Avatar",
+      "description": "Upload a profile picture to personalize your account.",
+      "uploading": "Uploading...",
+      "supportedFormats": "Supports JPG, PNG, GIF, WebP, max {size}MB"
+    },
+    "language": {
+      "title": "Language Settings",
+      "description": "Select your preferred language for the interface.",
+      "placeholder": "Select language"
+    },
+    "deleteAccount": {
+      "title": "Delete Account",
+      "description": "Permanently delete your account and all associated data. This action cannot be undone.",
+      "button": "Delete Account",
+      "warning": "This action is irreversible. Please proceed with caution."
+    },
+    "security": {
+      "changePassword": {
+        "title": "Change Password",
+        "description": "Update your password to keep your account secure.",
+        "currentPassword": "Current Password",
+        "currentPasswordPlaceholder": "Enter current password",
+        "newPassword": "New Password",
+        "newPasswordPlaceholder": "Enter new password",
+        "confirmPassword": "Confirm New Password",
+        "confirmPasswordPlaceholder": "Confirm new password",
+        "submit": "Update Password",
+        "updating": "Updating..."
+      },
+      "errors": {
+        "missingFields": "Please fill in all password fields.",
+        "passwordTooShort": "New password must be at least 8 characters.",
+        "passwordMismatch": "New passwords do not match.",
+        "samePassword": "New password must be different from current password.",
+        "wrongPassword": "Current password is incorrect."
+      },
+      "success": "Password updated successfully."
+    },
+    "errors": {
+      "unsupportedFileType": "Unsupported file type. Supported: {types}",
+      "fileTooLarge": "File too large. Maximum size: {size}MB",
+      "uploadFailed": "Failed to get upload URL",
+      "fileUploadFailed": "File upload failed",
+      "avatarUploadError": "Avatar upload failed",
+      "validationFailed": "Validation failed"
+    },
+    "success": {
+      "avatarUpdated": "Avatar updated successfully"
+    },
+    "billing": {
+      "currentPlan": {
+        "title": "Current Plan",
+        "description": "Manage your subscription and billing cycle.",
+        "freePlan": "Free Plan",
+        "current": "Current",
+        "basicFeatures": "Basic features with limited credits",
+        "premiumFeatures": "Full access to all premium features",
+        "upgradePlan": "Upgrade Plan",
+        "managePlan": "Manage Plan",
+        "monthlyCredits": "Monthly Credits",
+        "renewalDate": "Renewal Date",
+        "notApplicable": "N/A",
+        "price": "Price",
+        "perMonth": "month",
+        "perYear": "year",
+        "cancelSubscription": "Cancel Subscription",
+        "cancelPending": "Cancels on {date}",
+        "cancelDialog": {
+          "title": "Cancel Subscription?",
+          "description": "Your subscription will remain active until the end of your current billing period ({date}). After that, your plan will revert to Free.",
+          "keepBenefits": "You'll keep all your current plan benefits until {date}",
+          "confirm": "Yes, Cancel Subscription",
+          "cancel": "Keep Subscription"
+        }
+      },
+      "paymentMethods": {
+        "title": "Payment Methods",
+        "description": "Add or manage your payment methods for subscriptions and purchases.",
+        "addMethod": "Add Payment Method",
+        "noMethods": "No payment methods added",
+        "noMethodsHint": "Add a payment method to upgrade your plan or purchase credits"
+      },
+      "history": {
+        "title": "Billing History",
+        "description": "View and download your past invoices.",
+        "date": "Date",
+        "historyDescription": "Description",
+        "amount": "Amount",
+        "status": "Status",
+        "invoice": "Invoice",
+        "noHistory": "No billing history",
+        "noHistoryHint": "Your invoices will appear here after your first purchase"
+      }
+    },
+    "usage": {
+      "title": "Compute Credit Usage",
+      "description": "Credits used for AI dialogue, image and etc.",
+      "availableCredits": "Available Credits",
+      "creditsAvailable": "credits available",
+      "getMoreCredits": {
+        "title": "Get More Credits",
+        "description": "Subscribe to a plan to get monthly credits and unlock advanced features",
+        "viewPlans": "View Subscription Plans"
+      },
+      "expiringSoon": {
+        "title": "Credits Expiring Soon",
+        "message": "{count} credits will expire on {date}"
+      },
+      "transactions": {
+        "title": "Transaction History",
+        "description": "View all your credit transactions including grants and consumption",
+        "date": "Date",
+        "type": "Type",
+        "transactionDescription": "Description",
+        "transactionAmount": "Amount",
+        "noTransactions": "No transactions yet",
+        "noTransactionsHint": "Your credit transactions will appear here",
+        "loading": "Loading...",
+        "showing": "Showing {from} to {to} of {total} transactions",
+        "rowsPerPage": "Rows per page",
+        "pageOf": "Page {page} of {total}",
+        "types": {
+          "registration_bonus": "Registration Bonus",
+          "admin_grant": "Admin Grant",
+          "monthly_grant": "Monthly Grant",
+          "purchase": "Purchase",
+          "consumption": "Usage",
+          "expiration": "Expired",
+          "refund": "Refund"
+        },
+        "descriptions": {
+          "registration_bonus": "New user registration bonus",
+          "monthly_grant": "{plan} monthly subscription credits",
+          "yearly_grant": "{plan} yearly subscription credits ({monthly} x 12)",
+          "consumption": "Credit consumption",
+          "expiration": "Credits expired",
+          "admin_grant": "Admin granted credits",
+          "refund": "Credits refund"
+        }
+      }
+    }
+  }
+}
