@@ -42,88 +42,15 @@
 
 ## 快速开始
 
-### 环境要求
-
-- Node.js 18+
-- pnpm 8+
-- PostgreSQL 数据库（推荐 [Neon](https://neon.tech)）
-
-### 安装
+只需 3 个环境变量即可启动。详见 **[Quick Start 文档](./docs/quick-start.md)**。
 
 ```bash
-# 克隆项目
-git clone <your-repo-url>
-cd nextdevtpl
-
-# 安装依赖
+git clone git@github.com:evepupil/NextDevTpl.git
+cd NextDevTpl
 pnpm install
-
-# 复制环境变量
 cp .env.example .env.local
-```
-
-### 配置环境变量
-
-编辑 `.env.local` 文件：
-
-```env
-# 数据库（必填）
-DATABASE_URL="postgresql://..."
-
-# Better Auth（必填）
-BETTER_AUTH_SECRET="your-secret-key"
-BETTER_AUTH_URL="http://localhost:3000"
-
-# OAuth（可选）
-GITHUB_CLIENT_ID=""
-GITHUB_CLIENT_SECRET=""
-GOOGLE_CLIENT_ID=""
-GOOGLE_CLIENT_SECRET=""
-
-# Creem（可选）
-CREEM_API_KEY=""
-CREEM_WEBHOOK_SECRET=""
-
-# Resend 邮件（可选）
-RESEND_API_KEY=""
-
-# S3/R2 存储（可选）
-STORAGE_ENDPOINT=""
-STORAGE_REGION=""
-STORAGE_ACCESS_KEY_ID=""
-STORAGE_SECRET_ACCESS_KEY=""
-
-# API 限流 - Upstash Redis（可选，未配置时跳过限流）
-# UPSTASH_REDIS_REST_URL=""
-# UPSTASH_REDIS_REST_TOKEN=""
-
-# 日志 - Axiom（可选，未配置时使用 console）
-# AXIOM_TOKEN=""
-# AXIOM_DATASET="nextdevtpl"
-
-# 错误监控 - Sentry（可选，未配置时使用 console）
-# NEXT_PUBLIC_SENTRY_DSN=""
-# SENTRY_AUTH_TOKEN=""
-```
-
-### 数据库初始化
-
-```bash
-# 方式一：直接推送 schema（推荐新项目使用）
+# 编辑 .env.local 填入 DATABASE_URL、BETTER_AUTH_SECRET、BETTER_AUTH_URL
 pnpm db:push
-
-# 方式二：使用迁移文件
-pnpm db:migrate
-```
-
-> **说明**：
-> - `db:push` 会直接将 schema 同步到数据库，适合新项目初始化
-> - `db:migrate` 会执行 `drizzle/` 目录下的迁移文件
-> - 开发过程中修改 schema 后，运行 `pnpm db:generate` 生成新的迁移文件
-
-### 启动开发服务器
-
-```bash
 pnpm dev
 ```
 
@@ -234,6 +161,77 @@ src/
 - Server Action 错误自动上报
 - 用户上下文关联
 - 未配置时回退 console
+
+## 部署
+
+支持自有服务器部署，提供一键构建 + 推送 + 启动脚本。
+
+### 部署方式
+
+| 方式 | 说明 |
+|------|------|
+| **自有服务器（推荐）** | 通过 `deploy-build.bat` 一键部署到 Linux 服务器 |
+| **Vercel** | `git push` 即可，零配置 |
+| **Docker** | 自行编写 Dockerfile，`pnpm build` + `pnpm start` |
+
+### 一键部署到服务器
+
+项目提供了 `deploy-build.bat`（本地 Windows）+ `start-prod.sh`（服务器端）部署脚本，流程为：
+
+**本地构建 → 打包 → 上传 → 服务器解压 → PM2 启动/重启**
+
+#### 1. 配置部署参数
+
+编辑 `deploy-build.bat` 头部的配置：
+
+```bat
+set "REMOTE_USER=ubuntu"          # 服务器用户名
+set "REMOTE_HOST=<your-server>"   # 服务器 IP 或域名
+set "REMOTE_PORT=22"              # SSH 端口
+set "REMOTE_DIR=/home/ubuntu/NextjsTpl"  # 服务器上的项目目录
+set "SSH_KEY=%USERPROFILE%\.ssh\id_ed25519"  # SSH 私钥路径
+set "PORT=3303"                   # 应用运行端口
+```
+
+#### 2. 准备生产环境变量
+
+```bash
+# 创建生产环境变量文件（不会被提交到 Git）
+cp .env.example .env.prod
+# 编辑 .env.prod，填入生产环境的真实配置
+```
+
+#### 3. 服务器前置准备
+
+```bash
+# 服务器上需要安装：
+# - Node.js 18+（推荐通过 nvm 安装）
+# - pnpm: npm install -g pnpm
+# - PM2: npm install -g pm2
+
+# 创建项目目录
+mkdir -p /home/ubuntu/NextjsTpl
+```
+
+#### 4. 执行部署
+
+```bash
+# Windows 本地执行
+deploy-build.bat
+```
+
+脚本会自动完成：本地 `pnpm build` → 打包 `.next` + 配置文件 → SCP 上传 → SSH 远程解压 → PM2 启动应用。
+
+#### 5. 服务器管理
+
+```bash
+pm2 status              # 查看应用状态
+pm2 logs NextjsTpl      # 查看日志
+pm2 restart NextjsTpl   # 重启应用
+pm2 stop NextjsTpl      # 停止应用
+```
+
+> 服务器端通常还需要配置 Nginx 反向代理（将 80/443 端口转发到应用端口）和 SSL 证书。
 
 ## 命令
 
