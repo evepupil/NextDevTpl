@@ -138,6 +138,7 @@ export const productsNav: ProductNavGroup[] = [
  */
 export const mainNav: NavItem[] = [
   { title: "Docs", href: "/docs" },
+  { title: "PSEO", href: "/pseo" },
   { title: "Pricing", href: "/#pricing" },
   { title: "Blog", href: "/blog" },
 ];

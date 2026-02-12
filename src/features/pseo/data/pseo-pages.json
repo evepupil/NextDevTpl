@@ -1,0 +1,534 @@
+[
+  {
+    "slug": "ai-meeting-notes",
+    "category": "Product Ops",
+    "locales": {
+      "en": {
+        "seo": {
+          "title": "AI Meeting Notes for Product Teams | NextDevTpl",
+          "description": "Turn messy transcripts into clear decisions, action items, and follow-ups with automated meeting notes."
+        },
+        "hero": {
+          "badge": "PSEO Template",
+          "title": "AI Meeting Notes for",
+          "highlight": "Product Teams",
+          "subtitle": "Transform raw call transcripts into structured decisions, action items, and follow-ups in minutes.",
+          "primaryCta": {
+            "label": "Start free",
+            "href": "/sign-up"
+          },
+          "secondaryCta": {
+            "label": "See pricing",
+            "href": "/#pricing"
+          },
+          "summaryTitle": "Workflow snapshot",
+          "summaryItems": [
+            "Auto-generated recap and decisions",
+            "Action items mapped to owners",
+            "Stakeholder-ready highlights"
+          ]
+        },
+        "stats": [
+          {
+            "label": "Time saved",
+            "value": "6.5 hrs/week",
+            "detail": "Average across PM syncs"
+          },
+          {
+            "label": "Follow-up speed",
+            "value": "2x faster",
+            "detail": "From meeting to action"
+          },
+          {
+            "label": "Adoption",
+            "value": "94%",
+            "detail": "Teams stay active after month 1"
+          }
+        ],
+        "sections": {
+          "features": {
+            "title": "Features built for high-velocity product teams",
+            "subtitle": "Everything you need to capture decisions and keep roadmaps moving."
+          },
+          "useCases": {
+            "title": "Where teams use this template",
+            "subtitle": "From customer discovery to sprint reviews, keep every meeting accountable."
+          },
+          "faq": {
+            "title": "FAQ",
+            "subtitle": "Quick answers about this PSEO workflow."
+          },
+          "related": {
+            "title": "More PSEO templates",
+            "subtitle": "Explore other JSON-driven landing pages in the demo."
+          }
+        },
+        "features": [
+          {
+            "title": "Agenda-aware summaries",
+            "description": "Detect agenda sections and group decisions automatically.",
+            "icon": "sparkles"
+          },
+          {
+            "title": "Action item routing",
+            "description": "Assign owners, due dates, and sync tasks to Jira or Linear.",
+            "icon": "target"
+          },
+          {
+            "title": "Speaker insights",
+            "description": "Track talk time, sentiment, and open questions by stakeholder.",
+            "icon": "lineChart"
+          },
+          {
+            "title": "Stakeholder sharing",
+            "description": "Publish recap links in branded templates within seconds.",
+            "icon": "share"
+          }
+        ],
+        "useCases": [
+          {
+            "title": "Customer discovery calls",
+            "description": "Capture pain points and keep roadmaps aligned after every interview.",
+            "metric": "32%",
+            "metricLabel": "faster follow-ups"
+          },
+          {
+            "title": "Weekly product syncs",
+            "description": "Record decisions, owners, and dependencies without extra notes.",
+            "metric": "48h",
+            "metricLabel": "decision turnaround"
+          },
+          {
+            "title": "Sprint reviews",
+            "description": "Summaries ready for execs and customers within hours.",
+            "metric": "3x",
+            "metricLabel": "faster summaries"
+          }
+        ],
+        "faq": [
+          {
+            "question": "Can I connect this with my task tracker?",
+            "answer": "Yes. The workflow exports action items to Jira, Linear, and Notion, plus custom webhooks."
+          },
+          {
+            "question": "Does it support multiple meeting formats?",
+            "answer": "The template ships with presets for 1:1s, sprint reviews, and discovery calls."
+          },
+          {
+            "question": "How are summaries generated?",
+            "answer": "You can use AI models or manually curated rules. Both are configured in the JSON dataset."
+          }
+        ],
+        "cta": {
+          "title": "Launch your meeting hub",
+          "description": "Start with the AI Meeting Notes template and generate hundreds of pages for every team or industry.",
+          "primaryCta": {
+            "label": "Start free",
+            "href": "/sign-up"
+          },
+          "secondaryCta": {
+            "label": "See pricing",
+            "href": "/#pricing"
+          },
+          "note": "No credit card required."
+        }
+      },
+      "zh": {
+        "seo": {
+          "title": "产品团队的 AI 会议纪要 | NextDevTpl",
+          "description": "把杂乱会议记录自动整理为决策、行动项和跟进计划。"
+        },
+        "hero": {
+          "badge": "PSEO 模板",
+          "title": "为产品团队打造的",
+          "highlight": "AI 会议纪要",
+          "subtitle": "将会议录音与转录快速整理为结构化结论、行动项与复盘摘要。",
+          "primaryCta": {
+            "label": "免费开始",
+            "href": "/sign-up"
+          },
+          "secondaryCta": {
+            "label": "查看定价",
+            "href": "/#pricing"
+          },
+          "summaryTitle": "模板速览",
+          "summaryItems": [
+            "自动生成会议总结与结论",
+            "行动项自动分配责任人",
+            "一键分享给关键干系人"
+          ]
+        },
+        "stats": [
+          {
+            "label": "节省时间",
+            "value": "6.5 小时/周",
+            "detail": "来自产品同步会议"
+          },
+          {
+            "label": "跟进效率",
+            "value": "提升 2 倍",
+            "detail": "从会议到执行"
+          },
+          {
+            "label": "持续使用",
+            "value": "94%",
+            "detail": "第 1 个月后仍活跃"
+          }
+        ],
+        "sections": {
+          "features": {
+            "title": "专为高节奏产品团队设计的能力",
+            "subtitle": "帮助你快速捕捉决策、推动 roadmap。"
+          },
+          "useCases": {
+            "title": "适用场景",
+            "subtitle": "从用户访谈到迭代复盘，让每场会议都有产出。"
+          },
+          "faq": {
+            "title": "常见问题",
+            "subtitle": "关于该 PSEO 模板的常见解答。"
+          },
+          "related": {
+            "title": "更多 PSEO 模板",
+            "subtitle": "继续探索更多 JSON 驱动的落地页。"
+          }
+        },
+        "features": [
+          {
+            "title": "议程识别总结",
+            "description": "自动识别议程并聚合关键决策。",
+            "icon": "sparkles"
+          },
+          {
+            "title": "行动项流转",
+            "description": "分配负责人、截止时间并同步到 Jira/Linear。",
+            "icon": "target"
+          },
+          {
+            "title": "发言洞察",
+            "description": "追踪讨论热度、情绪与未解决问题。",
+            "icon": "lineChart"
+          },
+          {
+            "title": "干系人分享",
+            "description": "秒级生成可分享的品牌化纪要。",
+            "icon": "share"
+          }
+        ],
+        "useCases": [
+          {
+            "title": "用户访谈",
+            "description": "记录痛点与需求，推动产品方向一致。",
+            "metric": "32%",
+            "metricLabel": "更快跟进"
+          },
+          {
+            "title": "周会同步",
+            "description": "决策、负责人、依赖关系清晰可追踪。",
+            "metric": "48 小时",
+            "metricLabel": "决策周期"
+          },
+          {
+            "title": "迭代复盘",
+            "description": "快速生成给管理层的复盘摘要。",
+            "metric": "3 倍",
+            "metricLabel": "更快总结"
+          }
+        ],
+        "faq": [
+          {
+            "question": "可以对接任务管理工具吗？",
+            "answer": "可以。支持 Jira、Linear、Notion 的行动项同步，并可配置 webhook。"
+          },
+          {
+            "question": "支持不同会议模板吗？",
+            "answer": "内置 1:1、迭代复盘、用户访谈等预设场景。"
+          },
+          {
+            "question": "总结是如何生成的？",
+            "answer": "可选择 AI 模型或自定义规则，全部在 JSON 数据中配置。"
+          }
+        ],
+        "cta": {
+          "title": "开启你的会议中心",
+          "description": "使用 AI 会议纪要模板，快速扩展到更多团队与行业。",
+          "primaryCta": {
+            "label": "免费开始",
+            "href": "/sign-up"
+          },
+          "secondaryCta": {
+            "label": "查看定价",
+            "href": "/#pricing"
+          },
+          "note": "无需信用卡。"
+        }
+      }
+    }
+  },
+  {
+    "slug": "sales-playbook",
+    "category": "Revenue",
+    "locales": {
+      "en": {
+        "seo": {
+          "title": "Sales Playbook Generator for Growth Teams | NextDevTpl",
+          "description": "Generate tailored sales playbooks for every segment using structured JSON data."
+        },
+        "hero": {
+          "badge": "PSEO Template",
+          "title": "Sales Playbook Generator for",
+          "highlight": "Growth Teams",
+          "subtitle": "Create segment-specific messaging, objections, and next steps with repeatable workflows.",
+          "primaryCta": {
+            "label": "Start free",
+            "href": "/sign-up"
+          },
+          "secondaryCta": {
+            "label": "View demo",
+            "href": "/#pricing"
+          },
+          "summaryTitle": "Playbook snapshot",
+          "summaryItems": [
+            "Persona-specific messaging",
+            "Deal stage checklists",
+            "Competitive battlecards"
+          ]
+        },
+        "stats": [
+          {
+            "label": "Win rate lift",
+            "value": "18%",
+            "detail": "Average after 60 days"
+          },
+          {
+            "label": "Rep ramp time",
+            "value": "14 days",
+            "detail": "From hire to quota"
+          },
+          {
+            "label": "Templates",
+            "value": "120+",
+            "detail": "Ready for new segments"
+          }
+        ],
+        "sections": {
+          "features": {
+            "title": "Features that scale revenue enablement",
+            "subtitle": "Generate messaging that stays consistent across every segment."
+          },
+          "useCases": {
+            "title": "Use cases by growth stage",
+            "subtitle": "Adapt playbooks for outbound, expansion, and renewals."
+          },
+          "faq": {
+            "title": "FAQ",
+            "subtitle": "Everything you need to run this playbook at scale."
+          },
+          "related": {
+            "title": "More PSEO templates",
+            "subtitle": "Explore other JSON-driven landing pages in the demo."
+          }
+        },
+        "features": [
+          {
+            "title": "Segment logic",
+            "description": "Drive custom messaging by industry, ARR, or intent score.",
+            "icon": "layers"
+          },
+          {
+            "title": "Objection handling",
+            "description": "Generate rebuttals and proof points based on deal stage.",
+            "icon": "shield"
+          },
+          {
+            "title": "Deal acceleration",
+            "description": "Surface next-best actions to move opportunities forward.",
+            "icon": "zap"
+          },
+          {
+            "title": "Rep coaching",
+            "description": "Personalized tips and talk tracks for new hires.",
+            "icon": "users"
+          }
+        ],
+        "useCases": [
+          {
+            "title": "Mid-market outbound",
+            "description": "Auto-generate personalized messaging by vertical.",
+            "metric": "22%",
+            "metricLabel": "reply rate"
+          },
+          {
+            "title": "Enterprise expansion",
+            "description": "Align playbooks with multi-threaded account plans.",
+            "metric": "1.6x",
+            "metricLabel": "pipeline lift"
+          },
+          {
+            "title": "Renewal operations",
+            "description": "Standardize health check scripts and success metrics.",
+            "metric": "30%",
+            "metricLabel": "churn reduction"
+          }
+        ],
+        "faq": [
+          {
+            "question": "Can this pull data from our CRM?",
+            "answer": "Yes. Connect Salesforce or HubSpot to hydrate playbooks with live account data."
+          },
+          {
+            "question": "How do we update templates?",
+            "answer": "Edit the JSON dataset or import changes from a spreadsheet. Updates go live instantly."
+          },
+          {
+            "question": "Is there support for multiple brands?",
+            "answer": "Multi-brand setups are supported with theme tokens and per-brand content blocks."
+          }
+        ],
+        "cta": {
+          "title": "Scale your sales enablement",
+          "description": "Launch the Sales Playbook template and generate targeted pages for every segment.",
+          "primaryCta": {
+            "label": "Start free",
+            "href": "/sign-up"
+          },
+          "secondaryCta": {
+            "label": "See pricing",
+            "href": "/#pricing"
+          },
+          "note": "No implementation services required."
+        }
+      },
+      "zh": {
+        "seo": {
+          "title": "增长团队的销售作战手册 | NextDevTpl",
+          "description": "用结构化 JSON 数据为每个细分市场生成专属销售手册。"
+        },
+        "hero": {
+          "badge": "PSEO 模板",
+          "title": "增长团队的",
+          "highlight": "销售作战手册",
+          "subtitle": "为不同客群生成话术、异议处理与下一步行动建议。",
+          "primaryCta": {
+            "label": "免费开始",
+            "href": "/sign-up"
+          },
+          "secondaryCta": {
+            "label": "查看演示",
+            "href": "/#pricing"
+          },
+          "summaryTitle": "手册速览",
+          "summaryItems": [
+            "按画像生成的沟通策略",
+            "标准化的阶段清单",
+            "竞品对比与战术卡片"
+          ]
+        },
+        "stats": [
+          {
+            "label": "赢单提升",
+            "value": "18%",
+            "detail": "60 天内平均表现"
+          },
+          {
+            "label": "新人上手",
+            "value": "14 天",
+            "detail": "从入职到达标"
+          },
+          {
+            "label": "模板数量",
+            "value": "120+",
+            "detail": "覆盖更多细分"
+          }
+        ],
+        "sections": {
+          "features": {
+            "title": "驱动收入增长的关键能力",
+            "subtitle": "让每个细分市场都能输出一致话术。"
+          },
+          "useCases": {
+            "title": "增长阶段典型场景",
+            "subtitle": "外呼、续费、扩张策略一网打尽。"
+          },
+          "faq": {
+            "title": "常见问题",
+            "subtitle": "关于销售作战手册的常见解答。"
+          },
+          "related": {
+            "title": "更多 PSEO 模板",
+            "subtitle": "查看其他 JSON 驱动的落地页示例。"
+          }
+        },
+        "features": [
+          {
+            "title": "细分逻辑",
+            "description": "按照行业、ARR、意向评分生成定制话术。",
+            "icon": "layers"
+          },
+          {
+            "title": "异议处理",
+            "description": "按阶段生成证据与反驳要点。",
+            "icon": "shield"
+          },
+          {
+            "title": "推进节奏",
+            "description": "提示下一步行动并加速成交。",
+            "icon": "zap"
+          },
+          {
+            "title": "新人辅导",
+            "description": "提供角色化建议与话术提示。",
+            "icon": "users"
+          }
+        ],
+        "useCases": [
+          {
+            "title": "中端市场外呼",
+            "description": "按行业快速生成个性化脚本。",
+            "metric": "22%",
+            "metricLabel": "回复率"
+          },
+          {
+            "title": "大客户扩张",
+            "description": "多线程计划与账户协同。",
+            "metric": "1.6 倍",
+            "metricLabel": "pipeline 提升"
+          },
+          {
+            "title": "续费运营",
+            "description": "标准化健康度检查与成功指标。",
+            "metric": "30%",
+            "metricLabel": "流失下降"
+          }
+        ],
+        "faq": [
+          {
+            "question": "可以同步 CRM 数据吗？",
+            "answer": "可以对接 Salesforce 或 HubSpot，为手册注入实时客户数据。"
+          },
+          {
+            "question": "如何更新模板内容？",
+            "answer": "直接修改 JSON 或从表格导入，更新立即生效。"
+          },
+          {
+            "question": "支持多品牌版本吗？",
+            "answer": "支持。可基于主题令牌与内容块区分品牌。"
+          }
+        ],
+        "cta": {
+          "title": "规模化你的销售赋能",
+          "description": "用销售作战手册模板为每个细分市场生成专属页面。",
+          "primaryCta": {
+            "label": "免费开始",
+            "href": "/sign-up"
+          },
+          "secondaryCta": {
+            "label": "查看定价",
+            "href": "/#pricing"
+          },
+          "note": "无需额外实施服务。"
+        }
+      }
+    }
+  }
+]

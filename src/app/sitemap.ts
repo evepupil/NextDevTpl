@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { siteConfig } from "@/config";
+import { getAllPseoParams } from "@/features/pseo/lib/pseo-data";
 import { getAllBlogSlugs, getAllLegalSlugs } from "@/lib/source";
 
 /** Supported locales */
@@ -23,6 +24,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticPaths = [
     "", // homepage
     "/blog",
+    "/pseo",
   ];
 
   // Generate static routes for each locale
@@ -63,5 +65,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.3,
   }));
 
-  return [...staticRoutes, ...solutionRoutes, ...blogRoutes, ...legalRoutes];
+  const pseoSlugs = getAllPseoParams();
+  const pseoRoutes = pseoSlugs.map(({ locale, slug }) => ({
+    url: `${baseUrl}/${locale}/pseo/${slug}`,
+    lastModified: now,
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
+  }));
+
+  return [
+    ...staticRoutes,
+    ...solutionRoutes,
+    ...blogRoutes,
+    ...legalRoutes,
+    ...pseoRoutes,
+  ];
 }

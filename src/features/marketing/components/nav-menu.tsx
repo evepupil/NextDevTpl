@@ -61,6 +61,7 @@ export function NavMenu() {
 
   const navTitleMap: Record<string, string> = {
     Docs: t("docs"),
+    PSEO: t("pseo"),
     Pricing: t("pricing"),
     Blog: t("blog"),
   };
