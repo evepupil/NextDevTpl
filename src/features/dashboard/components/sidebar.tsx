@@ -42,7 +42,7 @@ import { cn } from "@/lib/utils";
 export function DashboardSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { isCollapsed, isMobileOpen, setMobileOpen } = useSidebar();
+  const { isCollapsed, isMobileOpen, setMobileOpen, toggleSidebar } = useSidebar();
   const t = useTranslations("Dashboard");
 
   // 获取当前用户会话
@@ -123,7 +123,14 @@ export function DashboardSidebar() {
           <Link
             href="/"
             className="flex items-center gap-2"
-            onClick={() => mobile && setMobileOpen(false)}
+            onClick={(e) => {
+              if (mobile) {
+                setMobileOpen(false);
+              } else if (collapsed) {
+                e.preventDefault();
+                toggleSidebar();
+              }
+            }}
           >
             <svg
               className="h-6 w-6 shrink-0 text-primary"
