@@ -586,6 +586,20 @@ export async function getUserTransactions(
 }
 
 /**
+ * 获取用户交易总数
+ */
+export async function getUserTransactionsCount(userId: string): Promise<number> {
+  const [result] = await db
+    .select({
+      count: sql<number>`count(*)`.mapWith(Number),
+    })
+    .from(creditsTransaction)
+    .where(eq(creditsTransaction.userId, userId));
+
+  return result?.count ?? 0;
+}
+
+/**
  * 冻结用户积分账户
  */
 export async function freezeCreditsAccount(userId: string) {

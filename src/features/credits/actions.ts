@@ -24,6 +24,7 @@ import {
   ensureRegistrationBonus,
   getCreditsBalance,
   getUserActiveBatches,
+  getUserTransactionsCount,
   getUserTransactions,
   grantCredits,
   InsufficientCreditsError,
@@ -136,21 +137,27 @@ export const getMyTransactions = withProtectedCreditsAction("getMyTransactions")
     const limit = parsedInput?.limit;
     const offset = parsedInput?.offset;
 
-    const transactions = await getUserTransactions(userId, {
-      ...(limit !== undefined && { limit }),
-      ...(offset !== undefined && { offset }),
-    });
+    const [transactions, totalCount] = await Promise.all([
+      getUserTransactions(userId, {
+        ...(limit !== undefined && { limit }),
+        ...(offset !== undefined && { offset }),
+      }),
+      getUserTransactionsCount(userId),
+    ]);
 
-    return transactions.map((tx) => ({
-      id: tx.id,
-      type: tx.type,
-      amount: tx.amount,
-      debitAccount: tx.debitAccount,
-      creditAccount: tx.creditAccount,
-      description: tx.description,
-      metadata: tx.metadata as Record<string, unknown> | null,
-      createdAt: tx.createdAt,
-    }));
+    return {
+      transactions: transactions.map((tx) => ({
+        id: tx.id,
+        type: tx.type,
+        amount: tx.amount,
+        debitAccount: tx.debitAccount,
+        creditAccount: tx.creditAccount,
+        description: tx.description,
+        metadata: tx.metadata as Record<string, unknown> | null,
+        createdAt: tx.createdAt,
+      })),
+      totalCount,
+    };
   });
 
 /**

@@ -78,8 +78,8 @@ export function TransactionHistory() {
     execute({ limit: pageSize, offset: (page - 1) * pageSize });
   }, [execute, page, pageSize]);
 
-  const transactions = result.data ?? [];
-  const totalCount = transactions.length; // 简化版，实际应从服务端获取总数
+  const transactions = result.data?.transactions ?? [];
+  const totalCount = result.data?.totalCount ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   /**
