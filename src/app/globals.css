@@ -48,6 +48,12 @@
 }
 
 :root {
+  --font-geist-sans: "Segoe UI", ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    sans-serif;
+  --font-geist-mono: "SFMono-Regular", "Cascadia Code", Consolas, "Liberation Mono",
+    Menlo, monospace;
+
   /* Linear-style: smaller radius, more restrained */
   --radius: 0.375rem;
 
