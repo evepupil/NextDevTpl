@@ -1,8 +1,7 @@
 /**
- * 测试数据库工具
+ * Test database helpers.
  *
- * 提供测试数据库连接、清理和辅助函数
- * 使用 @neondatabase/serverless 的 WebSocket 模式以支持事务
+ * Provides the shared test DB connection plus cleanup and inspection helpers.
  */
 
 import { neonConfig, Pool } from "@neondatabase/serverless";
@@ -12,48 +11,35 @@ import ws from "ws";
 
 import * as schema from "@/db/schema";
 
-// 配置 WebSocket 以支持事务
 neonConfig.webSocketConstructor = ws;
 
-// ============================================
-// 数据库连接
-// ============================================
-
 let pool: Pool | null = null;
+let legacySchemaSynced = false;
 
-/**
- * 获取测试数据库连接字符串
- */
 function getTestDatabaseUrl(): string {
 	const url = process.env.DATABASE_URL;
 	if (!url) {
 		throw new Error(
-			"DATABASE_URL 环境变量未设置。\n" +
-				"请创建 .env.test 文件并添加:\n" +
-				"DATABASE_URL=postgresql://...(你的 Neon test branch 连接字符串)"
+			"DATABASE_URL is not configured.\n" +
+				"Create .env.test and set DATABASE_URL to your test database."
 		);
 	}
+
 	return url;
 }
 
-/**
- * 创建测试数据库实例
- * 使用 neon-serverless 驱动 (WebSocket) 以支持事务
- */
 function createTestDb() {
 	const databaseUrl = getTestDatabaseUrl();
-	pool = new Pool({ connectionString: databaseUrl });
+	pool = new Pool({
+		connectionString: databaseUrl,
+		max: 1,
+		connectionTimeoutMillis: 15000,
+	});
 	return drizzle(pool, { schema });
 }
 
-/**
- * 测试数据库实例
- */
 export const testDb = createTestDb();
 
-/**
- * 关闭测试数据库连接
- */
 export async function closeTestDb() {
 	if (pool) {
 		await pool.end();
@@ -61,15 +47,159 @@ export async function closeTestDb() {
 	}
 }
 
-// ============================================
-// 数据清理
-// ============================================
-
 /**
- * 清理指定用户的所有测试数据
+ * Forward-sync legacy test branches to the current schema.
+ *
+ * Some existing test databases were created from the initial Stripe-based schema
+ * and are missing the Creem-era columns now used by the app code.
  */
+export async function syncLegacyTestSchema() {
+	if (legacySchemaSynced) {
+		return;
+	}
+
+	const readinessResult = await testDb.execute(sql.raw(`
+SELECT
+	EXISTS (
+		SELECT 1
+		FROM information_schema.columns
+		WHERE table_name = 'subscription'
+		  AND column_name = 'subscription_id'
+	) AS has_subscription_id,
+	EXISTS (
+		SELECT 1
+		FROM information_schema.columns
+		WHERE table_name = 'subscription'
+		  AND column_name = 'price_id'
+	) AS has_price_id,
+	EXISTS (
+		SELECT 1
+		FROM information_schema.columns
+		WHERE table_name = 'user'
+		  AND column_name = 'customer_id'
+	) AS has_customer_id,
+	EXISTS (
+		SELECT 1
+		FROM pg_type t
+		JOIN pg_enum e ON e.enumtypid = t.oid
+		WHERE t.typname = 'credits_transaction_type'
+		  AND e.enumlabel = 'admin_grant'
+	) AS has_admin_grant;
+`));
+
+	const readinessRow = readinessResult.rows[0] as
+		| {
+				has_subscription_id?: boolean;
+				has_price_id?: boolean;
+				has_customer_id?: boolean;
+				has_admin_grant?: boolean;
+		  }
+		| undefined;
+
+	if (
+		readinessRow?.has_subscription_id &&
+		readinessRow.has_price_id &&
+		readinessRow.has_customer_id &&
+		readinessRow.has_admin_grant
+	) {
+		legacySchemaSynced = true;
+		return;
+	}
+
+	await testDb.transaction(async (tx) => {
+		await tx.execute(sql`SELECT pg_advisory_xact_lock(842145611)`);
+
+		await tx.execute(sql.raw(`
+DO $$
+BEGIN
+	IF NOT EXISTS (
+		SELECT 1
+		FROM pg_type t
+		JOIN pg_enum e ON e.enumtypid = t.oid
+		WHERE t.typname = 'credits_transaction_type'
+		  AND e.enumlabel = 'admin_grant'
+	) THEN
+		ALTER TYPE "public"."credits_transaction_type"
+		ADD VALUE 'admin_grant' BEFORE 'expiration';
+	END IF;
+EXCEPTION
+	WHEN duplicate_object THEN NULL;
+END $$;
+`));
+
+		await tx.execute(
+			sql.raw(`ALTER TABLE "subscription" ADD COLUMN IF NOT EXISTS "subscription_id" text;`)
+		);
+		await tx.execute(
+			sql.raw(`ALTER TABLE "subscription" ADD COLUMN IF NOT EXISTS "price_id" text;`)
+		);
+		await tx.execute(
+			sql.raw(`ALTER TABLE "user" ADD COLUMN IF NOT EXISTS "customer_id" text;`)
+		);
+
+		await tx.execute(sql.raw(`
+DO $$
+BEGIN
+	IF EXISTS (
+		SELECT 1
+		FROM information_schema.columns
+		WHERE table_name = 'subscription'
+		  AND column_name = 'stripe_subscription_id'
+	) THEN
+		UPDATE "subscription"
+		SET "subscription_id" = COALESCE("subscription_id", "stripe_subscription_id")
+		WHERE "subscription_id" IS NULL;
+	END IF;
+
+	IF EXISTS (
+		SELECT 1
+		FROM information_schema.columns
+		WHERE table_name = 'subscription'
+		  AND column_name = 'stripe_price_id'
+	) THEN
+		UPDATE "subscription"
+		SET "price_id" = COALESCE("price_id", "stripe_price_id")
+		WHERE "price_id" IS NULL;
+	END IF;
+
+	IF EXISTS (
+		SELECT 1
+		FROM information_schema.columns
+		WHERE table_name = 'user'
+		  AND column_name = 'stripe_customer_id'
+	) THEN
+		UPDATE "user"
+		SET "customer_id" = COALESCE("customer_id", "stripe_customer_id")
+		WHERE "customer_id" IS NULL;
+	END IF;
+
+	IF EXISTS (
+		SELECT 1
+		FROM information_schema.columns
+		WHERE table_name = 'subscription'
+		  AND column_name = 'stripe_subscription_id'
+	) THEN
+		ALTER TABLE "subscription"
+		ALTER COLUMN "stripe_subscription_id" DROP NOT NULL;
+	END IF;
+
+	IF EXISTS (
+		SELECT 1
+		FROM information_schema.columns
+		WHERE table_name = 'subscription'
+		  AND column_name = 'stripe_price_id'
+	) THEN
+		ALTER TABLE "subscription"
+		ALTER COLUMN "stripe_price_id" DROP NOT NULL;
+	END IF;
+END $$;
+`));
+	});
+
+	legacySchemaSynced = true;
+}
+
 export async function cleanupUserData(userId: string) {
-	// 按外键依赖顺序删除
 	await testDb
 		.delete(schema.creditsTransaction)
 		.where(eq(schema.creditsTransaction.userId, userId));
@@ -82,38 +212,22 @@ export async function cleanupUserData(userId: string) {
 		.delete(schema.creditsBalance)
 		.where(eq(schema.creditsBalance.userId, userId));
 
-	// 删除用户相关的 session 和 account
-	await testDb
-		.delete(schema.session)
-		.where(eq(schema.session.userId, userId));
-
-	await testDb
-		.delete(schema.account)
-		.where(eq(schema.account.userId, userId));
-
-	// 最后删除用户
+	await testDb.delete(schema.session).where(eq(schema.session.userId, userId));
+	await testDb.delete(schema.account).where(eq(schema.account.userId, userId));
 	await testDb.delete(schema.user).where(eq(schema.user.id, userId));
 }
 
-/**
- * 批量清理测试用户数据
- */
 export async function cleanupTestUsers(userIds: string[]) {
 	if (userIds.length === 0) return;
 
-	// 按外键依赖顺序删除
-
-	// 1. 清理工单消息（依赖 ticket 和 user）
 	await testDb
 		.delete(schema.ticketMessage)
 		.where(inArray(schema.ticketMessage.userId, userIds));
 
-	// 2. 清理工单（依赖 user）
 	await testDb
 		.delete(schema.ticket)
 		.where(inArray(schema.ticket.userId, userIds));
 
-	// 3. 清理积分相关
 	await testDb
 		.delete(schema.creditsTransaction)
 		.where(inArray(schema.creditsTransaction.userId, userIds));
@@ -126,12 +240,10 @@ export async function cleanupTestUsers(userIds: string[]) {
 		.delete(schema.creditsBalance)
 		.where(inArray(schema.creditsBalance.userId, userIds));
 
-	// 4. 清理订阅
 	await testDb
 		.delete(schema.subscription)
 		.where(inArray(schema.subscription.userId, userIds));
 
-	// 5. 清理认证相关
 	await testDb
 		.delete(schema.session)
 		.where(inArray(schema.session.userId, userIds));
@@ -140,17 +252,10 @@ export async function cleanupTestUsers(userIds: string[]) {
 		.delete(schema.account)
 		.where(inArray(schema.account.userId, userIds));
 
-	// 6. 最后删除用户
 	await testDb.delete(schema.user).where(inArray(schema.user.id, userIds));
 }
 
-/**
- * 清理所有测试数据（危险操作，仅用于测试）
- *
- * 只清理带有 test_ 前缀的数据
- */
 export async function cleanupTestData() {
-	// 只清理测试用户（以 test_ 开头的）
 	const testUsers = await testDb
 		.select({ id: schema.user.id })
 		.from(schema.user)
@@ -160,13 +265,6 @@ export async function cleanupTestData() {
 	await cleanupTestUsers(userIds);
 }
 
-// ============================================
-// 数据库状态检查
-// ============================================
-
-/**
- * 检查数据库连接是否正常
- */
 export async function checkDbConnection(): Promise<boolean> {
 	try {
 		await testDb.execute(sql`SELECT 1`);
@@ -176,9 +274,6 @@ export async function checkDbConnection(): Promise<boolean> {
 	}
 }
 
-/**
- * 获取用户的积分账户状态
- */
 export async function getUserCreditsState(userId: string) {
 	const [balance] = await testDb
 		.select()
@@ -199,9 +294,6 @@ export async function getUserCreditsState(userId: string) {
 	return { balance, batches, transactions };
 }
 
-/**
- * 获取工单及其消息
- */
 export async function getTicketWithMessages(ticketId: string) {
 	const [ticketData] = await testDb
 		.select()
@@ -218,9 +310,6 @@ export async function getTicketWithMessages(ticketId: string) {
 	return { ticket: ticketData, messages };
 }
 
-/**
- * 获取用户的所有工单
- */
 export async function getUserTickets(userId: string) {
 	return await testDb
 		.select()
@@ -229,9 +318,6 @@ export async function getUserTickets(userId: string) {
 		.orderBy(schema.ticket.createdAt);
 }
 
-/**
- * 获取用户的订阅信息
- */
 export async function getUserSubscription(userId: string) {
 	const [sub] = await testDb
 		.select()
@@ -242,9 +328,6 @@ export async function getUserSubscription(userId: string) {
 	return sub;
 }
 
-/**
- * 清理测试 Newsletter 订阅者
- */
 export async function cleanupTestNewsletterSubscribers(emails: string[]) {
 	if (emails.length === 0) return;
 
@@ -255,9 +338,6 @@ export async function cleanupTestNewsletterSubscribers(emails: string[]) {
 	}
 }
 
-/**
- * 创建测试 Newsletter 订阅者
- */
 export async function createTestNewsletterSubscriber(options: {
 	email: string;
 	isSubscribed?: boolean;
@@ -277,7 +357,7 @@ export async function createTestNewsletterSubscriber(options: {
 		.returning();
 
 	if (!subscriber) {
-		throw new Error("创建测试 Newsletter 订阅者失败");
+		throw new Error("Failed to create test newsletter subscriber");
 	}
 
 	return subscriber;

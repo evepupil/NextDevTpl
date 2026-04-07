@@ -36,8 +36,8 @@ export const CREDITS_EXPIRY_DAYS = null;
  */
 export const CREDIT_PACKAGES = [
   {
-    id: "starter",
-    name: "Starter",
+    id: "lite",
+    name: "Lite",
     credits: 3000,
     price: 3,
     description: "For a quick study session",
@@ -51,8 +51,8 @@ export const CREDIT_PACKAGES = [
     description: "Most popular top-up",
   },
   {
-    id: "premium",
-    name: "Premium",
+    id: "pro",
+    name: "Pro",
     credits: 20000,
     price: 18,
     description: "Best value credit pack",

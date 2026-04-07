@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 积分系统核心逻辑
  *
  * 实现企业级双重记账和 FIFO 过期机制
@@ -8,11 +8,11 @@ import { and, asc, eq, gt, isNull, lt, or, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import {
+  type CreditsBatchSource,
+  type CreditsTransactionType,
   creditsBalance,
   creditsBatch,
   creditsTransaction,
-  type CreditsBatchSource,
-  type CreditsTransactionType,
 } from "@/db/schema";
 import { logEvent } from "@/lib/logger";
 
@@ -36,7 +36,7 @@ export interface GrantCreditsParams {
   transactionType: CreditsTransactionType;
   /** 过期时间（可选） */
   expiresAt?: Date | null;
-  /** 来源引用（如订单ID） */
+  /** 来源引用（如订单 ID） */
   sourceRef?: string;
   /** 描述 */
   description?: string;
@@ -122,7 +122,6 @@ export async function ensureCreditsBalance(userId: string) {
     return existing;
   }
 
-  // 创建新账户
   const [newBalance] = await db
     .insert(creditsBalance)
     .values({
@@ -146,8 +145,7 @@ export async function ensureCreditsBalance(userId: string) {
  * 获取用户积分余额
  */
 export async function getCreditsBalance(userId: string) {
-  const balance = await ensureCreditsBalance(userId);
-  return balance;
+  return await ensureCreditsBalance(userId);
 }
 
 /**
@@ -167,24 +165,20 @@ export async function ensureRegistrationBonus(
   bonusAmount: number,
   expiryDays: number | null
 ) {
-  // 检查用户是否已有交易记录
   const [existingTransaction] = await db
     .select({ id: creditsTransaction.id })
     .from(creditsTransaction)
     .where(eq(creditsTransaction.userId, userId))
     .limit(1);
 
-  // 如果已有交易记录，说明不是新用户，直接返回
   if (existingTransaction) {
     return { granted: false, reason: "User already has transactions" };
   }
 
-  // 计算过期时间
   const expiresAt = expiryDays
     ? new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000)
     : null;
 
-  // 发放注册奖励
   const result = await grantCredits({
     userId,
     amount: bonusAmount,
@@ -231,7 +225,6 @@ export async function grantCredits(params: GrantCreditsParams) {
   }
 
   return await db.transaction(async (tx) => {
-    // 1. 确保用户有积分账户
     const [balanceRecord] = await tx
       .select()
       .from(creditsBalance)
@@ -241,7 +234,6 @@ export async function grantCredits(params: GrantCreditsParams) {
     let currentBalance = balanceRecord;
 
     if (!currentBalance) {
-      // 创建新账户
       const [newBalance] = await tx
         .insert(creditsBalance)
         .values({
@@ -257,15 +249,14 @@ export async function grantCredits(params: GrantCreditsParams) {
       if (!newBalance) {
         throw new Error("创建积分账户失败");
       }
+
       currentBalance = newBalance;
     }
 
-    // 检查账户状态
     if (currentBalance.status === "frozen") {
       throw new AccountFrozenError(userId);
     }
 
-    // 2. 创建积分批次
     const batchId = crypto.randomUUID();
     await tx.insert(creditsBatch).values({
       id: batchId,
@@ -279,7 +270,6 @@ export async function grantCredits(params: GrantCreditsParams) {
       sourceRef,
     });
 
-    // 3. 记录交易（双重记账）
     const transactionId = crypto.randomUUID();
     const creditAccount = `WALLET:${userId}`;
 
@@ -298,7 +288,6 @@ export async function grantCredits(params: GrantCreditsParams) {
       },
     });
 
-    // 4. 更新余额
     await tx
       .update(creditsBalance)
       .set({
@@ -336,7 +325,6 @@ export async function consumeCredits(
   }
 
   return await db.transaction(async (tx) => {
-    // 1. 检查用户账户状态和余额
     const [balanceRecord] = await tx
       .select()
       .from(creditsBalance)
@@ -355,8 +343,6 @@ export async function consumeCredits(
       throw new InsufficientCreditsError(amount, balanceRecord.balance);
     }
 
-    // 2. 获取所有活跃批次（FIFO 排序）
-    // 排序规则：有过期时间的按过期时间升序，无过期时间的放最后
     const now = new Date();
     const activeBatches = await tx
       .select()
@@ -366,20 +352,11 @@ export async function consumeCredits(
           eq(creditsBatch.userId, userId),
           eq(creditsBatch.status, "active"),
           gt(creditsBatch.remaining, 0),
-          // 过滤掉已过期的批次
-          or(
-            isNull(creditsBatch.expiresAt),
-            gt(creditsBatch.expiresAt, now)
-          )
+          or(isNull(creditsBatch.expiresAt), gt(creditsBatch.expiresAt, now))
         )
       )
-      .orderBy(
-        // FIFO: 先过期的优先，无过期时间的按发放时间排序
-        asc(creditsBatch.expiresAt),
-        asc(creditsBatch.issuedAt)
-      );
+      .orderBy(asc(creditsBatch.expiresAt), asc(creditsBatch.issuedAt));
 
-    // 3. FIFO 消费逻辑
     let remainingToConsume = amount;
     const consumedBatches: Array<{
       batchId: string;
@@ -387,12 +364,16 @@ export async function consumeCredits(
     }> = [];
 
     for (const batch of activeBatches) {
-      if (remainingToConsume <= 0) break;
+      if (remainingToConsume <= 0) {
+        break;
+      }
 
-      const consumeFromThisBatch = Math.min(batch.remaining, remainingToConsume);
+      const consumeFromThisBatch = Math.min(
+        batch.remaining,
+        remainingToConsume
+      );
       const newRemaining = batch.remaining - consumeFromThisBatch;
 
-      // 更新批次
       await tx
         .update(creditsBatch)
         .set({
@@ -410,13 +391,10 @@ export async function consumeCredits(
       remainingToConsume -= consumeFromThisBatch;
     }
 
-    // 验证是否完全消费
     if (remainingToConsume > 0) {
-      // 这不应该发生，因为我们已经检查了余额
       throw new InsufficientCreditsError(amount, amount - remainingToConsume);
     }
 
-    // 4. 记录交易（双重记账）
     const transactionId = crypto.randomUUID();
     const debitAccount = `WALLET:${userId}`;
     const creditAccount = `SERVICE:${serviceName}`;
@@ -436,7 +414,6 @@ export async function consumeCredits(
       },
     });
 
-    // 5. 更新余额
     const newBalance = balanceRecord.balance - amount;
     await tx
       .update(creditsBalance)
@@ -460,15 +437,16 @@ export async function consumeCredits(
 /**
  * 处理过期批次
  *
- * 扫描并标记所有过期的批次
- * 同时更新用户余额
+ * 扫描并标记所有过期的批次，同时更新用户余额。
+ * 使用条件更新保证同一批次在并发运行时只会被处理一次。
  */
 export async function processExpiredBatches() {
   const now = new Date();
 
-  // 查找所有过期但仍活跃的批次
   const expiredBatches = await db
-    .select()
+    .select({
+      id: creditsBatch.id,
+    })
     .from(creditsBatch)
     .where(
       and(
@@ -486,52 +464,69 @@ export async function processExpiredBatches() {
 
   for (const batch of expiredBatches) {
     await db.transaction(async (tx) => {
-      // 1. 标记批次为过期
-      await tx
+      const [expiredBatch] = await tx
         .update(creditsBatch)
         .set({
           status: "expired",
           updatedAt: new Date(),
         })
-        .where(eq(creditsBatch.id, batch.id));
+        .where(
+          and(
+            eq(creditsBatch.id, batch.id),
+            eq(creditsBatch.status, "active"),
+            gt(creditsBatch.remaining, 0)
+          )
+        )
+        .returning({
+          id: creditsBatch.id,
+          userId: creditsBatch.userId,
+          amount: creditsBatch.amount,
+          remaining: creditsBatch.remaining,
+          expiresAt: creditsBatch.expiresAt,
+        });
 
-      // 2. 记录过期交易
+      if (!expiredBatch) {
+        return;
+      }
+
       const transactionId = crypto.randomUUID();
       await tx.insert(creditsTransaction).values({
         id: transactionId,
-        userId: batch.userId,
+        userId: expiredBatch.userId,
         type: "expiration",
-        amount: batch.remaining,
-        debitAccount: `WALLET:${batch.userId}`,
+        amount: expiredBatch.remaining,
+        debitAccount: `WALLET:${expiredBatch.userId}`,
         creditAccount: "SYSTEM:expired",
-        description: `批次 ${batch.id} 过期`,
+        description: `批次 ${expiredBatch.id} 过期`,
         metadata: {
-          batchId: batch.id,
-          originalAmount: batch.amount,
-          expiredAmount: batch.remaining,
-          expiresAt: batch.expiresAt,
+          batchId: expiredBatch.id,
+          originalAmount: expiredBatch.amount,
+          expiredAmount: expiredBatch.remaining,
+          expiresAt: expiredBatch.expiresAt,
         },
       });
 
-      // 3. 更新用户余额
       await tx
         .update(creditsBalance)
         .set({
-          balance: sql`${creditsBalance.balance} - ${batch.remaining}`,
+          balance: sql`${creditsBalance.balance} - ${expiredBatch.remaining}`,
           updatedAt: new Date(),
         })
-        .where(eq(creditsBalance.userId, batch.userId));
+        .where(eq(creditsBalance.userId, expiredBatch.userId));
 
       results.push({
-        batchId: batch.id,
-        userId: batch.userId,
-        expiredAmount: batch.remaining,
+        batchId: expiredBatch.id,
+        userId: expiredBatch.userId,
+        expiredAmount: expiredBatch.remaining,
       });
     });
   }
 
   if (results.length > 0) {
-    const totalExpired = results.reduce((sum, item) => sum + item.expiredAmount, 0);
+    const totalExpired = results.reduce(
+      (sum, item) => sum + item.expiredAmount,
+      0
+    );
     logEvent("credits.expired", {
       count: results.length,
       totalExpired,
@@ -555,10 +550,7 @@ export async function getUserActiveBatches(userId: string) {
         eq(creditsBatch.userId, userId),
         eq(creditsBatch.status, "active"),
         gt(creditsBatch.remaining, 0),
-        or(
-          isNull(creditsBatch.expiresAt),
-          gt(creditsBatch.expiresAt, now)
-        )
+        or(isNull(creditsBatch.expiresAt), gt(creditsBatch.expiresAt, now))
       )
     )
     .orderBy(asc(creditsBatch.expiresAt), asc(creditsBatch.issuedAt));
