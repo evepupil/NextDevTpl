@@ -6,6 +6,8 @@ import * as schema from "@/db/schema";
 import { sendEmail } from "@/features/mail/utils";
 import { VerifyEmailEmail, ResetPasswordEmail } from "@/features/mail/templates/primary-action-email";
 
+const isResendConfigured = Boolean(process.env.RESEND_API_KEY);
+
 /**
  * Better Auth 服务端配置
  *
@@ -73,7 +75,7 @@ export const auth = betterAuth({
    */
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
+    requireEmailVerification: isResendConfigured,
     sendResetPassword: async ({ user, url }) => {
       await sendEmail({
         to: user.email,
@@ -89,19 +91,23 @@ export const auth = betterAuth({
   /**
    * 邮箱验证配置
    */
-  emailVerification: {
-    sendOnSignUp: true,
-    sendVerificationEmail: async ({ user, url }) => {
-      await sendEmail({
-        to: user.email,
-        subject: "Verify your email - NextDevTpl",
-        react: VerifyEmailEmail({
-          verifyUrl: url,
-          name: user.name || "there",
-        }),
-      });
-    },
-  },
+  ...(isResendConfigured
+    ? {
+        emailVerification: {
+          sendOnSignUp: true,
+          sendVerificationEmail: async ({ user, url }) => {
+            await sendEmail({
+              to: user.email,
+              subject: "Verify your email - NextDevTpl",
+              react: VerifyEmailEmail({
+                verifyUrl: url,
+                name: user.name || "there",
+              }),
+            });
+          },
+        },
+      }
+    : {}),
 
   /**
    * OAuth 社交登录提供商配置
