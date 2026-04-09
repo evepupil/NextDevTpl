@@ -299,13 +299,32 @@
     "managePreferences": "管理偏好",
     "back": "返回",
     "preferencesTitle": "Cookie 偏好设置",
+    "dialog": {
+      "title": "管理 Cookie 偏好",
+      "heading": "您的隐私选择",
+      "description": "您可以在此面板中随时查看并修改 Cookie 偏好。若不希望我们使用可选类别，请关闭对应开关；若只接受必要 Cookie，也可以直接选择“仅必要”。",
+      "acceptCurrentSelection": "接受当前选择"
+    },
+    "card": {
+      "title": "Cookie 设置",
+      "description": "在这里管理您的 Cookie 设置。",
+      "savePreferences": "保存偏好"
+    },
     "essential": {
       "title": "必要 Cookie",
       "description": "这些 Cookie 是网站正常运行所必需的，无法关闭。"
     },
+    "functional": {
+      "title": "功能性 Cookie",
+      "description": "这些 Cookie 用于启用个性化功能与体验。"
+    },
     "analytics": {
       "title": "分析 Cookie",
       "description": "帮助我们了解访问者如何与网站互动，以便改进用户体验。"
+    },
+    "performance": {
+      "title": "性能 Cookie",
+      "description": "这些 Cookie 帮助我们了解访问者如何与网站互动。"
     },
     "marketing": {
       "title": "营销 Cookie",

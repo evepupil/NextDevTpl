@@ -1,44 +1,45 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
-const cookieOptions = [
-  {
-    id: "necessary",
-    label: "Strictly Necessary",
-    description:
-      "These cookies are essential for the website to function properly.",
-    defaultChecked: true,
-    disabled: true,
-  },
-  {
-    id: "functional",
-    label: "Functional Cookies",
-    description:
-      "These cookies enable personalized features and functionality.",
-    defaultChecked: false,
-    disabled: false,
-  },
-  {
-    id: "performance",
-    label: "Performance Cookies",
-    description:
-      "These cookies help us understand how visitors interact with the website.",
-    defaultChecked: false,
-    disabled: false,
-  },
-];
-
 export function CookieSettingsCard() {
+  const t = useTranslations("Cookie");
+
+  const cookieOptions = [
+    {
+      id: "necessary",
+      label: t("essential.title"),
+      description: t("essential.description"),
+      defaultChecked: true,
+      disabled: true,
+    },
+    {
+      id: "functional",
+      label: t("functional.title"),
+      description: t("functional.description"),
+      defaultChecked: false,
+      disabled: false,
+    },
+    {
+      id: "performance",
+      label: t("performance.title"),
+      description: t("performance.description"),
+      defaultChecked: false,
+      disabled: false,
+    },
+  ] as const;
+
   return (
     <Card className="rounded-xl">
       <CardHeader>
-        <CardTitle className="text-base">Cookie Settings</CardTitle>
+        <CardTitle className="text-base">{t("card.title")}</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Manage your cookie settings here.
+          {t("card.description")}
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -62,7 +63,7 @@ export function CookieSettingsCard() {
             />
           </div>
         ))}
-        <Button className="w-full">Save preferences</Button>
+        <Button className="w-full">{t("card.savePreferences")}</Button>
       </CardContent>
     </Card>
   );

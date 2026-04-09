@@ -342,13 +342,32 @@
     "managePreferences": "Manage preferences",
     "back": "Back",
     "preferencesTitle": "Cookie Preferences",
+    "dialog": {
+      "title": "Manage cookie preferences",
+      "heading": "Your Privacy Choices",
+      "description": "In this panel you can review and change your cookie preferences at any time. Turn optional categories off if you do not want us to use them, or choose essential only to keep strictly necessary cookies enabled.",
+      "acceptCurrentSelection": "Accept current selection"
+    },
+    "card": {
+      "title": "Cookie Settings",
+      "description": "Manage your cookie settings here.",
+      "savePreferences": "Save preferences"
+    },
     "essential": {
       "title": "Essential Cookies",
       "description": "These cookies are necessary for the website to function and cannot be disabled."
     },
+    "functional": {
+      "title": "Functional Cookies",
+      "description": "These cookies enable personalized features and functionality."
+    },
     "analytics": {
       "title": "Analytics Cookies",
       "description": "Help us understand how visitors interact with our website to improve user experience."
+    },
+    "performance": {
+      "title": "Performance Cookies",
+      "description": "These cookies help us understand how visitors interact with the website."
     },
     "marketing": {
       "title": "Marketing Cookies",
