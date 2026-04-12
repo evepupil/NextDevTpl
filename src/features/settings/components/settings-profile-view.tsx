@@ -2,14 +2,23 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Camera, Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { useLocale, useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { useAction } from "next-safe-action/hooks";
 import { useRef, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type { z } from "zod";
 
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,25 +41,25 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CreditUsageSection } from "@/features/credits/components";
-import { usePathname, useRouter } from "@/i18n/routing";
-
-import { BillingSection } from "./billing-section";
-import { SecuritySection } from "./security-section";
-import { updateProfileAction } from "@/features/settings/actions";
+import {
+  deleteAccountAction,
+  updateProfileAction,
+} from "@/features/settings/actions";
 import { updateProfileSchema } from "@/features/settings/schemas";
 import {
   ALLOWED_IMAGE_TYPES,
-  MAX_FILE_SIZE,
   generateAvatarKey,
   getAvatarUrl,
   getSignedUploadUrlAction,
+  MAX_FILE_SIZE,
 } from "@/features/storage";
+import { usePathname, useRouter } from "@/i18n/routing";
+import { signOut } from "@/lib/auth/client";
 
-/**
- * SettingsProfileView Props 类型
- */
+import { BillingSection } from "./billing-section";
+import { SecuritySection } from "./security-section";
+
 interface SettingsProfileViewProps {
-  /** 用户初始数据 */
   user: {
     id: string;
     name: string;
@@ -59,60 +68,34 @@ interface SettingsProfileViewProps {
   };
 }
 
-/**
- * 表单数据类型
- */
 type FormValues = z.infer<typeof updateProfileSchema>;
 
-/**
- * 设置页面主视图组件
- *
- * 包含:
- * - Tabs 导航 (Account, Security, Billing, Usage, Notifications)
- * - General 表单 (Name, Email)
- * - Avatar 上传
- * - Language 设置
- * - Delete Account 危险区域
- */
 export function SettingsProfileView({ user }: SettingsProfileViewProps) {
-  // 文件上传 ref
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 国际化
   const t = useTranslations("Settings");
   const tTabs = useTranslations("Settings.tabs");
 
-  // 国际化路由
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
   const params = useParams();
   const [isChangingLocale, startLocaleTransition] = useTransition();
 
-  // 头像上传状态
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-
-  // 头像预览 URL (本地预览)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  /**
-   * 切换语言
-   */
   const handleLanguageChange = (newLocale: string) => {
     startLocaleTransition(() => {
       router.replace(
-        // @ts-expect-error -- TypeScript will validate that only known `params`
-        // are used in combination with a given `pathname`. Since the two will
-        // always match for the current route, we can skip runtime checks.
+        // @ts-expect-error Current route params always match the current pathname.
         { pathname, params },
         { locale: newLocale }
       );
     });
   };
 
-  /**
-   * 获取用户名首字母作为头像回退
-   */
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -122,14 +105,8 @@ export function SettingsProfileView({ user }: SettingsProfileViewProps) {
       .slice(0, 2);
   };
 
-  /**
-   * 获取当前显示的头像 URL
-   */
   const currentAvatarUrl = avatarPreview ?? getAvatarUrl(user.image);
 
-  /**
-   * 表单实例
-   */
   const form = useForm<FormValues>({
     resolver: zodResolver(updateProfileSchema),
     defaultValues: {
@@ -137,82 +114,109 @@ export function SettingsProfileView({ user }: SettingsProfileViewProps) {
     },
   });
 
-  /**
-   * Server Action 绑定 - 更新资料
-   */
-  const { execute: executeUpdateProfile, isPending } = useAction(updateProfileAction, {
-    onSuccess: ({ data }) => {
-      if (data?.message) {
-        toast.success(data.message);
-      }
-    },
-    onError: ({ error }) => {
-      if (error.serverError) {
-        toast.error(error.serverError);
-      }
-      if (error.validationErrors) {
-        const errors = Object.values(error.validationErrors).flat();
-        toast.error(errors.join(", ") || t("errors.validationFailed"));
-      }
-    },
-  });
+  const { execute: executeUpdateProfile, isPending } = useAction(
+    updateProfileAction,
+    {
+      onSuccess: ({ data }) => {
+        if (data?.message) {
+          toast.success(data.message);
+        }
+      },
+      onError: ({ error }) => {
+        if (error.serverError) {
+          toast.error(error.serverError);
+        }
+        if (error.validationErrors) {
+          const errors = Object.values(error.validationErrors).flat();
+          toast.error(errors.join(", ") || t("errors.validationFailed"));
+        }
+      },
+    }
+  );
 
-  /**
-   * 表单提交
-   */
+  const { execute: executeDeleteAccount, isPending: isDeletingAccount } =
+    useAction(deleteAccountAction, {
+      onSuccess: async ({ data }) => {
+        setIsDeleteDialogOpen(false);
+
+        if (data?.message) {
+          toast.success(data.message);
+        }
+
+        try {
+          await signOut({
+            fetchOptions: {
+              onSuccess: () => {
+                router.replace("/");
+                router.refresh();
+              },
+            },
+          });
+        } catch {
+          router.replace("/");
+          router.refresh();
+        }
+      },
+      onError: ({ error }) => {
+        toast.error(error.serverError || t("deleteAccount.error"));
+      },
+    });
+
   const onSubmit = (values: FormValues) => {
     executeUpdateProfile(values);
   };
 
-  /**
-   * 处理头像点击
-   */
   const handleAvatarClick = () => {
     if (!isUploadingAvatar) {
       fileInputRef.current?.click();
     }
   };
 
-  /**
-   * 处理文件选择并上传头像
-   */
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // 验证文件类型
-    if (!ALLOWED_IMAGE_TYPES.includes(file.type as typeof ALLOWED_IMAGE_TYPES[number])) {
-      toast.error(t("errors.unsupportedFileType", { types: ALLOWED_IMAGE_TYPES.join(", ") }));
+    if (
+      !ALLOWED_IMAGE_TYPES.includes(
+        file.type as (typeof ALLOWED_IMAGE_TYPES)[number]
+      )
+    ) {
+      toast.error(
+        t("errors.unsupportedFileType", {
+          types: ALLOWED_IMAGE_TYPES.join(", "),
+        })
+      );
       return;
     }
 
-    // 验证文件大小
     if (file.size > MAX_FILE_SIZE) {
-      toast.error(t("errors.fileTooLarge", { size: MAX_FILE_SIZE / 1024 / 1024 }));
+      toast.error(
+        t("errors.fileTooLarge", { size: MAX_FILE_SIZE / 1024 / 1024 })
+      );
       return;
     }
 
     setIsUploadingAvatar(true);
 
     try {
-      // 1. 创建本地预览
       const localPreviewUrl = URL.createObjectURL(file);
       setAvatarPreview(localPreviewUrl);
 
-      // 2. 生成唯一文件名
       const key = generateAvatarKey(user.id, file);
 
-      // 3. 获取签名上传 URL
       const uploadUrlResult = await getSignedUploadUrlAction({
         key,
-        contentType: file.type as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
+        contentType: file.type as
+          | "image/jpeg"
+          | "image/png"
+          | "image/gif"
+          | "image/webp",
       });
 
       if (!uploadUrlResult?.data?.uploadUrl) {
         throw new Error(t("errors.uploadFailed"));
       }
 
-      // 4. 直接上传文件到存储
       const uploadResponse = await fetch(uploadUrlResult.data.uploadUrl, {
         method: "PUT",
         body: file,
@@ -225,34 +229,28 @@ export function SettingsProfileView({ user }: SettingsProfileViewProps) {
         throw new Error(t("errors.fileUploadFailed"));
       }
 
-      // 5. 更新数据库中的头像字段
       executeUpdateProfile({ image: uploadUrlResult.data.key });
       toast.success(t("success.avatarUpdated"));
     } catch (error) {
-      console.error("头像上传错误:", error);
-      toast.error(error instanceof Error ? error.message : t("errors.avatarUploadError"));
-      // 清除预览
+      console.error("Avatar upload error:", error);
+      toast.error(
+        error instanceof Error ? error.message : t("errors.avatarUploadError")
+      );
       setAvatarPreview(null);
     } finally {
       setIsUploadingAvatar(false);
-      // 重置文件输入
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
     }
   };
 
-  /**
-   * 处理删除账户
-   */
   const handleDeleteAccount = () => {
-    // TODO: 实现删除账户功能
-    toast.error(t("deleteAccount.warning"));
+    executeDeleteAccount();
   };
 
   return (
     <div className="max-w-4xl space-y-8">
-      {/* Tabs 导航 */}
       <Tabs defaultValue="account" className="w-full">
         <div className="border-b border-border pb-2">
           <TabsList className="h-auto gap-1 bg-transparent p-0">
@@ -283,11 +281,8 @@ export function SettingsProfileView({ user }: SettingsProfileViewProps) {
           </TabsList>
         </div>
 
-        {/* Account Tab 内容 */}
         <TabsContent value="account" className="mt-8 space-y-10 pl-4">
-          {/* General Section */}
           <section className="space-y-6">
-            {/* Section Header with Save Button */}
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-semibold">{t("general.title")}</h2>
@@ -306,14 +301,12 @@ export function SettingsProfileView({ user }: SettingsProfileViewProps) {
               </Button>
             </div>
 
-            {/* Form */}
             <Form {...form}>
               <form
                 id="profile-form"
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-6"
               >
-                {/* Name Field */}
                 <FormField
                   control={form.control}
                   name="name"
@@ -336,12 +329,15 @@ export function SettingsProfileView({ user }: SettingsProfileViewProps) {
                   )}
                 />
 
-                {/* Email Field (Read-only) */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium leading-none">
+                  <label
+                    htmlFor="settings-email"
+                    className="text-sm font-medium leading-none"
+                  >
                     {t("general.email")}
                   </label>
                   <Input
+                    id="settings-email"
                     type="email"
                     value={user.email}
                     disabled
@@ -357,7 +353,6 @@ export function SettingsProfileView({ user }: SettingsProfileViewProps) {
 
           <Separator />
 
-          {/* Avatar Section */}
           <section className="space-y-6">
             <div>
               <h2 className="text-xl font-semibold">{t("avatar.title")}</h2>
@@ -367,7 +362,6 @@ export function SettingsProfileView({ user }: SettingsProfileViewProps) {
             </div>
 
             <div className="flex flex-col items-center space-y-4">
-              {/* 隐藏的文件输入 */}
               <input
                 ref={fileInputRef}
                 type="file"
@@ -377,7 +371,6 @@ export function SettingsProfileView({ user }: SettingsProfileViewProps) {
                 disabled={isUploadingAvatar}
               />
 
-              {/* 可点击的头像 */}
               <button
                 type="button"
                 onClick={handleAvatarClick}
@@ -390,10 +383,9 @@ export function SettingsProfileView({ user }: SettingsProfileViewProps) {
                     {getInitials(user.name)}
                   </AvatarFallback>
                 </Avatar>
-                {/* Hover 遮罩 / 上传中状态 */}
                 <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 group-disabled:opacity-100">
                   {isUploadingAvatar ? (
-                    <Loader2 className="h-6 w-6 text-white animate-spin" />
+                    <Loader2 className="h-6 w-6 animate-spin text-white" />
                   ) : (
                     <Camera className="h-6 w-6 text-white" />
                   )}
@@ -403,14 +395,15 @@ export function SettingsProfileView({ user }: SettingsProfileViewProps) {
               <p className="text-sm text-muted-foreground">
                 {isUploadingAvatar
                   ? t("avatar.uploading")
-                  : t("avatar.supportedFormats", { size: MAX_FILE_SIZE / 1024 / 1024 })}
+                  : t("avatar.supportedFormats", {
+                      size: MAX_FILE_SIZE / 1024 / 1024,
+                    })}
               </p>
             </div>
           </section>
 
           <Separator />
 
-          {/* Language Settings Section */}
           <section className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
@@ -429,8 +422,8 @@ export function SettingsProfileView({ user }: SettingsProfileViewProps) {
                   <SelectValue placeholder={t("language.placeholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="en">🇺🇸 English</SelectItem>
-                  <SelectItem value="zh">🇨🇳 中文</SelectItem>
+                  <SelectItem value="en">English</SelectItem>
+                  <SelectItem value="zh">中文</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -438,39 +431,76 @@ export function SettingsProfileView({ user }: SettingsProfileViewProps) {
 
           <Separator />
 
-          {/* Delete Account Section (Danger Zone) */}
           <section className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-semibold text-destructive">{t("deleteAccount.title")}</h2>
+                <h2 className="text-xl font-semibold text-destructive">
+                  {t("deleteAccount.title")}
+                </h2>
                 <p className="text-sm text-muted-foreground">
                   {t("deleteAccount.description")}
                 </p>
               </div>
 
-              <Button
-                type="button"
-                variant="outline"
-                className="border-destructive text-destructive hover:text-destructive hover:bg-destructive/10"
-                onClick={handleDeleteAccount}
+              <AlertDialog
+                open={isDeleteDialogOpen}
+                onOpenChange={(open) => {
+                  if (!isDeletingAccount) {
+                    setIsDeleteDialogOpen(open);
+                  }
+                }}
               >
-                {t("deleteAccount.button")}
-              </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  onClick={() => setIsDeleteDialogOpen(true)}
+                  disabled={isDeletingAccount}
+                >
+                  {isDeletingAccount && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  {t("deleteAccount.button")}
+                </Button>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      {t("deleteAccount.confirmTitle")}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t("deleteAccount.confirmDescription")}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={isDeletingAccount}>
+                      {t("deleteAccount.cancel")}
+                    </AlertDialogCancel>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      onClick={handleDeleteAccount}
+                      disabled={isDeletingAccount}
+                    >
+                      {isDeletingAccount && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
+                      {t("deleteAccount.confirm")}
+                    </Button>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </section>
         </TabsContent>
 
-        {/* Security Tab */}
         <TabsContent value="security" className="mt-8 pl-4">
           <SecuritySection />
         </TabsContent>
 
-        {/* Billing Tab */}
         <TabsContent value="billing" className="mt-8 pl-4">
           <BillingSection />
         </TabsContent>
 
-        {/* Usage Tab - 积分使用情况 */}
         <TabsContent value="usage" className="mt-8 pl-4">
           <CreditUsageSection />
         </TabsContent>

@@ -1,2 +1,3 @@
-// 设置功能 - Actions 导出
+// Settings feature - action exports
+export { deleteAccountAction } from "./delete-account";
 export { updateProfileAction } from "./update-profile";

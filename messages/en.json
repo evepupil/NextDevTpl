@@ -531,7 +531,12 @@
       "title": "Delete Account",
       "description": "Permanently delete your account and all associated data. This action cannot be undone.",
       "button": "Delete Account",
-      "warning": "This action is irreversible. Please proceed with caution."
+      "warning": "This action is irreversible. Please proceed with caution.",
+      "confirmTitle": "Delete this account?",
+      "confirmDescription": "Your account and all associated data will be permanently deleted. This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Yes, delete account",
+      "error": "Failed to delete account. Please try again later."
     },
     "security": {
       "changePassword": {
