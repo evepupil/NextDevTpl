@@ -59,7 +59,7 @@
     "fumadocs-core": "^16.4.8",
     "fumadocs-mdx": "^14.2.6",
     "fumadocs-ui": "^16.4.8",
-    "inngest": "^3.49.3",
+    "inngest": "^3.54.2",
     "lucide-react": "^0.562.0",
     "nanoid": "^5.1.6",
     "next": "16.1.4",
