@@ -1,0 +1,175 @@
+---
+title: 全局配置
+description: NextDevTpl 的环境变量、站点信息、导航、套餐和文档配置方式。
+---
+
+# 全局配置
+
+全局配置分为四层：环境变量、代码配置、内容配置和第三方控制台配置。运营上线前应先完成必填项，再逐步开启可选服务。
+
+## 最小启动配置
+
+复制示例文件：
+
+```bash
+cp .env.example .env.local
+```
+
+本地最小启动需要：
+
+```bash
+DATABASE_URL=postgresql://postgres:password@localhost:5432/nextdevtpl
+BETTER_AUTH_SECRET=your-super-secret-key
+BETTER_AUTH_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_APP_NAME=NextDevTpl
+```
+
+其中 `BETTER_AUTH_SECRET` 用于签名会话 Cookie，生产环境必须使用强随机值。
+
+## 环境变量分组
+
+| 分组 | 变量 | 是否必填 | 用途 |
+| --- | --- | --- | --- |
+| 应用 | `NEXT_PUBLIC_APP_URL`、`NEXT_PUBLIC_APP_NAME` | 必填 | 应用 URL、邮件和页面展示名称 |
+| 数据库 | `DATABASE_URL` | 必填 | PostgreSQL 连接 |
+| 认证 | `BETTER_AUTH_SECRET`、`BETTER_AUTH_URL` | 必填 | Better Auth 会话、OAuth 回调和邮件链接 |
+| OAuth | `GITHUB_CLIENT_ID`、`GITHUB_CLIENT_SECRET`、`GOOGLE_CLIENT_ID`、`GOOGLE_CLIENT_SECRET` | 可选 | GitHub/Google 登录 |
+| 支付 | `CREEM_API_KEY`、`CREEM_WEBHOOK_SECRET`、`NEXT_PUBLIC_CREEM_PRICE_*` | 支付上线必填 | Creem Checkout、Webhook 和价格 ID |
+| 邮件 | `RESEND_API_KEY`、`EMAIL_FROM` | 邮件上线必填 | 邮箱验证、密码重置和业务邮件 |
+| 存储 | `STORAGE_ENDPOINT`、`STORAGE_REGION`、`STORAGE_ACCESS_KEY_ID`、`STORAGE_SECRET_ACCESS_KEY`、`NEXT_PUBLIC_AVATARS_BUCKET_NAME` | 上传上线必填 | S3/R2 兼容对象存储 |
+| AI | `AI_PROVIDER`、`OPENAI_API_KEY`、`DEEPSEEK_API_KEY`、`MIMO_API_KEY`、模型变量 | AI 能力必填 | 多提供商 LLM 调用 |
+| Inngest | `INNGEST_EVENT_KEY`、`INNGEST_SIGNING_KEY`、`INNGEST_BASE_URL` | 生产异步任务必填 | 后台任务和事件队列 |
+| Cron | `CRON_SECRET` | 定时任务建议填写 | 保护 Cron API |
+| 限流 | `UPSTASH_REDIS_REST_URL`、`UPSTASH_REDIS_REST_TOKEN` | 可选 | API 滑动窗口限流 |
+| 日志 | `AXIOM_TOKEN`、`AXIOM_DATASET` | 可选 | 结构化日志上报 |
+| 监控 | `NEXT_PUBLIC_SENTRY_DSN`、`SENTRY_AUTH_TOKEN` | 可选 | 错误追踪和构建 sourcemap 上传 |
+| 分析 | `NEXT_PUBLIC_GA_ID` | 可选 | Google Analytics |
+
+未配置的可选服务会降级为空操作或控制台输出，不应阻塞本地启动。
+
+## 站点信息
+
+站点基础信息在 `src/config/site.ts`：
+
+```ts
+export const siteConfig = {
+  name: "NextDevTpl",
+  description: "Production-ready Next.js SaaS template...",
+  url: process.env.NEXT_PUBLIC_APP_URL || "https://example.com",
+  ogImage: "/og-image.png",
+  author: { name: "NextDevTpl Team" },
+  links: { twitter: "...", github: "...", discord: "..." },
+};
+```
+
+运营上线时建议修改：
+
+- `name`：产品名。
+- `description`：一句话定位，用于 SEO 和默认元数据。
+- `url`：生产域名，建议通过 `NEXT_PUBLIC_APP_URL` 管理。
+- `author`：团队名、官网、联系邮箱。
+- `links`：真实的社媒、GitHub、Discord 或社区链接。
+- `keywords`：业务关键词。
+
+## 导航配置
+
+导航集中在 `src/config/nav.ts`：
+
+| 配置 | 作用 |
+| --- | --- |
+| `productsNav` | 首页 Header 的 Products 下拉分组 |
+| `mainNav` | 顶部主导航，当前包含 Docs、PSEO、Pricing、Blog |
+| `footerNav` | 页脚 Product 和 Legal 链接 |
+| `dashboardNav` | 用户工作台侧边栏 |
+| `adminNav` | 管理后台侧边栏 |
+
+新增页面时，需要同步检查导航、路由和 i18n 文案。
+
+## 支付和套餐配置
+
+支付配置在 `src/config/payment.ts`：
+
+- `paymentConfig.provider` 当前为 `creem`。
+- `currency` 当前为 `USD`。
+- `yearlyDiscount` 控制年付折扣展示。
+- `redirectAfterCheckout` 支付成功后跳转 `/dashboard`。
+- `redirectAfterCancel` 取消支付后跳转 `/pricing`。
+- `plans` 定义 Free、Starter、Pro、Ultra。
+
+价格 ID 从环境变量读取：
+
+```bash
+NEXT_PUBLIC_CREEM_PRICE_STARTER_MONTHLY=price_xxx
+NEXT_PUBLIC_CREEM_PRICE_STARTER_YEARLY=price_xxx
+NEXT_PUBLIC_CREEM_PRICE_PRO_MONTHLY=price_xxx
+NEXT_PUBLIC_CREEM_PRICE_PRO_YEARLY=price_xxx
+NEXT_PUBLIC_CREEM_PRICE_ULTRA_MONTHLY=price_xxx
+NEXT_PUBLIC_CREEM_PRICE_ULTRA_YEARLY=price_xxx
+```
+
+套餐权限在 `src/config/subscription-plan.ts`：
+
+| 套餐 | 月度积分 | 单文件上限 | 队列优先级 |
+| --- | --- | --- | --- |
+| Free | 200，一次性 | 5MB | normal |
+| Starter | 3,000/月 | 20MB | normal |
+| Pro | 8,000/月 | 50MB | priority |
+| Ultra | 16,000/月 | 100MB | highest |
+
+如果调整价格、积分或文件上限，需要同步检查价格页文案、权限校验、Webhook 发放逻辑和测试。
+
+## 数据库配置
+
+数据库连接由 `DATABASE_URL` 提供，schema 在 `src/db/schema.ts`，迁移文件在 `drizzle/`。
+
+常用命令：
+
+```bash
+pnpm db:generate
+pnpm db:push
+pnpm db:migrate
+pnpm db:studio
+```
+
+生产环境建议使用版本化迁移，不建议直接 `db:push`。
+
+## 文档配置
+
+文档内容位于 `src/content/docs`，路由由 `src/app/[locale]/docs/[[...slug]]/page.tsx` 渲染，数据源在 `src/lib/source.ts`。
+
+新增文档页：
+
+1. 在 `src/content/docs` 新增 `.mdx` 文件。
+2. 在同级 `meta.json` 的 `pages` 中加入文件名。
+3. 文件开头添加 frontmatter：
+
+```mdx
+---
+title: 页面标题
+description: 页面描述
+---
+```
+
+4. 运行开发服务访问 `/docs/<slug>` 检查侧栏和内容。
+
+## 内容配置
+
+| 内容 | 目录 | 路由 |
+| --- | --- | --- |
+| 文档 | `src/content/docs` | `/docs` |
+| 博客 | `src/content/blog/<locale>` | `/blog`、`/blog/[slug]` |
+| 法律文档 | `src/content/legal/<locale>` | `/legal/[slug]` |
+| PSEO 数据 | `src/features/pseo/data/pseo-pages.json` | `/pseo`、`/pseo/[slug]` |
+
+国际化内容按 `en`、`zh` 目录或 JSON 文案拆分。
+
+## 上线配置顺序
+
+1. 先完成 `DATABASE_URL`、`BETTER_AUTH_SECRET`、`BETTER_AUTH_URL`、`NEXT_PUBLIC_APP_URL`。
+2. 部署并验证注册、登录、工作台访问。
+3. 配置 OAuth、邮件、存储。
+4. 配置 Creem 产品、价格 ID 和 Webhook。
+5. 配置 AI、Inngest、Cron。
+6. 配置 Upstash、Axiom、Sentry、GA。
+7. 跑完整检查：`pnpm lint`、`pnpm typecheck`、`pnpm test`、`pnpm build`。

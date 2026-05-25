@@ -1,0 +1,140 @@
+---
+title: 用户工作台与管理后台
+description: 用户侧 Dashboard、账号设置、管理员用户管理和后台权限操作。
+---
+
+# 用户工作台与管理后台
+
+用户工作台服务普通用户，管理后台服务运营和管理员。两者都基于 Next.js App Router、Server Components 和 Server Actions 实现。
+
+## 实现了什么
+
+- 登录用户 Dashboard。
+- 用户设置页，支持资料更新。
+- 订阅、账单和 Cookie 设置入口。
+- 管理员 Overview。
+- 用户列表、搜索、角色调整、封禁、人工充值积分。
+- 管理员工单队列和回复入口。
+- 管理员专用侧边栏。
+
+## 相关文件
+
+| 文件 | 作用 |
+| --- | --- |
+| `src/app/[locale]/(dashboard)/dashboard/page.tsx` | 用户工作台首页 |
+| `src/app/[locale]/(dashboard)/dashboard/settings/page.tsx` | 设置页 |
+| `src/app/[locale]/(dashboard)/layout.tsx` | 用户区布局和保护 |
+| `src/features/dashboard/components/*` | 用户区侧边栏和卡片 |
+| `src/features/settings/actions/*` | 更新资料、删除账号 |
+| `src/app/[locale]/(admin)/admin/page.tsx` | 管理后台首页 |
+| `src/app/[locale]/(admin)/admin/users/page.tsx` | 用户管理 |
+| `src/app/[locale]/(admin)/admin/tickets/page.tsx` | 工单管理 |
+| `src/features/admin/components/admin-sidebar.tsx` | 管理后台侧边栏 |
+| `src/features/support/actions/admin-users.ts` | 管理用户和积分 |
+| `src/config/nav.ts` | Dashboard 和 Admin 导航配置 |
+
+## 用户工作台入口
+
+| 路由 | 功能 |
+| --- | --- |
+| `/dashboard` | 用户概览、订阅卡、积分卡和示例数据 |
+| `/dashboard/settings` | 用户资料、账单、安全、Cookie 设置 |
+| `/dashboard/support` | 我的工单列表 |
+| `/dashboard/support/new` | 新建工单 |
+| `/dashboard/support/[id]` | 工单详情和消息 |
+
+## 设置页操作
+
+用户可以在设置页更新：
+
+- 昵称。
+- 头像。
+- 账单相关入口。
+- 安全相关入口。
+- Cookie 偏好。
+
+资料更新通过 `updateProfileAction` 写入 `user` 表，并刷新 `/dashboard/settings`。
+
+## 管理后台入口
+
+| 路由 | 功能 |
+| --- | --- |
+| `/admin` | 管理概览 |
+| `/admin/users` | 用户列表、搜索、角色、封禁、积分 |
+| `/admin/tickets` | 工单队列 |
+| `/admin/tickets/[id]` | 工单详情、回复、状态变更 |
+
+后台侧边栏配置在 `adminNav`，当前包含控制面板、用户管理、工单管理。
+
+## 用户管理操作
+
+### 搜索用户
+
+管理员可以按邮箱或昵称模糊搜索。查询结果会合并：
+
+- 用户基础信息。
+- 积分余额。
+- 订阅状态。
+
+### 调整角色
+
+角色可选：
+
+- `user`：普通用户。
+- `admin`：管理员。
+
+限制：
+
+- 不能更改自己的角色。
+- 调整管理员前应确认账号归属。
+
+### 封禁或解封
+
+封禁操作会写入：
+
+- `user.banned`
+- `user.bannedReason`
+- `user.updatedAt`
+
+限制：
+
+- 不能封禁自己。
+- 不能封禁管理员账号。
+
+### 人工充值积分
+
+管理员需要填写：
+
+- 用户 ID。
+- 积分数量。
+- 充值原因。
+
+系统会：
+
+1. 校验用户存在。
+2. 按当前过期策略计算 `expiresAt`。
+3. 调用 `grantCredits`。
+4. 写入批次和交易。
+5. 刷新 `/admin/users`。
+
+## 权限配置
+
+需要登录的用户操作使用 `protectedAction`，管理员操作使用 `adminAction`。新增后台功能时应默认使用 `adminAction`，并在页面层做管理员访问控制。
+
+## 运营建议
+
+| 运营场景 | 建议动作 |
+| --- | --- |
+| 新用户转化 | 观察注册用户、订阅状态、积分使用 |
+| 客诉处理 | 结合工单、用户订阅、积分交易排查 |
+| 风控账号 | 先封禁，再记录原因和证据 |
+| 补偿发放 | 使用人工充值并填写明确原因 |
+| 管理员变更 | 控制管理员人数，保留变更记录 |
+
+## 风险控制
+
+- 管理后台不应暴露给普通用户。
+- 人工充值和封禁属于高风险操作，必须保留操作原因。
+- 角色变更前应确认用户邮箱和组织归属。
+- 批量管理功能上线前要增加二次确认。
+- 用户删除或数据清理前先确认订阅、积分和工单关联数据。

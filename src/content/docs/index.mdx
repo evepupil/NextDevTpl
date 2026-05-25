@@ -1,73 +1,92 @@
 ---
-title: Introduction
-description: Welcome to NextDevTpl documentation. Learn how to get started with our SaaS boilerplate.
+title: 产品文档总览
+description: NextDevTpl 产品操作手册与模块配置入口。
 ---
 
-# Introduction
+# 产品文档总览
 
-Welcome to the NextDevTpl documentation! This guide will help you get started with building your SaaS application.
+NextDevTpl 是一套生产可用的 Next.js SaaS 模板，内置认证、订阅支付、积分账本、管理后台、工单、对象存储、邮件、内容文档、国际化、AI 接入、日志监控和异步任务能力。
 
-## Overview
+这套文档面向产品运营、管理员和开发维护人员，说明每个模块实现了什么、在哪里配置、上线前需要检查什么。
 
-NextDevTpl is a comprehensive starter kit designed to accelerate your SaaS development. It includes everything you need to build a modern web application:
+## 推荐阅读路径
 
-- **Authentication** - Secure user authentication with Better Auth
-- **Database** - PostgreSQL with Drizzle ORM for type-safe queries
-- **UI Components** - Beautiful components built with Shadcn UI
-- **Internationalization** - Multi-language support with next-intl
-- **Content Management** - Blog and docs powered by Fumadocs
+1. 先读 [操作手册](/docs/manual)，了解角色、入口和日常流程。
+2. 再读 [全局配置](/docs/configuration)，完成环境变量、站点信息、导航和价格配置。
+3. 按业务模块阅读 Modules 下的专项说明。
+4. 上线前使用 [运营上线检查清单](/docs/operations-checklist) 做最终核对。
 
-## Quick Start
+## 已覆盖模块
 
-### Prerequisites
+- **认证与账号**：邮箱密码登录、GitHub/Google OAuth、邮箱验证、密码重置、用户角色。
+- **数据库与迁移**：PostgreSQL、Drizzle ORM、核心表、迁移命令。
+- **订阅支付与积分**：Creem Checkout/Webhook、套餐价格、月度积分、一次性积分包、FIFO 批次和双重记账。
+- **用户工作台与管理后台**：仪表盘、设置、用户管理、角色切换、封禁、人工加积分。
+- **支持工单**：用户提交工单、追加消息、管理员回复和状态流转。
+- **存储与邮件**：S3/R2 兼容存储、头像上传、Resend 和 React Email 模板。
+- **内容与国际化**：Fumadocs 文档、博客、法律页面、next-intl 双语路由。
+- **AI、可观测性与异步任务**：OpenAI/DeepSeek/MiMo、Upstash 限流、Pino/Axiom、Sentry、Inngest、Cron。
 
-Before you begin, make sure you have:
+## 快速启动
 
-- Node.js 18+ installed
-- pnpm package manager
-- PostgreSQL database
+### 前置条件
 
-### Installation
+- Node.js 20 或更高版本。
+- pnpm。
+- PostgreSQL 数据库，本地 PostgreSQL 或 Neon 均可。
 
-1. Clone the repository:
+### 安装
 
 ```bash
-git clone https://github.com/nextdevtpl/nextdevtpl.git
-cd nextdevtpl
-```
-
-2. Install dependencies:
-
-```bash
+git clone git@github.com:evepupil/NextDevTpl.git
+cd NextDevTpl
 pnpm install
-```
-
-3. Set up environment variables:
-
-```bash
 cp .env.example .env.local
 ```
 
-4. Start the development server:
+至少填写：
 
 ```bash
+DATABASE_URL=postgresql://...
+BETTER_AUTH_SECRET=your-secret
+BETTER_AUTH_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+```bash
+pnpm db:push
 pnpm dev
 ```
 
-## Project Structure
+开发服务默认运行在 `http://localhost:3000`，文档入口是 `/docs`，中文路由下通常是 `/zh/docs`。
 
-```
+## 项目结构
+
+```txt
 src/
-├── app/           # Next.js App Router
-├── components/    # Shared components
-├── features/      # Feature modules
-├── lib/           # Utilities
-├── db/            # Database schema
-└── content/       # MDX content
+├── app/                        # Next.js App Router
+│   └── [locale]/               # en / zh 国际化路由
+├── components/ui/              # Shadcn UI 与 Radix 基础组件
+├── features/                   # 业务功能模块
+├── db/                         # Drizzle schema
+├── lib/                        # Auth、AI、日志、限流等基础能力
+├── inngest/                    # 异步任务入口
+├── content/                    # docs、blog、legal MDX 内容
+└── test/                       # Vitest 测试
 ```
 
-## Next Steps
+## 常用命令
 
-- [Authentication](/docs/authentication) - Set up user authentication
-- [Database](/docs/database) - Configure your database
-- [Deployment](/docs/deployment) - Deploy to production
+```bash
+pnpm dev            # 本地开发
+pnpm build          # 生产构建
+pnpm start          # 启动生产服务
+pnpm lint           # Biome lint
+pnpm format         # Biome format
+pnpm typecheck      # TypeScript 检查
+pnpm db:generate    # 生成 Drizzle 迁移
+pnpm db:push        # 将 schema 推送到开发库
+pnpm db:migrate     # 执行迁移
+pnpm db:studio      # 打开 Drizzle Studio
+pnpm test           # 运行测试
+```

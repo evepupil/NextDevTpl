@@ -1,0 +1,17 @@
+{
+  "title": "NextDevTpl",
+  "pages": [
+    "index",
+    "manual",
+    "configuration",
+    "modules/auth",
+    "modules/database",
+    "modules/payment-credits",
+    "modules/dashboard-admin",
+    "modules/support",
+    "modules/storage-mail",
+    "modules/content-i18n",
+    "modules/ai-observability-jobs",
+    "operations-checklist"
+  ]
+}

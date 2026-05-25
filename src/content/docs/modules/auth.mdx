@@ -1,0 +1,140 @@
+---
+title: 认证与账号
+description: Better Auth 认证模块的配置、流程、角色和风险控制。
+---
+
+# 认证与账号
+
+认证模块基于 Better Auth、Drizzle 和 PostgreSQL，实现邮箱密码登录、GitHub/Google OAuth、会话管理、邮箱验证、密码重置和用户角色。
+
+## 实现了什么
+
+- 邮箱密码注册和登录。
+- GitHub、Google OAuth 登录。
+- 登录会话有效期 7 天，剩余不足 1 天时刷新。
+- 会话 Cookie 缓存 5 分钟。
+- 用户表扩展 `role`、`banned`、`bannedReason`。
+- 配置 Resend 后启用邮箱验证和密码重置邮件。
+- 管理员和普通用户权限区分。
+
+## 相关文件
+
+| 文件 | 作用 |
+| --- | --- |
+| `src/lib/auth/index.ts` | Better Auth 服务端配置 |
+| `src/lib/auth/client.ts` | 客户端 auth helper |
+| `src/lib/auth/server.ts` | 服务端 session 获取 |
+| `src/lib/auth/admin.ts` | 管理员权限判断 |
+| `src/app/api/auth/[...all]/route.ts` | Better Auth API 路由 |
+| `src/db/schema.ts` | `user`、`session`、`account`、`verification` 表 |
+| `src/features/auth/components/*` | 登录、注册、忘记密码表单 |
+| `src/app/[locale]/(auth)/*` | 认证页面路由 |
+
+## 环境变量
+
+```bash
+BETTER_AUTH_SECRET=your-super-secret-key-change-in-production
+BETTER_AUTH_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
+
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+RESEND_API_KEY=re_your-resend-api-key
+EMAIL_FROM="NextDevTpl <noreply@your-domain.com>"
+```
+
+`RESEND_API_KEY` 存在时，邮箱密码注册会要求邮箱验证；未配置时本地开发可直接登录。
+
+## OAuth 配置
+
+### GitHub
+
+1. 进入 GitHub Developer Settings。
+2. 创建 OAuth App。
+3. Homepage URL 填写 `NEXT_PUBLIC_APP_URL`。
+4. Authorization callback URL 填写：
+
+```txt
+http://localhost:3000/api/auth/callback/github
+```
+
+生产环境替换为真实域名。
+
+### Google
+
+1. 在 Google Cloud Console 创建 OAuth Client。
+2. Authorized JavaScript origins 填写站点域名。
+3. Authorized redirect URIs 填写：
+
+```txt
+http://localhost:3000/api/auth/callback/google
+```
+
+生产环境替换为真实域名。
+
+## 用户字段
+
+| 字段 | 说明 |
+| --- | --- |
+| `id` | 用户唯一 ID |
+| `name` | 显示名称 |
+| `email` | 唯一邮箱 |
+| `emailVerified` | 邮箱是否验证 |
+| `image` | 头像 URL |
+| `role` | `user` 或 `admin` |
+| `banned` | 是否封禁 |
+| `bannedReason` | 封禁原因 |
+| `customerId` | Creem 客户 ID |
+
+`role`、`banned`、`bannedReason` 设置为 `input: false`，用户不能通过注册或更新资料自行修改。
+
+## 管理员账号初始化
+
+项目没有硬编码默认管理员。初始化管理员可选方式：
+
+1. 先注册一个普通账号。
+2. 在数据库中将该用户的 `role` 改为 `admin`。
+3. 用管理员账号进入 `/admin/users` 后，再通过 UI 管理其他用户角色。
+
+## 操作流程
+
+### 用户注册
+
+1. 打开 `/sign-up`。
+2. 输入邮箱、密码和名称。
+3. 如果开启 Resend，用户需要点击验证邮件。
+4. 登录后进入 `/dashboard`。
+
+### 密码重置
+
+1. 打开 `/forgot-password`。
+2. 输入邮箱。
+3. 系统通过 Resend 发送重置链接。
+4. 用户打开链接完成重置。
+
+### 角色调整
+
+1. 管理员打开 `/admin/users`。
+2. 找到目标用户。
+3. 调整角色为 `user` 或 `admin`。
+4. 系统禁止管理员调整自己的角色。
+
+### 封禁账号
+
+1. 管理员打开 `/admin/users`。
+2. 选择封禁并填写原因。
+3. 系统禁止封禁管理员账号。
+4. 后续运营可按封禁原因复盘风险账号。
+
+## 风险控制
+
+- 生产环境必须使用高强度 `BETTER_AUTH_SECRET`。
+- OAuth 回调域名必须与部署域名一致。
+- 管理员账号数量应控制，调整角色前确认目标用户身份。
+- 封禁用户时填写明确原因，便于后续审计。
+- 配置 Resend 后再开启生产注册，避免用户无法完成验证。
+- 涉及用户身份的 Server Action 应使用 `protectedAction` 或 `adminAction`。

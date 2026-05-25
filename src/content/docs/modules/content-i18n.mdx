@@ -1,0 +1,149 @@
+---
+title: 内容、文档与国际化
+description: Fumadocs、博客、法律页、PSEO 数据和 next-intl 双语路由配置。
+---
+
+# 内容、文档与国际化
+
+内容系统由 Fumadocs MDX、博客集合、法律文档集合、PSEO JSON 数据和 next-intl 组成。当前路由支持 `en` 和 `zh`。
+
+## 实现了什么
+
+- `/docs` 文档页面，使用 Fumadocs UI。
+- `/blog` 博客列表和详情。
+- `/legal/[slug]` 法律文档。
+- `/pseo` 和 `/pseo/[slug]` 程序化 SEO 页面。
+- `en`、`zh` 双语路由。
+- Header 语言切换。
+- 全站文案 JSON 管理。
+
+## 相关文件
+
+| 文件 | 作用 |
+| --- | --- |
+| `source.config.ts` | Fumadocs 内容集合定义 |
+| `src/lib/source.ts` | docs、blog、legal 数据加载 |
+| `src/content/docs/*` | 文档 MDX |
+| `src/content/blog/en/*`、`src/content/blog/zh/*` | 博客 MDX |
+| `src/content/legal/en/*`、`src/content/legal/zh/*` | 法律文档 MDX |
+| `src/app/[locale]/docs/[[...slug]]/page.tsx` | 文档渲染路由 |
+| `src/app/[locale]/(marketing)/blog/*` | 博客路由 |
+| `src/app/[locale]/(marketing)/legal/[slug]/page.tsx` | 法律页路由 |
+| `src/features/pseo/data/pseo-pages.json` | PSEO 页面数据 |
+| `src/i18n/routing.ts` | locale 和路由配置 |
+| `messages/en.json`、`messages/zh.json` | 页面文案 |
+
+## 文档内容
+
+文档内容放在 `src/content/docs`。每个 `.mdx` 文件需要 frontmatter：
+
+```mdx
+---
+title: 页面标题
+description: 页面描述
+---
+```
+
+侧栏顺序由 `meta.json` 控制：
+
+```json
+{
+  "title": "NextDevTpl",
+  "pages": ["index", "manual", "configuration"]
+}
+```
+
+新增模块目录时，可在目录下添加自己的 `meta.json`。
+
+## 博客内容
+
+博客按语言分目录：
+
+```txt
+src/content/blog/
+├── en/
+│   └── hello-world.mdx
+└── zh/
+    └── hello-world.mdx
+```
+
+博客 frontmatter 需要：
+
+```mdx
+---
+title: 标题
+description: 摘要
+date: 2026-05-25
+author: NextDevTpl Team
+tags:
+  - SaaS
+---
+```
+
+`getBlogPosts(locale)` 会按文件路径第一段筛选语言。
+
+## 法律文档
+
+法律文档路径：
+
+```txt
+src/content/legal/en/terms.mdx
+src/content/legal/en/privacy.mdx
+src/content/legal/en/cookie-policy.mdx
+src/content/legal/zh/terms.mdx
+src/content/legal/zh/privacy.mdx
+src/content/legal/zh/cookie-policy.mdx
+```
+
+页脚链接在 `src/config/nav.ts` 的 `footerNav.legal` 中维护。
+
+## PSEO 页面
+
+PSEO 数据在 `src/features/pseo/data/pseo-pages.json`，渲染组件在 `src/features/pseo/components/*`。
+
+适合以下场景：
+
+- 批量生成行业页。
+- 批量生成用例页。
+- 批量生成模板页。
+- 用同一套组件承载不同 SEO 关键词。
+
+新增 PSEO 页面时，确保：
+
+- `slug` 唯一。
+- 每个 locale 的标题、描述和内容完整。
+- 相关页面推荐不会指向不存在的 slug。
+
+## 国际化配置
+
+路由和 locale 配置在 `src/i18n/routing.ts`。当前内容和文案主要使用：
+
+- `messages/en.json`
+- `messages/zh.json`
+
+新增文案时要同时补齐英文和中文，避免运行时找不到 key。
+
+## 新增语言流程
+
+1. 在 `src/i18n/routing.ts` 增加 locale。
+2. 新增 `messages/<locale>.json`。
+3. 补齐博客和法律文档目录。
+4. 检查语言切换器。
+5. 检查 sitemap 和 SEO 元数据。
+6. 运行 `pnpm typecheck` 和 `pnpm build`。
+
+## SEO 操作建议
+
+- 每个内容页都写清晰的 `title` 和 `description`。
+- 博客标题面向搜索意图，描述控制在 1 到 2 句话。
+- 法律页面不要混入营销语。
+- PSEO 页面避免纯模板堆砌，应提供真实差异化内容。
+- 修改导航后检查移动端 Header 和 Footer。
+
+## 风险控制
+
+- 不要删除旧 slug，除非已配置重定向。
+- 多语言内容发布前检查两个语言版本是否都存在。
+- PSEO 批量新增前先抽样检查 5 到 10 个页面。
+- 文档中不要写真实密钥、客户数据或内部后台地址。
+- 法律文档上线前应经过法务或负责人确认。

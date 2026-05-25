@@ -1,0 +1,111 @@
+---
+title: 支持工单
+description: 用户工单、管理员回复、状态流转和客服运营规范。
+---
+
+# 支持工单
+
+支持工单模块用于用户反馈、账单问题、技术问题、Bug 和功能需求收集。用户只能查看自己的工单，管理员可以查看和处理全部工单。
+
+## 实现了什么
+
+- 用户创建工单。
+- 用户查看自己的工单列表和详情。
+- 用户在未关闭工单中追加消息。
+- 管理员查看全部工单。
+- 管理员回复工单。
+- 管理员更新工单状态。
+- 管理员回复后自动将 `open` 状态推进到 `in_progress`。
+
+## 相关文件
+
+| 文件 | 作用 |
+| --- | --- |
+| `src/features/support/actions/ticket.ts` | 用户和管理员工单 Server Actions |
+| `src/features/support/schemas/ticket.ts` | 表单校验 |
+| `src/features/support/components/*` | 工单表单、回复表单、状态选择 |
+| `src/app/[locale]/(dashboard)/dashboard/support/*` | 用户侧工单页面 |
+| `src/app/[locale]/(admin)/admin/tickets/*` | 管理员工单页面 |
+| `src/db/schema.ts` | `ticket`、`ticket_message` 表 |
+
+## 工单字段
+
+| 字段 | 说明 |
+| --- | --- |
+| `subject` | 工单标题 |
+| `category` | `billing`、`technical`、`bug`、`feature`、`other` |
+| `priority` | `low`、`medium`、`high` |
+| `status` | `open`、`in_progress`、`resolved`、`closed` |
+| `createdAt` | 创建时间 |
+| `updatedAt` | 最近更新时间 |
+
+消息表使用 `isAdminResponse` 区分用户消息和管理员回复。
+
+## 用户操作流程
+
+### 创建工单
+
+1. 用户进入 `/dashboard/support/new`。
+2. 填写标题、类别、优先级和问题描述。
+3. 提交后系统创建一条 `ticket`。
+4. 同时创建第一条 `ticket_message`。
+5. 页面刷新 `/dashboard/support`。
+
+### 查看和追加消息
+
+1. 用户进入 `/dashboard/support`。
+2. 打开目标工单。
+3. 如果工单未关闭，可继续追加消息。
+4. 如果状态为 `closed`，系统拒绝新增消息。
+
+用户侧查询会校验 `ticket.userId`，不能查看他人工单。
+
+## 管理员操作流程
+
+### 查看队列
+
+1. 管理员进入 `/admin/tickets`。
+2. 查看工单用户、标题、类别、优先级、状态和时间。
+3. 优先处理 `high` 和长时间未响应的 `open` 工单。
+
+### 回复工单
+
+1. 打开 `/admin/tickets/[id]`。
+2. 输入回复内容。
+3. 提交后写入 `ticket_message`，并标记 `isAdminResponse = true`。
+4. 如果工单原状态是 `open`，系统自动改为 `in_progress`。
+
+### 更新状态
+
+管理员可将状态调整为：
+
+- `open`：新问题或重新打开。
+- `in_progress`：处理中。
+- `resolved`：已解决，等待用户确认或归档。
+- `closed`：关闭，不再允许用户追加消息。
+
+## 客服 SLA 建议
+
+| 优先级 | 首响目标 | 处理建议 |
+| --- | --- | --- |
+| high | 4 小时内 | 涉及支付、登录、数据丢失、严重 Bug，优先处理 |
+| medium | 1 个工作日内 | 一般功能异常、订阅疑问、配置问题 |
+| low | 2 个工作日内 | 咨询、建议、非阻塞问题 |
+
+## 分类处理建议
+
+| 类别 | 处理方式 |
+| --- | --- |
+| billing | 核对订阅、支付、发票、退款、积分发放 |
+| technical | 收集浏览器、账号、复现步骤、错误截图 |
+| bug | 标注复现步骤，必要时转开发 issue |
+| feature | 汇总到产品需求池，记录业务价值 |
+| other | 补充分流信息后重新分类 |
+
+## 风险控制
+
+- 不要在工单回复中泄露内部密钥、支付密钥或数据库信息。
+- 涉及退款、补偿、封禁的处理要同步记录原因。
+- 关闭工单前确认用户问题已解决或已给出明确下一步。
+- Bug 工单应关联具体版本、时间和复现路径。
+- 大额补偿不要只在工单中承诺，还要通过管理员充值记录落库。

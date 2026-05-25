@@ -1,0 +1,134 @@
+---
+title: 数据库与迁移
+description: PostgreSQL、Drizzle ORM、核心数据表和迁移流程。
+---
+
+# 数据库与迁移
+
+数据库层使用 PostgreSQL 和 Drizzle ORM，核心 schema 位于 `src/db/schema.ts`，迁移文件位于 `drizzle/`。
+
+## 实现了什么
+
+- Better Auth 所需用户、会话、账号、验证表。
+- Creem 订阅表。
+- 积分余额、积分批次、积分交易表。
+- Newsletter 订阅表。
+- 支持工单和工单消息表。
+- Drizzle 类型推导和迁移生成。
+
+## 相关文件
+
+| 文件 | 作用 |
+| --- | --- |
+| `src/db/schema.ts` | 数据表、枚举和类型定义 |
+| `src/db/index.ts` | Drizzle 数据库连接 |
+| `drizzle.config.ts` | Drizzle Kit 配置 |
+| `drizzle/*.sql` | 已生成迁移 |
+| `drizzle/meta/*` | 迁移快照 |
+| `src/test/utils/db.ts` | 测试数据库工具 |
+
+## 数据库连接
+
+在 `.env.local` 中配置：
+
+```bash
+DATABASE_URL=postgresql://postgres:password@localhost:5432/nextdevtpl
+```
+
+使用 Neon 时建议使用非 pooler 端点，以支持事务。
+
+## 核心表
+
+### 认证表
+
+| 表 | 说明 |
+| --- | --- |
+| `user` | 用户基础资料、角色、封禁、Creem customerId |
+| `session` | 登录会话、过期时间、IP、User-Agent |
+| `account` | OAuth 账号和密码凭证 |
+| `verification` | 邮箱验证和密码重置 token |
+
+### 商业化表
+
+| 表 | 说明 |
+| --- | --- |
+| `subscription` | 用户订阅、价格 ID、状态、周期、取消标记 |
+| `credits_balance` | 用户积分预计算余额、累计获得、累计消费、账户状态 |
+| `credits_batch` | 积分批次、剩余数量、来源、过期时间、状态 |
+| `credits_transaction` | 积分双重记账交易明细 |
+
+### 运营表
+
+| 表 | 说明 |
+| --- | --- |
+| `newsletter_subscriber` | 邮件订阅状态 |
+| `ticket` | 支持工单主题、类别、优先级、状态 |
+| `ticket_message` | 工单对话消息和管理员回复标记 |
+
+## 枚举
+
+| 枚举 | 值 |
+| --- | --- |
+| `user_role` | `user`、`admin` |
+| `credits_balance_status` | `active`、`frozen` |
+| `credits_batch_status` | `active`、`consumed`、`expired` |
+| `credits_batch_source` | `purchase`、`subscription`、`bonus`、`refund` |
+| `credits_transaction_type` | `purchase`、`consumption`、`monthly_grant`、`registration_bonus`、`admin_grant`、`expiration`、`refund` |
+| `ticket_category` | `billing`、`technical`、`bug`、`feature`、`other` |
+| `ticket_priority` | `low`、`medium`、`high` |
+| `ticket_status` | `open`、`in_progress`、`resolved`、`closed` |
+
+## 迁移流程
+
+### 开发环境快速同步
+
+```bash
+pnpm db:push
+```
+
+适合本地开发和原型验证，会直接根据当前 schema 同步数据库。
+
+### 版本化迁移
+
+```bash
+pnpm db:generate
+pnpm db:migrate
+```
+
+适合生产和多人协作。提交代码时应同时提交 `drizzle/*.sql` 和 `drizzle/meta/*`。
+
+### 查看数据
+
+```bash
+pnpm db:studio
+```
+
+用于检查用户、订阅、积分批次和工单数据。
+
+## 数据变更规范
+
+1. 修改 `src/db/schema.ts`。
+2. 运行 `pnpm db:generate`。
+3. 检查生成 SQL 是否符合预期。
+4. 更新依赖类型和业务查询。
+5. 补充测试。
+6. 在测试库执行 `pnpm db:migrate`。
+7. 发布后监控迁移耗时和错误。
+
+## 常见运营排查
+
+| 问题 | 检查点 |
+| --- | --- |
+| 用户登录失败 | `user`、`account`、`session`、OAuth 回调配置 |
+| 管理后台看不到用户 | `user.role`、数据库连接、查询日志 |
+| 支付完成但未订阅 | `subscription` 是否有记录，Webhook 是否更新状态 |
+| 积分余额不一致 | 对比 `credits_balance` 与 `credits_transaction`，再查 `credits_batch` |
+| 工单列表为空 | `ticket.userId` 是否匹配当前用户 |
+
+## 风险控制
+
+- 生产环境执行迁移前备份数据库。
+- 积分和订阅相关字段变更前先写回滚方案。
+- 不要在生产环境直接删除枚举值。
+- 对用户、支付、积分表的手工修改必须保留操作记录。
+- 批量修复数据时先在只读查询中确认影响范围。

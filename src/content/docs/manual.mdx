@@ -1,0 +1,113 @@
+---
+title: 操作手册
+description: NextDevTpl 的产品角色、常用入口和日常运营流程。
+---
+
+# 操作手册
+
+本手册按实际使用者拆分流程：访客、登录用户、管理员和开发维护人员。每个角色使用的页面和权限不同，运营时应先确认当前账号角色。
+
+## 角色与权限
+
+| 角色 | 入口 | 能做什么 | 权限来源 |
+| --- | --- | --- | --- |
+| 访客 | `/`、`/pricing`、`/blog`、`/docs`、`/pseo` | 浏览营销页、价格页、博客、文档和 PSEO 页面 | 未登录 |
+| 普通用户 | `/dashboard`、`/dashboard/settings`、`/dashboard/support` | 查看工作台、管理资料、查看积分和订阅、提交工单 | `user.role = user` |
+| 管理员 | `/admin`、`/admin/users`、`/admin/tickets` | 管理用户、调整角色、封禁账号、人工充值积分、处理工单 | `user.role = admin` |
+| 开发维护人员 | 代码仓库、数据库、第三方控制台 | 配置环境变量、迁移数据库、接入支付/邮件/存储/监控 | 项目部署权限 |
+
+## 访客流程
+
+1. 进入首页 `/`，查看产品卖点、功能介绍、价格区块、FAQ 和 CTA。
+2. 进入 `/pricing` 或首页价格区，选择 Free、Starter、Pro、Ultra。
+3. 进入 `/blog` 查看内容增长文章。
+4. 进入 `/docs` 查看操作手册和模块说明。
+5. 点击注册或订阅 CTA，进入 `/sign-up` 或 `/sign-in`。
+
+## 注册与登录流程
+
+1. 用户打开 `/sign-up`。
+2. 使用邮箱密码注册，或使用 GitHub/Google OAuth 登录。
+3. 如果配置了 `RESEND_API_KEY`，系统会启用邮箱验证和密码重置邮件。
+4. 登录成功后进入 `/dashboard`。
+5. 用户第一次触发积分相关能力时，系统会懒加载发放注册奖励积分。
+
+## 用户工作台流程
+
+| 页面 | 操作 | 结果 |
+| --- | --- | --- |
+| `/dashboard` | 查看概览卡片、订阅卡片、积分状态和示例数据 | 用户掌握当前账号状态 |
+| `/dashboard/settings` | 更新昵称、头像、账单和安全信息 | 写入 `user.name`、`user.image` 等字段 |
+| `/dashboard/support` | 查看自己的工单列表 | 按创建时间展示用户工单 |
+| `/dashboard/support/new` | 创建新工单 | 生成 `ticket` 和第一条 `ticket_message` |
+| `/dashboard/support/[id]` | 追加消息 | 工单未关闭时可继续沟通 |
+
+## 订阅与积分流程
+
+1. 用户在价格页选择套餐。
+2. 前端调用 `createCheckoutSession` 创建 Creem Checkout。
+3. 支付完成后跳回 `/dashboard?success=true`。
+4. Creem Webhook 更新订阅状态并发放订阅积分。
+5. 用户消费能力时，积分系统按批次 FIFO 扣减，并记录双重记账交易。
+6. 用户可在积分相关页面查看余额、批次和交易历史。
+
+## 管理员流程
+
+### 用户管理
+
+1. 进入 `/admin/users`。
+2. 搜索用户邮箱或昵称。
+3. 查看用户基础信息、积分余额、订阅状态。
+4. 根据运营需要执行：
+   - 将普通用户升级为管理员，或降级为普通用户。
+   - 封禁或解封用户。
+   - 填写原因并人工发放积分。
+
+管理员不能更改自己的角色，也不能封禁管理员账号。
+
+### 工单管理
+
+1. 进入 `/admin/tickets`。
+2. 按状态和优先级识别待处理工单。
+3. 打开工单详情 `/admin/tickets/[id]`。
+4. 回复用户，若工单处于 `open`，首次管理员回复会自动转为 `in_progress`。
+5. 问题解决后将状态改为 `resolved` 或 `closed`。
+
+## 开发维护流程
+
+### 本地开发
+
+```bash
+pnpm install
+cp .env.example .env.local
+pnpm db:push
+pnpm dev
+```
+
+### 发布前检查
+
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+```
+
+### 数据库变更
+
+1. 修改 `src/db/schema.ts`。
+2. 运行 `pnpm db:generate` 生成迁移。
+3. 开发环境可用 `pnpm db:push` 快速同步。
+4. 生产环境使用 `pnpm db:migrate` 执行版本化迁移。
+
+## 状态和风险处理
+
+| 场景 | 建议处理 |
+| --- | --- |
+| 支付后订阅未生效 | 检查 Creem Webhook Secret、Webhook 投递日志、`subscription` 表记录 |
+| 积分余额异常 | 核对 `credits_balance`、`credits_batch`、`credits_transaction`，以交易账本为审计依据 |
+| 邮件未发送 | 检查 `RESEND_API_KEY`、`EMAIL_FROM`、域名验证和 Resend 日志 |
+| 用户无法上传头像 | 检查存储环境变量、桶名、对象 key 是否包含用户 ID |
+| 管理后台 403 或跳转 | 确认当前用户 `role` 是否为 `admin` |
+| AI 调用失败 | 检查 `AI_PROVIDER`、对应 API Key、模型名和 Cloudflare AI Gateway 配置 |
+| 文档未出现 | 确认 MDX 文件在 `src/content/docs` 下，并在 `meta.json` 的 `pages` 中登记 |

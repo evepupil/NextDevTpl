@@ -1,0 +1,13 @@
+{
+  "title": "Modules",
+  "pages": [
+    "auth",
+    "database",
+    "payment-credits",
+    "dashboard-admin",
+    "support",
+    "storage-mail",
+    "content-i18n",
+    "ai-observability-jobs"
+  ]
+}

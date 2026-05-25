@@ -1,0 +1,122 @@
+---
+title: 存储与邮件
+description: S3/R2 对象存储、头像上传、Resend 发信和 React Email 模板。
+---
+
+# 存储与邮件
+
+存储模块负责用户上传文件，当前主要用于头像。邮件模块负责邮箱验证、密码重置和业务邮件发送。
+
+## 实现了什么
+
+- S3 兼容对象存储抽象，可接 AWS S3、Cloudflare R2、MinIO。
+- 受保护的签名上传 URL。
+- 文件删除 Action。
+- 存储桶白名单。
+- 文件 key 用户归属校验。
+- Resend 发信。
+- React Email 邮件模板。
+- 邮件未配置时的本地降级。
+
+## 存储相关文件
+
+| 文件 | 作用 |
+| --- | --- |
+| `src/features/storage/actions.ts` | 获取签名上传 URL、删除文件 |
+| `src/features/storage/providers/s3.ts` | S3/R2 Provider |
+| `src/features/storage/providers/index.ts` | Provider 获取 |
+| `src/features/storage/types.ts` | 文件类型和类型定义 |
+| `src/features/storage/utils.ts` | 存储工具 |
+| `src/app/api/upload/presigned/route.ts` | 上传 API |
+| `src/app/image-proxy/[...path]/route.ts` | 图片代理 |
+
+## 存储配置
+
+```bash
+STORAGE_ENDPOINT=https://your-account-id.r2.cloudflarestorage.com
+STORAGE_REGION=auto
+STORAGE_ACCESS_KEY_ID=your-access-key-id
+STORAGE_SECRET_ACCESS_KEY=your-secret-access-key
+NEXT_PUBLIC_AVATARS_BUCKET_NAME=avatars
+```
+
+Cloudflare R2 常用 `STORAGE_REGION=auto`。AWS S3 则使用具体区域，如 `us-east-1`。
+
+## 上传规则
+
+签名上传 URL 由 `getSignedUploadUrlAction` 生成，规则包括：
+
+- 用户必须登录。
+- `key` 不能为空，最长 255 字符。
+- `key` 只能包含字母、数字、`-`、`_`、`/`、`.`。
+- 仅支持 `image/jpeg`、`image/png`、`image/gif`、`image/webp`。
+- 默认只能访问头像桶。
+- 文件路径必须包含当前用户 ID。
+
+这些规则用于降低越权覆盖和非法文件上传风险。
+
+## 删除规则
+
+`deleteFileAction` 会检查：
+
+- 用户已登录。
+- 存储桶在白名单中。
+- 文件 key 包含当前用户 ID。
+
+通过检查后才调用 Provider 删除对象。
+
+## 邮件相关文件
+
+| 文件 | 作用 |
+| --- | --- |
+| `src/features/mail/client.ts` | Resend client |
+| `src/features/mail/utils.ts` | `sendEmail` 工具 |
+| `src/features/mail/actions.ts` | Newsletter 等邮件动作 |
+| `src/features/mail/templates/primary-action-email.tsx` | 验证、重置等主要操作邮件 |
+| `src/features/mail/templates/welcome-email.tsx` | 欢迎邮件 |
+| `src/lib/auth/index.ts` | 邮箱验证和密码重置邮件调用 |
+
+## 邮件配置
+
+```bash
+RESEND_API_KEY=re_your-resend-api-key
+EMAIL_FROM="NextDevTpl <noreply@your-domain.com>"
+```
+
+上线前需要在 Resend 中完成发件域名验证。`EMAIL_FROM` 建议使用产品名和真实域名邮箱。
+
+## 邮件触发场景
+
+| 场景 | 条件 | 模板 |
+| --- | --- | --- |
+| 邮箱验证 | 配置 `RESEND_API_KEY` 后注册 | `VerifyEmailEmail` |
+| 密码重置 | 用户提交忘记密码 | `ResetPasswordEmail` |
+| 欢迎邮件 | 可按业务接入 | `WelcomeEmail` |
+| Newsletter | 用户订阅或运营触达 | `mail/actions.ts` |
+
+## 操作建议
+
+### 接入 Cloudflare R2
+
+1. 创建 R2 bucket，例如 `avatars`。
+2. 创建访问密钥。
+3. 填写 `STORAGE_ENDPOINT`、`STORAGE_REGION=auto`、Access Key 和 Secret。
+4. 设置 `NEXT_PUBLIC_AVATARS_BUCKET_NAME=avatars`。
+5. 本地上传头像验证签名 URL 和对象读取。
+
+### 接入 Resend
+
+1. 创建 Resend API Key。
+2. 验证发件域名。
+3. 填写 `RESEND_API_KEY` 和 `EMAIL_FROM`。
+4. 注册新用户，确认验证邮件可达。
+5. 测试忘记密码邮件。
+
+## 风险控制
+
+- 不要把 Secret Key 暴露到 `NEXT_PUBLIC_*` 变量中。
+- 上传 key 必须包含用户 ID，避免用户覆盖他人文件。
+- 生产环境只开放必要的 bucket。
+- 邮件模板中不要包含敏感 token 原文以外的内部信息。
+- 发件域名未验证前不要开放生产注册验证。
+- 监控邮件退信率和垃圾邮件投诉。
