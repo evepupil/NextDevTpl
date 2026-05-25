@@ -1,277 +1,267 @@
-# NextDevTpl
+<p align="center">
+  <br>
+  <img src="public/logo.svg" alt="NextDevTpl" width="120">
+  <br>
+  <h1 align="center">NextDevTpl</h1>
+  <p align="center">
+    The production-ready Next.js SaaS starter — launch your SaaS in hours, not weeks.
+  </p>
+  <p align="center">
+    <a href="https://github.com/evepupil/NextDevTpl/blob/master/LICENSE">
+      <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
+    </a>
+    <a href="https://nextjs.org/">
+      <img src="https://img.shields.io/badge/Next.js-15-black?logo=nextdotjs" alt="Next.js 15">
+    </a>
+    <a href="https://www.typescriptlang.org/">
+      <img src="https://img.shields.io/badge/TypeScript-5-blue?logo=typescript" alt="TypeScript 5">
+    </a>
+    <a href="https://tailwindcss.com/">
+      <img src="https://img.shields.io/badge/Tailwind%20CSS-4-38bdf8?logo=tailwindcss" alt="Tailwind CSS 4">
+    </a>
+    <a href="https://pnpm.io/">
+      <img src="https://img.shields.io/badge/pnpm-9-orange?logo=pnpm" alt="pnpm">
+    </a>
+  </p>
+  <p align="center">
+    <a href="#-features">Features</a> •
+    <a href="#-why-nextdevtpl">Why NextDevTpl?</a> •
+    <a href="#-quick-start">Quick Start</a> •
+    <a href="#-project-structure">Structure</a> •
+    <a href="#-deployment">Deployment</a>
+  </p>
+</p>
 
-一个现代化的 SaaS 全栈开发模板，基于 Next.js 15 构建，包含认证、支付、积分、邮件、存储、工单、API 限流、日志、错误监控等完整的 SaaS 功能模块。
+---
 
-> **开箱即用**：所有可选服务（限流、日志、监控）在未配置时自动降级为本地模式，不影响使用。配置对应环境变量即可启用完整功能。
+## 🚀 Features
 
-## 特性
+| Category | Highlights |
+|----------|-----------|
+| **Framework** | Next.js 15 (App Router, Turbopack), React 19, TypeScript |
+| **Styling** | Tailwind CSS 4, Shadcn/UI, Radix UI, dark mode |
+| **Database** | PostgreSQL, Drizzle ORM, Neon serverless |
+| **Auth** | Better Auth — email/password, GitHub/Google OAuth, role-based access |
+| **Payments** | Creem subscription billing, webhooks, multi-tier pricing |
+| **Credits** | Double-entry FIFO system with batch expiration tracking |
+| **Email** | Resend delivery, React Email templates, dev preview |
+| **Storage** | S3 / Cloudflare R2 compatible, presigned uploads |
+| **Support** | Ticket system with threaded conversations |
+| **Admin** | Dashboard, user CRUD, credit top-ups, ticket management |
+| **i18n** | ~~next-intl~~ full en/zh bilingual routing |
+| **AI** | ~~Remove~~ multi-provider chat (OpenAI, DeepSeek, MiMo) |
+| **Rate Limiting** | Upstash Redis sliding window — automatically falls back to no-op when unconfigured |
+| **Logging** | Pino structured logging → Axiom cloud — gracefully degrades to console |
+| **Monitoring** | Sentry error tracking — auto-capture, user context, console fallback |
+| **Async Jobs** | Inngest background queue with graceful degradation |
+| **Tooling** | Biome (lint + format), pnpm, strict TypeScript |
 
-- **Next.js 15** - App Router、Turbopack、React 19
-- **TypeScript** - 严格模式，完整类型安全
-- **Tailwind CSS 4** - 最新版样式系统
-- **Shadcn/UI** - 高质量组件库
-- **Better Auth** - 现代认证方案（邮箱密码 + OAuth）
-- **Drizzle ORM** - 类型安全的数据库操作
-- **Creem** - 订阅支付集成
-- **积分系统** - FIFO 过期 + 复式记账
-- **邮件系统** - Resend + React Email
-- **存储系统** - S3/R2 兼容
-- **工单系统** - 用户支持
-- **管理后台** - 用户管理、数据统计
-- **国际化** - next-intl 多语言支持
-- **API 限流** - Upstash Redis，全局自动保护（可选）
-- **结构化日志** - Pino + Axiom 云日志（可选）
-- **错误监控** - Sentry 自动捕获（可选）
+> **Graceful degradation** — every optional service (rate limiting, logging, monitoring, async jobs) falls back to a safe local mode when its environment variable is missing. Start with 3 env vars and add services incrementally.
 
-## 技术栈
+## ✨ Why NextDevTpl?
 
-| 分类 | 技术 |
-|------|------|
-| 框架 | Next.js 15, React 19, TypeScript |
-| 样式 | Tailwind CSS 4, Shadcn/UI, Radix UI |
-| 数据库 | PostgreSQL, Drizzle ORM, Neon |
-| 认证 | Better Auth |
-| 支付 | Creem |
-| 邮件 | Resend, React Email |
-| 存储 | AWS S3 / Cloudflare R2 |
-| 验证 | Zod, React Hook Form, next-safe-action |
-| 限流 | Upstash Redis, @upstash/ratelimit |
-| 日志 | Pino, Axiom |
-| 监控 | Sentry |
-| 工具 | Biome, pnpm |
+| | NextDevTpl | Other SaaS Templates |
+|---|---|---|
+| **AI integration** | Multi-provider, built-in | None or bolted on |
+| **Double-entry credits** | FIFO + batch expiry | Shallow balance field |
+| **i18n** | Full en/zh routing | Partial or add-on |
+| **Async jobs** | Inngest, no blocking calls | Requests block on I/O |
+| **Graceful degradation** | Every optional service self-silences | Hard dependency on Redis / Sentry / etc. |
+| **Feature-based code** | `features/auth/`, `features/credits/` | Flat or role-based folders |
+| **Real payment integration** | Creem (not Stripe mock) | Placeholder events |
+| **PSEO demo** | ~~AnkiGenix~~ Phoenix-style programmatic SEO | None |
 
-## 快速开始
+## 📦 Tech Stack
 
-只需 3 个环境变量即可启动。详见 **[Quick Start 文档](./docs/quick-start.md)**。
+```mermaid
+graph TD
+    Client[Browser / Client] --> Next["Next.js 15<br/>App Router + Server Actions"]
+    Next --> Auth[Better Auth]
+    Next --> DB[("PostgreSQL<br/>Drizzle ORM")]
+    Next --> Mail[Resend + React Email]
+    Next --> Storage[(S3 / R2)]
+    Next --> Payment[Creem]
+    Next --> RateLimit["Rate Limit<br/>Upstash Redis"]
+    Next --> Jobs[Inngest Queue]
+    Next --> Log[Pino → Axiom]
+    Next --> Monitor[Sentry]
+    Next --> AI["AI<br/>OpenAI / DeepSeek / MiMo"]
+```
+
+## 🏁 Quick Start
+
+Three env vars are enough to launch:
 
 ```bash
 git clone git@github.com:evepupil/NextDevTpl.git
 cd NextDevTpl
 pnpm install
 cp .env.example .env.local
-# 编辑 .env.local 填入 DATABASE_URL、BETTER_AUTH_SECRET、BETTER_AUTH_URL
-pnpm db:push
-pnpm dev
 ```
 
-访问 http://localhost:3000
+Edit `.env.local`:
 
-## 项目结构
+```bash
+DATABASE_URL=postgresql://...
+BETTER_AUTH_SECRET="your-secret"
+BETTER_AUTH_URL="http://localhost:3000"
+```
+
+```bash
+pnpm db:push    # push Drizzle schema to your DB
+pnpm dev        # http://localhost:3000
+```
+
+### Optional Services
+
+| Service | Env Var | What You Get |
+|---------|---------|-------------|
+| Inngest | `INNGEST_EVENT_KEY` | Background queue (credits delivery, email batching) |
+| Upstash | `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` | API rate limiting |
+| Axiom | `AXIOM_TOKEN` + `AXIOM_DATASET` | Structured cloud logging |
+| Sentry | `SENTRY_DSN` | Error monitoring |
+| OpenAI | `OPENAI_API_KEY` | AI chat |
+| Creem | `CREEM_API_KEY` + webhook secret | Subscription payments |
+
+Every service that isn't configured simply skips its logic — no crash, no error, no blocked startup.
+
+## 📁 Project Structure
 
 ```
 src/
-├── app/                          # Next.js App Router
-│   └── [locale]/                 # 国际化路由
-│       ├── (marketing)/          # 营销页面（公开）
-│       ├── (dashboard)/          # 用户仪表盘（需登录）
-│       └── (admin)/              # 管理后台（需管理员）
-├── components/ui/                # Shadcn/UI 基础组件
-├── shared/                       # 全局共享组件
-│   ├── providers.tsx             # 主题等 Provider
-│   ├── mode-toggle.tsx           # 暗色模式切换
-│   ├── language-switcher.tsx     # 语言切换
-│   └── icons/                    # 图标
-├── features/                     # Feature-based 模块
-│   ├── marketing/components/     # header, footer, hero, pricing...
-│   ├── dashboard/components/     # sidebar, topbar, cards...
-│   ├── admin/components/         # admin-sidebar
-│   ├── ai/components/            # chat-interface
-│   ├── auth/components/          # 认证相关
-│   ├── blog/components/          # 博客相关
-│   ├── settings/components/      # 设置相关
-│   └── support/components/       # 工单支持
-├── db/                           # 数据库 Schema
-├── lib/                          # 工具函数
-│   ├── auth/                     # 认证相关
-│   ├── rate-limit/               # API 限流
-│   ├── logger/                   # 结构化日志
-│   └── monitoring/               # 错误监控 (Sentry)
-├── credits/                      # 积分系统
-├── mail/                         # 邮件系统
-├── storage/                      # 存储系统
-└── config/                       # 配置文件
+├── app/                        # Next.js App Router
+│   └── [locale]/               # i18n routing (en / zh)
+│       ├── (marketing)/        # Public pages (landing, pricing, blog, docs)
+│       ├── (dashboard)/        # Authenticated user area
+│       └── (admin)/            # Admin-only area
+├── components/ui/              # Shadcn/UI primitives
+├── features/                   # Feature-based modules
+│   ├── marketing/              # header, footer, hero, pricing
+│   ├── dashboard/              # sidebar, topbar, stat cards
+│   ├── admin/                  # admin sidebar, user table
+│   ├── auth/                   # sign-in, sign-up, auth client
+│   ├── blog/                   # blog list, post detail
+│   ├── settings/               # profile, billing, account
+│   ├── support/                # ticket CRUD
+│   ├── analytics/              # admin dashboard charts
+│   ├── shared/                 # mode-toggle, language-switcher, icons
+│   └── pseo/                   # programmatic SEO demo
+├── db/                         # Drizzle schema definitions
+├── lib/                        # Shared utilities
+│   ├── auth/                   # Better Auth config + middleware
+│   ├── rate-limit/             # Upstash sliding window
+│   ├── logger/                 # Pino logger wrapper
+│   └── monitoring/             # Sentry instrumentation
+├── credits/                    # Double-entry FIFO credit engine
+├── mail/                       # React Email templates + Resend sender
+├── storage/                    # S3 / R2 abstraction
+├── config/                     # Site, nav, payment, subscription configs
+└── test/                       # Integration tests
 ```
 
-## 功能模块
+## 🧩 Feature Modules
 
-### 认证系统
+### Auth
+Email/password + GitHub/Google OAuth. Session management, `user` / `admin` roles, middleware protection.
 
-- 邮箱密码注册/登录
-- GitHub/Google OAuth
-- 会话管理
-- 用户角色（user/admin）
+### Payments
+Creem subscription flow. Multi-tier pricing, webhook handling, subscription lifecycle, admin override.
 
-### 支付系统
+### Credits
+FIFO batch expiry + double-entry ledger. Every credit transaction is a balanced debit/credit pair with audit trail.
 
-- Creem 订阅
-- 多种定价方案
-- Webhook 处理
-- 订阅管理
+### Email
+React Email templates with `<Html>`, `<Button>`, etc. Resend delivery. In dev mode, preview at `/api/emails/preview`.
 
-### 积分系统
+### Storage
+S3-compatible abstraction. Presigned upload URLs. Works with AWS S3, Cloudflare R2, MinIO, etc.
 
-- FIFO 过期机制
-- 复式记账
-- 批次管理
-- 交易历史
+### Support Tickets
+Threaded conversations, status workflow (open → in-progress → resolved), admin reply, email notifications.
 
-### 邮件系统
+### Admin Panel
+Overview dashboard, user management (search, role toggle, ban), credit top-ups, ticket queue.
 
-- React Email 模板
-- Resend 发送
-- 开发模式预览
+### i18n
+`next-intl`-based routing. Current locales: `en`, `zh`. Add a locale by dropping a JSON file.
 
-### 存储系统
+### Rate Limiting
+Globally applied middleware. Route-level rate windows. Zero-config — unset `UPSTASH_*` env vars and it becomes a pass-through.
 
-- S3/R2 兼容
-- 预签名上传
-- 文件管理
+### Logging
+Pino structured logger wrapped in `@/lib/logger`. Ships to Axiom when configured, otherwise writes to console.
 
-### 工单系统
+### Error Monitoring
+Sentry auto-instruments Server Actions & route handlers. Attaches authenticated user context. Falls back to `console.error` without a DSN.
 
-- 用户创建工单
-- 消息对话
-- 状态管理
-- 管理员回复
+## 🚢 Deployment
 
-### 管理后台
+### Self-hosted (recommended)
 
-- 数据统计面板
-- 用户管理（搜索、角色、封禁）
-- 积分充值
-- 工单处理
-
-### API 限流
-
-- Upstash Redis 滑动窗口
-- Middleware 全局自动保护
-- 路由级别差异化限制
-- 未配置时自动跳过
-
-### 日志系统
-
-- Pino 结构化日志
-- Axiom 云日志集成
-- Server Action 错误自动记录
-- 未配置时回退 console
-
-### 错误监控
-
-- Sentry 自动捕获
-- Server Action 错误自动上报
-- 用户上下文关联
-- 未配置时回退 console
-
-## 部署
-
-支持自有服务器部署，提供一键构建 + 推送 + 启动脚本。
-
-### 部署方式
-
-| 方式 | 说明 |
-|------|------|
-| **自有服务器（推荐）** | 通过 `deploy-build.bat` 一键部署到 Linux 服务器 |
-| **Vercel** | `git push` 即可，零配置 |
-| **Docker** | 自行编写 Dockerfile，`pnpm build` + `pnpm start` |
-
-### 一键部署到服务器
-
-项目提供了 `deploy-build.bat`（本地 Windows）+ `start-prod.sh`（服务器端）部署脚本，流程为：
-
-**本地构建 → 打包 → 上传 → 服务器解压 → PM2 启动/重启**
-
-#### 1. 配置部署参数
-
-编辑 `deploy-build.bat` 头部的配置：
+The repo includes `deploy-build.bat` (Windows build machine) + `start-prod.sh` (Linux server). Edit the SSH host / key paths at the top of `deploy-build.bat`, then:
 
 ```bat
-set "REMOTE_USER=ubuntu"          # 服务器用户名
-set "REMOTE_HOST=<your-server>"   # 服务器 IP 或域名
-set "REMOTE_PORT=22"              # SSH 端口
-set "REMOTE_DIR=/home/ubuntu/NextjsTpl"  # 服务器上的项目目录
-set "SSH_KEY=%USERPROFILE%\.ssh\id_ed25519"  # SSH 私钥路径
-set "PORT=3303"                   # 应用运行端口
-```
-
-#### 2. 准备生产环境变量
-
-```bash
-# 创建生产环境变量文件（不会被提交到 Git）
-cp .env.example .env.prod
-# 编辑 .env.prod，填入生产环境的真实配置
-```
-
-#### 3. 服务器前置准备
-
-```bash
-# 服务器上需要安装：
-# - Node.js 18+（推荐通过 nvm 安装）
-# - pnpm: npm install -g pnpm
-# - PM2: npm install -g pm2
-
-# 创建项目目录
-mkdir -p /home/ubuntu/NextjsTpl
-```
-
-#### 4. 执行部署
-
-```bash
-# Windows 本地执行
+:: Windows local machine
 deploy-build.bat
 ```
 
-脚本会自动完成：本地 `pnpm build` → 打包 `.next` + 配置文件 → SCP 上传 → SSH 远程解压 → PM2 启动应用。
+The script: builds → tars `.next` + config → SCPs → remote server unpacks → PM2 restarts.
 
-#### 5. 服务器管理
+### Vercel
 
-```bash
-pm2 status              # 查看应用状态
-pm2 logs NextjsTpl      # 查看日志
-pm2 restart NextjsTpl   # 重启应用
-pm2 stop NextjsTpl      # 停止应用
+Zero-config — push to `master`, Vercel auto-detects Next.js.
+
+### Docker
+
+Write a `Dockerfile`:
+
+```dockerfile
+FROM node:20-alpine AS base
+# ... pnpm install, build, start
 ```
 
-> 服务器端通常还需要配置 Nginx 反向代理（将 80/443 端口转发到应用端口）和 SSL 证书。
-
-## 命令
+## 📋 Scripts
 
 ```bash
-pnpm dev          # 启动开发服务器
-pnpm build        # 生产构建
-pnpm start        # 启动生产服务器
-pnpm lint         # 代码检查
-pnpm format       # 代码格式化
-pnpm check        # 检查并自动修复
-pnpm typecheck    # 类型检查
-pnpm db:generate  # 生成迁移
-pnpm db:push      # 推送 Schema
-pnpm db:studio    # 打开 Drizzle Studio
+pnpm dev            # Next.js dev (Turbopack)
+pnpm build          # Production build
+pnpm start          # Production server
+pnpm lint           # Biome lint
+pnpm format         # Biome format
+pnpm check          # lint + format in fix mode
+pnpm typecheck      # tsc --noEmit
+pnpm db:generate    # Drizzle kit generate
+pnpm db:push        # Drizzle kit push (dev)
+pnpm db:studio      # Drizzle Studio UI
+pnpm test           # Run integration tests
 ```
 
-## 路由说明
+## 🗺️ Routes
 
-| 路由 | 说明 | 权限 |
-|------|------|------|
-| `/` | 首页 | 公开 |
-| `/pricing` | 定价页 | 公开 |
-| `/blog` | 博客 | 公开 |
-| `/docs` | 文档 | 公开 |
-| `/sign-in` | 登录 | 公开 |
-| `/sign-up` | 注册 | 公开 |
-| `/dashboard` | 仪表盘 | 登录用户 |
-| `/dashboard/support` | 我的工单 | 登录用户 |
-| `/settings` | 设置 | 登录用户 |
-| `/admin` | 管理后台 | 管理员 |
-| `/admin/users` | 用户管理 | 管理员 |
-| `/admin/tickets` | 工单管理 | 管理员 |
+| Route | Description | Access |
+|-------|-------------|--------|
+| `/` | Landing page | Public |
+| `/pricing` | Subscription plans | Public |
+| `/blog` | Blog index | Public |
+| `/blog/[slug]` | Blog post | Public |
+| `/docs` | Documentation | Public |
+| `/sign-in` | Sign in | Public |
+| `/sign-up` | Sign up | Public |
+| `/dashboard` | User dashboard | Auth required |
+| `/dashboard/support` | My tickets | Auth required |
+| `/settings` | Account settings | Auth required |
+| `/admin` | Admin dashboard | Admin only |
+| `/admin/users` | User management | Admin only |
+| `/admin/tickets` | Ticket queue | Admin only |
 
-## 开发规范
+## 🤝 Contributing
 
-- **Server Components 优先** - 只在需要交互时使用 `'use client'`
-- **Server Actions** - 所有数据变更使用 next-safe-action
-- **类型安全** - 所有 Props、API 响应必须有类型定义
-- **Feature-based** - 按功能模块组织代码
+- **Feature-based code**: place new modules under `src/features/<name>/`.
+- **Server Components first**: only add `'use client'` when you need interactivity.
+- **Server Actions**: all data mutations go through `next-safe-action`.
+- **Type safety**: every prop, API response, and action schema must be typed.
+- **Tests**: add integration tests in `src/test/`.
 
-## License
+## 📄 License
 
 MIT
