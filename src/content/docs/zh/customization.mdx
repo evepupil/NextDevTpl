@@ -1,0 +1,95 @@
+---
+title: 二开指南
+description: 常见品牌、导航、定价、页面和模块定制入口。
+---
+
+# 二开指南
+
+这页列出把 NextDevTpl 改成自己 SaaS 时最常见的修改入口。
+
+## 品牌
+
+| 修改项 | 路径 |
+| --- | --- |
+| 站点名、URL、metadata | `src/config/site.ts` |
+| Logo | `public/logo.svg` 和 Header 组件 |
+| 全局样式 | `src/app/globals.css` |
+| Open Graph 图片模板 | `src/features/shared/components/og-image-template.tsx` |
+
+## 导航
+
+| 区域 | 路径 |
+| --- | --- |
+| Header 和 Footer | `src/config/nav.ts` |
+| Dashboard 侧边栏 | `src/config/nav.ts` 和 `src/features/dashboard/components/sidebar.tsx` |
+| Admin 侧边栏 | `src/config/nav.ts` 和 `src/features/admin/components/admin-sidebar.tsx` |
+
+## 首页
+
+营销页组件在：
+
+```txt
+src/features/marketing/components
+```
+
+首页路由在：
+
+```txt
+src/app/[locale]/(marketing)/page.tsx
+```
+
+大部分文案在：
+
+```txt
+messages/en.json
+messages/zh.json
+```
+
+## 定价和套餐
+
+| 修改项 | 路径 |
+| --- | --- |
+| 套餐名和限制 | `src/config/subscription-plan.ts` |
+| 支付产品映射 | `src/config/payment.ts` |
+| 定价区 UI | `src/features/marketing/components/pricing-section.tsx` |
+| 订阅 UI | `src/features/subscription` |
+
+## 新增产品模块
+
+新功能建议放在：
+
+```txt
+src/features/<your-feature>
+```
+
+推荐结构：
+
+```txt
+src/features/example/
+├── actions.ts
+├── components/
+├── schemas/
+├── types.ts
+└── index.ts
+```
+
+路由组合放在 `src/app`，可复用业务逻辑放在 feature module。
+
+## 内容
+
+| 内容 | 路径 |
+| --- | --- |
+| 文档 | `src/content/docs/<locale>` |
+| 博客 | `src/content/blog/<locale>` |
+| 法律页面 | `src/content/legal/<locale>` |
+| PSEO 数据 | `src/features/pseo/data/pseo-pages.json` |
+
+## 提交前检查
+
+```bash
+pnpm typecheck
+pnpm lint
+```
+
+如果改了认证、积分、支付、存储、工单或后台任务，要跑对应测试。
+

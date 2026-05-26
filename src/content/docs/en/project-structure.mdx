@@ -1,0 +1,82 @@
+---
+title: Project Structure
+description: Understand how the application is organized and where to customize each feature.
+---
+
+# Project Structure
+
+NextDevTpl uses a feature-based structure. Routes live under `src/app`, reusable product modules live under `src/features`, and infrastructure helpers live under `src/lib`.
+
+## Top-level files
+
+| Path | Purpose |
+| --- | --- |
+| `package.json` | Scripts and dependency versions |
+| `next.config.mjs` | Next.js, MDX, and build configuration |
+| `source.config.ts` | Fumadocs content collections |
+| `drizzle.config.ts` | Drizzle migration configuration |
+| `.env.example` | Environment variable reference |
+| `deploy-build.bat` | Windows-side production build and upload script |
+| `start-prod.sh` | Linux production start script |
+
+## Application routes
+
+```txt
+src/app/
+├── [locale]/
+│   ├── (marketing)/     # Home, blog, legal, PSEO, public pages
+│   ├── (auth)/          # Sign in, sign up, password reset
+│   ├── (dashboard)/     # Authenticated customer dashboard
+│   ├── (admin)/         # Admin-only area
+│   └── docs/            # Fumadocs documentation
+└── api/                 # Route handlers and webhooks
+```
+
+The locale segment is handled by `next-intl`. Current locales are configured in `src/i18n/routing.ts`.
+
+## Feature modules
+
+| Module | Main purpose |
+| --- | --- |
+| `src/features/auth` | Auth UI and client hooks |
+| `src/features/credits` | Credit ledger, purchases, and balance utilities |
+| `src/features/payment` | Creem checkout and payment actions |
+| `src/features/subscription` | User plan lookup and subscription UI |
+| `src/features/settings` | Profile, security, billing, and account settings |
+| `src/features/support` | User tickets and admin replies |
+| `src/features/admin` | Admin UI components |
+| `src/features/marketing` | Header, footer, hero, pricing, FAQ, and landing sections |
+| `src/features/storage` | S3/R2 upload and provider abstraction |
+| `src/features/mail` | React Email templates and send actions |
+| `src/features/shared` | Providers, theme toggle, language switcher, shared icons |
+
+## Infrastructure modules
+
+| Path | Responsibility |
+| --- | --- |
+| `src/db/schema.ts` | Database tables and relations |
+| `src/lib/auth` | Better Auth server, client, edge helpers, and admin helpers |
+| `src/lib/rate-limit` | Upstash-backed rate limiting with safe fallback |
+| `src/lib/logger` | Pino logger wrapper and Axiom integration |
+| `src/lib/monitoring` | Sentry integration helpers |
+| `src/lib/source.ts` | Fumadocs, blog, and legal content loaders |
+| `src/lib/safe-action.ts` | Server Action client setup |
+| `src/inngest` | Inngest client and background functions |
+
+## Content
+
+| Path | Content type |
+| --- | --- |
+| `src/content/docs/en` | English documentation |
+| `src/content/docs/zh` | Chinese documentation |
+| `src/content/blog/en` | English blog posts |
+| `src/content/blog/zh` | Chinese blog posts |
+| `src/content/legal/en` | English legal pages |
+| `src/content/legal/zh` | Chinese legal pages |
+| `messages/en.json` | English UI translations |
+| `messages/zh.json` | Chinese UI translations |
+
+## Testing
+
+Integration tests live under `src/test`. They cover payment, credits, support tickets, storage security, settings, jobs, and email flows.
+

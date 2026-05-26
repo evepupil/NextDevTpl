@@ -1,0 +1,82 @@
+---
+title: 项目结构
+description: 了解应用目录、功能模块和基础设施代码如何组织。
+---
+
+# 项目结构
+
+NextDevTpl 使用按功能组织的结构。路由放在 `src/app`，可复用产品模块放在 `src/features`，底层工具和基础设施放在 `src/lib`。
+
+## 顶层文件
+
+| 路径 | 作用 |
+| --- | --- |
+| `package.json` | 脚本和依赖版本 |
+| `next.config.mjs` | Next.js、MDX、构建配置 |
+| `source.config.ts` | Fumadocs 内容集合配置 |
+| `drizzle.config.ts` | Drizzle 迁移配置 |
+| `.env.example` | 环境变量参考 |
+| `deploy-build.bat` | Windows 本地构建和上传脚本 |
+| `start-prod.sh` | Linux 服务器生产启动脚本 |
+
+## 应用路由
+
+```txt
+src/app/
+├── [locale]/
+│   ├── (marketing)/     # 首页、博客、法律页面、PSEO 等公开页面
+│   ├── (auth)/          # 登录、注册、找回密码
+│   ├── (dashboard)/     # 登录后的用户工作台
+│   ├── (admin)/         # 管理员后台
+│   └── docs/            # Fumadocs 文档
+└── api/                 # Route handlers 和 webhooks
+```
+
+`[locale]` 由 `next-intl` 处理。当前语言配置在 `src/i18n/routing.ts`。
+
+## 功能模块
+
+| 模块 | 作用 |
+| --- | --- |
+| `src/features/auth` | 登录、注册等认证 UI 和 hooks |
+| `src/features/credits` | 积分账本、购买、余额工具 |
+| `src/features/payment` | Creem checkout 和支付 actions |
+| `src/features/subscription` | 用户套餐查询和订阅 UI |
+| `src/features/settings` | 资料、安全、账单、账户设置 |
+| `src/features/support` | 用户工单和管理员回复 |
+| `src/features/admin` | 管理后台 UI 组件 |
+| `src/features/marketing` | Header、Footer、Hero、Pricing、FAQ 等首页模块 |
+| `src/features/storage` | S3/R2 上传和存储 provider |
+| `src/features/mail` | React Email 模板和发信逻辑 |
+| `src/features/shared` | Providers、主题切换、语言切换、共享图标 |
+
+## 基础设施模块
+
+| 路径 | 职责 |
+| --- | --- |
+| `src/db/schema.ts` | 数据库表定义 |
+| `src/lib/auth` | Better Auth server/client/edge/admin helpers |
+| `src/lib/rate-limit` | 基于 Upstash 的限流和降级逻辑 |
+| `src/lib/logger` | Pino logger 和 Axiom 集成 |
+| `src/lib/monitoring` | Sentry 监控 helpers |
+| `src/lib/source.ts` | Docs、Blog、Legal 内容加载器 |
+| `src/lib/safe-action.ts` | Server Action client 配置 |
+| `src/inngest` | Inngest client 和后台函数 |
+
+## 内容目录
+
+| 路径 | 内容 |
+| --- | --- |
+| `src/content/docs/en` | 英文文档 |
+| `src/content/docs/zh` | 中文文档 |
+| `src/content/blog/en` | 英文博客 |
+| `src/content/blog/zh` | 中文博客 |
+| `src/content/legal/en` | 英文法律页面 |
+| `src/content/legal/zh` | 中文法律页面 |
+| `messages/en.json` | 英文 UI 文案 |
+| `messages/zh.json` | 中文 UI 文案 |
+
+## 测试
+
+集成测试在 `src/test`。目前覆盖支付、积分、工单、存储安全、设置、后台任务和邮件等流程。
+

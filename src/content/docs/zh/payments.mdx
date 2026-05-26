@@ -1,0 +1,64 @@
+---
+title: 支付
+description: 配置 Creem 支付、订阅、一次性购买和 webhooks。
+---
+
+# 支付
+
+支付层基于 Creem。模板包含订阅、一次性积分购买、webhook 处理和用户套餐查询。
+
+## 主要文件
+
+| 路径 | 作用 |
+| --- | --- |
+| `src/features/payment/creem.ts` | Creem client 和 API 集成 |
+| `src/features/payment/actions.ts` | Checkout 和支付 Server Actions |
+| `src/features/payment/types.ts` | 支付相关类型 |
+| `src/config/payment.ts` | 产品和支付配置 |
+| `src/config/subscription-plan.ts` | 套餐定义 |
+| `src/app/api/webhooks/creem/route.ts` | Creem webhook endpoint |
+| `src/features/subscription` | 用户套餐查询和订阅 UI |
+| `src/test/payment` | 支付和订阅测试 |
+
+## 必要环境变量
+
+| 变量 | 作用 |
+| --- | --- |
+| `CREEM_API_KEY` | 调用 Creem API |
+| `CREEM_WEBHOOK_SECRET` | 校验 webhook 签名 |
+
+生产环境的 callback 和 webhook URL 应该使用正式域名。
+
+## 订阅流程
+
+1. 套餐定义在 `src/config/subscription-plan.ts`。
+2. 定价 UI 展示套餐。
+3. checkout action 创建 Creem checkout session。
+4. Creem 发送 webhook 事件。
+5. webhook 更新订阅状态。
+6. Dashboard 读取当前用户套餐。
+
+## 积分购买流程
+
+一次性积分购买复用支付层，在付款成功后发放积分套餐。账本行为见 [积分系统](/zh/docs/credits)。
+
+## Webhook 上线 checklist
+
+上线前确认：
+
+1. 配置 Creem webhook URL：
+
+```txt
+https://your-domain.com/api/webhooks/creem
+```
+
+2. 设置 `CREEM_WEBHOOK_SECRET`。
+3. 如果 Creem 支持 sandbox，先跑 sandbox checkout。
+4. 确认订阅状态会更新。
+5. 确认重复 webhook 不会重复发积分。
+6. 跑支付测试。
+
+```bash
+pnpm test:run src/test/payment
+```
+

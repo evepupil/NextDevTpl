@@ -1,0 +1,22 @@
+{
+  "title": "NextDevTpl",
+  "root": true,
+  "pages": [
+    "index",
+    "quick-start",
+    "project-structure",
+    "configuration",
+    "authentication",
+    "database",
+    "credits",
+    "payments",
+    "email",
+    "storage",
+    "internationalization",
+    "background-jobs",
+    "admin-and-support",
+    "observability",
+    "deployment",
+    "customization"
+  ]
+}

@@ -1,0 +1,65 @@
+---
+title: 管理后台和工单
+description: 管理用户、角色、工单和客户支持流程。
+---
+
+# 管理后台和工单
+
+模板内置了一个简单但可用的管理后台和工单系统。
+
+## 管理后台
+
+Admin 路由在：
+
+```txt
+src/app/[locale]/(admin)/admin
+```
+
+主要组件：
+
+| 路径 | 作用 |
+| --- | --- |
+| `src/features/admin/components/admin-sidebar.tsx` | Admin 导航 |
+| `src/app/[locale]/(admin)/admin/page.tsx` | Admin 概览 |
+| `src/app/[locale]/(admin)/admin/users/page.tsx` | 用户管理 |
+| `src/app/[locale]/(admin)/admin/tickets/page.tsx` | 工单队列 |
+| `src/app/[locale]/(admin)/admin/tickets/[id]/page.tsx` | 工单详情 |
+
+## 工单系统
+
+用户工单路由在：
+
+```txt
+src/app/[locale]/(dashboard)/dashboard/support
+```
+
+功能文件：
+
+| 路径 | 作用 |
+| --- | --- |
+| `src/features/support/actions/ticket.ts` | 工单 actions |
+| `src/features/support/actions/admin-users.ts` | Admin 用户 helpers |
+| `src/features/support/components` | 工单表单、回复、状态控件 |
+| `src/features/support/schemas` | 校验 schemas |
+| `src/test/support` | 工单和 admin user 测试 |
+
+## 工单状态流
+
+推荐状态流：
+
+```txt
+open -> in_progress -> resolved
+```
+
+回复用户时不要暴露内部日志、密钥或供应商错误详情。
+
+## 管理员权限
+
+Admin 权限依赖当前用户的 role。本地测试时，创建用户后在数据库里设置 `role = 'admin'`。
+
+## 测试
+
+```bash
+pnpm test:run src/test/support
+```
+

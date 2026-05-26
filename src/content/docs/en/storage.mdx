@@ -1,0 +1,51 @@
+---
+title: Storage
+description: Configure S3 or Cloudflare R2 compatible storage and presigned uploads.
+---
+
+# Storage
+
+The storage layer is compatible with S3-style providers such as AWS S3, Cloudflare R2, and MinIO.
+
+## Main files
+
+| Path | Purpose |
+| --- | --- |
+| `src/features/storage/providers/s3.ts` | S3-compatible provider |
+| `src/features/storage/actions.ts` | Storage Server Actions |
+| `src/features/storage/utils.ts` | Utility helpers |
+| `src/features/storage/types.ts` | Storage types |
+| `src/app/api/upload/presigned/route.ts` | Presigned upload endpoint |
+| `src/app/image-proxy/[...path]/route.ts` | Image proxy route |
+| `src/test/storage/security.test.ts` | Storage security tests |
+
+## Environment variables
+
+| Variable | Purpose |
+| --- | --- |
+| `STORAGE_ENDPOINT` | Provider endpoint, for example R2 endpoint |
+| `STORAGE_REGION` | S3 region or provider-compatible value |
+| `STORAGE_BUCKET` | Bucket name |
+| `STORAGE_ACCESS_KEY_ID` | Access key |
+| `STORAGE_SECRET_ACCESS_KEY` | Secret key |
+
+## Upload model
+
+1. Client requests a presigned upload URL.
+2. Server validates the request and returns upload metadata.
+3. Client uploads directly to the storage provider.
+4. App stores or uses the returned object key.
+5. Public display can go through the image proxy when needed.
+
+## Security checklist
+
+- Validate file type and size before creating presigned URLs.
+- Keep object keys scoped and hard to guess.
+- Do not expose secret keys to the browser.
+- Prefer private buckets plus signed reads or proxy routes.
+- Run storage security tests after changing upload rules.
+
+```bash
+pnpm test:run src/test/storage
+```
+

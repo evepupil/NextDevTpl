@@ -1,0 +1,78 @@
+---
+title: 国际化
+description: 使用 next-intl 路由、UI 文案和多语言文档。
+---
+
+# 国际化
+
+NextDevTpl 使用 `next-intl` 处理 UI 翻译和带语言前缀的路由。文档内容通过 Fumadocs 的语言目录管理。
+
+## 当前语言
+
+语言配置在：
+
+```txt
+src/i18n/routing.ts
+```
+
+当前值：
+
+```ts
+locales: ["en", "zh"]
+defaultLocale: "en"
+```
+
+## UI 文案
+
+| 文件 | 作用 |
+| --- | --- |
+| `messages/en.json` | 英文 UI 文案 |
+| `messages/zh.json` | 中文 UI 文案 |
+| `src/i18n/request.ts` | 加载当前语言 messages |
+| `src/features/shared/components/language-switcher.tsx` | Header 语言切换器 |
+
+Client Component 使用 `useTranslations()`。Server Component 使用 next-intl 的服务端 helpers。
+
+## 路由结构
+
+大多数页面都在：
+
+```txt
+src/app/[locale]
+```
+
+示例：
+
+```txt
+/en
+/zh
+/en/dashboard
+/zh/dashboard
+/en/docs
+/zh/docs
+```
+
+## 文档国际化
+
+文档按语言存放：
+
+```txt
+src/content/docs/en
+src/content/docs/zh
+```
+
+`src/lib/source.ts` 中的 loader 使用 Fumadocs i18n，并采用 `dir` parser。docs route 会根据 `params.locale` 取页面，所以 `/en/docs` 和 `/zh/docs` 是两棵独立文档树。
+
+## 新增语言
+
+1. 在 `src/i18n/routing.ts` 添加 locale。
+2. 新增 `messages/<locale>.json`。
+3. 新增 `src/content/docs/<locale>`。
+4. 如果博客和法律页面也支持该语言，也要补对应内容。
+5. 必要时更新 sitemap metadata。
+6. 测试导航和语言切换。
+
+## 翻译原则
+
+不要机械翻译技术名词。Next.js、Drizzle、Better Auth、Creem、Inngest、Sentry、Axiom、Fumadocs、next-intl 这些框架或服务名保持英文。
+

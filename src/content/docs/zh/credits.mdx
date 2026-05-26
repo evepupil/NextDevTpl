@@ -1,0 +1,69 @@
+---
+title: 积分系统
+description: 了解内置积分系统、账本记录和过期模型。
+---
+
+# 积分系统
+
+积分模块是 NextDevTpl 的核心产品能力之一，适合 AI 工具、按量计费 SaaS、付费导出等场景。
+
+## 主要文件
+
+| 路径 | 作用 |
+| --- | --- |
+| `src/features/credits/core.ts` | 余额和交易核心逻辑 |
+| `src/features/credits/actions.ts` | 积分相关 Server Actions |
+| `src/features/credits/config.ts` | 积分套餐和展示配置 |
+| `src/features/credits/components` | 余额、用量、购买、历史记录 UI |
+| `src/app/[locale]/(dashboard)/dashboard/credits/buy` | 积分购买页 |
+| `src/test/credits` | 积分完整性和购买测试 |
+
+## 核心概念
+
+| 概念 | 说明 |
+| --- | --- |
+| Balance | 用户当前可用积分 |
+| Transaction | 一次积分变动记录 |
+| Batch | 一批同来源、同过期规则的积分 |
+| FIFO 过期 | 老批次积分优先消耗 |
+| Purchase package | 一次性购买的积分套餐 |
+
+## 典型流程
+
+### 购买积分
+
+1. 用户进入 `/dashboard/credits/buy`。
+2. 选择积分套餐。
+3. 支付层创建 checkout。
+4. webhook 确认付款成功。
+5. 给用户发放积分。
+6. 交易历史记录这次购买。
+
+### 消耗积分
+
+业务功能不要直接改一个余额数字，应该调用 credits core。这样才能保留审计记录和过期规则。
+
+### 过期积分
+
+过期依赖批次 metadata 和后台任务。后台任务说明见 [后台任务](/zh/docs/background-jobs)。
+
+## 修改积分套餐
+
+编辑：
+
+```txt
+src/features/credits/config.ts
+```
+
+套餐 ID 一旦进入支付或审计记录，就不要随意改名。
+
+## 测试
+
+修改积分逻辑后运行：
+
+```bash
+pnpm test:run src/test/credits
+```
+
+积分 bug 本质上是财务/账务 bug，不只是 UI bug。
+

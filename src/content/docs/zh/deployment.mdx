@@ -1,0 +1,61 @@
+---
+title: 部署
+description: 使用现有脚本或托管 Next.js 平台部署 NextDevTpl。
+---
+
+# 部署
+
+仓库内置了自托管部署流程，也可以部署到托管 Next.js 平台。
+
+## 自托管流程
+
+现有脚本：
+
+| 文件 | 运行位置 | 作用 |
+| --- | --- | --- |
+| `deploy-build.bat` | Windows 本地机器 | 构建、打包、上传产物 |
+| `start-prod.sh` | Linux 服务器 | 安装生产依赖并启动/重启应用 |
+
+典型流程：
+
+1. 在 `deploy-build.bat` 顶部配置 SSH host、部署目录和 key path。
+2. 确认服务器上已经有生产 `.env`。
+3. 本地运行：
+
+```bat
+deploy-build.bat
+```
+
+4. 脚本会本地构建、打包、上传，然后在服务器启动应用。
+
+## 生产环境变量
+
+最少需要：
+
+```bash
+DATABASE_URL="postgresql://..."
+BETTER_AUTH_SECRET="strong-production-secret"
+BETTER_AUTH_URL="https://your-domain.com"
+```
+
+再按实际启用的功能补 Creem、Resend、Storage、Redis、Sentry、Axiom、Inngest 和 AI provider 凭证。
+
+## Vercel
+
+部署到 Vercel：
+
+1. 导入 GitHub 仓库。
+2. 设置生产环境变量。
+3. 确认数据库能从 Vercel 访问。
+4. 使用 Vercel 生产域名配置 webhook URL。
+5. 发布前或发布时执行数据库迁移。
+
+## 发布 checklist
+
+- `pnpm typecheck` 通过。
+- `pnpm build` 通过。
+- 数据库迁移已准备。
+- `BETTER_AUTH_URL` 使用生产域名。
+- OAuth callback URL 使用生产域名。
+- Creem webhook 指向 `/api/webhooks/creem`。
+- Sentry/Axiom 不接收原始密钥。

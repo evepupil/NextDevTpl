@@ -2,33 +2,31 @@ import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import type { ReactNode } from "react";
 
 import { Header } from "@/features/marketing/components";
-import { docsSource } from "@/lib/source";
+import { routing } from "@/i18n/routing";
+import { docsI18n, docsSource } from "@/lib/source";
 
-/**
- * 文档布局
- *
- * 使用 Fumadocs UI 的 DocsLayout 组件
- * 提供侧边栏导航和文档结构
- * 同时保留网站顶部导航栏
- */
 export default async function Layout({
   children,
+  params,
 }: {
   children: ReactNode;
+  params: Promise<{ locale: string }>;
 }) {
-  // 获取页面树（不需要 locale，因为 i18n 由 Next.js 路由处理）
-  const tree = docsSource.pageTree;
+  const { locale } = await params;
+  const docsLocale = routing.locales.includes(locale as "en" | "zh")
+    ? locale
+    : routing.defaultLocale;
+  const tree = docsSource.getPageTree(docsLocale);
 
   return (
     <>
-      {/* 网站顶部导航栏 - 放在 DocsLayout 外部确保显示 */}
       <Header />
 
-      {/* Fumadocs 文档布局 */}
       <DocsLayout
         tree={tree}
+        i18n={docsI18n}
         nav={{
-          enabled: false, // 禁用 Fumadocs 自带的顶部导航
+          enabled: false,
         }}
         sidebar={{
           defaultOpenLevel: 1,

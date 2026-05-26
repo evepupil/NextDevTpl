@@ -1,0 +1,47 @@
+---
+title: 邮件
+description: 使用 Resend 和 React Email 模板发送产品邮件。
+---
+
+# 邮件
+
+邮件发送使用 Resend，模板使用 React Email 组件。
+
+## 主要文件
+
+| 路径 | 作用 |
+| --- | --- |
+| `src/features/mail/client.ts` | Resend client 配置 |
+| `src/features/mail/actions.ts` | 发信 actions |
+| `src/features/mail/utils.ts` | 邮件工具函数 |
+| `src/features/mail/templates` | React Email 模板 |
+| `src/test/mail/newsletter.test.ts` | 邮件相关测试 |
+
+## 环境变量
+
+| 变量 | 作用 |
+| --- | --- |
+| `RESEND_API_KEY` | Resend API 凭证 |
+| `EMAIL_FROM` | 用户看到的发件人 |
+
+示例：
+
+```bash
+RESEND_API_KEY="re_xxxxxxxxx"
+EMAIL_FROM="NextDevTpl <noreply@example.com>"
+```
+
+## 模板
+
+邮件模板是 React 组件：
+
+| 模板 | 作用 |
+| --- | --- |
+| `welcome-email.tsx` | 欢迎/引导邮件 |
+| `primary-action-email.tsx` | 带按钮的通用操作邮件 |
+
+改邮件模板时，文案尽量短，不要依赖复杂 CSS。邮件客户端的 CSS 支持很有限。
+
+## 本地行为
+
+没有配置 Resend 时，依赖邮件投递的功能应该视为不可用。先测试基础邮箱密码流程，再启用 Resend 测试验证邮件和重置密码。

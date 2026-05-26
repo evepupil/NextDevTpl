@@ -1,0 +1,68 @@
+---
+title: 可观测性
+description: 配置日志、监控、限流和请求诊断。
+---
+
+# 可观测性
+
+NextDevTpl 包含结构化日志、可选云端日志、Sentry 监控、限流和 API 请求日志工具。
+
+## 日志
+
+| 路径 | 作用 |
+| --- | --- |
+| `src/lib/logger/index.ts` | Pino logger wrapper |
+| `src/lib/api-logger.ts` | API logging helpers |
+
+配置 Axiom 后，日志可以发送到 Axiom。未配置时，日志应仍然能在本地看到。
+
+常见变量：
+
+```bash
+AXIOM_TOKEN="xaat-..."
+AXIOM_DATASET="nextdevtpl"
+```
+
+## 错误监控
+
+Sentry 配置文件：
+
+| 路径 | 作用 |
+| --- | --- |
+| `sentry.client.config.ts` | 浏览器 Sentry 配置 |
+| `sentry.server.config.ts` | 服务端 Sentry 配置 |
+| `sentry.edge.config.ts` | Edge Sentry 配置 |
+| `src/instrumentation.ts` | Next.js instrumentation hook |
+| `src/lib/monitoring/index.ts` | Monitoring helpers |
+
+常见变量：
+
+```bash
+NEXT_PUBLIC_SENTRY_DSN="https://..."
+SENTRY_AUTH_TOKEN="sntrys_..."
+```
+
+## 限流
+
+限流代码在：
+
+```txt
+src/lib/rate-limit
+```
+
+Upstash 变量：
+
+```bash
+UPSTASH_REDIS_REST_URL="https://..."
+UPSTASH_REDIS_REST_TOKEN="..."
+```
+
+没有 Redis 时，开发环境不应该因为限流配置缺失而启动失败。
+
+## 生产 checklist
+
+- 用户可见错误接入 Sentry。
+- webhook 和支付流程开启结构化日志。
+- 支付和 job retry 日志记录外部事件 id。
+- 不记录原始密钥、token、authorization headers。
+- 检查公开 mutation endpoint 的限流。

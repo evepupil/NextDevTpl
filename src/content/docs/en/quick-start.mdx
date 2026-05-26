@@ -1,0 +1,113 @@
+---
+title: Quick Start
+description: Run NextDevTpl locally with the minimum required services.
+---
+
+# Quick Start
+
+This guide starts the app locally with the smallest useful configuration.
+
+## Requirements
+
+| Tool | Version | Notes |
+| --- | --- | --- |
+| Node.js | 20+ | Required by Next.js and Inngest dependencies in this project |
+| pnpm | 10+ recommended | The lockfile is maintained with pnpm |
+| PostgreSQL | 14+ recommended | Local PostgreSQL, Neon, Supabase, or another compatible host |
+
+## Install dependencies
+
+```bash
+git clone git@github.com:evepupil/NextDevTpl.git
+cd NextDevTpl
+pnpm install
+```
+
+## Create environment file
+
+```bash
+cp .env.example .env.local
+```
+
+On Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env.local
+```
+
+## Minimal environment variables
+
+Only these variables are required for a basic local boot:
+
+```bash
+DATABASE_URL="postgresql://postgres:password@localhost:5432/nextdevtpl"
+BETTER_AUTH_SECRET="replace-with-a-random-secret"
+BETTER_AUTH_URL="http://localhost:3000"
+```
+
+Generate a strong local secret with:
+
+```bash
+openssl rand -base64 32
+```
+
+OAuth, email, payments, storage, Redis, logging, monitoring, AI, and background jobs can be enabled later.
+
+## Initialize the database
+
+For a new local database, push the current Drizzle schema:
+
+```bash
+pnpm db:push
+```
+
+Use migrations for shared or production databases:
+
+```bash
+pnpm db:generate
+pnpm db:migrate
+```
+
+## Start the dev server
+
+```bash
+pnpm dev
+```
+
+Open:
+
+```txt
+http://localhost:3000
+```
+
+The middleware will route you to the active locale, for example `/en` or `/zh`.
+
+## Verify the app
+
+After startup, verify these flows:
+
+| Check | Expected result |
+| --- | --- |
+| Home page | Marketing page renders without missing translation errors |
+| Sign up | Email/password account can be created |
+| Sign in | Authenticated user reaches `/dashboard` |
+| Dashboard | Sidebar, settings, credits, and support links render |
+| Admin | User with `role = "admin"` can access `/admin` |
+| Docs | `/en/docs` and `/zh/docs` show language-specific content |
+
+## Common commands
+
+```bash
+pnpm dev            # Start Next.js dev server
+pnpm build          # Create a production build
+pnpm start          # Start production server
+pnpm typecheck      # Run TypeScript type checking
+pnpm lint           # Run Biome lint
+pnpm check          # Run Biome check with fixes
+pnpm db:push        # Push Drizzle schema in development
+pnpm db:generate    # Generate migration files
+pnpm db:migrate     # Run migrations
+pnpm db:studio      # Open Drizzle Studio
+pnpm test:run       # Run tests once
+```
+

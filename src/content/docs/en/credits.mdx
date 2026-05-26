@@ -1,0 +1,69 @@
+---
+title: Credits
+description: Understand the built-in credit system, ledger entries, and expiration model.
+---
+
+# Credits
+
+The credits module is one of the main product primitives in NextDevTpl. It is designed for AI tools, usage-based SaaS products, paid exports, and other metered features.
+
+## Main files
+
+| Path | Purpose |
+| --- | --- |
+| `src/features/credits/core.ts` | Core balance and transaction logic |
+| `src/features/credits/actions.ts` | Server Actions for credit operations |
+| `src/features/credits/config.ts` | Credit packages and display config |
+| `src/features/credits/components` | Balance, usage, purchase, and history UI |
+| `src/app/[locale]/(dashboard)/dashboard/credits/buy` | Credit purchase page |
+| `src/test/credits` | Credit integrity and purchase tests |
+
+## Concepts
+
+| Concept | Meaning |
+| --- | --- |
+| Balance | Current spendable credits for a user |
+| Transaction | A recorded credit movement |
+| Batch | Credits granted together with shared expiration metadata |
+| FIFO expiration | Older credits are consumed before newer credits |
+| Purchase package | A configured one-time purchase amount |
+
+## Typical flows
+
+### Purchase credits
+
+1. User opens `/dashboard/credits/buy`.
+2. User selects a package.
+3. The app creates a checkout through the payment layer.
+4. The webhook confirms payment.
+5. Credits are granted to the user.
+6. Transaction history reflects the purchase.
+
+### Spend credits
+
+Feature code should use the credits core instead of manually decrementing a number. This keeps transactions auditable and preserves expiration rules.
+
+### Expire credits
+
+Expiration is handled by batch metadata and background jobs. See [Background Jobs](/en/docs/background-jobs) for the job route and Inngest integration.
+
+## Customizing packages
+
+Edit:
+
+```txt
+src/features/credits/config.ts
+```
+
+Keep package IDs stable once they are used in payment or audit records.
+
+## Testing
+
+Run focused tests when touching credits:
+
+```bash
+pnpm test:run src/test/credits
+```
+
+Always preserve transaction integrity. Bugs in credits are financial/accounting bugs, not only UI bugs.
+

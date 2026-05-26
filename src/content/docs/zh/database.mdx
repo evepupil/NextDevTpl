@@ -1,0 +1,66 @@
+---
+title: 数据库
+description: 在 NextDevTpl 中使用 PostgreSQL 和 Drizzle ORM。
+---
+
+# 数据库
+
+NextDevTpl 使用 PostgreSQL 和 Drizzle ORM。schema 是认证、积分、支付、工单和用户数据的事实来源。
+
+## 主要文件
+
+| 路径 | 作用 |
+| --- | --- |
+| `src/db/schema.ts` | 表结构定义 |
+| `src/db/index.ts` | 数据库 client |
+| `drizzle.config.ts` | Drizzle 配置 |
+| `drizzle/` | 生成的迁移和 snapshot |
+| `src/test/utils/db.ts` | 测试数据库 helpers |
+
+## 开发流程
+
+新本地数据库：
+
+```bash
+pnpm db:push
+```
+
+需要评审和部署的 schema 变更：
+
+```bash
+pnpm db:generate
+pnpm db:migrate
+```
+
+查看本地数据：
+
+```bash
+pnpm db:studio
+```
+
+## push 和 migration 的区别
+
+| 命令 | 使用场景 |
+| --- | --- |
+| `pnpm db:push` | 本地初始化或快速迭代 |
+| `pnpm db:generate` | 修改了 `src/db/schema.ts`，需要生成迁移文件 |
+| `pnpm db:migrate` | 执行已提交的迁移 |
+
+## schema 修改 checklist
+
+1. 修改 `src/db/schema.ts`。
+2. 更新读写该表的 feature service/action。
+3. 根据环境选择 push 或 migration。
+4. 在 `src/test` 补测试。
+5. 运行 `pnpm typecheck` 和相关测试。
+
+## 常见表区域
+
+| 区域 | 使用方 |
+| --- | --- |
+| 用户和 session | Better Auth |
+| 积分和交易 | Credits ledger 和购买流程 |
+| 订阅 | 支付和套餐查询 |
+| 工单 | 用户工单和后台处理 |
+| 存储记录 | 上传和安全测试 |
+

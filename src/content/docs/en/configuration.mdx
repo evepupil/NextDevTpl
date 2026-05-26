@@ -1,0 +1,71 @@
+---
+title: Configuration
+description: Configure the required and optional services used by NextDevTpl.
+---
+
+# Configuration
+
+Configuration is environment-variable driven. Start with the required variables, then enable optional services as needed.
+
+## Required for local boot
+
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URL` | PostgreSQL connection string used by Drizzle and Better Auth |
+| `BETTER_AUTH_SECRET` | Secret used to sign auth/session data |
+| `BETTER_AUTH_URL` | Base URL for Better Auth callbacks and cookies |
+
+Example:
+
+```bash
+DATABASE_URL="postgresql://postgres:password@localhost:5432/nextdevtpl"
+BETTER_AUTH_SECRET="replace-with-a-random-secret"
+BETTER_AUTH_URL="http://localhost:3000"
+```
+
+## Recommended during development
+
+| Service | Variables | Notes |
+| --- | --- | --- |
+| GitHub OAuth | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | Callback: `/api/auth/callback/github` |
+| Google OAuth | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Callback: `/api/auth/callback/google` |
+| Resend | `RESEND_API_KEY`, `EMAIL_FROM` | Enables real email verification and reset emails |
+
+If email is not configured, test authentication flows that do not require delivery first.
+
+## Optional product services
+
+| Service | Variables | Used by |
+| --- | --- | --- |
+| Creem | `CREEM_API_KEY`, `CREEM_WEBHOOK_SECRET` | Subscription checkout, credit purchases, webhooks |
+| S3/R2 | `STORAGE_ENDPOINT`, `STORAGE_REGION`, `STORAGE_BUCKET`, `STORAGE_ACCESS_KEY_ID`, `STORAGE_SECRET_ACCESS_KEY` | File uploads and proxy routes |
+| Upstash Redis | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | API and anonymous rate limiting |
+| Axiom | `AXIOM_TOKEN`, `AXIOM_DATASET` | Structured cloud logs |
+| Sentry | `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_AUTH_TOKEN` | Error capture and release uploads |
+| OpenAI-compatible AI | `OPENAI_API_KEY`, provider-specific base URL/model vars if configured | AI abstraction in `src/lib/ai` |
+| Inngest | `INNGEST_EVENT_KEY`, `INNGEST_SIGNING_KEY` | Background jobs in production |
+
+## Degradation model
+
+Optional services should not block a basic local boot. The intended behavior is:
+
+| Missing service | Expected behavior |
+| --- | --- |
+| Redis | Rate limiter falls back instead of crashing |
+| Axiom | Logger writes locally |
+| Sentry | Monitoring hooks become no-op or console-only |
+| Storage | Upload flows are unavailable, app shell still runs |
+| Creem | Payment flows are unavailable, non-payment pages still run |
+| Inngest keys | Local development can run without production signing keys |
+
+## Where configuration lives
+
+| Path | What to edit |
+| --- | --- |
+| `src/config/site.ts` | Site name, URL, metadata, social links |
+| `src/config/nav.ts` | Header, footer, dashboard, and admin navigation |
+| `src/config/payment.ts` | Payment product and checkout configuration |
+| `src/config/subscription-plan.ts` | Plan limits and pricing display |
+| `messages/*.json` | UI copy |
+| `.env.local` | Local secrets and service credentials |
+

@@ -1,0 +1,65 @@
+---
+title: Admin and Support
+description: Manage users, roles, tickets, and customer support workflows.
+---
+
+# Admin and Support
+
+The template includes a simple but practical admin area and support ticket system.
+
+## Admin area
+
+Admin routes live under:
+
+```txt
+src/app/[locale]/(admin)/admin
+```
+
+Main components:
+
+| Path | Purpose |
+| --- | --- |
+| `src/features/admin/components/admin-sidebar.tsx` | Admin navigation |
+| `src/app/[locale]/(admin)/admin/page.tsx` | Admin overview |
+| `src/app/[locale]/(admin)/admin/users/page.tsx` | User management |
+| `src/app/[locale]/(admin)/admin/tickets/page.tsx` | Ticket queue |
+| `src/app/[locale]/(admin)/admin/tickets/[id]/page.tsx` | Ticket detail |
+
+## Support tickets
+
+User ticket routes live under:
+
+```txt
+src/app/[locale]/(dashboard)/dashboard/support
+```
+
+Feature files:
+
+| Path | Purpose |
+| --- | --- |
+| `src/features/support/actions/ticket.ts` | Ticket actions |
+| `src/features/support/actions/admin-users.ts` | Admin user helpers |
+| `src/features/support/components` | Ticket forms, replies, status controls |
+| `src/features/support/schemas` | Validation schemas |
+| `src/test/support` | Ticket and admin user tests |
+
+## Ticket lifecycle
+
+Recommended status flow:
+
+```txt
+open -> in_progress -> resolved
+```
+
+Keep user-facing replies clear and avoid exposing internal logs or secrets.
+
+## Admin access
+
+Admin access depends on the authenticated user's role. For local testing, create a user and set `role = 'admin'` in the database.
+
+## Tests
+
+```bash
+pnpm test:run src/test/support
+```
+

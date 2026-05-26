@@ -70,7 +70,7 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
-      <Providers>
+      <Providers locale={locale}>
         {children}
         <CookieConsent />
         <Toaster richColors position="top-right" />

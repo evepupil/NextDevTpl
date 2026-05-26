@@ -1,0 +1,62 @@
+---
+title: Deployment
+description: Deploy NextDevTpl with the existing scripts or a managed Next.js platform.
+---
+
+# Deployment
+
+The repository includes a self-hosted deployment flow and can also be deployed on managed Next.js platforms.
+
+## Self-hosted flow
+
+The existing script pair is:
+
+| File | Runs on | Purpose |
+| --- | --- | --- |
+| `deploy-build.bat` | Windows/local machine | Build, package, upload artifacts |
+| `start-prod.sh` | Linux/server | Install production dependencies and start/restart app |
+
+Typical flow:
+
+1. Configure SSH host, deploy path, and key path in `deploy-build.bat`.
+2. Confirm production `.env` exists on the server.
+3. Run the script locally:
+
+```bat
+deploy-build.bat
+```
+
+4. The script builds locally, creates an archive, uploads it, then starts the app on the server.
+
+## Production environment
+
+At minimum, production needs:
+
+```bash
+DATABASE_URL="postgresql://..."
+BETTER_AUTH_SECRET="strong-production-secret"
+BETTER_AUTH_URL="https://your-domain.com"
+```
+
+Add the optional services you actually use: Creem, Resend, storage, Redis, Sentry, Axiom, Inngest, and AI provider credentials.
+
+## Vercel
+
+For Vercel:
+
+1. Import the GitHub repository.
+2. Set all production environment variables.
+3. Make sure the database is reachable from Vercel.
+4. Configure webhook URLs with the Vercel production domain.
+5. Run migrations before or during release.
+
+## Release checklist
+
+- `pnpm typecheck` passes.
+- `pnpm build` passes.
+- Database migrations are ready.
+- `BETTER_AUTH_URL` uses the production domain.
+- OAuth callback URLs use the production domain.
+- Creem webhook URL points to `/api/webhooks/creem`.
+- Sentry/Axiom do not receive raw secrets.
+

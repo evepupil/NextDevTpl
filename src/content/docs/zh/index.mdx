@@ -1,0 +1,48 @@
+---
+title: 介绍
+description: 了解 NextDevTpl 内置能力，以及如何把它作为生产级 SaaS 起点。
+---
+
+# NextDevTpl 文档
+
+NextDevTpl 是一个偏生产落地的 SaaS 启动模板，基于 Next.js、React、TypeScript、PostgreSQL、Drizzle ORM、Better Auth、next-intl、Creem 支付、积分系统、管理后台、工单、邮件、对象存储、可观测性和后台任务构建。
+
+它不是只展示一个首页的 UI 模板，而是提供一套可以继续二开的产品骨架。
+
+## 内置能力
+
+| 模块 | 说明 |
+| --- | --- |
+| 应用骨架 | 多语言营销页、博客、文档、Dashboard、Admin、法律页面 |
+| 认证 | Better Auth 邮箱密码、OAuth、session、角色权限 |
+| 数据库 | PostgreSQL schema、Drizzle ORM、迁移和集成测试 |
+| 支付 | Creem checkout、订阅、webhook、一次性积分购买 |
+| 积分 | 账本式积分记录、FIFO 批次过期、余额读取 |
+| 运营 | 用户管理、工单、日志、监控、限流、后台任务 |
+| 内容 | Fumadocs 文档、MDX 博客、next-intl UI 翻译 |
+
+## 推荐阅读顺序
+
+如果你想先跑起来，建议看：
+
+- [快速开始](/zh/docs/quick-start)
+- [项目结构](/zh/docs/project-structure)
+- [配置说明](/zh/docs/configuration)
+
+如果你要接入业务功能，建议看：
+
+- [认证](/zh/docs/authentication)
+- [支付](/zh/docs/payments)
+- [积分系统](/zh/docs/credits)
+- [国际化](/zh/docs/internationalization)
+
+如果你准备上线，建议看：
+
+- [部署](/zh/docs/deployment)
+- [可观测性](/zh/docs/observability)
+- [后台任务](/zh/docs/background-jobs)
+
+## 核心原则
+
+本地开发时，大多数外部服务都应该是可选的。项目先用数据库和基础认证跑起来，再按产品需要逐步启用 OAuth、邮件、支付、对象存储、Redis、Sentry、Axiom 和 Inngest。
+

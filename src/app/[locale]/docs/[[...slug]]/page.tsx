@@ -2,25 +2,26 @@ import { DocsBody, DocsPage, DocsTitle } from "fumadocs-ui/page";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { routing } from "@/i18n/routing";
 import { docsSource } from "@/lib/source";
 
-/**
- * 生成静态参数
- */
 export function generateStaticParams() {
-  return docsSource.generateParams();
+  return docsSource.generateParams().map(({ lang, slug }) => ({
+    locale: lang,
+    slug,
+  }));
 }
 
-/**
- * 生成页面元数据
- */
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug?: string[] }>;
+  params: Promise<{ locale: string; slug?: string[] }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const page = docsSource.getPage(slug);
+  const { locale, slug } = await params;
+  const docsLocale = routing.locales.includes(locale as "en" | "zh")
+    ? locale
+    : routing.defaultLocale;
+  const page = docsSource.getPage(slug, docsLocale);
 
   if (!page) {
     return {
@@ -34,19 +35,16 @@ export async function generateMetadata({
   };
 }
 
-/**
- * 文档页面
- *
- * 使用 Fumadocs UI 的 DocsPage 组件
- * 渲染 MDX 内容
- */
 export default async function Page({
   params,
 }: {
-  params: Promise<{ slug?: string[] }>;
+  params: Promise<{ locale: string; slug?: string[] }>;
 }) {
-  const { slug } = await params;
-  const page = docsSource.getPage(slug);
+  const { locale, slug } = await params;
+  const docsLocale = routing.locales.includes(locale as "en" | "zh")
+    ? locale
+    : routing.defaultLocale;
+  const page = docsSource.getPage(slug, docsLocale);
 
   if (!page) {
     notFound();

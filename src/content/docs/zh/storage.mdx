@@ -1,0 +1,51 @@
+---
+title: 对象存储
+description: 配置 S3 或 Cloudflare R2 兼容存储和 presigned upload。
+---
+
+# 对象存储
+
+存储层兼容 S3 风格服务，例如 AWS S3、Cloudflare R2 和 MinIO。
+
+## 主要文件
+
+| 路径 | 作用 |
+| --- | --- |
+| `src/features/storage/providers/s3.ts` | S3-compatible provider |
+| `src/features/storage/actions.ts` | 存储 Server Actions |
+| `src/features/storage/utils.ts` | 工具函数 |
+| `src/features/storage/types.ts` | 存储类型 |
+| `src/app/api/upload/presigned/route.ts` | Presigned upload endpoint |
+| `src/app/image-proxy/[...path]/route.ts` | 图片代理路由 |
+| `src/test/storage/security.test.ts` | 存储安全测试 |
+
+## 环境变量
+
+| 变量 | 作用 |
+| --- | --- |
+| `STORAGE_ENDPOINT` | Provider endpoint，例如 R2 endpoint |
+| `STORAGE_REGION` | S3 region 或兼容值 |
+| `STORAGE_BUCKET` | Bucket 名称 |
+| `STORAGE_ACCESS_KEY_ID` | Access key |
+| `STORAGE_SECRET_ACCESS_KEY` | Secret key |
+
+## 上传模型
+
+1. 客户端请求 presigned upload URL。
+2. 服务端校验请求并返回上传 metadata。
+3. 客户端直传到对象存储。
+4. 应用保存或使用 object key。
+5. 公开展示时可以走 image proxy。
+
+## 安全 checklist
+
+- 创建 presigned URL 前校验文件类型和大小。
+- object key 要有作用域，不要可预测。
+- 不要把 secret key 暴露给浏览器。
+- 优先使用私有 bucket，配合 signed read 或 proxy route。
+- 修改上传规则后运行存储安全测试。
+
+```bash
+pnpm test:run src/test/storage
+```
+

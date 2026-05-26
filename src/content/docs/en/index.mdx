@@ -1,0 +1,48 @@
+---
+title: Introduction
+description: Learn what NextDevTpl includes and how to use the template as a production SaaS starting point.
+---
+
+# NextDevTpl Documentation
+
+NextDevTpl is a production-oriented SaaS starter built on Next.js, React, TypeScript, PostgreSQL, Drizzle ORM, Better Auth, next-intl, Creem payments, credits, admin tools, support tickets, email, storage, observability, and background jobs.
+
+The goal of the template is not only to show a landing page. It gives you a working product shell that can be customized into a real SaaS application.
+
+## What is included
+
+| Area | What you get |
+| --- | --- |
+| App shell | Localized marketing site, blog, docs, dashboard, admin area, and legal pages |
+| Authentication | Better Auth with email/password, OAuth providers, session handling, and roles |
+| Database | PostgreSQL schema with Drizzle ORM, migrations, and integration tests |
+| Billing | Creem checkout, subscription flow, webhook handling, and one-time credit purchases |
+| Credits | Ledger-style credit accounting, FIFO batch expiration, and balance reads |
+| Operations | Admin users, support tickets, logging, monitoring, rate limiting, and jobs |
+| Content | Fumadocs-powered docs, MDX blog, and next-intl translated UI |
+
+## Recommended reading path
+
+If you are evaluating the template, start with:
+
+- [Quick Start](/en/docs/quick-start)
+- [Project Structure](/en/docs/project-structure)
+- [Configuration](/en/docs/configuration)
+
+If you are integrating product features, read:
+
+- [Authentication](/en/docs/authentication)
+- [Payments](/en/docs/payments)
+- [Credits](/en/docs/credits)
+- [Internationalization](/en/docs/internationalization)
+
+If you are preparing production, read:
+
+- [Deployment](/en/docs/deployment)
+- [Observability](/en/docs/observability)
+- [Background Jobs](/en/docs/background-jobs)
+
+## Core principle
+
+Most external services are optional during local development. The app should boot with only database and auth basics, then enable OAuth, email, payments, storage, Redis, Sentry, Axiom, and Inngest as your product needs them.
+

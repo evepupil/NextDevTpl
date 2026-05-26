@@ -1,0 +1,71 @@
+---
+title: Authentication
+description: Understand Better Auth integration, auth routes, roles, and protected pages.
+---
+
+# Authentication
+
+Authentication is built with Better Auth and integrated into the App Router, middleware, dashboard, and admin area.
+
+## Main files
+
+| Path | Purpose |
+| --- | --- |
+| `src/lib/auth/api.ts` | Better Auth API configuration |
+| `src/lib/auth/client.ts` | Client-side auth helpers |
+| `src/lib/auth/server.ts` | Server-side session helpers |
+| `src/lib/auth/edge.ts` | Middleware-safe auth checks and public route config |
+| `src/lib/auth/admin.ts` | Admin-specific helpers |
+| `src/app/api/auth/[...all]/route.ts` | Better Auth route handler |
+| `src/features/auth/components` | Sign-in, sign-up, forgot-password UI |
+
+## Supported flows
+
+| Flow | Notes |
+| --- | --- |
+| Email/password | Baseline local auth flow |
+| GitHub OAuth | Requires GitHub OAuth app credentials |
+| Google OAuth | Requires Google Cloud OAuth credentials |
+| Password reset | Requires email delivery to send reset messages |
+| Role-based access | `user` and `admin` roles are used by dashboard/admin protection |
+
+## Public and protected routes
+
+The middleware/auth edge helpers decide which routes are public and which need a session. Public routes include marketing pages, auth pages, blog, legal pages, docs, and selected API endpoints.
+
+Authenticated pages live under:
+
+```txt
+src/app/[locale]/(dashboard)/dashboard
+```
+
+Admin pages live under:
+
+```txt
+src/app/[locale]/(admin)/admin
+```
+
+## Make yourself an admin
+
+After creating a local user, update the user's role in the database:
+
+```sql
+update "user"
+set role = 'admin'
+where email = 'you@example.com';
+```
+
+Then visit:
+
+```txt
+/en/admin
+```
+
+## Adding an OAuth provider
+
+1. Create credentials in the provider console.
+2. Add the provider credentials to `.env.local`.
+3. Register callback URLs that match `BETTER_AUTH_URL`.
+4. Update the auth UI if you want to expose a new provider button.
+5. Test sign-in locally before enabling it in production.
+

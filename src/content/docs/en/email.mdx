@@ -1,0 +1,48 @@
+---
+title: Email
+description: Send product emails with Resend and React Email templates.
+---
+
+# Email
+
+Email delivery uses Resend and React Email templates.
+
+## Main files
+
+| Path | Purpose |
+| --- | --- |
+| `src/features/mail/client.ts` | Resend client setup |
+| `src/features/mail/actions.ts` | Email send actions |
+| `src/features/mail/utils.ts` | Email helpers |
+| `src/features/mail/templates` | React Email templates |
+| `src/test/mail/newsletter.test.ts` | Email-related test coverage |
+
+## Environment variables
+
+| Variable | Purpose |
+| --- | --- |
+| `RESEND_API_KEY` | Authenticates with Resend |
+| `EMAIL_FROM` | Sender address displayed to users |
+
+Example:
+
+```bash
+RESEND_API_KEY="re_xxxxxxxxx"
+EMAIL_FROM="NextDevTpl <noreply@example.com>"
+```
+
+## Templates
+
+Templates are React components. Current examples include:
+
+| Template | Purpose |
+| --- | --- |
+| `welcome-email.tsx` | Welcome/onboarding email |
+| `primary-action-email.tsx` | Generic action email with a button |
+
+When editing templates, keep copy short and avoid relying on app-only CSS. Email clients have limited CSS support.
+
+## Local behavior
+
+If Resend is not configured, email-dependent features should be treated as unavailable. Use email/password flows that do not require delivery first, then enable Resend when testing verification and reset flows.
+

@@ -1,0 +1,78 @@
+---
+title: Internationalization
+description: Work with next-intl routes, UI messages, and localized documentation.
+---
+
+# Internationalization
+
+NextDevTpl uses `next-intl` for UI translations and locale-aware routing. Documentation content is localized through Fumadocs content folders.
+
+## Current locales
+
+Locales are configured in:
+
+```txt
+src/i18n/routing.ts
+```
+
+Current values:
+
+```ts
+locales: ["en", "zh"]
+defaultLocale: "en"
+```
+
+## UI messages
+
+| File | Purpose |
+| --- | --- |
+| `messages/en.json` | English UI copy |
+| `messages/zh.json` | Chinese UI copy |
+| `src/i18n/request.ts` | Loads locale messages |
+| `src/features/shared/components/language-switcher.tsx` | Header language switcher |
+
+Use `useTranslations()` in client components and server translation helpers in server components.
+
+## Route structure
+
+Most pages live under:
+
+```txt
+src/app/[locale]
+```
+
+Examples:
+
+```txt
+/en
+/zh
+/en/dashboard
+/zh/dashboard
+/en/docs
+/zh/docs
+```
+
+## Documentation i18n
+
+Docs are stored by language:
+
+```txt
+src/content/docs/en
+src/content/docs/zh
+```
+
+The loader in `src/lib/source.ts` uses Fumadocs i18n with the `dir` parser. The docs route reads pages by `params.locale`, so `/en/docs` and `/zh/docs` get separate page trees.
+
+## Adding a locale
+
+1. Add the locale to `src/i18n/routing.ts`.
+2. Add `messages/<locale>.json`.
+3. Add docs under `src/content/docs/<locale>`.
+4. Add blog/legal content if those routes should support the locale.
+5. Update sitemap metadata if needed.
+6. Test navigation and language switching.
+
+## Translation quality
+
+Do not mechanically translate product terms that are better left in English. Keep framework and API names unchanged: Next.js, Drizzle, Better Auth, Creem, Inngest, Sentry, Axiom, Fumadocs, next-intl.
+

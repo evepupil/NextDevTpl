@@ -1,0 +1,110 @@
+---
+title: 快速开始
+description: 使用最小配置在本地启动 NextDevTpl。
+---
+
+# 快速开始
+
+这篇文档用于用最小配置启动本地开发环境。
+
+## 前置要求
+
+| 工具 | 版本 | 说明 |
+| --- | --- | --- |
+| Node.js | 20+ | 当前依赖要求 Node 20 以上 |
+| pnpm | 推荐 10+ | lockfile 使用 pnpm 维护 |
+| PostgreSQL | 推荐 14+ | 可以用本地 PostgreSQL、Neon、Supabase 等兼容服务 |
+
+## 安装依赖
+
+```bash
+git clone git@github.com:evepupil/NextDevTpl.git
+cd NextDevTpl
+pnpm install
+```
+
+## 创建环境变量文件
+
+```bash
+cp .env.example .env.local
+```
+
+Windows PowerShell：
+
+```powershell
+Copy-Item .env.example .env.local
+```
+
+## 最小启动配置
+
+只要下面 3 个变量存在，项目就应该能完成基础启动：
+
+```bash
+DATABASE_URL="postgresql://postgres:password@localhost:5432/nextdevtpl"
+BETTER_AUTH_SECRET="replace-with-a-random-secret"
+BETTER_AUTH_URL="http://localhost:3000"
+```
+
+可以用下面命令生成随机密钥：
+
+```bash
+openssl rand -base64 32
+```
+
+OAuth、邮件、支付、对象存储、Redis、日志、监控、AI、后台任务都可以后续再接。
+
+## 初始化数据库
+
+新本地库建议直接推送当前 Drizzle schema：
+
+```bash
+pnpm db:push
+```
+
+共享环境或生产环境建议走迁移：
+
+```bash
+pnpm db:generate
+pnpm db:migrate
+```
+
+## 启动开发服务
+
+```bash
+pnpm dev
+```
+
+打开：
+
+```txt
+http://localhost:3000
+```
+
+中间件会根据语言配置进入对应路径，例如 `/en` 或 `/zh`。
+
+## 启动后检查
+
+| 检查项 | 预期结果 |
+| --- | --- |
+| 首页 | 营销页正常渲染，没有缺失翻译报错 |
+| 注册 | 可以创建邮箱密码账号 |
+| 登录 | 登录后进入 `/dashboard` |
+| Dashboard | 侧边栏、设置、积分、工单入口正常 |
+| Admin | `role = "admin"` 的用户可以访问 `/admin` |
+| Docs | `/en/docs` 和 `/zh/docs` 显示各自语言的内容 |
+
+## 常用命令
+
+```bash
+pnpm dev            # 启动 Next.js 开发服务
+pnpm build          # 生产构建
+pnpm start          # 启动生产服务
+pnpm typecheck      # TypeScript 类型检查
+pnpm lint           # Biome lint
+pnpm check          # Biome check 并自动修复
+pnpm db:push        # 开发环境推送 Drizzle schema
+pnpm db:generate    # 生成迁移文件
+pnpm db:migrate     # 执行迁移
+pnpm db:studio      # 打开 Drizzle Studio
+pnpm test:run       # 单次运行测试
+```

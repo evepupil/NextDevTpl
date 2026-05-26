@@ -1,0 +1,70 @@
+---
+title: 配置说明
+description: 配置 NextDevTpl 需要的必填和可选服务。
+---
+
+# 配置说明
+
+项目通过环境变量配置。建议先填必填项，让项目跑起来，再按业务需要逐步打开外部服务。
+
+## 最小必填项
+
+| 变量 | 作用 |
+| --- | --- |
+| `DATABASE_URL` | Drizzle 和 Better Auth 使用的 PostgreSQL 连接串 |
+| `BETTER_AUTH_SECRET` | 用于签名认证/session 数据 |
+| `BETTER_AUTH_URL` | Better Auth callback 和 cookie 使用的站点地址 |
+
+示例：
+
+```bash
+DATABASE_URL="postgresql://postgres:password@localhost:5432/nextdevtpl"
+BETTER_AUTH_SECRET="replace-with-a-random-secret"
+BETTER_AUTH_URL="http://localhost:3000"
+```
+
+## 开发阶段推荐配置
+
+| 服务 | 变量 | 说明 |
+| --- | --- | --- |
+| GitHub OAuth | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | 回调地址：`/api/auth/callback/github` |
+| Google OAuth | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | 回调地址：`/api/auth/callback/google` |
+| Resend | `RESEND_API_KEY`, `EMAIL_FROM` | 开启真实邮件验证和重置密码邮件 |
+
+如果没有配置邮件，先测试不依赖邮件投递的认证流程。
+
+## 可选产品服务
+
+| 服务 | 变量 | 用途 |
+| --- | --- | --- |
+| Creem | `CREEM_API_KEY`, `CREEM_WEBHOOK_SECRET` | 订阅 checkout、积分购买、webhook |
+| S3/R2 | `STORAGE_ENDPOINT`, `STORAGE_REGION`, `STORAGE_BUCKET`, `STORAGE_ACCESS_KEY_ID`, `STORAGE_SECRET_ACCESS_KEY` | 文件上传和代理访问 |
+| Upstash Redis | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | API 和匿名访问限流 |
+| Axiom | `AXIOM_TOKEN`, `AXIOM_DATASET` | 云端结构化日志 |
+| Sentry | `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_AUTH_TOKEN` | 错误监控和 release 上传 |
+| AI Provider | `OPENAI_API_KEY` 以及供应商相关配置 | `src/lib/ai` 抽象层 |
+| Inngest | `INNGEST_EVENT_KEY`, `INNGEST_SIGNING_KEY` | 生产后台任务 |
+
+## 降级策略
+
+可选服务不应该阻断基础启动。预期行为如下：
+
+| 缺少服务 | 预期行为 |
+| --- | --- |
+| Redis | 限流降级，不让应用启动失败 |
+| Axiom | 日志输出到本地 |
+| Sentry | 监控 no-op 或 console-only |
+| Storage | 上传功能不可用，但应用外壳可运行 |
+| Creem | 支付流程不可用，非支付页面可运行 |
+| Inngest keys | 本地开发不强依赖生产签名密钥 |
+
+## 常改配置入口
+
+| 路径 | 修改内容 |
+| --- | --- |
+| `src/config/site.ts` | 站点名、URL、metadata、社交链接 |
+| `src/config/nav.ts` | Header、Footer、Dashboard、Admin 导航 |
+| `src/config/payment.ts` | 支付产品和 checkout 配置 |
+| `src/config/subscription-plan.ts` | 套餐限制和价格展示 |
+| `messages/*.json` | UI 文案 |
+| `.env.local` | 本地密钥和服务凭证 |

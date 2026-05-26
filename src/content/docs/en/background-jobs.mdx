@@ -1,0 +1,53 @@
+---
+title: Background Jobs
+description: Run async product workflows with Inngest.
+---
+
+# Background Jobs
+
+Background jobs are powered by Inngest. Use jobs for workflows that should not block a request, such as credit expiration, delivery retries, email batching, or async product processing.
+
+## Main files
+
+| Path | Purpose |
+| --- | --- |
+| `src/inngest/client.ts` | Inngest client |
+| `src/inngest/functions.ts` | Function definitions |
+| `src/inngest/index.ts` | Exports |
+| `src/app/api/inngest/route.ts` | Inngest route handler |
+| `src/app/api/jobs/credits/expire/route.ts` | Credit expiration job endpoint |
+| `src/test/jobs/cron-expire.test.ts` | Job test coverage |
+
+## Local development
+
+Start the app:
+
+```bash
+pnpm dev
+```
+
+Then use the Inngest dev server if you need to inspect or trigger functions locally.
+
+## Production variables
+
+| Variable | Purpose |
+| --- | --- |
+| `INNGEST_EVENT_KEY` | Sends events to Inngest |
+| `INNGEST_SIGNING_KEY` | Verifies requests from Inngest |
+
+## Job design rules
+
+- Keep jobs idempotent.
+- Store enough state to recover from retries.
+- Do not grant credits or change subscription state twice for the same external event.
+- Prefer small composable functions over one large workflow.
+- Log job identifiers and external event IDs.
+
+## Testing
+
+Run job tests after touching expiration logic:
+
+```bash
+pnpm test:run src/test/jobs
+```
+

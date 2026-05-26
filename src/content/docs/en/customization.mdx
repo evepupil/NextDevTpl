@@ -1,0 +1,95 @@
+---
+title: Customization
+description: Common places to customize branding, navigation, pricing, pages, and modules.
+---
+
+# Customization
+
+This page lists the most common places to edit when turning NextDevTpl into your own SaaS.
+
+## Branding
+
+| Edit | Path |
+| --- | --- |
+| Site name, URL, metadata | `src/config/site.ts` |
+| Logo | `public/logo.svg` and header components |
+| Global styles | `src/app/globals.css` |
+| Open Graph image template | `src/features/shared/components/og-image-template.tsx` |
+
+## Navigation
+
+| Area | Path |
+| --- | --- |
+| Header and footer | `src/config/nav.ts` |
+| Dashboard sidebar | `src/config/nav.ts` and `src/features/dashboard/components/sidebar.tsx` |
+| Admin sidebar | `src/config/nav.ts` and `src/features/admin/components/admin-sidebar.tsx` |
+
+## Landing page
+
+Marketing sections live in:
+
+```txt
+src/features/marketing/components
+```
+
+The home route is:
+
+```txt
+src/app/[locale]/(marketing)/page.tsx
+```
+
+Most copy comes from:
+
+```txt
+messages/en.json
+messages/zh.json
+```
+
+## Pricing and plans
+
+| Edit | Path |
+| --- | --- |
+| Plan names and limits | `src/config/subscription-plan.ts` |
+| Payment product mapping | `src/config/payment.ts` |
+| Pricing section UI | `src/features/marketing/components/pricing-section.tsx` |
+| Subscription UI | `src/features/subscription` |
+
+## Product modules
+
+Add new product code under:
+
+```txt
+src/features/<your-feature>
+```
+
+Recommended shape:
+
+```txt
+src/features/example/
+├── actions.ts
+├── components/
+├── schemas/
+├── types.ts
+└── index.ts
+```
+
+Keep route-specific composition in `src/app` and reusable business logic inside the feature module.
+
+## Content
+
+| Content | Path |
+| --- | --- |
+| Docs | `src/content/docs/<locale>` |
+| Blog | `src/content/blog/<locale>` |
+| Legal | `src/content/legal/<locale>` |
+| PSEO data | `src/features/pseo/data/pseo-pages.json` |
+
+## Before committing customizations
+
+```bash
+pnpm typecheck
+pnpm lint
+```
+
+Run focused tests if you changed auth, credits, payments, storage, support, or jobs.
+

@@ -1,0 +1,66 @@
+---
+title: Database
+description: Work with PostgreSQL and Drizzle ORM in NextDevTpl.
+---
+
+# Database
+
+NextDevTpl uses PostgreSQL with Drizzle ORM. The schema is the source of truth for auth, credits, payments, support tickets, and user data.
+
+## Main files
+
+| Path | Purpose |
+| --- | --- |
+| `src/db/schema.ts` | Table definitions |
+| `src/db/index.ts` | Database client |
+| `drizzle.config.ts` | Drizzle config |
+| `drizzle/` | Generated migration files and snapshots |
+| `src/test/utils/db.ts` | Test database helpers |
+
+## Development workflow
+
+For a new local database:
+
+```bash
+pnpm db:push
+```
+
+For a change that should be reviewed and deployed:
+
+```bash
+pnpm db:generate
+pnpm db:migrate
+```
+
+Use Drizzle Studio to inspect local data:
+
+```bash
+pnpm db:studio
+```
+
+## When to use push vs migrations
+
+| Command | Use it when |
+| --- | --- |
+| `pnpm db:push` | You are bootstrapping or iterating on a local database |
+| `pnpm db:generate` | You changed `src/db/schema.ts` and need a migration file |
+| `pnpm db:migrate` | You want to apply committed migrations |
+
+## Schema changes checklist
+
+1. Update `src/db/schema.ts`.
+2. Update any feature service/action that reads or writes the changed table.
+3. Generate or push the schema depending on environment.
+4. Add or update tests under `src/test`.
+5. Run `pnpm typecheck` and targeted tests.
+
+## Common table areas
+
+| Area | Used by |
+| --- | --- |
+| Auth users and sessions | Better Auth |
+| Credits and transactions | Credits ledger and purchases |
+| Subscriptions | Payment and plan lookup |
+| Support tickets | User support and admin ticket queue |
+| Storage records | Upload and file security tests |
+

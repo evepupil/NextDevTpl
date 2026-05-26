@@ -1,0 +1,53 @@
+---
+title: 后台任务
+description: 使用 Inngest 运行异步产品流程。
+---
+
+# 后台任务
+
+后台任务使用 Inngest。适合处理不应该阻塞请求的流程，例如积分过期、投递重试、邮件批处理、异步产品任务等。
+
+## 主要文件
+
+| 路径 | 作用 |
+| --- | --- |
+| `src/inngest/client.ts` | Inngest client |
+| `src/inngest/functions.ts` | function 定义 |
+| `src/inngest/index.ts` | exports |
+| `src/app/api/inngest/route.ts` | Inngest route handler |
+| `src/app/api/jobs/credits/expire/route.ts` | 积分过期 job endpoint |
+| `src/test/jobs/cron-expire.test.ts` | job 测试 |
+
+## 本地开发
+
+先启动应用：
+
+```bash
+pnpm dev
+```
+
+如果需要本地检查或触发 function，再使用 Inngest dev server。
+
+## 生产环境变量
+
+| 变量 | 作用 |
+| --- | --- |
+| `INNGEST_EVENT_KEY` | 向 Inngest 发送事件 |
+| `INNGEST_SIGNING_KEY` | 校验 Inngest 请求 |
+
+## Job 设计规则
+
+- job 必须尽量幂等。
+- 保存足够状态，方便 retry 后恢复。
+- 不要因为重复 webhook 或重复事件重复发积分。
+- 优先拆成小的可组合函数。
+- 日志里记录 job id 和外部事件 id。
+
+## 测试
+
+修改过期逻辑后运行：
+
+```bash
+pnpm test:run src/test/jobs
+```
+

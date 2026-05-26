@@ -1,6 +1,14 @@
+import { defineI18n } from "fumadocs-core/i18n";
 import { loader } from "fumadocs-core/source";
 
 import { docs, blog, legal } from "../../.source/server";
+
+export const docsI18n = defineI18n({
+  languages: ["en", "zh"],
+  defaultLanguage: "en",
+  parser: "dir",
+  hideLocale: "never",
+});
 
 /**
  * 文档数据源
@@ -11,6 +19,12 @@ import { docs, blog, legal } from "../../.source/server";
 export const docsSource = loader({
   baseUrl: "/docs",
   source: docs.toFumadocsSource(),
+  i18n: docsI18n,
+  url: (slugs, locale) => {
+    const language = locale ?? docsI18n.defaultLanguage;
+    const path = slugs.length > 0 ? `/${slugs.join("/")}` : "";
+    return `/${language}/docs${path}`;
+  },
 });
 
 /**

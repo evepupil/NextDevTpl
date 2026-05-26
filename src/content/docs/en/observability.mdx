@@ -1,0 +1,69 @@
+---
+title: Observability
+description: Configure logging, monitoring, rate limits, and request diagnostics.
+---
+
+# Observability
+
+NextDevTpl includes structured logging, optional cloud log shipping, Sentry monitoring, rate limiting, and API request logging utilities.
+
+## Logging
+
+| Path | Purpose |
+| --- | --- |
+| `src/lib/logger/index.ts` | Pino logger wrapper |
+| `src/lib/api-logger.ts` | API logging helpers |
+
+When Axiom is configured, logs can be shipped to Axiom. Without Axiom, logs should still be available locally.
+
+Common variables:
+
+```bash
+AXIOM_TOKEN="xaat-..."
+AXIOM_DATASET="nextdevtpl"
+```
+
+## Error monitoring
+
+Sentry config files:
+
+| Path | Purpose |
+| --- | --- |
+| `sentry.client.config.ts` | Browser Sentry setup |
+| `sentry.server.config.ts` | Server Sentry setup |
+| `sentry.edge.config.ts` | Edge Sentry setup |
+| `src/instrumentation.ts` | Next.js instrumentation hook |
+| `src/lib/monitoring/index.ts` | Monitoring helpers |
+
+Common variables:
+
+```bash
+NEXT_PUBLIC_SENTRY_DSN="https://..."
+SENTRY_AUTH_TOKEN="sntrys_..."
+```
+
+## Rate limiting
+
+Rate limiting lives in:
+
+```txt
+src/lib/rate-limit
+```
+
+Upstash variables:
+
+```bash
+UPSTASH_REDIS_REST_URL="https://..."
+UPSTASH_REDIS_REST_TOKEN="..."
+```
+
+If Redis is missing, development should continue without a hard startup failure.
+
+## Production checklist
+
+- Enable Sentry for user-visible errors.
+- Enable structured logs for webhook and payment debugging.
+- Log external event IDs for payment and job retries.
+- Avoid logging raw credentials, tokens, or authorization headers.
+- Verify rate limits on public mutation endpoints.
+

@@ -1,0 +1,64 @@
+---
+title: Payments
+description: Configure Creem payments, subscriptions, one-time purchases, and webhooks.
+---
+
+# Payments
+
+Payments are implemented through Creem. The template includes subscription billing, one-time credit purchases, webhook handling, and plan lookup.
+
+## Main files
+
+| Path | Purpose |
+| --- | --- |
+| `src/features/payment/creem.ts` | Creem client and API integration |
+| `src/features/payment/actions.ts` | Checkout and payment Server Actions |
+| `src/features/payment/types.ts` | Payment-related types |
+| `src/config/payment.ts` | Product/payment configuration |
+| `src/config/subscription-plan.ts` | Plan definitions |
+| `src/app/api/webhooks/creem/route.ts` | Creem webhook endpoint |
+| `src/features/subscription` | User plan lookup and subscription UI |
+| `src/test/payment` | Payment and subscription tests |
+
+## Required environment variables
+
+| Variable | Purpose |
+| --- | --- |
+| `CREEM_API_KEY` | Calls Creem APIs |
+| `CREEM_WEBHOOK_SECRET` | Verifies webhook signatures |
+
+Production callback and webhook URLs should use your deployed domain.
+
+## Subscription flow
+
+1. Plans are defined in `src/config/subscription-plan.ts`.
+2. The pricing UI renders available plans.
+3. A checkout action creates a Creem checkout session.
+4. Creem sends webhook events.
+5. The webhook updates subscription state.
+6. The dashboard reads the current user plan.
+
+## Credit purchase flow
+
+One-time credit purchases share the payment layer but grant credit packages after successful payment. See [Credits](/en/docs/credits) for ledger behavior.
+
+## Webhook checklist
+
+Before going live:
+
+1. Configure the Creem webhook URL:
+
+```txt
+https://your-domain.com/api/webhooks/creem
+```
+
+2. Set `CREEM_WEBHOOK_SECRET`.
+3. Test a checkout in sandbox mode if available.
+4. Confirm subscription state updates.
+5. Confirm duplicate webhook events do not double-grant credits.
+6. Run payment tests.
+
+```bash
+pnpm test:run src/test/payment
+```
+

@@ -1,0 +1,71 @@
+---
+title: 认证
+description: 了解 Better Auth 集成、认证路由、角色和受保护页面。
+---
+
+# 认证
+
+认证基于 Better Auth，并接入了 App Router、middleware、Dashboard 和 Admin 权限控制。
+
+## 主要文件
+
+| 路径 | 作用 |
+| --- | --- |
+| `src/lib/auth/api.ts` | Better Auth API 配置 |
+| `src/lib/auth/client.ts` | 客户端认证 helpers |
+| `src/lib/auth/server.ts` | 服务端 session helpers |
+| `src/lib/auth/edge.ts` | middleware 可用的认证检查和公开路由配置 |
+| `src/lib/auth/admin.ts` | 管理员相关 helpers |
+| `src/app/api/auth/[...all]/route.ts` | Better Auth route handler |
+| `src/features/auth/components` | 登录、注册、找回密码 UI |
+
+## 支持的流程
+
+| 流程 | 说明 |
+| --- | --- |
+| 邮箱密码 | 最基础的本地认证流程 |
+| GitHub OAuth | 需要 GitHub OAuth app 凭证 |
+| Google OAuth | 需要 Google Cloud OAuth 凭证 |
+| 重置密码 | 需要邮件服务发送重置邮件 |
+| 角色权限 | 使用 `user` 和 `admin` 区分普通用户和管理员 |
+
+## 公开和受保护路由
+
+middleware 和 edge auth helpers 会判断哪些路由公开，哪些路由需要 session。公开路由包括营销页、认证页、博客、法律页面、文档和部分 API。
+
+用户登录后的页面在：
+
+```txt
+src/app/[locale]/(dashboard)/dashboard
+```
+
+管理员页面在：
+
+```txt
+src/app/[locale]/(admin)/admin
+```
+
+## 给自己设置管理员
+
+本地创建用户后，在数据库里把用户角色改成 `admin`：
+
+```sql
+update "user"
+set role = 'admin'
+where email = 'you@example.com';
+```
+
+然后访问：
+
+```txt
+/zh/admin
+```
+
+## 新增 OAuth Provider
+
+1. 在供应商控制台创建 OAuth 凭证。
+2. 把 client id 和 secret 写入 `.env.local`。
+3. 配置和 `BETTER_AUTH_URL` 匹配的 callback URL。
+4. 如果要展示按钮，更新认证 UI。
+5. 本地测试通过后再上生产。
+
