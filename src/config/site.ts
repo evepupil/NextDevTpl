@@ -20,15 +20,15 @@ export const siteConfig = {
   /** 作者信息 */
   author: {
     name: "NextDevTpl Team",
-    url: "https://example.com",
-    email: "hello@example.com",
+    url: process.env.NEXT_PUBLIC_APP_URL || "https://example.com",
+    email: process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "hello@example.com",
   },
 
   /** 社交链接 */
   links: {
-    twitter: "https://twitter.com/example",
-    github: "https://github.com/example/nextdevtpl",
-    discord: "https://discord.gg/example",
+    twitter: process.env.NEXT_PUBLIC_TWITTER_URL || "https://twitter.com/example",
+    github: process.env.NEXT_PUBLIC_GITHUB_URL || "https://github.com/example/nextdevtpl",
+    discord: process.env.NEXT_PUBLIC_DISCORD_URL || "https://discord.gg/example",
   },
 
   /** 关键词 (SEO) */

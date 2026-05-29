@@ -267,10 +267,6 @@
       }
     }
   },
-  "Flashcards": {},
-  "Decks": {},
-  "AnonymousGenerate": {},
-  "Solutions": {},
   "CreditTransactions": {
     "anonymous_migration": "Migrated {cardCount} items from anonymous session",
     "anonymous_migration_bonus": "New user bonus: Saved {cardCount} items for free"

@@ -263,10 +263,6 @@
       }
     }
   },
-  "Flashcards": {},
-  "Decks": {},
-  "AnonymousGenerate": {},
-  "Solutions": {},
   "CreditTransactions": {
     "anonymous_migration": "迁移 {cardCount} 条匿名生成的数据",
     "anonymous_migration_bonus": "新用户福利：免费保存 {cardCount} 条数据"
