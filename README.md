@@ -11,7 +11,7 @@
       <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
     </a>
     <a href="https://nextjs.org/">
-      <img src="https://img.shields.io/badge/Next.js-15-black?logo=nextdotjs" alt="Next.js 15">
+      <img src="https://img.shields.io/badge/Next.js-16-black?logo=nextdotjs" alt="Next.js 16">
     </a>
     <a href="https://www.typescriptlang.org/">
       <img src="https://img.shields.io/badge/TypeScript-5-blue?logo=typescript" alt="TypeScript 5">
@@ -38,7 +38,7 @@
 
 | Category | Highlights |
 |----------|-----------|
-| **Framework** | Next.js 15 (App Router, Turbopack), React 19, TypeScript |
+| **Framework** | Next.js 16 (App Router, Turbopack), React 19, TypeScript |
 | **Styling** | Tailwind CSS 4, Shadcn/UI, Radix UI, dark mode |
 | **Database** | PostgreSQL, Drizzle ORM, Neon serverless |
 | **Auth** | Better Auth — email/password, GitHub/Google OAuth, role-based access |
@@ -75,7 +75,7 @@
 
 ```mermaid
 graph TD
-    Client[Browser / Client] --> Next["Next.js 15<br/>App Router + Server Actions"]
+    Client[Browser / Client] --> Next["Next.js 16<br/>App Router + Server Actions"]
     Next --> Auth[Better Auth]
     Next --> DB[("PostgreSQL<br/>Drizzle ORM")]
     Next --> Mail[Resend + React Email]

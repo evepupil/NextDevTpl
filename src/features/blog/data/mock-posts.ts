@@ -23,7 +23,7 @@ export const mockPosts: BlogPost[] = [
     slug: "nextdevtpl-tech-stack",
     title: "NEXTDEVTPL Tech Stack",
     excerpt:
-      "Learn about the powerful technologies and tools that make NEXTDEVTPL a cutting-edge SaaS starter kit. From Next.js 15 to Drizzle ORM, discover how each piece fits together.",
+      "Learn about the powerful technologies and tools that make NEXTDEVTPL a cutting-edge SaaS starter kit. From Next.js 16 to Drizzle ORM, discover how each piece fits together.",
     tags: ["NEXTDEVTPL", "TECH-STACK", "SAAS", "NEXTJS"],
     author: "NEXTDEVTPL Team",
     date: "7/10/2025",

@@ -151,7 +151,7 @@
       },
       {
         "question": "What tech stack does it use?",
-        "answer": "Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS 4, Shadcn/UI, Drizzle ORM with PostgreSQL, Better Auth for authentication, Creem for payments, Inngest for async processing, next-intl for i18n, and Biome for linting and formatting."
+        "answer": "Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, Shadcn/UI, Drizzle ORM with PostgreSQL, Better Auth for authentication, Creem for payments, Inngest for async processing, next-intl for i18n, and Biome for linting and formatting."
       },
       {
         "question": "How is the credits system designed?",

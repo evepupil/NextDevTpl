@@ -147,7 +147,7 @@
     "items": [
       {
         "question": "NextDevTpl 是什么？",
-        "answer": "NextDevTpl 是一个基于 Next.js 15、React 19、TypeScript 的生产就绪 SaaS 模板。内置认证（Better Auth）、支付（Creem）、积分系统、异步任务处理（Inngest）、国际化、管理后台等完整功能，帮助开发者快速启动 SaaS 项目。"
+        "answer": "NextDevTpl 是一个基于 Next.js 16、React 19、TypeScript 的生产就绪 SaaS 模板。内置认证（Better Auth）、支付（Creem）、积分系统、异步任务处理（Inngest）、国际化、管理后台等完整功能，帮助开发者快速启动 SaaS 项目。"
       },
       {
         "question": "需要哪些技术基础？",

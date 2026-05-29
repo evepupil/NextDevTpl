@@ -29,7 +29,7 @@ Tests live in `src/test/` (not colocated), run sequentially to avoid DB race con
 
 ## Tech Stack
 
-- **Framework:** Next.js 15 (App Router only, no `pages/`), React 19, TypeScript (strict, no `any`)
+- **Framework:** Next.js 16 (App Router only, no `pages/`), React 19, TypeScript (strict, no `any`)
 - **Styling:** Tailwind CSS 4, Shadcn/UI, Radix UI, Framer Motion
 - **Database:** PostgreSQL (Neon) via Drizzle ORM (edge compatible)
 - **Auth:** Better Auth (email/password + Google + GitHub OAuth)
