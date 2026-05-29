@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 
 import { siteConfig } from "@/config";
 
@@ -50,13 +51,16 @@ export const metadata: Metadata = {
  * 提供基础 HTML 结构和字体配置
  * 实际内容由 [locale]/layout.tsx 处理
  */
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const locale = cookieStore.get("NEXT_LOCALE")?.value ?? "en";
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body className="font-sans antialiased">{children}</body>
     </html>
   );
