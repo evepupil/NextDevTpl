@@ -246,7 +246,7 @@ export function SettingsProfileView({ user }: SettingsProfileViewProps) {
   };
 
   const handleDeleteAccount = () => {
-    executeDeleteAccount();
+    executeDeleteAccount({ confirm: true as const });
   };
 
   return (

@@ -1,6 +1,7 @@
 "use server";
 
 import { eq } from "drizzle-orm";
+import { z } from "zod";
 
 import { db, user } from "@/db";
 import { subscription } from "@/db/schema";
@@ -9,6 +10,7 @@ import { protectedAction } from "@/lib/safe-action";
 
 export const deleteAccountAction = protectedAction
   .metadata({ action: "settings.deleteAccount" })
+  .schema(z.object({ confirm: z.literal(true) }))
   .action(async ({ ctx }) => {
     const [activeSubscription] = await db
       .select({
