@@ -9,8 +9,8 @@
  */
 
 import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -74,27 +74,33 @@ export function SecuritySection() {
       <section className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-semibold">{t("changePassword.title")}</h2>
+            <h2 className="text-xl font-semibold">
+              {t("changePassword.title")}
+            </h2>
             <p className="text-sm text-muted-foreground">
               {t("changePassword.description")}
             </p>
           </div>
           <Button
             size="sm"
-            disabled={isLoading || !currentPassword || !newPassword || !confirmPassword}
+            disabled={
+              isLoading || !currentPassword || !newPassword || !confirmPassword
+            }
             onClick={handleChangePassword}
           >
-            {isLoading ? t("changePassword.updating") : t("changePassword.submit")}
+            {isLoading
+              ? t("changePassword.updating")
+              : t("changePassword.submit")}
           </Button>
         </div>
 
-        {error && (
-          <p className="text-sm text-destructive">{error}</p>
-        )}
+        {error && <p className="text-sm text-destructive">{error}</p>}
 
         <div className="max-w-md space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="current-password">{t("changePassword.currentPassword")}</Label>
+            <Label htmlFor="current-password">
+              {t("changePassword.currentPassword")}
+            </Label>
             <div className="relative">
               <Input
                 id="current-password"
@@ -120,7 +126,9 @@ export function SecuritySection() {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="new-password">{t("changePassword.newPassword")}</Label>
+            <Label htmlFor="new-password">
+              {t("changePassword.newPassword")}
+            </Label>
             <Input
               id="new-password"
               type={showPasswords ? "text" : "password"}
@@ -131,7 +139,9 @@ export function SecuritySection() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirm-password">{t("changePassword.confirmPassword")}</Label>
+            <Label htmlFor="confirm-password">
+              {t("changePassword.confirmPassword")}
+            </Label>
             <Input
               id="confirm-password"
               type={showPasswords ? "text" : "password"}

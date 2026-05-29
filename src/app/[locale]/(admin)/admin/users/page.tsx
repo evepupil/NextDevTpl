@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Search, Coins, Ban, UserCheck, Loader2 } from "lucide-react";
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Ban, Coins, Loader2, Search, UserCheck } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -16,15 +15,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  getAllUsersAction,
-  banUserAction,
   adminGrantCreditsAction,
+  banUserAction,
+  getAllUsersAction,
 } from "@/features/support/actions";
 import { UserRoleSelect } from "@/features/support/components";
-import { toast } from "sonner";
 
 /**
  * 用户类型定义
@@ -71,7 +70,9 @@ export default function AdminUsersPage() {
 
   // 封禁对话框状态
   const [banDialogOpen, setBanDialogOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<UserWithDetails | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserWithDetails | null>(
+    null
+  );
   const [banReason, setBanReason] = useState("");
   const [isBanning, setIsBanning] = useState(false);
 
@@ -84,7 +85,7 @@ export default function AdminUsersPage() {
   /**
    * 加载用户列表
    */
-  const loadUsers = async (query?: string) => {
+  const loadUsers = useCallback(async (query?: string) => {
     setIsLoading(true);
     try {
       const result = await getAllUsersAction(query ? { query } : undefined);
@@ -97,12 +98,12 @@ export default function AdminUsersPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   // 初始加载
   useEffect(() => {
     loadUsers();
-  }, []);
+  }, [loadUsers]);
 
   /**
    * 处理搜索
@@ -168,7 +169,7 @@ export default function AdminUsersPage() {
     if (!selectedUser) return;
 
     const amount = parseInt(grantAmount, 10);
-    if (isNaN(amount) || amount <= 0) {
+    if (Number.isNaN(amount) || amount <= 0) {
       toast.error("请输入有效的积分数量");
       return;
     }
@@ -233,7 +234,10 @@ export default function AdminUsersPage() {
     };
 
     // 获取配置，使用默认值避免 undefined
-    const defaultConfig = { label: "未完成", color: "bg-gray-100 text-gray-800" };
+    const defaultConfig = {
+      label: "未完成",
+      color: "bg-gray-100 text-gray-800",
+    };
     const config = statusMap[sub.status] ?? defaultConfig;
     return (
       <Badge variant="secondary" className={config.color}>
@@ -255,9 +259,7 @@ export default function AdminUsersPage() {
       {/* 页面标题 */}
       <div>
         <h2 className="text-2xl font-bold tracking-tight">用户管理</h2>
-        <p className="text-muted-foreground">
-          查看和管理系统中的所有用户
-        </p>
+        <p className="text-muted-foreground">查看和管理系统中的所有用户</p>
       </div>
 
       {/* 统计信息 */}

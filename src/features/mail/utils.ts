@@ -63,7 +63,9 @@ function isDevelopment(): boolean {
  * 在控制台输出邮件预览信息 (开发环境)
  */
 function logEmailPreview(params: SendEmailParams): void {
-  const recipients = Array.isArray(params.to) ? params.to.join(", ") : params.to;
+  const recipients = Array.isArray(params.to)
+    ? params.to.join(", ")
+    : params.to;
 
   console.log("\n" + "=".repeat(60));
   console.log("📧 EMAIL PREVIEW (Development Mode)");
@@ -72,13 +74,19 @@ function logEmailPreview(params: SendEmailParams): void {
   console.log(`From:    ${params.from ?? DEFAULT_FROM_EMAIL}`);
   console.log(`Subject: ${params.subject}`);
   if (params.cc) {
-    console.log(`CC:      ${Array.isArray(params.cc) ? params.cc.join(", ") : params.cc}`);
+    console.log(
+      `CC:      ${Array.isArray(params.cc) ? params.cc.join(", ") : params.cc}`
+    );
   }
   if (params.bcc) {
-    console.log(`BCC:     ${Array.isArray(params.bcc) ? params.bcc.join(", ") : params.bcc}`);
+    console.log(
+      `BCC:     ${Array.isArray(params.bcc) ? params.bcc.join(", ") : params.bcc}`
+    );
   }
   if (params.replyTo) {
-    console.log(`Reply:   ${Array.isArray(params.replyTo) ? params.replyTo.join(", ") : params.replyTo}`);
+    console.log(
+      `Reply:   ${Array.isArray(params.replyTo) ? params.replyTo.join(", ") : params.replyTo}`
+    );
   }
   console.log("-".repeat(60));
   console.log("💡 Set force: true to send real email in development");
@@ -116,7 +124,9 @@ function logEmailPreview(params: SendEmailParams): void {
  * });
  * ```
  */
-export async function sendEmail(params: SendEmailParams): Promise<SendEmailResult> {
+export async function sendEmail(
+  params: SendEmailParams
+): Promise<SendEmailResult> {
   const { to, subject, react, from, cc, bcc, replyTo, force = false } = params;
 
   // 开发环境且未强制发送 -> 模拟发送
@@ -166,7 +176,8 @@ export async function sendEmail(params: SendEmailParams): Promise<SendEmailResul
       id: data?.id,
     };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     console.error("Email sending error:", errorMessage);
     return {
       success: false,
@@ -174,5 +185,3 @@ export async function sendEmail(params: SendEmailParams): Promise<SendEmailResul
     };
   }
 }
-
-

@@ -99,7 +99,7 @@ export async function chatCompletion(
     temperature?: number;
     maxTokens?: number;
     jsonMode?: boolean;
-  },
+  }
 ): Promise<string> {
   const client = getAIClient();
   const model = getAIModel();
@@ -125,4 +125,4 @@ export async function chatCompletion(
   return content;
 }
 
-export { openai, deepseek, mimo, getAIClient };
+export { deepseek, getAIClient, mimo, openai };

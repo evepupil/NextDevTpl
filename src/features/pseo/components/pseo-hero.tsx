@@ -25,8 +25,7 @@ export function PseoHero({ page }: { page: PseoPage }) {
           </Badge>
 
           <h1 className="mb-6 text-balance text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
-            {hero.title}{" "}
-            <span className="text-primary">{hero.highlight}</span>
+            {hero.title} <span className="text-primary">{hero.highlight}</span>
           </h1>
 
           <p className="mb-8 text-lg text-muted-foreground md:text-xl">
@@ -41,7 +40,9 @@ export function PseoHero({ page }: { page: PseoPage }) {
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
-              <Link href={hero.secondaryCta.href}>{hero.secondaryCta.label}</Link>
+              <Link href={hero.secondaryCta.href}>
+                {hero.secondaryCta.label}
+              </Link>
             </Button>
           </div>
 
@@ -91,7 +92,9 @@ export function PseoHero({ page }: { page: PseoPage }) {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Slug</span>
-                  <span className="font-medium text-foreground">{page.slug}</span>
+                  <span className="font-medium text-foreground">
+                    {page.slug}
+                  </span>
                 </div>
               </div>
             </CardContent>

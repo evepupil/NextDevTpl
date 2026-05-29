@@ -20,7 +20,7 @@ import pino from "pino";
  * 检查是否为生产环境
  */
 function isProduction(): boolean {
-	return process.env.NODE_ENV === "production";
+  return process.env.NODE_ENV === "production";
 }
 
 // ============================================
@@ -39,43 +39,43 @@ function isProduction(): boolean {
  * - 未配置 Axiom: 仅 console（开发环境美化输出）
  */
 function createLogger(): pino.Logger {
-	const level = isProduction() ? "info" : "debug";
+  const level = isProduction() ? "info" : "debug";
 
-	// 基础配置
-	const baseOptions: pino.LoggerOptions = {
-		level,
-		base: {
-			env: process.env.NODE_ENV,
-			service: "nextdevtpl",
-		},
-		timestamp: pino.stdTimeFunctions.isoTime,
-	};
+  // 基础配置
+  const baseOptions: pino.LoggerOptions = {
+    level,
+    base: {
+      env: process.env.NODE_ENV,
+      service: "nextdevtpl",
+    },
+    timestamp: pino.stdTimeFunctions.isoTime,
+  };
 
-	// 开发环境：美化输出
-	if (!isProduction()) {
-		try {
-			return pino({
-				...baseOptions,
-				transport: {
-					target: "pino-pretty",
-					options: {
-						colorize: true,
-						translateTime: "SYS:standard",
-						ignore: "pid,hostname",
-					},
-				},
-			});
-		} catch {
-			// pino-pretty 不可用时降级
-			return pino(baseOptions);
-		}
-	}
+  // 开发环境：美化输出
+  if (!isProduction()) {
+    try {
+      return pino({
+        ...baseOptions,
+        transport: {
+          target: "pino-pretty",
+          options: {
+            colorize: true,
+            translateTime: "SYS:standard",
+            ignore: "pid,hostname",
+          },
+        },
+      });
+    } catch {
+      // pino-pretty 不可用时降级
+      return pino(baseOptions);
+    }
+  }
 
-	// 生产环境：结构化 JSON 输出到 stdout
-	// 注: pino transport（@axiomhq/pino）在 Turbopack 打包后无法工作
-	// 因为 transport 使用 worker_threads 按字符串路径动态加载模块
-	// 生产环境日志收集建议通过外部采集（如 Axiom 的 Vercel Integration 或 log drain）
-	return pino(baseOptions);
+  // 生产环境：结构化 JSON 输出到 stdout
+  // 注: pino transport（@axiomhq/pino）在 Turbopack 打包后无法工作
+  // 因为 transport 使用 worker_threads 按字符串路径动态加载模块
+  // 生产环境日志收集建议通过外部采集（如 Axiom 的 Vercel Integration 或 log drain）
+  return pino(baseOptions);
 }
 
 // ============================================
@@ -101,9 +101,9 @@ export const logger = createLogger();
  * ```
  */
 export function createContextLogger(
-	context: Record<string, unknown>
+  context: Record<string, unknown>
 ): pino.Logger {
-	return logger.child(context);
+  return logger.child(context);
 }
 
 /**
@@ -116,14 +116,14 @@ export function createContextLogger(
  * ```
  */
 export function createRequestLogger(request: Request): pino.Logger {
-	const url = new URL(request.url);
+  const url = new URL(request.url);
 
-	return logger.child({
-		requestId: crypto.randomUUID(),
-		method: request.method,
-		path: url.pathname,
-		userAgent: request.headers.get("user-agent")?.slice(0, 100),
-	});
+  return logger.child({
+    requestId: crypto.randomUUID(),
+    method: request.method,
+    path: url.pathname,
+    userAgent: request.headers.get("user-agent")?.slice(0, 100),
+  });
 }
 
 // ============================================
@@ -134,24 +134,24 @@ export function createRequestLogger(request: Request): pino.Logger {
  * 业务事件类型
  */
 export type BusinessEvent =
-	| "user.signup"
-	| "user.login"
-	| "user.logout"
-	| "payment.checkout.started"
-	| "payment.checkout.completed"
-	| "payment.subscription.created"
-	| "payment.subscription.canceled"
-	| "credits.purchased"
-	| "credits.consumed"
-	| "credits.expired"
-	| "ticket.created"
-	| "ticket.replied"
-	| "ticket.closed"
-	| "email.sent"
-	| "file.uploaded"
-	| "file.deleted"
-	| "admin.user.banned"
-	| "admin.user.unbanned";
+  | "user.signup"
+  | "user.login"
+  | "user.logout"
+  | "payment.checkout.started"
+  | "payment.checkout.completed"
+  | "payment.subscription.created"
+  | "payment.subscription.canceled"
+  | "credits.purchased"
+  | "credits.consumed"
+  | "credits.expired"
+  | "ticket.created"
+  | "ticket.replied"
+  | "ticket.closed"
+  | "email.sent"
+  | "file.uploaded"
+  | "file.deleted"
+  | "admin.user.banned"
+  | "admin.user.unbanned";
 
 /**
  * 记录业务事件
@@ -163,10 +163,10 @@ export type BusinessEvent =
  * ```
  */
 export function logEvent(
-	event: BusinessEvent,
-	data?: Record<string, unknown>
+  event: BusinessEvent,
+  data?: Record<string, unknown>
 ): void {
-	logger.info({ event, ...data }, `Event: ${event}`);
+  logger.info({ event, ...data }, `Event: ${event}`);
 }
 
 /**
@@ -182,44 +182,41 @@ export function logEvent(
  * ```
  */
 export function logError(
-	error: unknown,
-	context?: Record<string, unknown>
+  error: unknown,
+  context?: Record<string, unknown>
 ): void {
-	if (error instanceof Error) {
-		logger.error(
-			{
-				err: {
-					name: error.name,
-					message: error.message,
-					stack: error.stack,
-				},
-				...context,
-			},
-			error.message
-		);
-	} else {
-		logger.error({ err: error, ...context }, "Unknown error");
-	}
+  if (error instanceof Error) {
+    logger.error(
+      {
+        err: {
+          name: error.name,
+          message: error.message,
+          stack: error.stack,
+        },
+        ...context,
+      },
+      error.message
+    );
+  } else {
+    logger.error({ err: error, ...context }, "Unknown error");
+  }
 }
 
 /**
  * 记录警告
  */
-export function logWarn(
-	message: string,
-	data?: Record<string, unknown>
-): void {
-	logger.warn(data, message);
+export function logWarn(message: string, data?: Record<string, unknown>): void {
+  logger.warn(data, message);
 }
 
 /**
  * 记录调试信息（仅开发环境）
  */
 export function logDebug(
-	message: string,
-	data?: Record<string, unknown>
+  message: string,
+  data?: Record<string, unknown>
 ): void {
-	logger.debug(data, message);
+  logger.debug(data, message);
 }
 
 // ============================================
@@ -230,22 +227,23 @@ export function logDebug(
  * 记录 API 响应
  */
 export function logApiResponse(
-	request: Request,
-	response: Response,
-	duration: number
+  request: Request,
+  response: Response,
+  duration: number
 ): void {
-	const url = new URL(request.url);
-	const level = response.status >= 500 ? "error" : response.status >= 400 ? "warn" : "info";
+  const url = new URL(request.url);
+  const level =
+    response.status >= 500 ? "error" : response.status >= 400 ? "warn" : "info";
 
-	logger[level](
-		{
-			method: request.method,
-			path: url.pathname,
-			status: response.status,
-			duration,
-		},
-		`${request.method} ${url.pathname} ${response.status} ${duration}ms`
-	);
+  logger[level](
+    {
+      method: request.method,
+      path: url.pathname,
+      status: response.status,
+      duration,
+    },
+    `${request.method} ${url.pathname} ${response.status} ${duration}ms`
+  );
 }
 
 // ============================================

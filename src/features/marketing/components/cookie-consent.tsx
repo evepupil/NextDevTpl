@@ -1,19 +1,19 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { cn } from "@/lib/utils";
-import { Link } from "@/i18n/routing";
 import {
-  COOKIE_CONSENT_KEY,
   COOKIE_CONSENT_CHANGE_EVENT,
+  COOKIE_CONSENT_KEY,
   COOKIE_PREFERENCES_KEY,
   type CookieConsentType,
   type CookiePreferences,
 } from "@/features/marketing/constants";
+import { Link } from "@/i18n/routing";
+import { cn } from "@/lib/utils";
 
 /**
  * 默认 Cookie 偏好
@@ -175,7 +175,9 @@ export function CookieConsent() {
             // 详细设置视图
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">{t("preferencesTitle")}</h3>
+                <h3 className="text-lg font-semibold">
+                  {t("preferencesTitle")}
+                </h3>
                 <Button
                   variant="ghost"
                   size="sm"

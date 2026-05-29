@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-
-import { siteConfig } from "@/config";
-import { Separator } from "@/components/ui/separator";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { Separator } from "@/components/ui/separator";
+import { siteConfig } from "@/config";
 import { getBlogPosts } from "@/lib/source";
 
 import { BlogPostCard } from "./blog-post-card";
@@ -106,7 +105,7 @@ export default async function BlogPage({
                   date={
                     typeof post.date === "string"
                       ? post.date
-                      : post.date.toISOString().split("T")[0] ?? ""
+                      : (post.date.toISOString().split("T")[0] ?? "")
                   }
                   author={post.author}
                   tags={post.tags}

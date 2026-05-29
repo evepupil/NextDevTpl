@@ -515,4 +515,3 @@ export type TicketPriority = (typeof ticketPriorityEnum.enumValues)[number];
 
 /** 工单状态类型 */
 export type TicketStatus = (typeof ticketStatusEnum.enumValues)[number];
-

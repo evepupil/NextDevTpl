@@ -1,12 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { db } from "@/db";
-import {
-  creditsBalance,
-  subscription,
-  ticket,
-  user,
-} from "@/db/schema";
-import { count, eq, sum, gte } from "drizzle-orm";
+import { count, eq, gte, sum } from "drizzle-orm";
 import {
   Coins,
   CreditCard,
@@ -15,6 +7,9 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { db } from "@/db";
+import { creditsBalance, subscription, ticket, user } from "@/db/schema";
 
 /**
  * Admin 控制面板页面
@@ -186,9 +181,7 @@ export default async function AdminDashboardPage() {
             <div className="text-2xl font-bold text-yellow-600">
               {stats.credits.totalBalance.toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground">
-              当前用户持有总积分
-            </p>
+            <p className="text-xs text-muted-foreground">当前用户持有总积分</p>
           </CardContent>
         </Card>
       </div>

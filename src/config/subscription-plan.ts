@@ -88,10 +88,7 @@ export function getPlanFromPriceId(priceId: string): SubscriptionPlan | null {
   }
 
   // Pro
-  if (
-    priceId === PRICE_IDS.PRO_MONTHLY ||
-    priceId === PRICE_IDS.PRO_YEARLY
-  ) {
+  if (priceId === PRICE_IDS.PRO_MONTHLY || priceId === PRICE_IDS.PRO_YEARLY) {
     return "pro";
   }
 
@@ -129,7 +126,7 @@ export function getPlanPrivileges(plan: SubscriptionPlan): PlanPrivileges {
  */
 export function isWithinFileSizeLimit(
   plan: SubscriptionPlan,
-  fileSizeBytes: number,
+  fileSizeBytes: number
 ): boolean {
   return fileSizeBytes <= PLAN_PRIVILEGES[plan].maxFileSizeBytes;
 }
@@ -154,7 +151,7 @@ export function formatFileSizeLimit(plan: SubscriptionPlan): string {
  */
 export function getUpgradeMessage(
   currentPlan: SubscriptionPlan,
-  requiredFeature: string,
+  requiredFeature: string
 ): string {
   const upgradeTo =
     currentPlan === "free"

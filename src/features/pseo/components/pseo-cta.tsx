@@ -36,7 +36,9 @@ export function PseoCta({ page }: { page: PseoPage }) {
                 className="border-white/40 text-white hover:bg-white/10"
                 asChild
               >
-                <Link href={cta.secondaryCta.href}>{cta.secondaryCta.label}</Link>
+                <Link href={cta.secondaryCta.href}>
+                  {cta.secondaryCta.label}
+                </Link>
               </Button>
             </div>
 

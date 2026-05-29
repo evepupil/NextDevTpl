@@ -6,14 +6,14 @@
  */
 
 export async function register() {
-	// 服务端初始化
-	if (process.env.NEXT_RUNTIME === "nodejs") {
-		// Sentry 服务端初始化
-		await import("../sentry.server.config");
-	}
+  // 服务端初始化
+  if (process.env.NEXT_RUNTIME === "nodejs") {
+    // Sentry 服务端初始化
+    await import("../sentry.server.config");
+  }
 
-	// Edge Runtime 初始化
-	if (process.env.NEXT_RUNTIME === "edge") {
-		await import("../sentry.edge.config");
-	}
+  // Edge Runtime 初始化
+  if (process.env.NEXT_RUNTIME === "edge") {
+    await import("../sentry.edge.config");
+  }
 }

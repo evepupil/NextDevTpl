@@ -53,10 +53,7 @@ export const POST = withApiLogging(async () => {
 
   // 验证身份
   if (!validateCronSecret(authHeader)) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {

@@ -85,7 +85,10 @@ export function AdminSidebar() {
     <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r bg-slate-900 text-slate-100">
       {/* Logo - Admin 标识 */}
       <div className="flex h-14 items-center border-b border-slate-700 px-4">
-        <Link href="/admin" className="flex items-center gap-2 text-lg font-bold tracking-tight">
+        <Link
+          href="/admin"
+          className="flex items-center gap-2 text-lg font-bold tracking-tight"
+        >
           <svg
             className="h-6 w-6 shrink-0 text-blue-400"
             viewBox="0 0 24 24"
@@ -167,7 +170,9 @@ export function AdminSidebar() {
                 </Avatar>
                 <div className="flex-1 truncate text-left">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-white">{user.name}</p>
+                    <p className="text-sm font-medium text-white">
+                      {user.name}
+                    </p>
                     <span className="rounded bg-red-600/20 px-1.5 py-0.5 text-xs font-medium text-red-400">
                       Admin
                     </span>

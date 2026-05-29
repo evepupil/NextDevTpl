@@ -1,7 +1,7 @@
 "use client";
 
+import { Check, Download, FileUp, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Check, FileUp, Sparkles, Download } from "lucide-react";
 
 const stepConfig = [
   { key: "upload" as const, icon: FileUp, step: "01" },

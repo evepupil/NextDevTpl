@@ -1,15 +1,14 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
-
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -17,9 +16,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ticketCategories, ticketPriorities } from "@/features/support/schemas";
+import { Textarea } from "@/components/ui/textarea";
 import { createTicketAction } from "@/features/support/actions";
-import { toast } from "sonner";
+import { ticketCategories, ticketPriorities } from "@/features/support/schemas";
 
 /**
  * 新建工单页面
@@ -46,7 +45,12 @@ export default function NewTicketPage() {
     try {
       const result = await createTicketAction({
         subject,
-        category: category as "billing" | "technical" | "bug" | "feature" | "other",
+        category: category as
+          | "billing"
+          | "technical"
+          | "bug"
+          | "feature"
+          | "other",
         priority: priority as "low" | "medium" | "high",
         message,
       });

@@ -6,6 +6,11 @@ import { useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -14,18 +19,13 @@ import {
 } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { cn } from "@/lib/utils";
-import {
-  COOKIE_CONSENT_KEY,
   COOKIE_CONSENT_CHANGE_EVENT,
+  COOKIE_CONSENT_KEY,
   COOKIE_PREFERENCES_KEY,
   type CookieConsentType,
   type CookiePreferences,
 } from "@/features/marketing/constants";
+import { cn } from "@/lib/utils";
 
 /**
  * 默认 Cookie 偏好
@@ -179,7 +179,10 @@ export function CookieSettingsDialog({ children }: CookieSettingsDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="max-h-[90vh] max-w-2xl overflow-hidden p-0 [&>button]:hidden" overlayClassName="bg-black/30">
+      <DialogContent
+        className="max-h-[90vh] max-w-2xl overflow-hidden p-0 [&>button]:hidden"
+        overlayClassName="bg-black/30"
+      >
         {/* Header */}
         <DialogHeader className="border-b px-6 py-4">
           <div className="flex items-center justify-between">

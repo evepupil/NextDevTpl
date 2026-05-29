@@ -2,4 +2,4 @@
  * 订阅相关组件导出
  */
 
-export { PlanBadge, type PlanType, type BadgeSize } from "./plan-badge";
+export { type BadgeSize, PlanBadge, type PlanType } from "./plan-badge";

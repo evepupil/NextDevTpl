@@ -81,7 +81,11 @@
         "title": "AI Products",
         "subtitle": "AI-Powered Applications",
         "description": "Build AI wrappers, content generators, or intelligent assistants. The credits system and async processing handle LLM calls and usage metering out of the box.",
-        "examples": ["AI content tools", "Chatbot platforms", "Image generators"]
+        "examples": [
+          "AI content tools",
+          "Chatbot platforms",
+          "Image generators"
+        ]
       },
       "professionals": {
         "title": "Productivity Tools",

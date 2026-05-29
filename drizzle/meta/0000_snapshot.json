@@ -95,12 +95,8 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -177,12 +173,8 @@
           "name": "credits_balance_user_id_user_id_fk",
           "tableFrom": "credits_balance",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -192,9 +184,7 @@
         "credits_balance_user_id_unique": {
           "name": "credits_balance_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         }
       },
       "policies": {},
@@ -284,12 +274,8 @@
           "name": "credits_batch_user_id_user_id_fk",
           "tableFrom": "credits_batch",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -367,12 +353,8 @@
           "name": "credits_transaction_user_id_user_id_fk",
           "tableFrom": "credits_transaction",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -441,9 +423,7 @@
         "newsletter_subscriber_email_unique": {
           "name": "newsletter_subscriber_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -511,12 +491,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -526,9 +502,7 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -610,12 +584,8 @@
           "name": "subscription_user_id_user_id_fk",
           "tableFrom": "subscription",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -625,9 +595,7 @@
         "subscription_stripe_subscription_id_unique": {
           "name": "subscription_stripe_subscription_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "stripe_subscription_id"
-          ]
+          "columns": ["stripe_subscription_id"]
         }
       },
       "policies": {},
@@ -701,12 +669,8 @@
           "name": "ticket_user_id_user_id_fk",
           "tableFrom": "ticket",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -766,12 +730,8 @@
           "name": "ticket_message_ticket_id_ticket_id_fk",
           "tableFrom": "ticket_message",
           "tableTo": "ticket",
-          "columnsFrom": [
-            "ticket_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["ticket_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -779,12 +739,8 @@
           "name": "ticket_message_user_id_user_id_fk",
           "tableFrom": "ticket_message",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -879,16 +835,12 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         },
         "user_stripe_customer_id_unique": {
           "name": "user_stripe_customer_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "stripe_customer_id"
-          ]
+          "columns": ["stripe_customer_id"]
         }
       },
       "policies": {},
@@ -951,29 +903,17 @@
     "public.credits_balance_status": {
       "name": "credits_balance_status",
       "schema": "public",
-      "values": [
-        "active",
-        "frozen"
-      ]
+      "values": ["active", "frozen"]
     },
     "public.credits_batch_source": {
       "name": "credits_batch_source",
       "schema": "public",
-      "values": [
-        "purchase",
-        "subscription",
-        "bonus",
-        "refund"
-      ]
+      "values": ["purchase", "subscription", "bonus", "refund"]
     },
     "public.credits_batch_status": {
       "name": "credits_batch_status",
       "schema": "public",
-      "values": [
-        "active",
-        "consumed",
-        "expired"
-      ]
+      "values": ["active", "consumed", "expired"]
     },
     "public.credits_transaction_type": {
       "name": "credits_transaction_type",
@@ -990,40 +930,22 @@
     "public.ticket_category": {
       "name": "ticket_category",
       "schema": "public",
-      "values": [
-        "billing",
-        "technical",
-        "bug",
-        "feature",
-        "other"
-      ]
+      "values": ["billing", "technical", "bug", "feature", "other"]
     },
     "public.ticket_priority": {
       "name": "ticket_priority",
       "schema": "public",
-      "values": [
-        "low",
-        "medium",
-        "high"
-      ]
+      "values": ["low", "medium", "high"]
     },
     "public.ticket_status": {
       "name": "ticket_status",
       "schema": "public",
-      "values": [
-        "open",
-        "in_progress",
-        "resolved",
-        "closed"
-      ]
+      "values": ["open", "in_progress", "resolved", "closed"]
     },
     "public.user_role": {
       "name": "user_role",
       "schema": "public",
-      "values": [
-        "user",
-        "admin"
-      ]
+      "values": ["user", "admin"]
     }
   },
   "schemas": {},

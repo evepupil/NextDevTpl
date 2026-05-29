@@ -6,10 +6,16 @@
  * 显示用户的积分交易记录表格
  */
 
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Inbox } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Inbox,
+} from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
-import { useTranslations, useLocale } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,12 +33,22 @@ import { cn } from "@/lib/utils";
 /**
  * 交易类型键
  */
-type TransactionTypeKey = "registration_bonus" | "admin_grant" | "monthly_grant" | "purchase" | "consumption" | "expiration" | "refund";
+type TransactionTypeKey =
+  | "registration_bonus"
+  | "admin_grant"
+  | "monthly_grant"
+  | "purchase"
+  | "consumption"
+  | "expiration"
+  | "refund";
 
 /**
  * 交易类型变体映射
  */
-const TRANSACTION_TYPE_VARIANTS: Record<TransactionTypeKey, "default" | "secondary" | "destructive" | "outline"> = {
+const TRANSACTION_TYPE_VARIANTS: Record<
+  TransactionTypeKey,
+  "default" | "secondary" | "destructive" | "outline"
+> = {
   registration_bonus: "default",
   admin_grant: "default",
   monthly_grant: "default",
@@ -60,7 +76,13 @@ function formatDateTime(date: Date | string, locale: string): string {
  * 判断是否为收入类型交易
  */
 function isIncomeType(type: string): boolean {
-  return ["registration_bonus", "admin_grant", "monthly_grant", "purchase", "refund"].includes(type);
+  return [
+    "registration_bonus",
+    "admin_grant",
+    "monthly_grant",
+    "purchase",
+    "refund",
+  ].includes(type);
 }
 
 /**
@@ -96,7 +118,11 @@ export function TransactionHistory() {
   /**
    * 获取本地化的交易描述
    */
-  const getLocalizedDescription = (tx: { type: string; description: string | null; metadata?: Record<string, unknown> | null }): string => {
+  const getLocalizedDescription = (tx: {
+    type: string;
+    description: string | null;
+    metadata?: Record<string, unknown> | null;
+  }): string => {
     const meta = tx.metadata;
     switch (tx.type) {
       case "registration_bonus":
@@ -106,10 +132,13 @@ export function TransactionHistory() {
         const plan = planType.charAt(0).toUpperCase() + planType.slice(1);
         const interval = meta?.interval as string;
         const monthlyCredits = meta?.planType
-          ? { starter: "3000", pro: "8000", ultra: "16000" }[planType] ?? ""
+          ? ({ starter: "3000", pro: "8000", ultra: "16000" }[planType] ?? "")
           : "";
         if (interval === "year") {
-          return t("descriptions.yearly_grant", { plan, monthly: monthlyCredits });
+          return t("descriptions.yearly_grant", {
+            plan,
+            monthly: monthlyCredits,
+          });
         }
         return t("descriptions.monthly_grant", { plan });
       }
@@ -129,7 +158,9 @@ export function TransactionHistory() {
   /**
    * 获取交易类型变体
    */
-  const getTypeVariant = (type: string): "default" | "secondary" | "destructive" | "outline" => {
+  const getTypeVariant = (
+    type: string
+  ): "default" | "secondary" | "destructive" | "outline" => {
     const typeKey = type as TransactionTypeKey;
     return TRANSACTION_TYPE_VARIANTS[typeKey] ?? "outline";
   };
@@ -141,9 +172,7 @@ export function TransactionHistory() {
         {/* 标题 */}
         <div>
           <h3 className="text-lg font-semibold">{t("title")}</h3>
-          <p className="text-sm text-muted-foreground">
-            {t("description")}
-          </p>
+          <p className="text-sm text-muted-foreground">{t("description")}</p>
         </div>
 
         {/* 空状态 */}
@@ -163,9 +192,7 @@ export function TransactionHistory() {
       {/* 标题 */}
       <div>
         <h3 className="text-lg font-semibold">{t("title")}</h3>
-        <p className="text-sm text-muted-foreground">
-          {t("description")}
-        </p>
+        <p className="text-sm text-muted-foreground">{t("description")}</p>
       </div>
 
       {/* 表格 */}
@@ -183,7 +210,9 @@ export function TransactionHistory() {
         {/* 加载状态 */}
         {isPending ? (
           <div className="flex items-center justify-center py-8">
-            <div className="animate-pulse text-muted-foreground">{t("loading")}</div>
+            <div className="animate-pulse text-muted-foreground">
+              {t("loading")}
+            </div>
           </div>
         ) : (
           /* 表格内容 */
@@ -203,13 +232,19 @@ export function TransactionHistory() {
 
                   {/* 类型 */}
                   <div className="col-span-2">
-                    <Badge variant={getTypeVariant(tx.type)} className="text-xs">
+                    <Badge
+                      variant={getTypeVariant(tx.type)}
+                      className="text-xs"
+                    >
                       {getTypeLabel(tx.type)}
                     </Badge>
                   </div>
 
                   {/* 描述 */}
-                  <div className="col-span-5 truncate" title={getLocalizedDescription(tx)}>
+                  <div
+                    className="col-span-5 truncate"
+                    title={getLocalizedDescription(tx)}
+                  >
                     {getLocalizedDescription(tx)}
                   </div>
 
@@ -236,7 +271,7 @@ export function TransactionHistory() {
           {t("showing", {
             from: Math.min((page - 1) * pageSize + 1, totalCount),
             to: Math.min(page * pageSize, totalCount),
-            total: totalCount
+            total: totalCount,
           })}
         </div>
 
@@ -263,9 +298,7 @@ export function TransactionHistory() {
           </div>
 
           {/* 页码信息 */}
-          <span>
-            {t("pageOf", { page, total: totalPages })}
-          </span>
+          <span>{t("pageOf", { page, total: totalPages })}</span>
 
           {/* 分页按钮 */}
           <div className="flex items-center gap-1">

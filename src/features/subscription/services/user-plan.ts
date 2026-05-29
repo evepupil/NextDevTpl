@@ -5,17 +5,16 @@
  */
 
 import { eq } from "drizzle-orm";
-
-import { db } from "@/db";
-import { subscription } from "@/db/schema";
 import {
-  type SubscriptionPlan,
+  formatFileSizeLimit,
   getPlanFromPriceId,
   getPlanPrivileges,
-  isWithinFileSizeLimit,
-  formatFileSizeLimit,
   getUpgradeMessage,
+  isWithinFileSizeLimit,
+  type SubscriptionPlan,
 } from "@/config/subscription-plan";
+import { db } from "@/db";
+import { subscription } from "@/db/schema";
 
 // ============================================
 // 类型定义
@@ -111,7 +110,7 @@ export async function getUserPlan(userId: string): Promise<UserPlanInfo> {
 
   if (!plan) {
     console.warn(
-      `Unknown priceId: ${userSubscription.priceId} for user ${userId}`,
+      `Unknown priceId: ${userSubscription.priceId} for user ${userId}`
     );
     return {
       plan: "free",
@@ -144,7 +143,7 @@ export async function getUserPlan(userId: string): Promise<UserPlanInfo> {
  * @returns 计划类型
  */
 export async function getUserPlanType(
-  userId: string,
+  userId: string
 ): Promise<SubscriptionPlan> {
   const { plan } = await getUserPlan(userId);
   return plan;
@@ -163,7 +162,7 @@ export async function getUserPlanType(
  */
 export async function checkFileSizePrivilege(
   userId: string,
-  fileSizeBytes: number,
+  fileSizeBytes: number
 ): Promise<PrivilegeCheckResult> {
   const { plan } = await getUserPlan(userId);
 

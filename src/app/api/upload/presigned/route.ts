@@ -1,17 +1,19 @@
-import { NextRequest, NextResponse } from "next/server";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { nanoid } from "nanoid";
-import { getFileTypeFromName } from "@/lib/file-utils";
-import { auth } from "@/lib/auth";
+import { type NextRequest, NextResponse } from "next/server";
 import { withApiLogging } from "@/lib/api-logger";
+import { auth } from "@/lib/auth";
+import { getFileTypeFromName } from "@/lib/file-utils";
 
 /**
  * S3/R2 客户端配置
  */
 const s3Client = new S3Client({
   region: process.env.STORAGE_REGION || "auto",
-  ...(process.env.STORAGE_ENDPOINT && { endpoint: process.env.STORAGE_ENDPOINT }),
+  ...(process.env.STORAGE_ENDPOINT && {
+    endpoint: process.env.STORAGE_ENDPOINT,
+  }),
   credentials: {
     accessKeyId: process.env.STORAGE_ACCESS_KEY_ID || "",
     secretAccessKey: process.env.STORAGE_SECRET_ACCESS_KEY || "",
@@ -40,10 +42,7 @@ export const POST = withApiLogging(async (request: NextRequest) => {
     });
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -65,7 +64,9 @@ export const POST = withApiLogging(async (request: NextRequest) => {
     const fileType = getFileTypeFromName(filename);
     if (!fileType) {
       return NextResponse.json(
-        { error: `Unsupported file type. Allowed: ${ALLOWED_EXTENSIONS.join(", ")}` },
+        {
+          error: `Unsupported file type. Allowed: ${ALLOWED_EXTENSIONS.join(", ")}`,
+        },
         { status: 400 }
       );
     }
@@ -73,7 +74,9 @@ export const POST = withApiLogging(async (request: NextRequest) => {
     // 验证文件大小
     if (fileSize > MAX_FILE_SIZE) {
       return NextResponse.json(
-        { error: `File too large. Maximum size: ${MAX_FILE_SIZE / 1024 / 1024}MB` },
+        {
+          error: `File too large. Maximum size: ${MAX_FILE_SIZE / 1024 / 1024}MB`,
+        },
         { status: 400 }
       );
     }

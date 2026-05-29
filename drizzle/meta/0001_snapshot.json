@@ -94,13 +94,9 @@
         "account_user_id_user_id_fk": {
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -176,13 +172,9 @@
         "credits_balance_user_id_user_id_fk": {
           "name": "credits_balance_user_id_user_id_fk",
           "tableFrom": "credits_balance",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -191,9 +183,7 @@
       "uniqueConstraints": {
         "credits_balance_user_id_unique": {
           "name": "credits_balance_user_id_unique",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "nullsNotDistinct": false
         }
       },
@@ -283,13 +273,9 @@
         "credits_batch_user_id_user_id_fk": {
           "name": "credits_batch_user_id_user_id_fk",
           "tableFrom": "credits_batch",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -366,13 +352,9 @@
         "credits_transaction_user_id_user_id_fk": {
           "name": "credits_transaction_user_id_user_id_fk",
           "tableFrom": "credits_transaction",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -440,9 +422,7 @@
       "uniqueConstraints": {
         "newsletter_subscriber_email_unique": {
           "name": "newsletter_subscriber_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "nullsNotDistinct": false
         }
       },
@@ -510,13 +490,9 @@
         "session_user_id_user_id_fk": {
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -525,9 +501,7 @@
       "uniqueConstraints": {
         "session_token_unique": {
           "name": "session_token_unique",
-          "columns": [
-            "token"
-          ],
+          "columns": ["token"],
           "nullsNotDistinct": false
         }
       },
@@ -609,13 +583,9 @@
         "subscription_user_id_user_id_fk": {
           "name": "subscription_user_id_user_id_fk",
           "tableFrom": "subscription",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -624,9 +594,7 @@
       "uniqueConstraints": {
         "subscription_stripe_subscription_id_unique": {
           "name": "subscription_stripe_subscription_id_unique",
-          "columns": [
-            "stripe_subscription_id"
-          ],
+          "columns": ["stripe_subscription_id"],
           "nullsNotDistinct": false
         }
       },
@@ -700,13 +668,9 @@
         "ticket_user_id_user_id_fk": {
           "name": "ticket_user_id_user_id_fk",
           "tableFrom": "ticket",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -765,26 +729,18 @@
         "ticket_message_ticket_id_ticket_id_fk": {
           "name": "ticket_message_ticket_id_ticket_id_fk",
           "tableFrom": "ticket_message",
-          "columnsFrom": [
-            "ticket_id"
-          ],
+          "columnsFrom": ["ticket_id"],
           "tableTo": "ticket",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "ticket_message_user_id_user_id_fk": {
           "name": "ticket_message_user_id_user_id_fk",
           "tableFrom": "ticket_message",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -878,16 +834,12 @@
       "uniqueConstraints": {
         "user_email_unique": {
           "name": "user_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "nullsNotDistinct": false
         },
         "user_stripe_customer_id_unique": {
           "name": "user_stripe_customer_id_unique",
-          "columns": [
-            "stripe_customer_id"
-          ],
+          "columns": ["stripe_customer_id"],
           "nullsNotDistinct": false
         }
       },
@@ -951,29 +903,17 @@
     "public.credits_balance_status": {
       "name": "credits_balance_status",
       "schema": "public",
-      "values": [
-        "active",
-        "frozen"
-      ]
+      "values": ["active", "frozen"]
     },
     "public.credits_batch_source": {
       "name": "credits_batch_source",
       "schema": "public",
-      "values": [
-        "purchase",
-        "subscription",
-        "bonus",
-        "refund"
-      ]
+      "values": ["purchase", "subscription", "bonus", "refund"]
     },
     "public.credits_batch_status": {
       "name": "credits_batch_status",
       "schema": "public",
-      "values": [
-        "active",
-        "consumed",
-        "expired"
-      ]
+      "values": ["active", "consumed", "expired"]
     },
     "public.credits_transaction_type": {
       "name": "credits_transaction_type",
@@ -990,40 +930,22 @@
     "public.ticket_category": {
       "name": "ticket_category",
       "schema": "public",
-      "values": [
-        "billing",
-        "technical",
-        "bug",
-        "feature",
-        "other"
-      ]
+      "values": ["billing", "technical", "bug", "feature", "other"]
     },
     "public.ticket_priority": {
       "name": "ticket_priority",
       "schema": "public",
-      "values": [
-        "low",
-        "medium",
-        "high"
-      ]
+      "values": ["low", "medium", "high"]
     },
     "public.ticket_status": {
       "name": "ticket_status",
       "schema": "public",
-      "values": [
-        "open",
-        "in_progress",
-        "resolved",
-        "closed"
-      ]
+      "values": ["open", "in_progress", "resolved", "closed"]
     },
     "public.user_role": {
       "name": "user_role",
       "schema": "public",
-      "values": [
-        "user",
-        "admin"
-      ]
+      "values": ["user", "admin"]
     }
   },
   "schemas": {},

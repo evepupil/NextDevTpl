@@ -11,11 +11,9 @@
  */
 
 import { Loader2, Receipt, Sparkles } from "lucide-react";
-import { Link } from "@/i18n/routing";
-import { useTranslations, useLocale } from "next-intl";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
-
+import { useEffect, useMemo, useState, useTransition } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,11 +28,18 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { getMyPlanAction } from "@/features/subscription/actions/get-user-plan";
-import { cancelSubscription } from "@/features/payment/actions";
-import { PlanBadge, type PlanType } from "@/features/subscription/components/plan-badge";
-import { PLAN_PRIVILEGES, type SubscriptionPlan } from "@/config/subscription-plan";
 import { findPlanByPriceId } from "@/config/payment";
+import {
+  PLAN_PRIVILEGES,
+  type SubscriptionPlan,
+} from "@/config/subscription-plan";
+import { cancelSubscription } from "@/features/payment/actions";
+import { getMyPlanAction } from "@/features/subscription/actions/get-user-plan";
+import {
+  PlanBadge,
+  type PlanType,
+} from "@/features/subscription/components/plan-badge";
+import { Link } from "@/i18n/routing";
 
 /**
  * 账单设置组件
@@ -61,7 +66,11 @@ export function BillingSection() {
   }, [planResult.data?.currentPeriodEnd]);
 
   const formattedRenewalDate = renewalDate
-    ? renewalDate.toLocaleDateString(locale === "zh" ? "zh-CN" : "en-US", { year: "numeric", month: "short", day: "numeric" })
+    ? renewalDate.toLocaleDateString(locale === "zh" ? "zh-CN" : "en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
     : null;
 
   const priceDisplay = useMemo(() => {
@@ -79,7 +88,9 @@ export function BillingSection() {
     if (!priceId) return "";
     const { price } = findPlanByPriceId(priceId);
     if (!price) return "";
-    return price.interval === "yearly" ? t("currentPlan.perYear") : t("currentPlan.perMonth");
+    return price.interval === "yearly"
+      ? t("currentPlan.perYear")
+      : t("currentPlan.perMonth");
   }, [userPlan, planResult.data?.priceId, t]);
 
   // 组件挂载时获取计划
@@ -117,7 +128,9 @@ export function BillingSection() {
               <PlanBadge plan={userPlan} size="lg" showLabel={false} />
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-semibold">{planConfig.name} Plan</h3>
+                  <h3 className="text-lg font-semibold">
+                    {planConfig.name} Plan
+                  </h3>
                   <Badge variant="secondary">{t("currentPlan.current")}</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
@@ -139,35 +152,54 @@ export function BillingSection() {
               <div className="flex items-center gap-2">
                 {isCancelPending ? (
                   <Badge variant="secondary" className="text-amber-600">
-                    {t("currentPlan.cancelPending", { date: formattedRenewalDate ?? "" })}
+                    {t("currentPlan.cancelPending", {
+                      date: formattedRenewalDate ?? "",
+                    })}
                   </Badge>
                 ) : (
-                  <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+                  <AlertDialog
+                    open={cancelDialogOpen}
+                    onOpenChange={setCancelDialogOpen}
+                  >
                     <AlertDialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="text-muted-foreground">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-muted-foreground"
+                      >
                         {t("currentPlan.cancelSubscription")}
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>{t("currentPlan.cancelDialog.title")}</AlertDialogTitle>
+                        <AlertDialogTitle>
+                          {t("currentPlan.cancelDialog.title")}
+                        </AlertDialogTitle>
                         <AlertDialogDescription className="space-y-2">
                           <span className="block">
-                            {t("currentPlan.cancelDialog.description", { date: formattedRenewalDate ?? "" })}
+                            {t("currentPlan.cancelDialog.description", {
+                              date: formattedRenewalDate ?? "",
+                            })}
                           </span>
                           <span className="block font-medium text-foreground">
-                            {t("currentPlan.cancelDialog.keepBenefits", { date: formattedRenewalDate ?? "" })}
+                            {t("currentPlan.cancelDialog.keepBenefits", {
+                              date: formattedRenewalDate ?? "",
+                            })}
                           </span>
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>{t("currentPlan.cancelDialog.cancel")}</AlertDialogCancel>
+                        <AlertDialogCancel>
+                          {t("currentPlan.cancelDialog.cancel")}
+                        </AlertDialogCancel>
                         <AlertDialogAction
                           onClick={handleCancelSubscription}
                           disabled={isCancelling}
                           className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
-                          {isCancelling && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          {isCancelling && (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          )}
                           {t("currentPlan.cancelDialog.confirm")}
                         </AlertDialogAction>
                       </AlertDialogFooter>
@@ -182,21 +214,33 @@ export function BillingSection() {
 
           <div className="grid grid-cols-3 gap-4 text-sm">
             <div>
-              <p className="text-muted-foreground">{t("currentPlan.monthlyCredits")}</p>
+              <p className="text-muted-foreground">
+                {t("currentPlan.monthlyCredits")}
+              </p>
               <p className="font-medium">
                 {planConfig.monthlyCredits.toLocaleString()} credits
               </p>
             </div>
             <div>
-              <p className="text-muted-foreground">{t("currentPlan.renewalDate")}</p>
-              <p className={`font-medium ${isCancelPending ? "text-amber-600" : ""}`}>
+              <p className="text-muted-foreground">
+                {t("currentPlan.renewalDate")}
+              </p>
+              <p
+                className={`font-medium ${isCancelPending ? "text-amber-600" : ""}`}
+              >
                 {formattedRenewalDate ?? t("currentPlan.notApplicable")}
               </p>
             </div>
             <div>
               <p className="text-muted-foreground">{t("currentPlan.price")}</p>
               <p className="font-medium">
-                {priceDisplay}{priceInterval && <span className="text-muted-foreground font-normal"> /{priceInterval}</span>}
+                {priceDisplay}
+                {priceInterval && (
+                  <span className="text-muted-foreground font-normal">
+                    {" "}
+                    /{priceInterval}
+                  </span>
+                )}
               </p>
             </div>
           </div>

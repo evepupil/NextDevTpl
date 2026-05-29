@@ -3,12 +3,11 @@ import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { Toaster } from "sonner";
-
-import { Providers } from "@/features/shared";
+import { siteConfig } from "@/config";
 import { Analytics } from "@/features/analytics";
 import { CookieConsent } from "@/features/marketing/components";
+import { Providers } from "@/features/shared";
 import { routing } from "@/i18n/routing";
-import { siteConfig } from "@/config";
 
 /**
  * 生成静态参数

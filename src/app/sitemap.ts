@@ -8,7 +8,14 @@ import { getAllBlogSlugs, getAllLegalSlugs } from "@/lib/source";
 const locales = ["en", "zh"] as const;
 
 /** Solution types */
-const solutionTypes = ["text", "pdf", "url", "video", "word", "markdown"] as const;
+const solutionTypes = [
+  "text",
+  "pdf",
+  "url",
+  "video",
+  "word",
+  "markdown",
+] as const;
 
 /**
  * 动态生成 sitemap.xml

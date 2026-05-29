@@ -124,11 +124,7 @@ export function getPseoPage(locale: string, slug: string) {
   } satisfies PseoPage;
 }
 
-export function getRelatedPseoPages(
-  locale: string,
-  slug: string,
-  limit = 3,
-) {
+export function getRelatedPseoPages(locale: string, slug: string, limit = 3) {
   return getPseoPages(locale)
     .filter((page) => page.slug !== slug)
     .slice(0, limit);
@@ -139,6 +135,6 @@ export function getAllPseoParams() {
     Object.keys(page.locales).map((locale) => ({
       locale,
       slug: page.slug,
-    })),
+    }))
   );
 }

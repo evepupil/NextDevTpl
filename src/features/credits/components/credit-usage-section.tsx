@@ -14,13 +14,16 @@
 
 import { Clock, Coins } from "lucide-react";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
-import { useTranslations, useLocale } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { getMyActiveBatches, getMyCreditsBalance } from "@/features/credits/actions";
+import {
+  getMyActiveBatches,
+  getMyCreditsBalance,
+} from "@/features/credits/actions";
 
 import { TransactionHistory } from "./transaction-history";
 
@@ -52,10 +55,8 @@ export function CreditUsageSection() {
   } = useAction(getMyCreditsBalance);
 
   // 获取活跃批次（用于显示即将过期）
-  const {
-    execute: fetchBatches,
-    result: batchesResult,
-  } = useAction(getMyActiveBatches);
+  const { execute: fetchBatches, result: batchesResult } =
+    useAction(getMyActiveBatches);
 
   // 组件挂载时获取数据
   useEffect(() => {
@@ -79,9 +80,7 @@ export function CreditUsageSection() {
       {/* 标题 */}
       <div>
         <h2 className="text-xl font-semibold">{t("title")}</h2>
-        <p className="text-sm text-muted-foreground">
-          {t("description")}
-        </p>
+        <p className="text-sm text-muted-foreground">{t("description")}</p>
       </div>
 
       {/* 可用积分 */}
@@ -100,8 +99,12 @@ export function CreditUsageSection() {
             </div>
           ) : (
             <>
-              <div className="text-4xl font-bold">{balance.toLocaleString()}</div>
-              <div className="text-sm text-muted-foreground">{t("creditsAvailable")}</div>
+              <div className="text-4xl font-bold">
+                {balance.toLocaleString()}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {t("creditsAvailable")}
+              </div>
             </>
           )}
         </div>
@@ -139,7 +142,7 @@ export function CreditUsageSection() {
                 <p className="text-sm text-amber-700 dark:text-amber-400">
                   {t("expiringSoon.message", {
                     count: expiringBatch.remaining,
-                    date: formatDate(expiringBatch.expiresAt, locale)
+                    date: formatDate(expiringBatch.expiresAt, locale),
                   })}
                 </p>
               </div>

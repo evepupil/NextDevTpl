@@ -2,10 +2,10 @@
  * 邮件模板导出
  */
 
-export { WelcomeEmail } from "./welcome-email";
 export {
-  PrimaryActionEmail,
   MagicLinkEmail,
+  PrimaryActionEmail,
   ResetPasswordEmail,
   VerifyEmailEmail,
 } from "./primary-action-email";
+export { WelcomeEmail } from "./welcome-email";

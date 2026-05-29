@@ -21,7 +21,11 @@ interface AnimatedPriceProps {
  * 使用 Framer Motion 实现价格数字的平滑跳动效果
  * 当价格变化时，数字会以弹簧动画的方式过渡到新值
  */
-export function AnimatedPrice({ value, className, formatOptions }: AnimatedPriceProps) {
+export function AnimatedPrice({
+  value,
+  className,
+  formatOptions,
+}: AnimatedPriceProps) {
   // 使用 spring 动画实现平滑过渡
   const spring = useSpring(value, {
     stiffness: 100,
@@ -43,9 +47,5 @@ export function AnimatedPrice({ value, className, formatOptions }: AnimatedPrice
     spring.set(value);
   }, [spring, value]);
 
-  return (
-    <motion.span className={className}>
-      {display}
-    </motion.span>
-  );
+  return <motion.span className={className}>{display}</motion.span>;
 }

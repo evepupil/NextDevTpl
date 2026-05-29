@@ -156,7 +156,9 @@ export function generateBreadcrumbSchema(items: BreadcrumbItem[]) {
       "@type": "ListItem",
       position: index + 1,
       name: item.name,
-      item: item.url.startsWith("http") ? item.url : `${getBaseUrl()}${item.url}`,
+      item: item.url.startsWith("http")
+        ? item.url
+        : `${getBaseUrl()}${item.url}`,
     })),
   };
 }

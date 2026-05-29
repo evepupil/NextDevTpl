@@ -1,4 +1,7 @@
-import { PlanBadge, type PlanType } from "@/features/subscription/components/plan-badge";
+import {
+  PlanBadge,
+  type PlanType,
+} from "@/features/subscription/components/plan-badge";
 
 const plans: PlanType[] = ["free", "starter", "pro", "ultra"];
 const sizes: Array<"xs" | "sm" | "md" | "lg"> = ["xs", "sm", "md", "lg"];
@@ -8,7 +11,9 @@ export default function PlanBadgesDemoPage() {
     <section className="container py-16">
       <div className="mx-auto flex max-w-4xl flex-col gap-10">
         <header className="space-y-3">
-          <h1 className="text-3xl font-semibold tracking-tight">Plan Badge Demo</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">
+            Plan Badge Demo
+          </h1>
           <p className="text-muted-foreground">
             Preview the subscription badge styles across plans and sizes.
           </p>

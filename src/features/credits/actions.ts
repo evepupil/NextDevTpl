@@ -9,9 +9,9 @@
 import { z } from "zod";
 
 import { getBaseUrl } from "@/config/payment";
-import { actionClient, protectedAction } from "@/lib/safe-action";
 import { creem } from "@/features/payment/creem";
 import { logEvent } from "@/lib/logger";
+import { actionClient, protectedAction } from "@/lib/safe-action";
 
 import {
   CREDIT_PACKAGES,
@@ -20,15 +20,15 @@ import {
   REGISTRATION_BONUS_CREDITS,
 } from "./config";
 import {
+  AccountFrozenError,
   consumeCredits,
   ensureRegistrationBonus,
   getCreditsBalance,
   getUserActiveBatches,
-  getUserTransactionsCount,
   getUserTransactions,
+  getUserTransactionsCount,
   grantCredits,
   InsufficientCreditsError,
-  AccountFrozenError,
 } from "./core";
 
 const withPublicCreditsAction = (name: string) =>
@@ -45,7 +45,9 @@ const withProtectedCreditsAction = (name: string) =>
  *
  * 新用户注册时调用，赠送初始积分
  */
-export const grantRegistrationBonus = withPublicCreditsAction("grantRegistrationBonus")
+export const grantRegistrationBonus = withPublicCreditsAction(
+  "grantRegistrationBonus"
+)
   .schema(
     z.object({
       userId: z.string().min(1),
@@ -86,51 +88,59 @@ export const grantRegistrationBonus = withPublicCreditsAction("grantRegistration
  * 包含懒加载注册奖励机制:
  * 首次调用时，如果用户没有任何交易记录，会自动发放注册奖励
  */
-export const getMyCreditsBalance = withProtectedCreditsAction("getMyCreditsBalance")
-  .action(async ({ ctx }) => {
-    const { userId } = ctx;
+export const getMyCreditsBalance = withProtectedCreditsAction(
+  "getMyCreditsBalance"
+).action(async ({ ctx }) => {
+  const { userId } = ctx;
 
-    // 懒加载: 确保新用户获得注册奖励
-    await ensureRegistrationBonus(userId, REGISTRATION_BONUS_CREDITS, CREDITS_EXPIRY_DAYS);
+  // 懒加载: 确保新用户获得注册奖励
+  await ensureRegistrationBonus(
+    userId,
+    REGISTRATION_BONUS_CREDITS,
+    CREDITS_EXPIRY_DAYS
+  );
 
-    // 获取余额
-    const balance = await getCreditsBalance(userId);
+  // 获取余额
+  const balance = await getCreditsBalance(userId);
 
-    return {
-      balance: balance.balance,
-      totalEarned: balance.totalEarned,
-      totalSpent: balance.totalSpent,
-      status: balance.status,
-    };
-  });
+  return {
+    balance: balance.balance,
+    totalEarned: balance.totalEarned,
+    totalSpent: balance.totalSpent,
+    status: balance.status,
+  };
+});
 
 /**
  * 获取当前用户活跃批次
  */
-export const getMyActiveBatches = withProtectedCreditsAction("getMyActiveBatches")
-  .action(async ({ ctx }) => {
-    const { userId } = ctx;
-    const batches = await getUserActiveBatches(userId);
+export const getMyActiveBatches = withProtectedCreditsAction(
+  "getMyActiveBatches"
+).action(async ({ ctx }) => {
+  const { userId } = ctx;
+  const batches = await getUserActiveBatches(userId);
 
-    return batches.map((batch) => ({
-      id: batch.id,
-      amount: batch.amount,
-      remaining: batch.remaining,
-      issuedAt: batch.issuedAt,
-      expiresAt: batch.expiresAt,
-      sourceType: batch.sourceType,
-    }));
-  });
+  return batches.map((batch) => ({
+    id: batch.id,
+    amount: batch.amount,
+    remaining: batch.remaining,
+    issuedAt: batch.issuedAt,
+    expiresAt: batch.expiresAt,
+    sourceType: batch.sourceType,
+  }));
+});
 
 /**
  * 获取当前用户交易历史
  */
 export const getMyTransactions = withProtectedCreditsAction("getMyTransactions")
   .schema(
-    z.object({
-      limit: z.number().min(1).max(100).optional(),
-      offset: z.number().min(0).optional(),
-    }).optional()
+    z
+      .object({
+        limit: z.number().min(1).max(100).optional(),
+        offset: z.number().min(0).optional(),
+      })
+      .optional()
   )
   .action(async ({ parsedInput, ctx }) => {
     const { userId } = ctx;
@@ -218,13 +228,14 @@ export const useCredits = withProtectedCreditsAction("useCredits")
       }
       throw error;
     }
-
   });
 
 /**
  * 检查用户是否有足够积分
  */
-export const checkCreditsAvailable = withProtectedCreditsAction("checkCreditsAvailable")
+export const checkCreditsAvailable = withProtectedCreditsAction(
+  "checkCreditsAvailable"
+)
   .schema(
     z.object({
       amount: z.number().min(1),
@@ -254,7 +265,9 @@ export const checkCreditsAvailable = withProtectedCreditsAction("checkCreditsAva
  *
  * 在订阅续费时调用
  */
-export const grantMonthlySubscriptionCredits = withPublicCreditsAction("grantMonthlySubscriptionCredits")
+export const grantMonthlySubscriptionCredits = withPublicCreditsAction(
+  "grantMonthlySubscriptionCredits"
+)
   .schema(
     z.object({
       userId: z.string().min(1),
@@ -349,7 +362,9 @@ export const purchaseCredits = withProtectedCreditsAction("purchaseCredits")
  * metadata 中包含 type: 'credit_purchase' 和 credits 数量
  * Webhook 会根据这些信息发放积分
  */
-export const createCreditsPurchaseCheckout = withProtectedCreditsAction("createCreditsPurchaseCheckout")
+export const createCreditsPurchaseCheckout = withProtectedCreditsAction(
+  "createCreditsPurchaseCheckout"
+)
   .schema(
     z.object({
       packageId: z.enum(["lite", "standard", "pro"]),
@@ -400,14 +415,15 @@ export const createCreditsPurchaseCheckout = withProtectedCreditsAction("createC
 /**
  * 获取积分套餐列表
  */
-export const getCreditPackages = withProtectedCreditsAction("getCreditPackages")
-  .action(async () => {
-    return CREDIT_PACKAGES.map((pkg) => ({
-      id: pkg.id,
-      name: pkg.name,
-      credits: pkg.credits,
-      price: pkg.price,
-      description: pkg.description,
-      popular: "popular" in pkg ? pkg.popular : false,
-    }));
-  });
+export const getCreditPackages = withProtectedCreditsAction(
+  "getCreditPackages"
+).action(async () => {
+  return CREDIT_PACKAGES.map((pkg) => ({
+    id: pkg.id,
+    name: pkg.name,
+    credits: pkg.credits,
+    price: pkg.price,
+    description: pkg.description,
+    popular: "popular" in pkg ? pkg.popular : false,
+  }));
+});

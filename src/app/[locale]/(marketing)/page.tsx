@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-
-import { siteConfig } from "@/config";
 import { SiteJsonLd, SoftwareAppJsonLd } from "@/components/seo/json-ld";
+import { siteConfig } from "@/config";
 import {
   CTASection,
   FAQSection,
@@ -42,9 +41,7 @@ export async function generateMetadata({
       "spaced repetition",
       "PDF to flashcards",
       "text to Anki",
-      ...(isZh
-        ? ["AI闪卡生成器", "Anki卡片", "间隔重复", "PDF转闪卡"]
-        : []),
+      ...(isZh ? ["AI闪卡生成器", "Anki卡片", "间隔重复", "PDF转闪卡"] : []),
     ],
     openGraph: {
       title,

@@ -103,10 +103,7 @@ export default async function LegalPage({
             {locale === "zh" ? "其他法律文档：" : "Other Legal Documents:"}
           </span>
           {slug !== "terms" && (
-            <Link
-              href="/legal/terms"
-              className="text-primary hover:underline"
-            >
+            <Link href="/legal/terms" className="text-primary hover:underline">
               {locale === "zh" ? "服务条款" : "Terms of Service"}
             </Link>
           )}

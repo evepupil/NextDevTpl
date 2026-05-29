@@ -37,107 +37,105 @@ export function createOgImageResponse(): ImageResponse {
   const hostname = getHostname(siteConfig.url);
 
   return new ImageResponse(
-    (
+    <div
+      style={{
+        height: "100%",
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#0a0a0a",
+        backgroundImage:
+          "radial-gradient(circle at 25% 25%, #7c3aed20 0%, transparent 50%), radial-gradient(circle at 75% 75%, #7c3aed10 0%, transparent 50%)",
+      }}
+    >
+      {/* Logo / Brand */}
       <div
         style={{
-          height: "100%",
-          width: "100%",
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#0a0a0a",
-          backgroundImage:
-            "radial-gradient(circle at 25% 25%, #7c3aed20 0%, transparent 50%), radial-gradient(circle at 75% 75%, #7c3aed10 0%, transparent 50%)",
+          marginBottom: 40,
         }}
       >
-        {/* Logo / Brand */}
         <div
           style={{
+            width: 80,
+            height: 80,
+            background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
+            borderRadius: 20,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            marginBottom: 40,
+            marginRight: 24,
+            boxShadow: "0 8px 32px rgba(124, 58, 237, 0.4)",
           }}
         >
-          <div
-            style={{
-              width: 80,
-              height: 80,
-              background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
-              borderRadius: 20,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginRight: 24,
-              boxShadow: "0 8px 32px rgba(124, 58, 237, 0.4)",
-            }}
+          <svg
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            <svg
-              width="48"
-              height="48"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 2L2 7l10 5 10-5-10-5z" />
-              <path d="M2 17l10 5 10-5" />
-              <path d="M2 12l10 5 10-5" />
-            </svg>
-          </div>
-          <span
-            style={{
-              fontSize: 64,
-              fontWeight: 700,
-              background: "linear-gradient(135deg, #ffffff 0%, #a5a5a5 100%)",
-              backgroundClip: "text",
-              color: "transparent",
-            }}
-          >
-            {siteConfig.name}
-          </span>
+            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+            <path d="M2 17l10 5 10-5" />
+            <path d="M2 12l10 5 10-5" />
+          </svg>
         </div>
-
-        {/* Description */}
-        <div
+        <span
           style={{
-            fontSize: 28,
-            color: "#a1a1aa",
-            textAlign: "center",
-            maxWidth: 800,
-            lineHeight: 1.4,
-            padding: "0 40px",
+            fontSize: 64,
+            fontWeight: 700,
+            background: "linear-gradient(135deg, #ffffff 0%, #a5a5a5 100%)",
+            backgroundClip: "text",
+            color: "transparent",
           }}
         >
-          {siteConfig.description}
-        </div>
-
-        {/* URL Badge */}
-        <div
-          style={{
-            marginTop: 48,
-            display: "flex",
-            alignItems: "center",
-            padding: "12px 24px",
-            background: "rgba(124, 58, 237, 0.1)",
-            borderRadius: 50,
-            border: "1px solid rgba(124, 58, 237, 0.3)",
-          }}
-        >
-          <span
-            style={{
-              fontSize: 18,
-              color: "#a78bfa",
-            }}
-          >
-            {hostname}
-          </span>
-        </div>
+          {siteConfig.name}
+        </span>
       </div>
-    ),
+
+      {/* Description */}
+      <div
+        style={{
+          fontSize: 28,
+          color: "#a1a1aa",
+          textAlign: "center",
+          maxWidth: 800,
+          lineHeight: 1.4,
+          padding: "0 40px",
+        }}
+      >
+        {siteConfig.description}
+      </div>
+
+      {/* URL Badge */}
+      <div
+        style={{
+          marginTop: 48,
+          display: "flex",
+          alignItems: "center",
+          padding: "12px 24px",
+          background: "rgba(124, 58, 237, 0.1)",
+          borderRadius: 50,
+          border: "1px solid rgba(124, 58, 237, 0.3)",
+        }}
+      >
+        <span
+          style={{
+            fontSize: 18,
+            color: "#a78bfa",
+          }}
+        >
+          {hostname}
+        </span>
+      </div>
+    </div>,
     {
       ...OG_IMAGE_SIZE,
     }

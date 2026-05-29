@@ -1,8 +1,8 @@
 "use client";
 
 import { Globe } from "lucide-react";
-import { useLocale } from "next-intl";
 import { useParams } from "next/navigation";
+import { useLocale } from "next-intl";
 import { useTransition } from "react";
 
 import { Button } from "@/components/ui/button";

@@ -12,9 +12,9 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { GoogleIcon } from "@/features/shared/icons";
 import {
+  resendVerificationEmail,
   signInWithEmail,
   signInWithGoogle,
-  resendVerificationEmail,
 } from "@/lib/auth/client";
 
 import { AuthErrorAlert } from "./auth-error-alert";
@@ -221,11 +221,7 @@ export function SignInForm() {
         </div>
 
         {/* 提交按钮 */}
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={isLoading}
-        >
+        <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? t("loading") : t("submit")}
         </Button>
       </form>

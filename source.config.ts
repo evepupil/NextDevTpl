@@ -1,4 +1,8 @@
-import { defineDocs, defineCollections, frontmatterSchema } from "fumadocs-mdx/config";
+import {
+  defineCollections,
+  defineDocs,
+  frontmatterSchema,
+} from "fumadocs-mdx/config";
 import { z } from "zod";
 
 /**

@@ -44,7 +44,10 @@ interface PlanBadgeProps {
 /**
  * 尺寸配置
  */
-const sizeConfig: Record<BadgeSize, { badge: string; icon: string; text: string }> = {
+const sizeConfig: Record<
+  BadgeSize,
+  { badge: string; icon: string; text: string }
+> = {
   xs: { badge: "h-5 px-1.5 gap-0.5", icon: "h-3 w-3", text: "text-[10px]" },
   sm: { badge: "h-6 px-2 gap-1", icon: "h-3.5 w-3.5", text: "text-xs" },
   md: { badge: "h-7 px-2.5 gap-1.5", icon: "h-4 w-4", text: "text-sm" },
@@ -54,38 +57,45 @@ const sizeConfig: Record<BadgeSize, { badge: string; icon: string; text: string 
 /**
  * 计划配置
  */
-const planConfig: Record<PlanType, {
-  icon: typeof User;
-  labelKey: string;
-  baseStyles: string;
-  glowStyles: string;
-  animationClass: string;
-}> = {
+const planConfig: Record<
+  PlanType,
+  {
+    icon: typeof User;
+    labelKey: string;
+    baseStyles: string;
+    glowStyles: string;
+    animationClass: string;
+  }
+> = {
   free: {
     icon: User,
     labelKey: "free",
-    baseStyles: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400",
+    baseStyles:
+      "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400",
     glowStyles: "",
     animationClass: "",
   },
   starter: {
     icon: Sparkles,
     labelKey: "starter",
-    baseStyles: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
+    baseStyles:
+      "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
     glowStyles: "shadow-[0_0_10px_rgba(59,130,246,0.3)]",
     animationClass: "plan-badge-shimmer",
   },
   pro: {
     icon: Crown,
     labelKey: "pro",
-    baseStyles: "bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-700 dark:from-amber-900/50 dark:to-yellow-900/50 dark:text-amber-300",
+    baseStyles:
+      "bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-700 dark:from-amber-900/50 dark:to-yellow-900/50 dark:text-amber-300",
     glowStyles: "shadow-[0_0_15px_rgba(245,158,11,0.4)]",
     animationClass: "plan-badge-shine",
   },
   ultra: {
     icon: Gem,
     labelKey: "ultra",
-    baseStyles: "bg-gradient-to-r from-purple-100 via-pink-100 to-purple-100 text-purple-700 dark:from-purple-900/50 dark:via-pink-900/50 dark:to-purple-900/50 dark:text-purple-300",
+    baseStyles:
+      "bg-gradient-to-r from-purple-100 via-pink-100 to-purple-100 text-purple-700 dark:from-purple-900/50 dark:via-pink-900/50 dark:to-purple-900/50 dark:text-purple-300",
     glowStyles: "shadow-[0_0_20px_rgba(168,85,247,0.5)]",
     animationClass: "plan-badge-aurora",
   },
@@ -131,7 +141,12 @@ export function PlanBadge({
       {/* 内容层 */}
       <Icon className={cn("relative z-10", sizeStyles.icon)} />
       {showLabel && (
-        <span className={cn("relative z-10 font-semibold uppercase tracking-wide", sizeStyles.text)}>
+        <span
+          className={cn(
+            "relative z-10 font-semibold uppercase tracking-wide",
+            sizeStyles.text
+          )}
+        >
           {t(`plans.${config.labelKey}`)}
         </span>
       )}

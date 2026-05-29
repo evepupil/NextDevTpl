@@ -19,7 +19,7 @@ import * as Sentry from "@sentry/nextjs";
  * 检查 Sentry 是否已配置
  */
 export function isSentryEnabled(): boolean {
-	return !!process.env.NEXT_PUBLIC_SENTRY_DSN;
+  return !!process.env.NEXT_PUBLIC_SENTRY_DSN;
 }
 
 // ============================================
@@ -32,48 +32,48 @@ export function isSentryEnabled(): boolean {
  * 在 instrumentation.ts 中调用
  */
 export function initSentryServer(): void {
-	if (!isSentryEnabled()) {
-		return;
-	}
+  if (!isSentryEnabled()) {
+    return;
+  }
 
-	Sentry.init({
-		dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-		environment: process.env.NODE_ENV,
+  Sentry.init({
+    dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+    environment: process.env.NODE_ENV,
 
-		// 性能监控采样率
-		tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
+    // 性能监控采样率
+    tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
 
-		// 错误采样率
-		sampleRate: 1.0,
+    // 错误采样率
+    sampleRate: 1.0,
 
-		// 调试模式（仅开发环境）
-		debug: process.env.NODE_ENV === "development",
+    // 调试模式（仅开发环境）
+    debug: process.env.NODE_ENV === "development",
 
-		// 忽略常见的无害错误
-		ignoreErrors: [
-			// 网络错误
-			"Network request failed",
-			"Failed to fetch",
-			"NetworkError",
-			"AbortError",
-			// 用户取消
-			"User cancelled",
-			"User denied",
-			// 常见的第三方脚本错误
-			"Script error",
-			"Non-Error promise rejection",
-		],
+    // 忽略常见的无害错误
+    ignoreErrors: [
+      // 网络错误
+      "Network request failed",
+      "Failed to fetch",
+      "NetworkError",
+      "AbortError",
+      // 用户取消
+      "User cancelled",
+      "User denied",
+      // 常见的第三方脚本错误
+      "Script error",
+      "Non-Error promise rejection",
+    ],
 
-		// 过滤敏感数据
-		beforeSend(event) {
-			// 过滤掉敏感信息
-			if (event.request?.headers) {
-				delete event.request.headers["authorization"];
-				delete event.request.headers["cookie"];
-			}
-			return event;
-		},
-	});
+    // 过滤敏感数据
+    beforeSend(event) {
+      // 过滤掉敏感信息
+      if (event.request?.headers) {
+        delete event.request.headers["authorization"];
+        delete event.request.headers["cookie"];
+      }
+      return event;
+    },
+  });
 }
 
 /**
@@ -82,32 +82,32 @@ export function initSentryServer(): void {
  * 在 sentry.client.config.ts 中调用
  */
 export function initSentryClient(): void {
-	if (!isSentryEnabled()) {
-		return;
-	}
+  if (!isSentryEnabled()) {
+    return;
+  }
 
-	Sentry.init({
-		dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-		environment: process.env.NODE_ENV,
+  Sentry.init({
+    dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+    environment: process.env.NODE_ENV,
 
-		// 性能监控
-		tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
+    // 性能监控
+    tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
 
-		// Replay 配置（可选）
-		replaysSessionSampleRate: 0,
-		replaysOnErrorSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 0,
+    // Replay 配置（可选）
+    replaysSessionSampleRate: 0,
+    replaysOnErrorSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 0,
 
-		// 调试模式
-		debug: false,
+    // 调试模式
+    debug: false,
 
-		// 忽略常见错误
-		ignoreErrors: [
-			"Network request failed",
-			"Failed to fetch",
-			"Script error",
-			"ResizeObserver loop",
-		],
-	});
+    // 忽略常见错误
+    ignoreErrors: [
+      "Network request failed",
+      "Failed to fetch",
+      "Script error",
+      "ResizeObserver loop",
+    ],
+  });
 }
 
 // ============================================
@@ -127,20 +127,20 @@ export function initSentryClient(): void {
  * ```
  */
 export function captureError(
-	error: unknown,
-	context?: Record<string, unknown>
+  error: unknown,
+  context?: Record<string, unknown>
 ): void {
-	if (!isSentryEnabled()) {
-		// 未配置时打印到 console
-		console.error("[Error]", error, context);
-		return;
-	}
+  if (!isSentryEnabled()) {
+    // 未配置时打印到 console
+    console.error("[Error]", error, context);
+    return;
+  }
 
-	if (context) {
-		Sentry.captureException(error, { extra: context });
-	} else {
-		Sentry.captureException(error);
-	}
+  if (context) {
+    Sentry.captureException(error, { extra: context });
+  } else {
+    Sentry.captureException(error);
+  }
 }
 
 /**
@@ -152,21 +152,26 @@ export function captureError(
  * ```
  */
 export function captureMessage(
-	message: string,
-	level: Sentry.SeverityLevel = "info",
-	context?: Record<string, unknown>
+  message: string,
+  level: Sentry.SeverityLevel = "info",
+  context?: Record<string, unknown>
 ): void {
-	if (!isSentryEnabled()) {
-		const logFn = level === "error" ? console.error : level === "warning" ? console.warn : console.log;
-		logFn(`[${level}]`, message, context);
-		return;
-	}
+  if (!isSentryEnabled()) {
+    const logFn =
+      level === "error"
+        ? console.error
+        : level === "warning"
+          ? console.warn
+          : console.log;
+    logFn(`[${level}]`, message, context);
+    return;
+  }
 
-	if (context) {
-		Sentry.captureMessage(message, { level, extra: context });
-	} else {
-		Sentry.captureMessage(message, level);
-	}
+  if (context) {
+    Sentry.captureMessage(message, { level, extra: context });
+  } else {
+    Sentry.captureMessage(message, level);
+  }
 }
 
 // ============================================
@@ -181,27 +186,29 @@ export function captureMessage(
  * setUser({ id: "123", email: "user@example.com" });
  * ```
  */
-export function setUser(user: {
-	id: string;
-	email?: string;
-	username?: string;
-} | null): void {
-	if (!isSentryEnabled()) {
-		return;
-	}
+export function setUser(
+  user: {
+    id: string;
+    email?: string;
+    username?: string;
+  } | null
+): void {
+  if (!isSentryEnabled()) {
+    return;
+  }
 
-	Sentry.setUser(user);
+  Sentry.setUser(user);
 }
 
 /**
  * 清除用户上下文（登出时调用）
  */
 export function clearUser(): void {
-	if (!isSentryEnabled()) {
-		return;
-	}
+  if (!isSentryEnabled()) {
+    return;
+  }
 
-	Sentry.setUser(null);
+  Sentry.setUser(null);
 }
 
 // ============================================
@@ -217,11 +224,11 @@ export function clearUser(): void {
  * ```
  */
 export function setTag(key: string, value: string): void {
-	if (!isSentryEnabled()) {
-		return;
-	}
+  if (!isSentryEnabled()) {
+    return;
+  }
 
-	Sentry.setTag(key, value);
+  Sentry.setTag(key, value);
 }
 
 /**
@@ -232,12 +239,15 @@ export function setTag(key: string, value: string): void {
  * setContext("order", { orderId: "123", amount: 99.99 });
  * ```
  */
-export function setContext(name: string, context: Record<string, unknown>): void {
-	if (!isSentryEnabled()) {
-		return;
-	}
+export function setContext(
+  name: string,
+  context: Record<string, unknown>
+): void {
+  if (!isSentryEnabled()) {
+    return;
+  }
 
-	Sentry.setContext(name, context);
+  Sentry.setContext(name, context);
 }
 
 // ============================================
@@ -255,17 +265,17 @@ export function setContext(name: string, context: Record<string, unknown>): void
  * ```
  */
 export function startSpan(
-	operation: string,
-	description?: string
+  operation: string,
+  description?: string
 ): Sentry.Span | undefined {
-	if (!isSentryEnabled()) {
-		return undefined;
-	}
+  if (!isSentryEnabled()) {
+    return undefined;
+  }
 
-	return Sentry.startInactiveSpan({
-		op: operation,
-		name: description ?? operation,
-	});
+  return Sentry.startInactiveSpan({
+    op: operation,
+    name: description ?? operation,
+  });
 }
 
 /**
@@ -279,21 +289,21 @@ export function startSpan(
  * ```
  */
 export async function withSpan<T>(
-	operation: string,
-	description: string,
-	fn: () => Promise<T>
+  operation: string,
+  description: string,
+  fn: () => Promise<T>
 ): Promise<T> {
-	if (!isSentryEnabled()) {
-		return fn();
-	}
+  if (!isSentryEnabled()) {
+    return fn();
+  }
 
-	return Sentry.startSpan(
-		{
-			op: operation,
-			name: description,
-		},
-		fn
-	);
+  return Sentry.startSpan(
+    {
+      op: operation,
+      name: description,
+    },
+    fn
+  );
 }
 
 // ============================================
@@ -312,16 +322,16 @@ export async function withSpan<T>(
  * ```
  */
 export function withSentryAction<TInput, TOutput>(
-	action: (input: TInput) => Promise<TOutput>
+  action: (input: TInput) => Promise<TOutput>
 ): (input: TInput) => Promise<TOutput> {
-	return async (input: TInput) => {
-		try {
-			return await action(input);
-		} catch (error) {
-			captureError(error, { action: action.name, input });
-			throw error;
-		}
-	};
+  return async (input: TInput) => {
+    try {
+      return await action(input);
+    } catch (error) {
+      captureError(error, { action: action.name, input });
+      throw error;
+    }
+  };
 }
 
 // ============================================
@@ -340,31 +350,31 @@ export function withSentryAction<TInput, TOutput>(
  * ```
  */
 export function withSentryHandler<T extends Response>(
-	handler: (request: Request) => Promise<T>
+  handler: (request: Request) => Promise<T>
 ): (request: Request) => Promise<T | Response> {
-	return async (request: Request) => {
-		try {
-			return await handler(request);
-		} catch (error) {
-			const url = new URL(request.url);
-			captureError(error, {
-				method: request.method,
-				path: url.pathname,
-			});
+  return async (request: Request) => {
+    try {
+      return await handler(request);
+    } catch (error) {
+      const url = new URL(request.url);
+      captureError(error, {
+        method: request.method,
+        path: url.pathname,
+      });
 
-			// 返回通用错误响应
-			return new Response(
-				JSON.stringify({
-					error: "Internal Server Error",
-					message: "服务器内部错误，请稍后重试",
-				}),
-				{
-					status: 500,
-					headers: { "Content-Type": "application/json" },
-				}
-			);
-		}
-	};
+      // 返回通用错误响应
+      return new Response(
+        JSON.stringify({
+          error: "Internal Server Error",
+          message: "服务器内部错误，请稍后重试",
+        }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+  };
 }
 
 // ============================================

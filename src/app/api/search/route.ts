@@ -1,7 +1,6 @@
 import { createFromSource } from "fumadocs-core/search/server";
-
-import { docsSource } from "@/lib/source";
 import { withApiLogging } from "@/lib/api-logger";
+import { docsSource } from "@/lib/source";
 
 /**
  * Orama 搜索 API

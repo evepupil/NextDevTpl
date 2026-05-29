@@ -4,8 +4,8 @@
  * 提供创建测试数据的工厂函数
  */
 
-import { testDb } from "./db";
 import * as schema from "@/db/schema";
+import { testDb } from "./db";
 
 // ============================================
 // ID 生成
@@ -17,9 +17,9 @@ import * as schema from "@/db/schema";
  * 使用时间戳 + 随机数确保唯一性，避免并行测试时的冲突
  */
 export function generateTestId(prefix = "test"): string {
-	const timestamp = Date.now();
-	const random = Math.random().toString(36).substring(2, 8);
-	return `${prefix}_${timestamp}_${random}`;
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 8);
+  return `${prefix}_${timestamp}_${random}`;
 }
 
 // ============================================
@@ -27,63 +27,63 @@ export function generateTestId(prefix = "test"): string {
 // ============================================
 
 export interface CreateTestUserOptions {
-	id?: string;
-	name?: string;
-	email?: string;
-	emailVerified?: boolean;
-	role?: "user" | "admin";
-	banned?: boolean;
+  id?: string;
+  name?: string;
+  email?: string;
+  emailVerified?: boolean;
+  role?: "user" | "admin";
+  banned?: boolean;
 }
 
 /**
  * 创建测试用户
  */
 export async function createTestUser(
-	options: CreateTestUserOptions = {}
+  options: CreateTestUserOptions = {}
 ): Promise<schema.User> {
-	const timestamp = Date.now();
-	const random = Math.random().toString(36).substring(2, 8);
-	const id = options.id ?? `test_user_${timestamp}_${random}`;
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 8);
+  const id = options.id ?? `test_user_${timestamp}_${random}`;
 
-	const userData: schema.NewUser = {
-		id,
-		name: options.name ?? `Test User ${timestamp}`,
-		email: options.email ?? `test_${timestamp}_${random}@test.local`,
-		emailVerified: options.emailVerified ?? true,
-		role: options.role ?? "user",
-		banned: options.banned ?? false,
-		createdAt: new Date(),
-		updatedAt: new Date(),
-	};
+  const userData: schema.NewUser = {
+    id,
+    name: options.name ?? `Test User ${timestamp}`,
+    email: options.email ?? `test_${timestamp}_${random}@test.local`,
+    emailVerified: options.emailVerified ?? true,
+    role: options.role ?? "user",
+    banned: options.banned ?? false,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
 
-	const [user] = await testDb.insert(schema.user).values(userData).returning();
+  const [user] = await testDb.insert(schema.user).values(userData).returning();
 
-	if (!user) {
-		throw new Error("创建测试用户失败");
-	}
+  if (!user) {
+    throw new Error("创建测试用户失败");
+  }
 
-	return user;
+  return user;
 }
 
 /**
  * 批量创建测试用户
  */
 export async function createTestUsers(
-	count: number,
-	options: Omit<CreateTestUserOptions, "id" | "email"> = {}
+  count: number,
+  options: Omit<CreateTestUserOptions, "id" | "email"> = {}
 ): Promise<schema.User[]> {
-	const users: schema.User[] = [];
+  const users: schema.User[] = [];
 
-	for (let i = 0; i < count; i++) {
-		const userOptions: CreateTestUserOptions = { ...options };
-		if (options.name) {
-			userOptions.name = `${options.name} ${i + 1}`;
-		}
-		const user = await createTestUser(userOptions);
-		users.push(user);
-	}
+  for (let i = 0; i < count; i++) {
+    const userOptions: CreateTestUserOptions = { ...options };
+    if (options.name) {
+      userOptions.name = `${options.name} ${i + 1}`;
+    }
+    const user = await createTestUser(userOptions);
+    users.push(user);
+  }
 
-	return users;
+  return users;
 }
 
 // ============================================
@@ -91,87 +91,87 @@ export async function createTestUsers(
 // ============================================
 
 export interface CreateCreditsBatchOptions {
-	userId: string;
-	amount?: number;
-	remaining?: number;
-	sourceType?: schema.CreditsBatchSource;
-	status?: schema.CreditsBatchStatus;
-	expiresAt?: Date | null;
-	sourceRef?: string;
+  userId: string;
+  amount?: number;
+  remaining?: number;
+  sourceType?: schema.CreditsBatchSource;
+  status?: schema.CreditsBatchStatus;
+  expiresAt?: Date | null;
+  sourceRef?: string;
 }
 
 /**
  * 直接创建积分批次（绕过业务逻辑，用于测试特定场景）
  */
 export async function createTestCreditsBatch(
-	options: CreateCreditsBatchOptions
+  options: CreateCreditsBatchOptions
 ): Promise<schema.CreditsBatch> {
-	const id = generateTestId("test_batch");
-	const amount = options.amount ?? 100;
+  const id = generateTestId("test_batch");
+  const amount = options.amount ?? 100;
 
-	const batchData: schema.NewCreditsBatch = {
-		id,
-		userId: options.userId,
-		amount,
-		remaining: options.remaining ?? amount,
-		issuedAt: new Date(),
-		expiresAt: options.expiresAt ?? null,
-		status: options.status ?? "active",
-		sourceType: options.sourceType ?? "bonus",
-		sourceRef: options.sourceRef,
-		createdAt: new Date(),
-		updatedAt: new Date(),
-	};
+  const batchData: schema.NewCreditsBatch = {
+    id,
+    userId: options.userId,
+    amount,
+    remaining: options.remaining ?? amount,
+    issuedAt: new Date(),
+    expiresAt: options.expiresAt ?? null,
+    status: options.status ?? "active",
+    sourceType: options.sourceType ?? "bonus",
+    sourceRef: options.sourceRef,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
 
-	const [batch] = await testDb
-		.insert(schema.creditsBatch)
-		.values(batchData)
-		.returning();
+  const [batch] = await testDb
+    .insert(schema.creditsBatch)
+    .values(batchData)
+    .returning();
 
-	if (!batch) {
-		throw new Error("创建测试积分批次失败");
-	}
+  if (!batch) {
+    throw new Error("创建测试积分批次失败");
+  }
 
-	return batch;
+  return batch;
 }
 
 export interface CreateCreditsBalanceOptions {
-	userId: string;
-	balance?: number;
-	totalEarned?: number;
-	totalSpent?: number;
-	status?: schema.CreditsBalanceStatus;
+  userId: string;
+  balance?: number;
+  totalEarned?: number;
+  totalSpent?: number;
+  status?: schema.CreditsBalanceStatus;
 }
 
 /**
  * 直接创建积分账户（绕过业务逻辑，用于测试特定场景）
  */
 export async function createTestCreditsBalance(
-	options: CreateCreditsBalanceOptions
+  options: CreateCreditsBalanceOptions
 ): Promise<schema.CreditsBalance> {
-	const id = generateTestId("test_balance");
+  const id = generateTestId("test_balance");
 
-	const balanceData: schema.NewCreditsBalance = {
-		id,
-		userId: options.userId,
-		balance: options.balance ?? 0,
-		totalEarned: options.totalEarned ?? 0,
-		totalSpent: options.totalSpent ?? 0,
-		status: options.status ?? "active",
-		createdAt: new Date(),
-		updatedAt: new Date(),
-	};
+  const balanceData: schema.NewCreditsBalance = {
+    id,
+    userId: options.userId,
+    balance: options.balance ?? 0,
+    totalEarned: options.totalEarned ?? 0,
+    totalSpent: options.totalSpent ?? 0,
+    status: options.status ?? "active",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
 
-	const [balance] = await testDb
-		.insert(schema.creditsBalance)
-		.values(balanceData)
-		.returning();
+  const [balance] = await testDb
+    .insert(schema.creditsBalance)
+    .values(balanceData)
+    .returning();
 
-	if (!balance) {
-		throw new Error("创建测试积分账户失败");
-	}
+  if (!balance) {
+    throw new Error("创建测试积分账户失败");
+  }
 
-	return balance;
+  return balance;
 }
 
 // ============================================
@@ -179,57 +179,57 @@ export async function createTestCreditsBalance(
 // ============================================
 
 export interface CreateUserWithCreditsOptions extends CreateTestUserOptions {
-	initialCredits?: number;
-	creditBatches?: Array<{
-		amount: number;
-		expiresAt?: Date | null;
-	}>;
+  initialCredits?: number;
+  creditBatches?: Array<{
+    amount: number;
+    expiresAt?: Date | null;
+  }>;
 }
 
 /**
  * 创建带有积分的测试用户
  */
 export async function createTestUserWithCredits(
-	options: CreateUserWithCreditsOptions = {}
+  options: CreateUserWithCreditsOptions = {}
 ): Promise<{
-	user: schema.User;
-	balance: schema.CreditsBalance;
-	batches: schema.CreditsBatch[];
+  user: schema.User;
+  balance: schema.CreditsBalance;
+  batches: schema.CreditsBatch[];
 }> {
-	const user = await createTestUser(options);
+  const user = await createTestUser(options);
 
-	const batches: schema.CreditsBatch[] = [];
-	let totalCredits = 0;
+  const batches: schema.CreditsBatch[] = [];
+  let totalCredits = 0;
 
-	if (options.creditBatches) {
-		for (const batchConfig of options.creditBatches) {
-			const batchOptions: CreateCreditsBatchOptions = {
-				userId: user.id,
-				amount: batchConfig.amount,
-			};
-			if (batchConfig.expiresAt !== undefined) {
-				batchOptions.expiresAt = batchConfig.expiresAt;
-			}
-			const batch = await createTestCreditsBatch(batchOptions);
-			batches.push(batch);
-			totalCredits += batchConfig.amount;
-		}
-	} else if (options.initialCredits) {
-		const batch = await createTestCreditsBatch({
-			userId: user.id,
-			amount: options.initialCredits,
-		});
-		batches.push(batch);
-		totalCredits = options.initialCredits;
-	}
+  if (options.creditBatches) {
+    for (const batchConfig of options.creditBatches) {
+      const batchOptions: CreateCreditsBatchOptions = {
+        userId: user.id,
+        amount: batchConfig.amount,
+      };
+      if (batchConfig.expiresAt !== undefined) {
+        batchOptions.expiresAt = batchConfig.expiresAt;
+      }
+      const batch = await createTestCreditsBatch(batchOptions);
+      batches.push(batch);
+      totalCredits += batchConfig.amount;
+    }
+  } else if (options.initialCredits) {
+    const batch = await createTestCreditsBatch({
+      userId: user.id,
+      amount: options.initialCredits,
+    });
+    batches.push(batch);
+    totalCredits = options.initialCredits;
+  }
 
-	const balance = await createTestCreditsBalance({
-		userId: user.id,
-		balance: totalCredits,
-		totalEarned: totalCredits,
-	});
+  const balance = await createTestCreditsBalance({
+    userId: user.id,
+    balance: totalCredits,
+    totalEarned: totalCredits,
+  });
 
-	return { user, balance, batches };
+  return { user, balance, batches };
 }
 
 // ============================================
@@ -240,28 +240,28 @@ export async function createTestUserWithCredits(
  * 创建过去的日期
  */
 export function daysAgo(days: number): Date {
-	return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 }
 
 /**
  * 创建未来的日期
  */
 export function daysFromNow(days: number): Date {
-	return new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+  return new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 }
 
 /**
  * 创建过期的日期（1天前）
  */
 export function expiredDate(): Date {
-	return daysAgo(1);
+  return daysAgo(1);
 }
 
 /**
  * 创建即将过期的日期（1天后）
  */
 export function soonExpiringDate(): Date {
-	return daysFromNow(1);
+  return daysFromNow(1);
 }
 
 // ============================================
@@ -269,104 +269,104 @@ export function soonExpiringDate(): Date {
 // ============================================
 
 export interface CreateTestTicketOptions {
-	userId: string;
-	subject?: string;
-	category?: schema.TicketCategory;
-	priority?: schema.TicketPriority;
-	status?: schema.TicketStatus;
+  userId: string;
+  subject?: string;
+  category?: schema.TicketCategory;
+  priority?: schema.TicketPriority;
+  status?: schema.TicketStatus;
 }
 
 /**
  * 创建测试工单
  */
 export async function createTestTicket(
-	options: CreateTestTicketOptions
+  options: CreateTestTicketOptions
 ): Promise<schema.Ticket> {
-	const id = generateTestId("test_ticket");
+  const id = generateTestId("test_ticket");
 
-	const ticketData: schema.NewTicket = {
-		id,
-		userId: options.userId,
-		subject: options.subject ?? `Test Ticket ${Date.now()}`,
-		category: options.category ?? "other",
-		priority: options.priority ?? "medium",
-		status: options.status ?? "open",
-		createdAt: new Date(),
-		updatedAt: new Date(),
-	};
+  const ticketData: schema.NewTicket = {
+    id,
+    userId: options.userId,
+    subject: options.subject ?? `Test Ticket ${Date.now()}`,
+    category: options.category ?? "other",
+    priority: options.priority ?? "medium",
+    status: options.status ?? "open",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
 
-	const [ticket] = await testDb
-		.insert(schema.ticket)
-		.values(ticketData)
-		.returning();
+  const [ticket] = await testDb
+    .insert(schema.ticket)
+    .values(ticketData)
+    .returning();
 
-	if (!ticket) {
-		throw new Error("创建测试工单失败");
-	}
+  if (!ticket) {
+    throw new Error("创建测试工单失败");
+  }
 
-	return ticket;
+  return ticket;
 }
 
 export interface CreateTestTicketMessageOptions {
-	ticketId: string;
-	userId: string;
-	content?: string;
-	isAdminResponse?: boolean;
+  ticketId: string;
+  userId: string;
+  content?: string;
+  isAdminResponse?: boolean;
 }
 
 /**
  * 创建测试工单消息
  */
 export async function createTestTicketMessage(
-	options: CreateTestTicketMessageOptions
+  options: CreateTestTicketMessageOptions
 ): Promise<schema.TicketMessage> {
-	const id = generateTestId("test_message");
+  const id = generateTestId("test_message");
 
-	const messageData: schema.NewTicketMessage = {
-		id,
-		ticketId: options.ticketId,
-		userId: options.userId,
-		content: options.content ?? `Test message ${Date.now()}`,
-		isAdminResponse: options.isAdminResponse ?? false,
-		createdAt: new Date(),
-	};
+  const messageData: schema.NewTicketMessage = {
+    id,
+    ticketId: options.ticketId,
+    userId: options.userId,
+    content: options.content ?? `Test message ${Date.now()}`,
+    isAdminResponse: options.isAdminResponse ?? false,
+    createdAt: new Date(),
+  };
 
-	const [message] = await testDb
-		.insert(schema.ticketMessage)
-		.values(messageData)
-		.returning();
+  const [message] = await testDb
+    .insert(schema.ticketMessage)
+    .values(messageData)
+    .returning();
 
-	if (!message) {
-		throw new Error("创建测试工单消息失败");
-	}
+  if (!message) {
+    throw new Error("创建测试工单消息失败");
+  }
 
-	return message;
+  return message;
 }
 
 export interface CreateTestTicketWithMessageOptions
-	extends CreateTestTicketOptions {
-	message?: string;
+  extends CreateTestTicketOptions {
+  message?: string;
 }
 
 /**
  * 创建带初始消息的测试工单
  */
 export async function createTestTicketWithMessage(
-	options: CreateTestTicketWithMessageOptions
+  options: CreateTestTicketWithMessageOptions
 ): Promise<{
-	ticket: schema.Ticket;
-	message: schema.TicketMessage;
+  ticket: schema.Ticket;
+  message: schema.TicketMessage;
 }> {
-	const ticket = await createTestTicket(options);
+  const ticket = await createTestTicket(options);
 
-	const message = await createTestTicketMessage({
-		ticketId: ticket.id,
-		userId: options.userId,
-		content: options.message ?? "Initial test message",
-		isAdminResponse: false,
-	});
+  const message = await createTestTicketMessage({
+    ticketId: ticket.id,
+    userId: options.userId,
+    content: options.message ?? "Initial test message",
+    isAdminResponse: false,
+  });
 
-	return { ticket, message };
+  return { ticket, message };
 }
 
 // ============================================
@@ -374,46 +374,46 @@ export async function createTestTicketWithMessage(
 // ============================================
 
 export interface CreateTestSubscriptionOptions {
-	userId: string;
-	subscriptionId?: string;
-	priceId?: string;
-	status?: string;
-	currentPeriodStart?: Date;
-	currentPeriodEnd?: Date;
-	cancelAtPeriodEnd?: boolean;
+  userId: string;
+  subscriptionId?: string;
+  priceId?: string;
+  status?: string;
+  currentPeriodStart?: Date;
+  currentPeriodEnd?: Date;
+  cancelAtPeriodEnd?: boolean;
 }
 
 /**
  * 创建测试订阅
  */
 export async function createTestSubscription(
-	options: CreateTestSubscriptionOptions
+  options: CreateTestSubscriptionOptions
 ): Promise<schema.Subscription> {
-	const id = generateTestId("test_sub");
-	const now = new Date();
-	const thirtyDaysLater = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+  const id = generateTestId("test_sub");
+  const now = new Date();
+  const thirtyDaysLater = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
-	const subscriptionData: schema.NewSubscription = {
-		id,
-		userId: options.userId,
-		subscriptionId: options.subscriptionId ?? `sub_test_${Date.now()}`,
-		priceId: options.priceId ?? "price_test_monthly",
-		status: options.status ?? "active",
-		currentPeriodStart: options.currentPeriodStart ?? now,
-		currentPeriodEnd: options.currentPeriodEnd ?? thirtyDaysLater,
-		cancelAtPeriodEnd: options.cancelAtPeriodEnd ?? false,
-		createdAt: now,
-		updatedAt: now,
-	};
+  const subscriptionData: schema.NewSubscription = {
+    id,
+    userId: options.userId,
+    subscriptionId: options.subscriptionId ?? `sub_test_${Date.now()}`,
+    priceId: options.priceId ?? "price_test_monthly",
+    status: options.status ?? "active",
+    currentPeriodStart: options.currentPeriodStart ?? now,
+    currentPeriodEnd: options.currentPeriodEnd ?? thirtyDaysLater,
+    cancelAtPeriodEnd: options.cancelAtPeriodEnd ?? false,
+    createdAt: now,
+    updatedAt: now,
+  };
 
-	const [sub] = await testDb
-		.insert(schema.subscription)
-		.values(subscriptionData)
-		.returning();
+  const [sub] = await testDb
+    .insert(schema.subscription)
+    .values(subscriptionData)
+    .returning();
 
-	if (!sub) {
-		throw new Error("创建测试订阅失败");
-	}
+  if (!sub) {
+    throw new Error("创建测试订阅失败");
+  }
 
-	return sub;
+  return sub;
 }

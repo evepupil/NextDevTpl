@@ -1,19 +1,18 @@
-import Link from "next/link";
+import { desc, eq } from "drizzle-orm";
 import { Plus, Ticket } from "lucide-react";
-
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { db } from "@/db";
 import { ticket } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
-import { getServerSession } from "@/lib/auth/server";
-import { redirect } from "next/navigation";
 import {
   ticketCategories,
   ticketPriorities,
   ticketStatuses,
 } from "@/features/support/schemas";
+import { getServerSession } from "@/lib/auth/server";
 
 /**
  * 用户工单列表页面
@@ -48,7 +47,10 @@ export default async function SupportPage() {
       closed: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300",
     };
     return (
-      <Badge className={colorMap[status] || colorMap.closed} variant="secondary">
+      <Badge
+        className={colorMap[status] || colorMap.closed}
+        variant="secondary"
+      >
         {statusConfig?.label || status}
       </Badge>
     );
@@ -66,7 +68,10 @@ export default async function SupportPage() {
       high: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
     };
     return (
-      <Badge className={colorMap[priority] || colorMap.medium} variant="secondary">
+      <Badge
+        className={colorMap[priority] || colorMap.medium}
+        variant="secondary"
+      >
         {priorityConfig?.label || priority}
       </Badge>
     );
@@ -86,9 +91,7 @@ export default async function SupportPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">支持中心</h2>
-          <p className="text-muted-foreground">
-            查看和管理您的支持工单
-          </p>
+          <p className="text-muted-foreground">查看和管理您的支持工单</p>
         </div>
         <Link href="/dashboard/support/new">
           <Button>

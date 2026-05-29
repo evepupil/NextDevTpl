@@ -14,7 +14,14 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { createCreditsPurchaseCheckout } from "@/features/credits/actions";
 import { CREDIT_PACKAGES } from "@/features/credits/config";
@@ -81,9 +88,7 @@ export function BuyCreditPackagesView() {
             >
               {/* 热门标签 */}
               {isPopular && (
-                <Badge
-                  className="absolute -top-3 left-1/2 -translate-x-1/2 gap-1"
-                >
+                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 gap-1">
                   <Sparkles className="h-3 w-3" />
                   Most Popular
                 </Badge>
@@ -132,7 +137,9 @@ export function BuyCreditPackagesView() {
                   className="w-full"
                   variant={isPopular ? "default" : "outline"}
                   disabled={isPending}
-                  onClick={() => handlePurchase(pkg.id as "lite" | "standard" | "pro")}
+                  onClick={() =>
+                    handlePurchase(pkg.id as "lite" | "standard" | "pro")
+                  }
                 >
                   {isPending ? (
                     <>
@@ -151,7 +158,10 @@ export function BuyCreditPackagesView() {
 
       {/* 返回链接 */}
       <div className="text-center">
-        <Button variant="ghost" onClick={() => router.push("/dashboard/settings?tab=usage")}>
+        <Button
+          variant="ghost"
+          onClick={() => router.push("/dashboard/settings?tab=usage")}
+        >
           ← Back to Usage
         </Button>
       </div>

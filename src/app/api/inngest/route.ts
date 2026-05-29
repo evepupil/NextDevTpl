@@ -1,5 +1,5 @@
 import { serve } from "inngest/next";
-import { inngest, functions } from "@/inngest";
+import { functions, inngest } from "@/inngest";
 import { withApiLogging } from "@/lib/api-logger";
 
 /**

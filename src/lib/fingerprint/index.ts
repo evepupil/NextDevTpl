@@ -70,4 +70,4 @@ export function useDeviceFingerprint(): string | null {
 }
 
 // Need to import useState and useEffect for the hook
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";

@@ -12,10 +12,7 @@ export const updateProfileSchema = z.object({
     .min(2, "名称至少需要 2 个字符")
     .max(50, "名称最多 50 个字符")
     .optional(),
-  image: z
-    .string()
-    .max(255, "头像路径过长")
-    .optional(),
+  image: z.string().max(255, "头像路径过长").optional(),
 });
 
 /**

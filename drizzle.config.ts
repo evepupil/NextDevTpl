@@ -2,7 +2,8 @@ import dotenv from "dotenv";
 import { defineConfig } from "drizzle-kit";
 
 // 检测测试环境 (通过命令行参数或环境变量)
-const isTestEnv = process.argv.includes("--test") || process.env.USE_TEST_DB === "true";
+const isTestEnv =
+  process.argv.includes("--test") || process.env.USE_TEST_DB === "true";
 
 // 根据环境加载对应的环境变量文件
 if (isTestEnv) {

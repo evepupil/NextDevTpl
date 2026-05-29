@@ -90,11 +90,7 @@ export async function GET(
 
     // 生成签名 URL
     const provider = getStorageProvider();
-    const signedUrl = await provider.getSignedUrl(
-      key,
-      bucket,
-      CACHE_MAX_AGE
-    );
+    const signedUrl = await provider.getSignedUrl(key, bucket, CACHE_MAX_AGE);
 
     // 重定向到签名 URL
     // 设置缓存头，让浏览器/CDN 缓存响应

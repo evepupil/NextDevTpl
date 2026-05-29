@@ -1,24 +1,25 @@
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-
-import { CREDITS_EXPIRY_DAYS } from "@/features/credits/config";
-import { grantCredits } from "@/features/credits/core";
+import { SUBSCRIPTION_MONTHLY_CREDITS } from "@/config/payment";
+import { getPlanFromPriceId } from "@/config/subscription-plan";
 import { db } from "@/db";
 import { creditsBatch, subscription, user } from "@/db/schema";
+import { CREDITS_EXPIRY_DAYS } from "@/features/credits/config";
+import { grantCredits } from "@/features/credits/core";
 import {
-  constructCreemEvent,
   type CreemCheckoutCompletedData,
   type CreemSubscription,
+  constructCreemEvent,
 } from "@/features/payment/creem";
-import { getPlanFromPriceId } from "@/config/subscription-plan";
-import { SUBSCRIPTION_MONTHLY_CREDITS } from "@/config/payment";
-import { logError, logEvent } from "@/lib/logger";
 import { withApiLogging } from "@/lib/api-logger";
+import { logError, logEvent } from "@/lib/logger";
 
 /** 从 CreemSubscription 中安全提取产品 ID */
 function getProductId(sub: CreemSubscription): string {
-  return typeof sub.product === "string" ? sub.product : sub.product?.id ?? "";
+  return typeof sub.product === "string"
+    ? sub.product
+    : (sub.product?.id ?? "");
 }
 
 /**
@@ -60,7 +61,9 @@ export const POST = withApiLogging(async (req: Request) => {
       // Checkout 完成事件
       // ============================================
       case "checkout.completed": {
-        await handleCheckoutCompleted(event.object as CreemCheckoutCompletedData);
+        await handleCheckoutCompleted(
+          event.object as CreemCheckoutCompletedData
+        );
         break;
       }
 
@@ -127,10 +130,7 @@ async function handleCheckoutCompleted(data: CreemCheckoutCompletedData) {
   }
 
   // 更新用户的 customerId
-  await db
-    .update(user)
-    .set({ customerId })
-    .where(eq(user.id, userId));
+  await db.update(user).set({ customerId }).where(eq(user.id, userId));
 
   // 如果有订阅信息，创建订阅记录
   if (data.subscription) {
@@ -173,7 +173,11 @@ async function handleSubscriptionActive(sub: CreemSubscription) {
     }
 
     await updateSubscriptionStatus(sub);
-    await grantSubscriptionCredits(existingSub.userId, sub, "subscription_create");
+    await grantSubscriptionCredits(
+      existingSub.userId,
+      sub,
+      "subscription_create"
+    );
     logEvent("payment.subscription.created", {
       userId: existingSub.userId,
       subscriptionId: sub.id,
@@ -299,7 +303,10 @@ async function handleSubscriptionPaused(sub: CreemSubscription) {
 /**
  * 创建或更新订阅记录
  */
-async function createOrUpdateSubscription(userId: string, sub: CreemSubscription) {
+async function createOrUpdateSubscription(
+  userId: string,
+  sub: CreemSubscription
+) {
   const [existingSub] = await db
     .select()
     .from(subscription)
@@ -376,18 +383,23 @@ async function grantSubscriptionCredits(
     .where(
       and(
         eq(creditsBatch.sourceRef, periodKey),
-        eq(creditsBatch.sourceType, "subscription"),
+        eq(creditsBatch.sourceType, "subscription")
       )
     )
     .limit(1);
 
   if (existingBatch) {
-    console.log(`Credits already granted for subscription period: ${periodKey}, skipping`);
+    console.log(
+      `Credits already granted for subscription period: ${periodKey}, skipping`
+    );
     return;
   }
 
   // 获取该计划的月度积分配额
-  const monthlyCredits = SUBSCRIPTION_MONTHLY_CREDITS[planType as keyof typeof SUBSCRIPTION_MONTHLY_CREDITS];
+  const monthlyCredits =
+    SUBSCRIPTION_MONTHLY_CREDITS[
+      planType as keyof typeof SUBSCRIPTION_MONTHLY_CREDITS
+    ];
   if (!monthlyCredits) {
     console.error(`No monthly credits configured for plan: ${planType}`);
     return;
@@ -396,7 +408,9 @@ async function grantSubscriptionCredits(
   // 判断是否为年付（通过周期长度判断）
   const periodStart = new Date(sub.current_period_start_date);
   const periodEnd = new Date(sub.current_period_end_date);
-  const periodDays = Math.round((periodEnd.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24));
+  const periodDays = Math.round(
+    (periodEnd.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24)
+  );
   const isYearly = periodDays > 60; // 超过60天认为是年付
 
   // 计算应发放积分：月付发月度积分，年付发12个月积分

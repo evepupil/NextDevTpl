@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, PanelLeftClose, PanelLeft } from "lucide-react";
+import { Menu, PanelLeft, PanelLeftClose } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 
@@ -63,7 +63,7 @@ export function DashboardMainWrapper({
     <main
       className={cn(
         "p-2.5 min-h-screen transition-all duration-300",
-        isCollapsed ? "md:ml-16" : "md:ml-64",
+        isCollapsed ? "md:ml-16" : "md:ml-64"
       )}
     >
       {/* 卡片容器 - Linear style: clean background, subtle border */}
@@ -96,13 +96,13 @@ export function DashboardMainWrapper({
           <div className="h-4 w-px bg-border" />
 
           {/* 页面标题 */}
-          <span className="text-sm font-medium text-foreground">{pageTitle}</span>
+          <span className="text-sm font-medium text-foreground">
+            {pageTitle}
+          </span>
         </header>
 
         {/* 内容区域 */}
-        <div className="flex-1 p-6">
-          {children}
-        </div>
+        <div className="flex-1 p-6">{children}</div>
       </div>
     </main>
   );

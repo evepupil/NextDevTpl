@@ -1,11 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 
 import { db, user } from "@/db";
-import { protectedAction } from "@/lib/safe-action";
 import { updateProfileSchema } from "@/features/settings/schemas";
+import { protectedAction } from "@/lib/safe-action";
 
 /**
  * 更新用户资料 Server Action
@@ -38,10 +38,7 @@ export const updateProfileAction = protectedAction
     }
 
     // 使用 Drizzle 更新用户资料
-    await db
-      .update(user)
-      .set(updateData)
-      .where(eq(user.id, ctx.userId));
+    await db.update(user).set(updateData).where(eq(user.id, ctx.userId));
 
     // 刷新设置页面缓存，使 UI 更新
     revalidatePath("/dashboard/settings");

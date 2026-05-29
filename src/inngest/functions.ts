@@ -1,5 +1,5 @@
-import { inngest } from "./client";
 import { logger } from "@/lib/logger";
+import { inngest } from "./client";
 
 /**
  * Hello World 示例函数
@@ -22,7 +22,7 @@ export const helloWorld = inngest.createFunction(
     });
 
     return result;
-  },
+  }
 );
 
 /**

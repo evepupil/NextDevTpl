@@ -1,30 +1,31 @@
 // 配置模块统一导出
-export { siteConfig, type SiteConfig } from "./site";
+
 export {
-  // 类型
-  type NavItem,
-  type NavGroup,
-  type ProductNavItem,
-  type ProductNavGroup,
-  // Marketing 配置
-  mainNav,
-  productsNav,
-  footerNav,
-  marketingConfig,
-  // Dashboard 配置
-  dashboardNav,
-  dashboardConfig,
+  adminConfig,
   // Admin 配置
   adminNav,
-  adminConfig,
+  dashboardConfig,
+  // Dashboard 配置
+  dashboardNav,
+  footerNav,
+  // Marketing 配置
+  mainNav,
+  marketingConfig,
+  type NavGroup,
+  // 类型
+  type NavItem,
+  type ProductNavGroup,
+  type ProductNavItem,
+  productsNav,
 } from "./nav";
 export {
+  findPlanByPriceId,
+  getBaseUrl,
+  getPlanPrice,
+  getPricingConfig,
+  getPricingPlans,
+  PRICE_IDS,
   // 支付配置
   paymentConfig,
-  PRICE_IDS,
-  getPricingPlans,
-  getPricingConfig,
-  findPlanByPriceId,
-  getPlanPrice,
-  getBaseUrl,
 } from "./payment";
+export { type SiteConfig, siteConfig } from "./site";

@@ -1,7 +1,7 @@
 import { defineI18n } from "fumadocs-core/i18n";
 import { loader } from "fumadocs-core/source";
 
-import { docs, blog, legal } from "../../.source/server";
+import { blog, docs, legal } from "../../.source/server";
 
 export const docsI18n = defineI18n({
   languages: ["en", "zh"],

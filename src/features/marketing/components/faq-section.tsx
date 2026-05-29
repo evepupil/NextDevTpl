@@ -10,7 +10,10 @@ import {
 
 export function FAQSection() {
   const t = useTranslations("FAQ");
-  const faqItems = t.raw("items") as Array<{ question: string; answer: string }>;
+  const faqItems = t.raw("items") as Array<{
+    question: string;
+    answer: string;
+  }>;
 
   return (
     <section className="container py-24">

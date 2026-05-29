@@ -1,13 +1,13 @@
 import {
-  generateWebSiteSchema,
-  generateOrganizationSchema,
-  generateArticleSchema,
-  generateFAQSchema,
-  generateBreadcrumbSchema,
-  generateSoftwareApplicationSchema,
   type ArticleSchemaInput,
-  type FAQItem,
   type BreadcrumbItem,
+  type FAQItem,
+  generateArticleSchema,
+  generateBreadcrumbSchema,
+  generateFAQSchema,
+  generateOrganizationSchema,
+  generateSoftwareApplicationSchema,
+  generateWebSiteSchema,
 } from "@/lib/seo/json-ld";
 
 type LocaleType = "en" | "zh";

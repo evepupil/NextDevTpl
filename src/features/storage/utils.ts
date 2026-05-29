@@ -48,7 +48,9 @@ export function isExternalUrl(value: string | null | undefined): boolean {
  * getAvatarUrl(null) // => undefined
  * ```
  */
-export function getAvatarUrl(image: string | null | undefined): string | undefined {
+export function getAvatarUrl(
+  image: string | null | undefined
+): string | undefined {
   if (!image) {
     return undefined;
   }
@@ -59,7 +61,8 @@ export function getAvatarUrl(image: string | null | undefined): string | undefin
   }
 
   // 否则是存储键名，转换为 image-proxy URL
-  const avatarsBucket = process.env.NEXT_PUBLIC_AVATARS_BUCKET_NAME ?? "avatars";
+  const avatarsBucket =
+    process.env.NEXT_PUBLIC_AVATARS_BUCKET_NAME ?? "avatars";
   return `/image-proxy/${avatarsBucket}/${image}`;
 }
 

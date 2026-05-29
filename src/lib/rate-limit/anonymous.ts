@@ -13,7 +13,10 @@ import { headers } from "next/headers";
  */
 function getRedisClient(): Redis | null {
   try {
-    if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+    if (
+      process.env.UPSTASH_REDIS_REST_URL &&
+      process.env.UPSTASH_REDIS_REST_TOKEN
+    ) {
       return new Redis({
         url: process.env.UPSTASH_REDIS_REST_URL,
         token: process.env.UPSTASH_REDIS_REST_TOKEN,
@@ -79,10 +82,11 @@ export async function getClientIdentifier(): Promise<string> {
     }
 
     // 使用 IP 地址
-    const ip = headersList.get("x-forwarded-for") ||
-               headersList.get("x-real-ip") ||
-               headersList.get("cf-connecting-ip") ||
-               "unknown";
+    const ip =
+      headersList.get("x-forwarded-for") ||
+      headersList.get("x-real-ip") ||
+      headersList.get("cf-connecting-ip") ||
+      "unknown";
 
     // 简单的 IP 匿名化（去掉最后一段）
     const anonymizedIp = ip.replace(/(\d+\.\d+\.\d+)\.\d+/, "$1.0");
@@ -97,7 +101,11 @@ export async function getClientIdentifier(): Promise<string> {
  *
  * @returns 是否允许生成
  */
-export async function checkAnonymousQuota(): Promise<{ allowed: boolean; remaining: number; resetAt?: Date }> {
+export async function checkAnonymousQuota(): Promise<{
+  allowed: boolean;
+  remaining: number;
+  resetAt?: Date;
+}> {
   const redis = getRedisClient();
 
   if (!redis) {
@@ -111,7 +119,7 @@ export async function checkAnonymousQuota(): Promise<{ allowed: boolean; remaini
     const key = getRateLimitKey(identifier);
 
     // 获取当前计数
-    const current = await redis.get<number>(key) ?? 0;
+    const current = (await redis.get<number>(key)) ?? 0;
 
     if (current >= ANONYMOUS_QUOTA.MAX_GENERATIONS) {
       // 获取过期时间
@@ -174,7 +182,7 @@ export async function getRemainingQuota(): Promise<number> {
   try {
     const identifier = await getClientIdentifier();
     const key = getRateLimitKey(identifier);
-    const current = await redis.get<number>(key) ?? 0;
+    const current = (await redis.get<number>(key)) ?? 0;
     return Math.max(0, ANONYMOUS_QUOTA.MAX_GENERATIONS - current);
   } catch {
     return ANONYMOUS_QUOTA.MAX_GENERATIONS;

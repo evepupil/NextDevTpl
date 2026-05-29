@@ -1,21 +1,20 @@
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { eq } from "drizzle-orm";
-
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { db } from "@/db";
 import { ticket, ticketMessage, user } from "@/db/schema";
+import { AdminTicketReplyForm } from "@/features/support/components/admin-ticket-reply-form";
+import { AdminTicketStatusSelect } from "@/features/support/components/admin-ticket-status-select";
 import {
   ticketCategories,
   ticketPriorities,
   ticketStatuses,
 } from "@/features/support/schemas";
-import { AdminTicketReplyForm } from "@/features/support/components/admin-ticket-reply-form";
-import { AdminTicketStatusSelect } from "@/features/support/components/admin-ticket-status-select";
 
 interface AdminTicketDetailPageProps {
   params: Promise<{
@@ -89,7 +88,10 @@ export default async function AdminTicketDetailPage({
       closed: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300",
     };
     return (
-      <Badge className={colorMap[status] || colorMap.closed} variant="secondary">
+      <Badge
+        className={colorMap[status] || colorMap.closed}
+        variant="secondary"
+      >
         {statusConfig?.label || status}
       </Badge>
     );
@@ -107,7 +109,10 @@ export default async function AdminTicketDetailPage({
       high: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
     };
     return (
-      <Badge className={colorMap[priority] || colorMap.medium} variant="secondary">
+      <Badge
+        className={colorMap[priority] || colorMap.medium}
+        variant="secondary"
+      >
         {priorityConfig?.label || priority}
       </Badge>
     );
@@ -147,8 +152,8 @@ export default async function AdminTicketDetailPage({
             {ticketData.subject}
           </h2>
           <p className="text-muted-foreground">
-            {getCategoryLabel(ticketData.category)} ·{" "}
-            创建于 {new Date(ticketData.createdAt).toLocaleDateString("zh-CN")}
+            {getCategoryLabel(ticketData.category)} · 创建于{" "}
+            {new Date(ticketData.createdAt).toLocaleDateString("zh-CN")}
           </p>
         </div>
         <div className="flex items-center gap-2">

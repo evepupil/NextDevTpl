@@ -5,10 +5,10 @@
  */
 
 import {
-  PaymentType,
-  PlanInterval,
   type PaymentConfig,
+  PaymentType,
   type Plan,
+  PlanInterval,
   type PriceConfig,
   type PricingConfig,
 } from "@/features/payment/types";
@@ -135,9 +135,7 @@ export const paymentConfig: PaymentConfig = {
  *
  * 返回用于定价页面展示的完整计划信息
  */
-export function getPricingPlans(
-  _t?: (key: string) => string
-): Plan[] {
+export function getPricingPlans(_t?: (key: string) => string): Plan[] {
   const plans: Plan[] = [];
   const config = paymentConfig;
 
@@ -230,7 +228,8 @@ export function getPricingPlans(
 export function getPricingConfig(): PricingConfig {
   return {
     title: "Simple, transparent pricing",
-    subtitle: "Start free, upgrade when you need more. Save 40% with yearly billing.",
+    subtitle:
+      "Start free, upgrade when you need more. Save 40% with yearly billing.",
     frequencies: ["Monthly", "Yearly"],
     yearlyDiscount: paymentConfig.yearlyDiscount,
     plans: getPricingPlans(),

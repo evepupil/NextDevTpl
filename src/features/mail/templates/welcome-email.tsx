@@ -79,8 +79,7 @@ export function WelcomeEmail({ name, dashboardUrl }: WelcomeEmailProps) {
               </Text>
               <Text className="m-0 text-sm text-gray-600">
                 • Upload PDF, Word, or Markdown files to generate flashcards
-                <br />
-                • Paste text or URLs to create cards instantly
+                <br />• Paste text or URLs to create cards instantly
                 <br />• Export to Anki format for spaced repetition learning
               </Text>
             </Section>

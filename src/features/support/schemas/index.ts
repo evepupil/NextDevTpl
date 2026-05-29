@@ -1,15 +1,15 @@
 // 工单 Schema 模块导出
 export {
-  // Schema
-  createTicketSchema,
+  type AddTicketMessageInput,
   addTicketMessageSchema,
-  updateTicketStatusSchema,
   // 类型
   type CreateTicketInput,
-  type AddTicketMessageInput,
-  type UpdateTicketStatusInput,
+  // Schema
+  createTicketSchema,
   // 选项配置
   ticketCategories,
   ticketPriorities,
   ticketStatuses,
+  type UpdateTicketStatusInput,
+  updateTicketStatusSchema,
 } from "./ticket";

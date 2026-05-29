@@ -38,9 +38,7 @@ export function CookieSettingsCard() {
     <Card className="rounded-xl">
       <CardHeader>
         <CardTitle className="text-base">{t("card.title")}</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          {t("card.description")}
-        </p>
+        <p className="text-sm text-muted-foreground">{t("card.description")}</p>
       </CardHeader>
       <CardContent className="space-y-4">
         {cookieOptions.map((option) => (

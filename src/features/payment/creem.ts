@@ -41,7 +41,16 @@ export interface CreemSubscription {
   /** 订阅状态 */
   status: "active" | "canceled" | "past_due" | "trialing" | "paused";
   /** 产品（可能是 ID 字符串或完整对象） */
-  product: string | { id: string; name?: string; price?: number; currency?: string; billing_type?: string; billing_period?: string };
+  product:
+    | string
+    | {
+        id: string;
+        name?: string;
+        price?: number;
+        currency?: string;
+        billing_type?: string;
+        billing_period?: string;
+      };
   /** 客户（可能是 ID 字符串或完整对象） */
   customer: string | { id: string; email?: string; name?: string };
   /** 当前周期开始时间 (ISO 8601) */
@@ -138,7 +147,9 @@ export const creem = {
    * @param params - Checkout 参数
    * @returns Checkout 响应（包含重定向 URL）
    */
-  async createCheckout(params: CreemCheckoutParams): Promise<CreemCheckoutResponse> {
+  async createCheckout(
+    params: CreemCheckoutParams
+  ): Promise<CreemCheckoutResponse> {
     const res = await fetch(`${CREEM_API_BASE}/checkouts`, {
       method: "POST",
       headers: {
@@ -163,11 +174,14 @@ export const creem = {
    * @returns 订阅信息
    */
   async getSubscription(subscriptionId: string): Promise<CreemSubscription> {
-    const res = await fetch(`${CREEM_API_BASE}/subscriptions/${subscriptionId}`, {
-      headers: {
-        "x-api-key": process.env.CREEM_API_KEY ?? "",
-      },
-    });
+    const res = await fetch(
+      `${CREEM_API_BASE}/subscriptions/${subscriptionId}`,
+      {
+        headers: {
+          "x-api-key": process.env.CREEM_API_KEY ?? "",
+        },
+      }
+    );
 
     if (!res.ok) {
       const error = await res.text();
@@ -184,12 +198,15 @@ export const creem = {
    * @returns 更新后的订阅信息
    */
   async cancelSubscription(subscriptionId: string): Promise<CreemSubscription> {
-    const res = await fetch(`${CREEM_API_BASE}/subscriptions/${subscriptionId}/cancel`, {
-      method: "POST",
-      headers: {
-        "x-api-key": process.env.CREEM_API_KEY ?? "",
-      },
-    });
+    const res = await fetch(
+      `${CREEM_API_BASE}/subscriptions/${subscriptionId}/cancel`,
+      {
+        method: "POST",
+        headers: {
+          "x-api-key": process.env.CREEM_API_KEY ?? "",
+        },
+      }
+    );
 
     if (!res.ok) {
       const error = await res.text();

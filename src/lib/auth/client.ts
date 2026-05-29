@@ -43,7 +43,10 @@ export const {
  * @param email - 用户邮箱
  * @param redirectTo - 重置链接的跳转地址
  */
-export async function forgetPassword(email: string, redirectTo = "/reset-password") {
+export async function forgetPassword(
+  email: string,
+  redirectTo = "/reset-password"
+) {
   const baseURL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
   const response = await fetch(`${baseURL}/api/auth/forget-password`, {
@@ -157,7 +160,10 @@ export async function signUpWithEmail(
  * @param currentPassword - 当前密码
  * @param newPassword - 新密码
  */
-export async function changePassword(currentPassword: string, newPassword: string) {
+export async function changePassword(
+  currentPassword: string,
+  newPassword: string
+) {
   const baseURL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
   const response = await fetch(`${baseURL}/api/auth/change-password`, {

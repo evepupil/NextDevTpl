@@ -28,7 +28,7 @@ export const FILE_EXTENSIONS: Record<string, SupportedFileType> = {
  * 从文件名获取文件类型
  */
 export function getFileTypeFromName(
-  filename: string,
+  filename: string
 ): SupportedFileType | null {
   const ext = filename.toLowerCase().match(/\.[^.]+$/)?.[0];
   if (!ext) return null;
@@ -39,7 +39,7 @@ export function getFileTypeFromName(
  * 从 MIME 类型获取文件类型
  */
 export function getFileTypeFromMime(
-  mimeType: string,
+  mimeType: string
 ): SupportedFileType | null {
   return FILE_MIME_TYPES[mimeType] || null;
 }

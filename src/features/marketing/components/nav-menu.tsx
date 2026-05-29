@@ -3,8 +3,8 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useRef, useState } from "react";
 
 import {
   NavigationMenu,
@@ -74,7 +74,7 @@ export function NavMenu() {
 
   const handleClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
-    href: string,
+    href: string
   ) => {
     if (href.startsWith("/#")) {
       const anchor = href.substring(2);
@@ -118,7 +118,7 @@ export function NavMenu() {
               "relative inline-flex h-9 items-center justify-center gap-1 px-4 py-2 text-sm font-medium transition-colors",
               productsOpen
                 ? "text-foreground"
-                : "text-muted-foreground hover:text-foreground",
+                : "text-muted-foreground hover:text-foreground"
             )}
             onMouseEnter={() => setHoveredItem("products")}
           >
@@ -133,7 +133,7 @@ export function NavMenu() {
             <ChevronDown
               className={cn(
                 "h-3.5 w-3.5 transition-transform duration-200",
-                productsOpen && "rotate-180",
+                productsOpen && "rotate-180"
               )}
             />
           </button>
@@ -155,9 +155,7 @@ export function NavMenu() {
                     {productsNav.map((group) => (
                       <div key={group.title}>
                         <h4 className="mb-3 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                          {t(
-                            productsTitleMap[group.title] || group.title,
-                          )}
+                          {t(productsTitleMap[group.title] || group.title)}
                         </h4>
                         <div className="space-y-1">
                           {group.items.map((item) => {
@@ -173,14 +171,12 @@ export function NavMenu() {
                                 <div>
                                   <div className="text-sm font-medium">
                                     {t(
-                                      productsTitleMap[item.title] ||
-                                        item.title,
+                                      productsTitleMap[item.title] || item.title
                                     )}
                                   </div>
                                   <div className="text-xs text-muted-foreground">
                                     {t(
-                                      productsDescMap[item.title] ||
-                                        item.title,
+                                      productsDescMap[item.title] || item.title
                                     )}
                                   </div>
                                 </div>
@@ -211,7 +207,7 @@ export function NavMenu() {
                     "relative inline-flex h-9 items-center justify-center px-4 py-2 text-sm font-medium transition-colors",
                     active
                       ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground",
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                 >
                   {hoveredItem === item.href && (

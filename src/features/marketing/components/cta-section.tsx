@@ -1,8 +1,8 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 export function CTASection() {
@@ -46,9 +46,7 @@ export function CTASection() {
                 className="text-primary-foreground hover:bg-white/10 hover:text-primary-foreground"
                 asChild
               >
-                <Link href="/dashboard/generate">
-                  {t("seeDemo")}
-                </Link>
+                <Link href="/dashboard/generate">{t("seeDemo")}</Link>
               </Button>
             </div>
           </div>

@@ -1,16 +1,16 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { and, desc, eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 
 import { db } from "@/db";
 import { ticket, ticketMessage, user } from "@/db/schema";
-import { adminAction, protectedAction } from "@/lib/safe-action";
 import {
-  createTicketSchema,
   addTicketMessageSchema,
+  createTicketSchema,
   updateTicketStatusSchema,
 } from "@/features/support/schemas";
+import { adminAction, protectedAction } from "@/lib/safe-action";
 
 const withTicketAction = (name: string) =>
   protectedAction.metadata({ action: `support.${name}` });
@@ -64,23 +64,25 @@ export const createTicketAction = withTicketAction("createTicket")
 /**
  * 获取用户的工单列表
  */
-export const getMyTicketsAction = withTicketAction("getMyTickets").action(async ({ ctx }) => {
-  const tickets = await db
-    .select({
-      id: ticket.id,
-      subject: ticket.subject,
-      category: ticket.category,
-      priority: ticket.priority,
-      status: ticket.status,
-      createdAt: ticket.createdAt,
-      updatedAt: ticket.updatedAt,
-    })
-    .from(ticket)
-    .where(eq(ticket.userId, ctx.userId))
-    .orderBy(desc(ticket.createdAt));
+export const getMyTicketsAction = withTicketAction("getMyTickets").action(
+  async ({ ctx }) => {
+    const tickets = await db
+      .select({
+        id: ticket.id,
+        subject: ticket.subject,
+        category: ticket.category,
+        priority: ticket.priority,
+        status: ticket.status,
+        createdAt: ticket.createdAt,
+        updatedAt: ticket.updatedAt,
+      })
+      .from(ticket)
+      .where(eq(ticket.userId, ctx.userId))
+      .orderBy(desc(ticket.createdAt));
 
-  return { tickets };
-});
+    return { tickets };
+  }
+);
 
 /**
  * 获取工单详情 (用户端)
@@ -178,7 +180,9 @@ export const addTicketMessageAction = withTicketAction("addTicketMessage")
 /**
  * 获取所有工单列表 (管理员)
  */
-export const getAllTicketsAction = withAdminTicketAction("getAllTickets").action(async () => {
+export const getAllTicketsAction = withAdminTicketAction(
+  "getAllTickets"
+).action(async () => {
   const tickets = await db
     .select({
       id: ticket.id,
@@ -207,7 +211,9 @@ export const getAllTicketsAction = withAdminTicketAction("getAllTickets").action
  *
  * 管理员可以查看任何工单
  */
-export const getAdminTicketDetailAction = withAdminTicketAction("getAdminTicketDetail")
+export const getAdminTicketDetailAction = withAdminTicketAction(
+  "getAdminTicketDetail"
+)
   .schema(addTicketMessageSchema.pick({ ticketId: true }))
   .action(async ({ parsedInput: { ticketId } }) => {
     // 获取工单信息（包含用户信息）
@@ -307,7 +313,9 @@ export const adminReplyTicketAction = withAdminTicketAction("replyTicket")
 /**
  * 更新工单状态 (管理员)
  */
-export const updateTicketStatusAction = withAdminTicketAction("updateTicketStatus")
+export const updateTicketStatusAction = withAdminTicketAction(
+  "updateTicketStatus"
+)
   .schema(updateTicketStatusSchema)
   .action(async ({ parsedInput: data }) => {
     // 验证工单存在

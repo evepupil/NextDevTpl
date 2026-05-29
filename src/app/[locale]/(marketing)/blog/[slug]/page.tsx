@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-
+import { ArticleJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { siteConfig } from "@/config";
 import { Link } from "@/i18n/routing";
 import { getAllBlogSlugs, getBlogPost } from "@/lib/source";
-import { ArticleJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
 
 /**
  * 生成静态参数

@@ -1,4 +1,7 @@
-import { DashboardSidebar, DashboardMainWrapper } from "@/features/dashboard/components";
+import {
+  DashboardMainWrapper,
+  DashboardSidebar,
+} from "@/features/dashboard/components";
 import { SidebarProvider } from "@/features/dashboard/context";
 
 export default function DashboardLayout({

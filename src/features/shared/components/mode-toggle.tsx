@@ -34,7 +34,10 @@ interface ModeToggleProps {
   className?: string;
 }
 
-export function ModeToggle({ variant = "dropdown", className }: ModeToggleProps) {
+export function ModeToggle({
+  variant = "dropdown",
+  className,
+}: ModeToggleProps) {
   const { theme, setTheme } = useTheme();
 
   // 内联按钮模式

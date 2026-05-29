@@ -1,7 +1,6 @@
 import { toNextJsHandler } from "better-auth/next-js";
-
-import { auth } from "@/lib/auth/index";
 import { withApiLogging } from "@/lib/api-logger";
+import { auth } from "@/lib/auth/index";
 
 /**
  * Better Auth API 路由处理器

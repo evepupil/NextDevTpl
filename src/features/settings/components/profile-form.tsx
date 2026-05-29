@@ -26,9 +26,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  updateProfileAction,
-} from "@/features/settings/actions";
+import { updateProfileAction } from "@/features/settings/actions";
 import { updateProfileSchema } from "@/features/settings/schemas";
 
 /**

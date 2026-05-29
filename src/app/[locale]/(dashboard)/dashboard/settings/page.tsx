@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
-
-import { getServerSession } from "@/lib/auth/server";
 import { SettingsProfileView } from "@/features/settings/components";
+import { getServerSession } from "@/lib/auth/server";
 
 /**
  * 设置页面元数据
@@ -22,7 +21,7 @@ export default async function SettingsPage() {
   const session = await getServerSession();
 
   // 如果用户未登录，重定向到登录页
-  if (!session || !session.user) {
+  if (!session?.user) {
     redirect("/sign-in");
   }
 
