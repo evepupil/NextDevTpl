@@ -2,7 +2,7 @@
  * 积分账户管理
  */
 
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import { creditsBalance } from "@/db/schema";

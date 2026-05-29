@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Link } from "@/i18n/routing";
 import {
   COOKIE_CONSENT_CHANGE_EVENT,
   COOKIE_CONSENT_KEY,
@@ -12,7 +13,6 @@ import {
   type CookieConsentType,
   type CookiePreferences,
 } from "@/lib/cookie-consent";
-import { Link } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
 /**

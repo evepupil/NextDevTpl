@@ -26,9 +26,13 @@ export const siteConfig = {
 
   /** 社交链接 */
   links: {
-    twitter: process.env.NEXT_PUBLIC_TWITTER_URL || "https://twitter.com/example",
-    github: process.env.NEXT_PUBLIC_GITHUB_URL || "https://github.com/example/nextdevtpl",
-    discord: process.env.NEXT_PUBLIC_DISCORD_URL || "https://discord.gg/example",
+    twitter:
+      process.env.NEXT_PUBLIC_TWITTER_URL || "https://twitter.com/example",
+    github:
+      process.env.NEXT_PUBLIC_GITHUB_URL ||
+      "https://github.com/example/nextdevtpl",
+    discord:
+      process.env.NEXT_PUBLIC_DISCORD_URL || "https://discord.gg/example",
   },
 
   /** 关键词 (SEO) */

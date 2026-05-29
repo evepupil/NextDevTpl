@@ -151,7 +151,10 @@ export const footerNav = {
   product: [
     { title: "Pricing", href: "/#pricing" },
     { title: "Changelog", href: "/blog" },
-    { title: "Contact Us", href: `mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "hello@example.com"}` },
+    {
+      title: "Contact Us",
+      href: `mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "hello@example.com"}`,
+    },
   ] as NavItem[],
 
   /** 法律 (Legal) */

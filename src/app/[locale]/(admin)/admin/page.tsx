@@ -55,7 +55,9 @@ export default async function AdminDashboardPage() {
     totalSubscriptionsResult,
   ] = await Promise.all([
     // 用户统计
-    db.select({ count: count() }).from(user),
+    db
+      .select({ count: count() })
+      .from(user),
     db.select({ count: count() }).from(user).where(eq(user.role, "admin")),
     db.select({ count: count() }).from(user).where(eq(user.banned, true)),
     db
@@ -64,7 +66,10 @@ export default async function AdminDashboardPage() {
       .where(gte(user.createdAt, weekStart)),
 
     // 工单统计
-    db.select({ count: count() }).from(ticket).where(eq(ticket.status, "open")),
+    db
+      .select({ count: count() })
+      .from(ticket)
+      .where(eq(ticket.status, "open")),
     db
       .select({ count: count() })
       .from(ticket)
@@ -76,7 +81,9 @@ export default async function AdminDashboardPage() {
       .where(gte(ticket.createdAt, todayStart)),
 
     // 积分统计
-    db.select({ total: sum(creditsBalance.balance) }).from(creditsBalance),
+    db
+      .select({ total: sum(creditsBalance.balance) })
+      .from(creditsBalance),
     db.select({ total: sum(creditsBalance.totalEarned) }).from(creditsBalance),
     db.select({ total: sum(creditsBalance.totalSpent) }).from(creditsBalance),
 

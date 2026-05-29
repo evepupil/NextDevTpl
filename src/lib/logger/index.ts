@@ -151,7 +151,14 @@ export type BusinessEvent =
   | "file.uploaded"
   | "file.deleted"
   | "admin.user.banned"
-  | "admin.user.unbanned";
+  | "admin.user.unbanned"
+  | "webhook.creem.unhandled"
+  | "webhook.creem.subscription.past_due"
+  | "webhook.creem.subscription.paused"
+  | "webhook.creem.subscription.upserted"
+  | "webhook.creem.credits.granted"
+  | "webhook.creem.credits.already_granted"
+  | "webhook.creem.credits.grant_success";
 
 /**
  * 记录业务事件

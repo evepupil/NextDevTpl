@@ -7,14 +7,13 @@ import { db } from "@/db";
 import { creditsBatch, subscription, user } from "@/db/schema";
 import { CREDITS_EXPIRY_DAYS } from "@/features/credits/config";
 import { grantCredits } from "@/features/credits/core";
-import { logError, logEvent, logWarn } from "@/lib/logger";
 import {
   type CreemCheckoutCompletedData,
   type CreemSubscription,
   constructCreemEvent,
 } from "@/features/payment/creem";
 import { withApiLogging } from "@/lib/api-logger";
-import { logError, logEvent } from "@/lib/logger";
+import { logError, logEvent, logWarn } from "@/lib/logger";
 
 /** 从 CreemSubscription 中安全提取产品 ID */
 function getProductId(sub: CreemSubscription): string {
@@ -169,7 +168,9 @@ async function handleSubscriptionActive(sub: CreemSubscription) {
       .limit(1);
 
     if (!existingSub) {
-      logError("Cannot find userId for subscription", { subscriptionId: sub.id });
+      logError("Cannot find userId for subscription", {
+        subscriptionId: sub.id,
+      });
       return;
     }
 

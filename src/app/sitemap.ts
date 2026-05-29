@@ -56,21 +56,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // Blog posts (dynamic)
   const blogSlugs = getAllBlogSlugs();
-  const blogRoutes = blogSlugs.map(({ locale, slug }) => ({
-    url: `${baseUrl}/${locale}/blog/${slug}`,
-    lastModified: now,
-    changeFrequency: "monthly" as const,
-    priority: 0.7,
-  }));
+  const blogRoutes = blogSlugs.map(
+    ({ locale, slug }: { locale: string; slug: string }) => ({
+      url: `${baseUrl}/${locale}/blog/${slug}`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    })
+  );
 
   // Legal pages (dynamic)
   const legalSlugs = getAllLegalSlugs();
-  const legalRoutes = legalSlugs.map(({ locale, slug }) => ({
-    url: `${baseUrl}/${locale}/legal/${slug}`,
-    lastModified: now,
-    changeFrequency: "yearly" as const,
-    priority: 0.3,
-  }));
+  const legalRoutes = legalSlugs.map(
+    ({ locale, slug }: { locale: string; slug: string }) => ({
+      url: `${baseUrl}/${locale}/legal/${slug}`,
+      lastModified: now,
+      changeFrequency: "yearly" as const,
+      priority: 0.3,
+    })
+  );
 
   const pseoSlugs = getAllPseoParams();
   const pseoRoutes = pseoSlugs.map(({ locale, slug }) => ({

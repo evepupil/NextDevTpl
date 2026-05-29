@@ -212,7 +212,7 @@ describe("Profile Update - Image", () => {
     const testUser = await createTestUser();
     createdUserIds.push(testUser.id);
 
-    const longPath = "avatars/" + "a".repeat(247); // 255 characters total
+    const longPath = `avatars/${"a".repeat(247)}`; // 255 characters total
     await expect(
       updateProfile(testUser.id, { image: longPath })
     ).resolves.not.toThrow();

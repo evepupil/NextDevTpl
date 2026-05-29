@@ -1,13 +1,12 @@
 export {
+  adminReplyTicketAction,
+  getAdminTicketDetailAction,
+  getAllTicketsAction,
+  updateTicketStatusAction,
+} from "./admin-ticket";
+export {
   addTicketMessageAction,
   createTicketAction,
   getMyTicketsAction,
   getTicketDetailAction,
 } from "./user-ticket";
-
-export {
-  adminReplyTicketAction,
-  getAllTicketsAction,
-  getAdminTicketDetailAction,
-  updateTicketStatusAction,
-} from "./admin-ticket";

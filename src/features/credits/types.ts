@@ -2,10 +2,7 @@
  * 积分系统类型定义
  */
 
-import type {
-  CreditsBatchSource,
-  CreditsTransactionType,
-} from "@/db/schema";
+import type { CreditsBatchSource, CreditsTransactionType } from "@/db/schema";
 
 /**
  * 发放积分参数
