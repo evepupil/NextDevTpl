@@ -5,7 +5,7 @@ set -euo pipefail
 export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 
-APP_NAME="${APP_NAME:-NextjsTpl}"
+APP_NAME="${APP_NAME:-NextDevTpl}"
 APP_DIR="${APP_DIR:-$(pwd)}"
 PORT="${PORT:-3303}"
 PACKAGE_MANAGER="${PACKAGE_MANAGER:-pnpm}"

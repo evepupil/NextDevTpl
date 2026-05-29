@@ -2,11 +2,11 @@
 setlocal EnableExtensions EnableDelayedExpansion
 
 rem === Config ===
-set "APP_NAME=NextjsTpl"
+set "APP_NAME=NextDevTpl"
 set "REMOTE_USER=ubuntu"
 set "REMOTE_HOST=<your-server>"
 set "REMOTE_PORT=22"
-set "REMOTE_DIR=/home/ubuntu/NextjsTpl"
+set "REMOTE_DIR=/home/ubuntu/NextDevTpl"
 set "SSH_KEY=%USERPROFILE%\.ssh\id_ed25519"
 set "PORT=3303"
 set "PACKAGE_MANAGER=pnpm"
