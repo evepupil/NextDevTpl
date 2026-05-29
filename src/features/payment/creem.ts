@@ -233,7 +233,7 @@ export const creem = {
  * @param secret - Webhook 密钥
  * @returns 是否验证通过
  */
-export function verifyCreemWebhookSignature(
+function verifyCreemWebhookSignature(
   payload: string,
   signature: string,
   secret: string

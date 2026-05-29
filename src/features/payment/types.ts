@@ -120,7 +120,7 @@ export interface Plan extends PlanConfig, PlanDisplayInfo {}
  */
 export interface PaymentConfig {
   /** 支付提供商 */
-  provider: "stripe" | "creem";
+  provider: "creem";
   /** 货币 */
   currency: string;
   /** 年付折扣百分比 */

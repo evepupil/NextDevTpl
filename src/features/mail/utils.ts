@@ -175,48 +175,4 @@ export async function sendEmail(params: SendEmailParams): Promise<SendEmailResul
   }
 }
 
-/**
- * 批量发送邮件
- *
- * 向多个收件人发送相同内容的邮件
- * 每个收件人会收到独立的邮件
- *
- * @example
- * ```ts
- * const results = await sendBulkEmail({
- *   recipients: ["a@example.com", "b@example.com"],
- *   subject: "Newsletter",
- *   react: <NewsletterEmail />,
- * });
- * ```
- */
-export async function sendBulkEmail(params: {
-  recipients: string[];
-  subject: string;
-  react: ReactElement;
-  from?: string;
-  force?: boolean;
-}): Promise<{ sent: number; failed: number; results: SendEmailResult[] }> {
-  const { recipients, ...emailParams } = params;
 
-  const results: SendEmailResult[] = [];
-  let sent = 0;
-  let failed = 0;
-
-  for (const recipient of recipients) {
-    const result = await sendEmail({
-      to: recipient,
-      ...emailParams,
-    });
-
-    results.push(result);
-
-    if (result.success) {
-      sent++;
-    } else {
-      failed++;
-    }
-  }
-
-  return { sent, failed, results };
-}

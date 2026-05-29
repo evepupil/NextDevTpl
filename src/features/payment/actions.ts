@@ -69,39 +69,6 @@ export const createCheckoutSession = protectedAction
   });
 
 /**
- * 创建订阅管理链接
- *
- * Creem 不提供类似 Stripe Customer Portal 的功能
- * 用户需要通过 Creem 的订阅管理页面或联系支持来管理订阅
- * 这里返回 null，前端可以显示取消订阅按钮或联系支持链接
- */
-export const createCustomerPortal = protectedAction
-  .metadata({ action: "payment.createCustomerPortal" })
-  .schema(
-    z.object({
-      returnUrl: z.string().optional(),
-    }).optional()
-  )
-  .action(async ({ ctx }) => {
-    const { userId } = ctx;
-
-    // 查询用户的订阅
-    const [userSubscription] = await db
-      .select({ subscriptionId: subscription.subscriptionId })
-      .from(subscription)
-      .where(eq(subscription.userId, userId))
-      .limit(1);
-
-    if (!userSubscription?.subscriptionId) {
-      throw new Error("您还没有订阅任何计划");
-    }
-
-    // Creem 没有 Customer Portal，返回 null
-    // 前端可以显示取消订阅按钮或联系支持链接
-    return { url: null, subscriptionId: userSubscription.subscriptionId };
-  });
-
-/**
  * 取消订阅
  *
  * 调用 Creem API 取消用户的订阅

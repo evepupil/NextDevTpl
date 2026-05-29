@@ -101,45 +101,4 @@ export const getSignedUploadUrlAction = withStorageAction("getSignedUploadUrl")
     };
   });
 
-/**
- * 删除文件
- *
- * 受保护的 Action - 需要用户登录
- * 用户只能删除自己的文件
- */
-export const deleteFileAction = withStorageAction("deleteFile")
-  .schema(
-    z.object({
-      /** 文件键名 */
-      key: z.string().min(1, "文件键名不能为空"),
-      /** 存储桶名称 (可选，默认使用头像桶) */
-      bucket: z.string().optional(),
-    })
-  )
-  .action(async ({ parsedInput, ctx }) => {
-    const { key, bucket: inputBucket } = parsedInput;
-    const { userId } = ctx;
 
-    // 确定使用的存储桶
-    const bucket = inputBucket ?? getAvatarsBucket();
-
-    // 安全检查：验证存储桶在白名单中
-    const allowedBuckets = getAllowedBuckets();
-    if (!allowedBuckets.includes(bucket)) {
-      throw new Error("不允许访问该存储桶");
-    }
-
-    // 安全检查：确保用户只能删除自己的文件
-    if (!key.includes(userId)) {
-      throw new Error("无权删除此文件");
-    }
-
-    // 删除文件
-    const provider = getStorageProvider();
-    await provider.deleteObject(key, bucket);
-
-    return {
-      success: true,
-      key,
-    };
-  });
