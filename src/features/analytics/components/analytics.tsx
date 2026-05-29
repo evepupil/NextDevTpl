@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import {
   COOKIE_CONSENT_CHANGE_EVENT,
   COOKIE_CONSENT_KEY,
-} from "@/features/marketing/constants";
+} from "@/lib/cookie-consent";
 
 /**
  * Analytics 组件

@@ -13,9 +13,7 @@ export type CookieConsentType = "all" | "essential" | null;
  * Cookie 偏好设置
  */
 export interface CookiePreferences {
-  /** 分析 Cookie */
   analytics: boolean;
-  /** 营销 Cookie */
   marketing: boolean;
 }
 
