@@ -261,7 +261,11 @@ export function constructCreemEvent(
   payload: string,
   signature: string
 ): CreemWebhookEvent {
-  const secret = process.env.CREEM_WEBHOOK_SECRET ?? "";
+  const secret = process.env.CREEM_WEBHOOK_SECRET;
+
+  if (!secret) {
+    throw new Error("CREEM_WEBHOOK_SECRET is not configured");
+  }
 
   if (!verifyCreemWebhookSignature(payload, signature, secret)) {
     throw new Error("Invalid webhook signature");
