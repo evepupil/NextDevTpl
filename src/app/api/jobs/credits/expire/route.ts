@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import { processExpiredBatches } from "@/features/credits/core";
 import { withApiLogging } from "@/lib/api-logger";
+import { logError, logWarn } from "@/lib/logger";
 
 /**
  * 积分过期处理 Cron Job API
@@ -30,7 +31,7 @@ function validateCronSecret(authHeader: string | null): boolean {
 
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret) {
-    console.warn("CRON_SECRET environment variable is not set");
+    logWarn("CRON_SECRET environment variable is not set");
     return false;
   }
 
@@ -72,7 +73,7 @@ export const POST = withApiLogging(async () => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error("Failed to process expired batches:", error);
+    logError("Failed to process expired batches", { error: String(error) });
 
     return NextResponse.json(
       {

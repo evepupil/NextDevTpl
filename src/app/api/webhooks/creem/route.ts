@@ -7,6 +7,7 @@ import { db } from "@/db";
 import { creditsBatch, subscription, user } from "@/db/schema";
 import { CREDITS_EXPIRY_DAYS } from "@/features/credits/config";
 import { grantCredits } from "@/features/credits/core";
+import { logError, logEvent, logWarn } from "@/lib/logger";
 import {
   type CreemCheckoutCompletedData,
   type CreemSubscription,
@@ -97,7 +98,7 @@ export const POST = withApiLogging(async (req: Request) => {
       }
 
       default:
-        console.log(`Unhandled event type: ${event.eventType}`);
+        logEvent("webhook.creem.unhandled", { eventType: event.eventType });
     }
 
     return NextResponse.json({ received: true });
@@ -125,7 +126,7 @@ async function handleCheckoutCompleted(data: CreemCheckoutCompletedData) {
   const productId = data.product?.id || data.order?.product;
 
   if (!userId) {
-    console.error("Missing userId in checkout metadata");
+    logError("Missing userId in checkout metadata");
     return;
   }
 
@@ -168,7 +169,7 @@ async function handleSubscriptionActive(sub: CreemSubscription) {
       .limit(1);
 
     if (!existingSub) {
-      console.error("Cannot find userId for subscription:", sub.id);
+      logError("Cannot find userId for subscription", { subscriptionId: sub.id });
       return;
     }
 
@@ -213,7 +214,7 @@ async function handleSubscriptionRenewed(sub: CreemSubscription) {
     .limit(1);
 
   if (!existingSub) {
-    console.error("Subscription not found for renewal:", sub.id);
+    logError("Subscription not found for renewal", { subscriptionId: sub.id });
     return;
   }
 
@@ -278,7 +279,7 @@ async function handleSubscriptionPastDue(sub: CreemSubscription) {
     })
     .where(eq(subscription.subscriptionId, sub.id));
 
-  console.log(`Subscription past due: ${sub.id}`);
+  logEvent("webhook.creem.subscription.past_due", { subscriptionId: sub.id });
 }
 
 /**
@@ -293,7 +294,7 @@ async function handleSubscriptionPaused(sub: CreemSubscription) {
     })
     .where(eq(subscription.subscriptionId, sub.id));
 
-  console.log(`Subscription paused: ${sub.id}`);
+  logEvent("webhook.creem.subscription.paused", { subscriptionId: sub.id });
 }
 
 // ============================================
@@ -336,7 +337,7 @@ async function createOrUpdateSubscription(
     });
   }
 
-  console.log(`Subscription created/updated for user ${userId}`);
+  logEvent("webhook.creem.subscription.upserted", { userId });
 }
 
 /**
@@ -371,7 +372,7 @@ async function grantSubscriptionCredits(
   const planType = getPlanFromPriceId(priceId);
 
   if (!planType) {
-    console.error(`Unknown priceId: ${priceId}`);
+    logError("Unknown priceId", { priceId });
     return;
   }
 
@@ -389,9 +390,7 @@ async function grantSubscriptionCredits(
     .limit(1);
 
   if (existingBatch) {
-    console.log(
-      `Credits already granted for subscription period: ${periodKey}, skipping`
-    );
+    logEvent("webhook.creem.credits.already_granted", { periodKey });
     return;
   }
 
@@ -401,7 +400,7 @@ async function grantSubscriptionCredits(
       planType as keyof typeof SUBSCRIPTION_MONTHLY_CREDITS
     ];
   if (!monthlyCredits) {
-    console.error(`No monthly credits configured for plan: ${planType}`);
+    logWarn("No monthly credits configured for plan", { planType });
     return;
   }
 
@@ -445,11 +444,18 @@ async function grantSubscriptionCredits(
       },
     });
 
-    console.log(
-      `Credits granted for user ${userId}: ${creditsToGrant} credits (${planType} ${isYearly ? "yearly" : "monthly"}), batch ${result.batchId}`
-    );
+    logEvent("webhook.creem.credits.grant_success", {
+      userId,
+      credits: creditsToGrant,
+      planType,
+      period: isYearly ? "yearly" : "monthly",
+      batchId: result.batchId,
+    });
   } catch (error) {
-    console.error("Failed to grant subscription credits:", error);
+    logError("Failed to grant subscription credits", {
+      error: String(error),
+      userId,
+    });
     // 不抛出错误，让 webhook 返回成功
     // 积分发放失败可通过日志追踪，手动补发
   }
