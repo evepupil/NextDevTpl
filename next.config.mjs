@@ -15,7 +15,7 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Exclude packages with webpack-specific syntax from server bundling
-  serverExternalPackages: ["anki-apkg-export", "sql.js", "pino", "pino-pretty", "@axiomhq/pino"],
+  serverExternalPackages: ["pino", "pino-pretty"],
 };
 
 // 组合插件: MDX -> NextIntl -> NextConfig
