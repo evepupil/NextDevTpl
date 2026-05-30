@@ -664,6 +664,28 @@
       }
     }
   },
+  "Support": {
+    "enterMessage": "Please enter a message",
+    "messageSent": "Message sent",
+    "sendFailed": "Failed to send, please retry",
+    "replyUser": "Reply to user",
+    "addReply": "Add reply",
+    "inputPlaceholder": "Enter your message...",
+    "characters": "characters",
+    "send": "Send",
+    "enterReplyContent": "Please enter reply content",
+    "replySuccess": "Reply sent",
+    "replyFailed": "Reply failed, please retry",
+    "ticketClosedNotice": "This ticket is closed, no new replies can be added",
+    "inputReplyPlaceholder": "Enter your reply...",
+    "sendReply": "Send reply",
+    "statusUpdateFailed": "Status update failed",
+    "updating": "Updating...",
+    "selectNewStatus": "Select new status",
+    "roleUpdateFailed": "Role update failed",
+    "admin": "Admin",
+    "user": "User"
+  },
   "AdminSidebar": {
     "badge": "ADMIN",
     "roleBadge": "Admin",

@@ -3,6 +3,7 @@
 import { Loader2, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,6 +27,7 @@ export function AdminTicketReplyForm({
   isClosed,
 }: AdminTicketReplyFormProps) {
   const router = useRouter();
+  const t = useTranslations("Support");
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -36,7 +38,7 @@ export function AdminTicketReplyForm({
     e.preventDefault();
 
     if (!content.trim()) {
-      toast.error("请输入回复内容");
+      toast.error(t("enterReplyContent"));
       return;
     }
 
@@ -49,14 +51,14 @@ export function AdminTicketReplyForm({
       });
 
       if (result?.data) {
-        toast.success("回复成功");
+        toast.success(t("replySuccess"));
         setContent("");
         router.refresh();
       } else if (result?.serverError) {
         toast.error(result.serverError);
       }
     } catch (error) {
-      toast.error("回复失败，请重试");
+      toast.error(t("replyFailed"));
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -67,7 +69,7 @@ export function AdminTicketReplyForm({
     return (
       <Card>
         <CardContent className="py-6 text-center text-muted-foreground">
-          此工单已关闭，无法添加新回复
+           {t("ticketClosedNotice")}
         </CardContent>
       </Card>
     );
@@ -76,12 +78,12 @@ export function AdminTicketReplyForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>回复用户</CardTitle>
+        <CardTitle>{t("replyUser")}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <Textarea
-            placeholder="输入您的回复..."
+            placeholder={t("inputReplyPlaceholder")}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             rows={4}
@@ -89,7 +91,7 @@ export function AdminTicketReplyForm({
           />
           <div className="flex items-center justify-between">
             <p className="text-xs text-muted-foreground">
-              {content.length}/5000 字符
+              {content.length}/5000 {t("characters")}
             </p>
             <Button type="submit" disabled={isLoading || !content.trim()}>
               {isLoading ? (
@@ -97,7 +99,7 @@ export function AdminTicketReplyForm({
               ) : (
                 <Send className="mr-2 h-4 w-4" />
               )}
-              发送回复
+              {t("sendReply")}
             </Button>
           </div>
         </form>

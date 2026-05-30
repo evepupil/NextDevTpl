@@ -3,6 +3,7 @@
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -32,6 +33,7 @@ export function AdminTicketStatusSelect({
   currentStatus,
 }: AdminTicketStatusSelectProps) {
   const router = useRouter();
+  const t = useTranslations("Support");
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState(currentStatus);
 
@@ -77,7 +79,7 @@ export function AdminTicketStatusSelect({
         toast.error(result.serverError);
       }
     } catch (error) {
-      toast.error("状态更新失败");
+      toast.error(t("statusUpdateFailed"));
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -88,14 +90,14 @@ export function AdminTicketStatusSelect({
     return (
       <div className="flex items-center gap-2">
         <Loader2 className="h-4 w-4 animate-spin" />
-        <span className="text-sm text-muted-foreground">更新中...</span>
+        <span className="text-sm text-muted-foreground">          {t("updating")}</span>
       </div>
     );
   }
 
   return (
     <div className="space-y-2">
-      <p className="text-sm text-muted-foreground">选择新状态</p>
+      <p className="text-sm text-muted-foreground">            {t("selectNewStatus")}</p>
       <Select value={status} onValueChange={handleStatusChange}>
         <SelectTrigger className="w-full">
           <SelectValue>

@@ -2,6 +2,7 @@
 
 import { Loader2, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ export function TicketMessageForm({
   isAdmin = false,
 }: TicketMessageFormProps) {
   const router = useRouter();
+  const t = useTranslations("Support");
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -36,7 +38,7 @@ export function TicketMessageForm({
     e.preventDefault();
 
     if (!content.trim()) {
-      toast.error("请输入消息内容");
+      toast.error(t("enterMessage"));
       return;
     }
 
@@ -49,14 +51,14 @@ export function TicketMessageForm({
       });
 
       if (result?.data) {
-        toast.success("消息发送成功");
+        toast.success(t("messageSent"));
         setContent("");
         router.refresh();
       } else if (result?.serverError) {
         toast.error(result.serverError);
       }
     } catch (error) {
-      toast.error("发送失败，请重试");
+      toast.error(t("sendFailed"));
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -66,12 +68,12 @@ export function TicketMessageForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{isAdmin ? "回复用户" : "添加回复"}</CardTitle>
+        <CardTitle>{isAdmin ? t("replyUser") : t("addReply")}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <Textarea
-            placeholder="输入您的消息..."
+            placeholder={t("inputPlaceholder")}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             rows={4}
@@ -79,7 +81,7 @@ export function TicketMessageForm({
           />
           <div className="flex items-center justify-between">
             <p className="text-xs text-muted-foreground">
-              {content.length}/5000 字符
+              {content.length}/5000 {t("characters")}
             </p>
             <Button type="submit" disabled={isLoading || !content.trim()}>
               {isLoading ? (
@@ -87,7 +89,7 @@ export function TicketMessageForm({
               ) : (
                 <Send className="mr-2 h-4 w-4" />
               )}
-              发送
+              {t("send")}
             </Button>
           </div>
         </form>

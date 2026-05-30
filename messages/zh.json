@@ -660,6 +660,28 @@
       }
     }
   },
+  "Support": {
+    "enterMessage": "请输入消息内容",
+    "messageSent": "消息发送成功",
+    "sendFailed": "发送失败，请重试",
+    "replyUser": "回复用户",
+    "addReply": "添加回复",
+    "inputPlaceholder": "输入您的消息...",
+    "characters": "字符",
+    "send": "发送",
+    "enterReplyContent": "请输入回复内容",
+    "replySuccess": "回复成功",
+    "replyFailed": "回复失败，请重试",
+    "ticketClosedNotice": "此工单已关闭，无法添加新回复",
+    "inputReplyPlaceholder": "输入您的回复...",
+    "sendReply": "发送回复",
+    "statusUpdateFailed": "状态更新失败",
+    "updating": "更新中...",
+    "selectNewStatus": "选择新状态",
+    "roleUpdateFailed": "角色更新失败",
+    "admin": "管理员",
+    "user": "普通用户"
+  },
   "AdminSidebar": {
     "badge": "管理",
     "roleBadge": "管理员",
