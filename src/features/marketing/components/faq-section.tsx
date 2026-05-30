@@ -10,37 +10,37 @@ import {
 
 export function FAQSection() {
   const t = useTranslations("FAQ");
-  const faqItems = t.raw("items") as Array<{
-    question: string;
-    answer: string;
-  }>;
+
+  const faqItems = [
+    {
+      question: t("items.0.question"),
+      answer: t("items.0.answer"),
+    },
+    {
+      question: t("items.1.question"),
+      answer: t("items.1.answer"),
+    },
+    {
+      question: t("items.2.question"),
+      answer: t("items.2.answer"),
+    },
+  ];
 
   return (
-    <section className="container py-24">
-      <div className="mx-auto max-w-3xl">
-        {/* Header */}
-        <div className="mb-12 text-center">
-          <p className="mb-2 text-sm font-medium uppercase tracking-wider text-primary">
-            {t("label")}
-          </p>
-          <h2 className="mb-4 text-balance text-3xl font-bold tracking-tight md:text-4xl">
-            {t("title")}
-          </h2>
-          <p className="mx-auto max-w-2xl text-muted-foreground">
-            {t("subtitle")}
-          </p>
-        </div>
-
-        {/* FAQ Accordion */}
+    <section className="py-24">
+      <div className="container max-w-3xl">
+        <h2 className="mb-12 text-center text-3xl font-bold">{t("title")}</h2>
         <Accordion type="single" collapsible className="w-full">
           {faqItems.map((faq, index) => (
-            <AccordionItem key={index} value={`item-${index}`}>
+            <AccordionItem
+              // biome-ignore lint/suspicious/noArrayIndexKey: static FAQ list
+              key={index}
+              value={`item-${index}`}
+            >
               <AccordionTrigger className="text-left">
                 {faq.question}
               </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground">
-                {faq.answer}
-              </AccordionContent>
+              <AccordionContent>{faq.answer}</AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>

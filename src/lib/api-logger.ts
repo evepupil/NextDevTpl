@@ -1,6 +1,6 @@
 import { logApiResponse, logError } from "@/lib/logger";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: wrapper must accept both Request and NextRequest
 type ApiHandler = (request: any, context?: any) => Promise<Response>;
 
 export function withApiLogging<T extends ApiHandler>(handler: T): T {

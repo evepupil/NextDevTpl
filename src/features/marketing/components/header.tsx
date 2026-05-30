@@ -75,6 +75,7 @@ export function Header() {
         <div className="flex items-center gap-8">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
+            {/* biome-ignore lint/a11y/noSvgWithoutTitle: decorative logo */}
             <svg
               className="h-6 w-6 text-primary"
               viewBox="0 0 24 24"

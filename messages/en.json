@@ -478,13 +478,13 @@
     }
   },
   "Dashboard": {
-  "nav": {
-    "dashboard": "Dashboard",
-    "credits": "Credits",
-    "settings": "Settings",
-    "support": "Support",
-    "newTicket": "New Ticket"
-  }
+    "nav": {
+      "dashboard": "Dashboard",
+      "credits": "Credits",
+      "settings": "Settings",
+      "support": "Support",
+      "newTicket": "New Ticket"
+    }
   },
   "Settings": {
     "tabs": {

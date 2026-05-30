@@ -134,6 +134,7 @@ export function DashboardSidebar() {
               }
             }}
           >
+            {/* biome-ignore lint/a11y/noSvgWithoutTitle: decorative logo */}
             <svg
               className="h-6 w-6 shrink-0 text-primary"
               viewBox="0 0 24 24"

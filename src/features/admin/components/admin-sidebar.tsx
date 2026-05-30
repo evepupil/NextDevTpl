@@ -10,8 +10,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -101,6 +101,7 @@ export function AdminSidebar() {
           href="/admin"
           className="flex items-center gap-2 text-lg font-bold tracking-tight"
         >
+          {/* biome-ignore lint/a11y/noSvgWithoutTitle: decorative logo */}
           <svg
             className="h-6 w-6 shrink-0 text-blue-400"
             viewBox="0 0 24 24"
@@ -116,7 +117,7 @@ export function AdminSidebar() {
             <path d="M8 16h4" />
           </svg>
           <span className="rounded bg-red-600 px-2 py-0.5 text-xs font-medium text-white">
-              {t("badge")}
+            {t("badge")}
           </span>
           {siteConfig.name}
         </Link>

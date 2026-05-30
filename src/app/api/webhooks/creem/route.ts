@@ -10,6 +10,7 @@ import { grantCredits } from "@/features/credits/core";
 import {
   type CreemCheckoutCompletedData,
   type CreemSubscription,
+  type CreemWebhookEvent,
   constructCreemEvent,
 } from "@/features/payment/creem";
 import { withApiLogging } from "@/lib/api-logger";
@@ -40,7 +41,7 @@ export const POST = withApiLogging(async (req: Request) => {
     );
   }
 
-  let event;
+  let event: CreemWebhookEvent;
 
   try {
     // 验证 Webhook 签名并解析事件

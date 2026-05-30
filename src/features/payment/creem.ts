@@ -5,7 +5,7 @@
  * 文档: https://docs.creem.io/api-reference
  */
 
-import crypto from "crypto";
+import crypto from "node:crypto";
 
 const CREEM_API_BASE = process.env.CREEM_API_KEY?.startsWith("creem_test_")
   ? "https://test-api.creem.io/v1"

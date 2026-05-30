@@ -2,8 +2,8 @@
 
 import { Loader2, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -69,7 +69,7 @@ export function AdminTicketReplyForm({
     return (
       <Card>
         <CardContent className="py-6 text-center text-muted-foreground">
-           {t("ticketClosedNotice")}
+          {t("ticketClosedNotice")}
         </CardContent>
       </Card>
     );

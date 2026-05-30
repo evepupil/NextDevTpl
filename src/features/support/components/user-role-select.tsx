@@ -2,8 +2,8 @@
 
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -85,7 +85,7 @@ export function UserRoleSelect({ userId, currentRole }: UserRoleSelectProps) {
     return (
       <div className="flex items-center gap-2">
         <Loader2 className="h-4 w-4 animate-spin" />
-        <span className="text-sm text-muted-foreground">          {t("updating")}</span>
+        <span className="text-sm text-muted-foreground"> {t("updating")}</span>
       </div>
     );
   }
@@ -106,7 +106,7 @@ export function UserRoleSelect({ userId, currentRole }: UserRoleSelectProps) {
         </SelectItem>
         <SelectItem value="admin">
           <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
-          {t("admin")}
+            {t("admin")}
           </Badge>
         </SelectItem>
       </SelectContent>

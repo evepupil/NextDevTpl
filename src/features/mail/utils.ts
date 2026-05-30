@@ -67,7 +67,7 @@ function logEmailPreview(params: SendEmailParams): void {
     ? params.to.join(", ")
     : params.to;
 
-  console.log("\n" + "=".repeat(60));
+  console.log(`\n${"=".repeat(60)}`);
   console.log("📧 EMAIL PREVIEW (Development Mode)");
   console.log("=".repeat(60));
   console.log(`To:      ${recipients}`);
@@ -90,7 +90,7 @@ function logEmailPreview(params: SendEmailParams): void {
   }
   console.log("-".repeat(60));
   console.log("💡 Set force: true to send real email in development");
-  console.log("=".repeat(60) + "\n");
+  console.log(`${"=".repeat(60)}\n`);
 }
 
 // ============================================

@@ -66,6 +66,7 @@ export function HeroSection() {
               "bg-gradient-to-br from-pink-400 to-pink-600",
             ].map((gradient, i) => (
               <div
+                // biome-ignore lint/suspicious/noArrayIndexKey: static gradient list
                 key={i}
                 className={`h-8 w-8 rounded-full border-2 border-background ${gradient}`}
               />

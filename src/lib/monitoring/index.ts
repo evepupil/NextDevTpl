@@ -68,8 +68,8 @@ export function initSentryServer(): void {
     beforeSend(event) {
       // 过滤掉敏感信息
       if (event.request?.headers) {
-        delete event.request.headers["authorization"];
-        delete event.request.headers["cookie"];
+        delete event.request.headers.authorization;
+        delete event.request.headers.cookie;
       }
       return event;
     },

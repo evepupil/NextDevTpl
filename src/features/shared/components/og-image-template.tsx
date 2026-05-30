@@ -72,6 +72,7 @@ export function createOgImageResponse(): ImageResponse {
             boxShadow: "0 8px 32px rgba(124, 58, 237, 0.4)",
           }}
         >
+          {/* biome-ignore lint/a11y/noSvgWithoutTitle: decorative template icon */}
           <svg
             width="48"
             height="48"

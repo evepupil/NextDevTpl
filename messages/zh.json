@@ -474,13 +474,13 @@
     }
   },
   "Dashboard": {
-  "nav": {
-    "dashboard": "控制面板",
-    "credits": "积分",
-    "settings": "设置",
-    "support": "支持",
-    "newTicket": "新建工单"
-  }
+    "nav": {
+      "dashboard": "控制面板",
+      "credits": "积分",
+      "settings": "设置",
+      "support": "支持",
+      "newTicket": "新建工单"
+    }
   },
   "Settings": {
     "tabs": {

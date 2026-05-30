@@ -76,7 +76,7 @@ export const getAllUsersAction = withAdminUsersAction("getAllUsers")
 
     // 根据是否有搜索条件构建查询
     const users =
-      query && query.trim()
+      query?.trim()
         ? await db
             .select(userSelectFields)
             .from(user)

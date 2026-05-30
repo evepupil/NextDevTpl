@@ -1,6 +1,6 @@
 import { Github, Twitter } from "lucide-react";
-import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { footerNav, siteConfig } from "@/config";
 
@@ -16,9 +16,7 @@ export function Footer() {
             <Link href="/" className="mb-4 inline-block text-xl font-bold">
               {siteConfig.name}
             </Link>
-            <p className="text-sm text-muted-foreground">
-              {t("description")}
-            </p>
+            <p className="text-sm text-muted-foreground">{t("description")}</p>
           </div>
 
           {/* 链接区 */}

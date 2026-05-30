@@ -225,7 +225,7 @@ describe("Profile Update - Image", () => {
     const testUser = await createTestUser();
     createdUserIds.push(testUser.id);
 
-    const tooLongPath = "avatars/" + "a".repeat(250); // 258 characters
+    const tooLongPath = `avatars/${"a".repeat(250)}`; // 258 characters
     await expect(
       updateProfile(testUser.id, { image: tooLongPath })
     ).rejects.toThrow("头像路径过长");

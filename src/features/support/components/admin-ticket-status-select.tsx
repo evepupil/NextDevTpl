@@ -2,8 +2,8 @@
 
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -90,14 +90,14 @@ export function AdminTicketStatusSelect({
     return (
       <div className="flex items-center gap-2">
         <Loader2 className="h-4 w-4 animate-spin" />
-        <span className="text-sm text-muted-foreground">          {t("updating")}</span>
+        <span className="text-sm text-muted-foreground"> {t("updating")}</span>
       </div>
     );
   }
 
   return (
     <div className="space-y-2">
-      <p className="text-sm text-muted-foreground">            {t("selectNewStatus")}</p>
+      <p className="text-sm text-muted-foreground"> {t("selectNewStatus")}</p>
       <Select value={status} onValueChange={handleStatusChange}>
         <SelectTrigger className="w-full">
           <SelectValue>
