@@ -478,26 +478,13 @@
     }
   },
   "Dashboard": {
-    "nav": {
-      "dashboard": "Dashboard",
-      "support": "Support",
-      "newTicket": "New Ticket"
-    },
-    "pages": {
-      "dashboard": "Dashboard",
-      "support": "Support",
-      "newTicket": "New Ticket",
-      "settings": "Settings",
-      "profile": "Profile",
-      "security": "Security",
-      "billing": "Billing",
-      "notifications": "Notifications",
-      "ticketDetails": "Ticket Details"
-    },
-    "sidebar": {
-      "settings": "Settings",
-      "logout": "Logout"
-    }
+  "nav": {
+    "dashboard": "Dashboard",
+    "credits": "Credits",
+    "settings": "Settings",
+    "support": "Support",
+    "newTicket": "New Ticket"
+  }
   },
   "Settings": {
     "tabs": {
@@ -693,7 +680,13 @@
     "lightMode": "Light mode",
     "darkMode": "Dark mode",
     "followSystem": "Follow system",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "nav": {
+      "controlPanel": "Control Panel",
+      "dashboard": "Dashboard",
+      "userManagement": "User Management",
+      "ticketManagement": "Ticket Management"
+    }
   },
   "Footer": {
     "description": "Production-ready Next.js SaaS template with auth, payments, credits, i18n, and more.",

@@ -474,26 +474,13 @@
     }
   },
   "Dashboard": {
-    "nav": {
-      "dashboard": "控制台",
-      "support": "支持",
-      "newTicket": "新建工单"
-    },
-    "pages": {
-      "dashboard": "控制台",
-      "support": "支持",
-      "newTicket": "新建工单",
-      "settings": "设置",
-      "profile": "个人资料",
-      "security": "安全",
-      "billing": "账单",
-      "notifications": "通知",
-      "ticketDetails": "工单详情"
-    },
-    "sidebar": {
-      "settings": "设置",
-      "logout": "退出登录"
-    }
+  "nav": {
+    "dashboard": "控制面板",
+    "credits": "积分",
+    "settings": "设置",
+    "support": "支持",
+    "newTicket": "新建工单"
+  }
   },
   "Settings": {
     "tabs": {
@@ -689,7 +676,13 @@
     "lightMode": "浅色模式",
     "darkMode": "深色模式",
     "followSystem": "跟随系统",
-    "signOut": "退出登录"
+    "signOut": "退出登录",
+    "nav": {
+      "controlPanel": "管理中心",
+      "dashboard": "控制面板",
+      "userManagement": "用户管理",
+      "ticketManagement": "工单管理"
+    }
   },
   "Footer": {
     "description": "生产就绪的 Next.js SaaS 模板，内置认证、支付、积分、国际化等功能。",

@@ -47,6 +47,16 @@ export function AdminSidebar() {
   const router = useRouter();
   const t = useTranslations("AdminSidebar");
 
+  const getNavTitle = (title: string): string => {
+    const titleMap: Record<string, string> = {
+      管理中心: t("nav.controlPanel"),
+      控制面板: t("nav.dashboard"),
+      用户管理: t("nav.userManagement"),
+      工单管理: t("nav.ticketManagement"),
+    };
+    return titleMap[title] || title;
+  };
+
   // 获取当前用户会话
   const { data: session } = useSession();
   const user = session?.user;
@@ -117,7 +127,7 @@ export function AdminSidebar() {
         {adminConfig.sidebarNav.map((group) => (
           <div key={group.title}>
             <p className="mb-2 px-2 text-xs font-medium uppercase tracking-wider text-slate-400">
-              {group.title}
+              {getNavTitle(group.title)}
             </p>
             <div className="space-y-1">
               {group.items.map((item) => {
@@ -135,7 +145,7 @@ export function AdminSidebar() {
                     )}
                   >
                     {Icon && <Icon className="h-4 w-4" />}
-                    {item.title}
+                    {getNavTitle(item.title)}
                   </Link>
                 );
               })}
