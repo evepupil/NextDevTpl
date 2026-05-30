@@ -11,6 +11,7 @@ import {
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -44,6 +45,7 @@ type Theme = "light" | "dark" | "system";
 export function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const t = useTranslations("AdminSidebar");
 
   // 获取当前用户会话
   const { data: session } = useSession();
@@ -104,7 +106,7 @@ export function AdminSidebar() {
             <path d="M8 16h4" />
           </svg>
           <span className="rounded bg-red-600 px-2 py-0.5 text-xs font-medium text-white">
-            ADMIN
+              {t("badge")}
           </span>
           {siteConfig.name}
         </Link>
@@ -148,7 +150,7 @@ export function AdminSidebar() {
             className="flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
-            返回用户端
+            {t("returnToUser")}
           </Link>
         </div>
       </nav>
@@ -174,7 +176,7 @@ export function AdminSidebar() {
                       {user.name}
                     </p>
                     <span className="rounded bg-red-600/20 px-1.5 py-0.5 text-xs font-medium text-red-400">
-                      Admin
+                      {t("roleBadge")}
                     </span>
                   </div>
                   <p className="truncate text-xs text-slate-400">
@@ -220,7 +222,7 @@ export function AdminSidebar() {
                       ? "bg-muted text-foreground"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
-                  title="浅色模式"
+                  title={t("lightMode")}
                 >
                   <Sun className="h-4 w-4" />
                 </button>
@@ -233,7 +235,7 @@ export function AdminSidebar() {
                       ? "bg-muted text-foreground"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
-                  title="深色模式"
+                  title={t("darkMode")}
                 >
                   <Moon className="h-4 w-4" />
                 </button>
@@ -246,7 +248,7 @@ export function AdminSidebar() {
                       ? "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
-                  title="跟随系统"
+                  title={t("followSystem")}
                 >
                   <Monitor className="h-4 w-4" />
                 </button>
@@ -263,7 +265,7 @@ export function AdminSidebar() {
                   className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-muted transition-colors"
                 >
                   <LogOut className="h-4 w-4" />
-                  退出登录
+                  {t("signOut")}
                 </button>
               </div>
             </PopoverContent>

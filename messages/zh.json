@@ -660,6 +660,15 @@
       }
     }
   },
+  "AdminSidebar": {
+    "badge": "管理",
+    "roleBadge": "管理员",
+    "returnToUser": "返回用户端",
+    "lightMode": "浅色模式",
+    "darkMode": "深色模式",
+    "followSystem": "跟随系统",
+    "signOut": "退出登录"
+  },
   "Footer": {
     "description": "生产就绪的 Next.js SaaS 模板，内置认证、支付、积分、国际化等功能。",
     "product": "产品",

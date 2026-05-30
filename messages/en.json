@@ -664,6 +664,15 @@
       }
     }
   },
+  "AdminSidebar": {
+    "badge": "ADMIN",
+    "roleBadge": "Admin",
+    "returnToUser": "Return to dashboard",
+    "lightMode": "Light mode",
+    "darkMode": "Dark mode",
+    "followSystem": "Follow system",
+    "signOut": "Sign out"
+  },
   "Footer": {
     "description": "Production-ready Next.js SaaS template with auth, payments, credits, i18n, and more.",
     "product": "Product",
