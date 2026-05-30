@@ -663,5 +663,13 @@
         }
       }
     }
+  },
+  "Footer": {
+    "description": "Production-ready Next.js SaaS template with auth, payments, credits, i18n, and more.",
+    "product": "Product",
+    "legal": "Legal",
+    "copyright": "© {year} {name}. All rights reserved.",
+    "twitter": "Twitter",
+    "github": "GitHub"
   }
 }

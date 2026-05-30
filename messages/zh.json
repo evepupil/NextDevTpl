@@ -659,5 +659,13 @@
         }
       }
     }
+  },
+  "Footer": {
+    "description": "生产就绪的 Next.js SaaS 模板，内置认证、支付、积分、国际化等功能。",
+    "product": "产品",
+    "legal": "法律",
+    "copyright": "© {year} {name}。保留所有权利。",
+    "twitter": "Twitter",
+    "github": "GitHub"
   }
 }
