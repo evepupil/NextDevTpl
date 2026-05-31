@@ -396,7 +396,7 @@ export async function createTestSubscription(
   const subscriptionData: schema.NewSubscription = {
     id,
     userId: options.userId,
-    subscriptionId: options.subscriptionId ?? `sub_test_${Date.now()}`,
+    subscriptionId: options.subscriptionId ?? generateTestId("sub_test"),
     priceId: options.priceId ?? "price_test_monthly",
     status: options.status ?? "active",
     currentPeriodStart: options.currentPeriodStart ?? now,
