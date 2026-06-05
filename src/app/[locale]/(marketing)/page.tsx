@@ -28,20 +28,20 @@ export async function generateMetadata({
     : "NextDevTpl - Production-ready Next.js SaaS Template";
 
   const description = isZh
-    ? "使用AI技术将文本、PDF、网页、视频等内容自动转换为Anki兼容的闪卡。支持多种输入格式，一键导出.apkg文件，让学习更高效。"
-    : "AI-powered flashcard generator that converts text, PDFs, URLs, and videos into Anki-compatible study cards. Multiple input formats supported with one-click .apkg export.";
+    ? "生产就绪的 Next.js SaaS 模板，内置认证、支付、积分系统、后台任务、国际化与管理后台。克隆、定制、即可上线。"
+    : "Production-ready Next.js SaaS template with authentication, payments, a credits system, background jobs, i18n, and an admin panel. Clone, customize, and ship.";
 
   return {
     title,
     description,
     keywords: [
-      "AI flashcard generator",
-      "Anki cards",
-      "study cards",
-      "spaced repetition",
-      "PDF to flashcards",
-      "text to Anki",
-      ...(isZh ? ["AI闪卡生成器", "Anki卡片", "间隔重复", "PDF转闪卡"] : []),
+      "Next.js SaaS template",
+      "SaaS boilerplate",
+      "Next.js starter kit",
+      "Better Auth",
+      "Drizzle ORM",
+      "TypeScript SaaS",
+      ...(isZh ? ["Next.js SaaS 模板", "SaaS 脚手架", "SaaS 样板"] : []),
     ],
     openGraph: {
       title,

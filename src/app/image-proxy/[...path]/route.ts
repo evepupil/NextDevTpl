@@ -4,7 +4,7 @@
  * 安全地代理访问存储中的图片
  * 路由: /image-proxy/{bucket}/{key}
  *
- * 示例: /image-proxy/avatars/user-123-1234567890.jpg
+ * 示例: /image-proxy/avatars/user-123/1234567890.jpg
  */
 
 import { type NextRequest, NextResponse } from "next/server";

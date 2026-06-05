@@ -16,8 +16,8 @@ export function generateWebSiteSchema(locale: LocaleType) {
     url: getBaseUrl(),
     description:
       locale === "en"
-        ? "AI-powered flashcard generator that converts any content into Anki-compatible study cards"
-        : "AI驱动的闪卡生成器，将任何内容转换为Anki兼容的学习卡片",
+        ? "Production-ready Next.js SaaS template with authentication, payments, credits, and i18n"
+        : "生产就绪的 Next.js SaaS 模板，内置认证、支付、积分与国际化",
     inLanguage: locale === "en" ? "en-US" : "zh-CN",
     potentialAction: {
       "@type": "SearchAction",
@@ -171,13 +171,13 @@ export function generateSoftwareApplicationSchema(locale: LocaleType) {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     name: siteConfig.name,
-    applicationCategory: "EducationalApplication",
+    applicationCategory: "DeveloperApplication",
     operatingSystem: "Web",
     url: getBaseUrl(),
     description:
       locale === "en"
-        ? "AI-powered flashcard generator for creating Anki-compatible study cards from any content"
-        : "AI驱动的闪卡生成器，从任何内容创建Anki兼容的学习卡片",
+        ? "Production-ready Next.js SaaS template with authentication, payments, credits, and i18n"
+        : "生产就绪的 Next.js SaaS 模板，内置认证、支付、积分与国际化",
     offers: {
       "@type": "Offer",
       price: "0",

@@ -12,6 +12,7 @@ import { protectedAction } from "@/lib/safe-action";
 
 import { getStorageProvider } from "./providers";
 import { ALLOWED_IMAGE_TYPES, type AllowedImageType } from "./types";
+import { validateUploadRequest } from "./validation";
 
 const withStorageAction = (name: string) =>
   protectedAction.metadata({ action: `storage.${name}` });
@@ -53,12 +54,8 @@ function getAllowedBuckets(): string[] {
 export const getSignedUploadUrlAction = withStorageAction("getSignedUploadUrl")
   .schema(
     z.object({
-      /** 文件键名 (完整路径，如 avatars/user-123.jpg) */
-      key: z
-        .string()
-        .min(1, "文件键名不能为空")
-        .max(255, "文件键名过长")
-        .regex(/^[a-zA-Z0-9\-_/.]+$/, "文件键名包含非法字符"),
+      /** 文件键名 (规范格式为 `${userId}/...`，如 user-123/169.jpg) */
+      key: z.string().min(1, "文件键名不能为空").max(255, "文件键名过长"),
       /** 文件 MIME 类型 */
       contentType: z.enum(
         ["image/jpeg", "image/png", "image/gif", "image/webp"],
@@ -77,16 +74,17 @@ export const getSignedUploadUrlAction = withStorageAction("getSignedUploadUrl")
     // 确定使用的存储桶
     const bucket = inputBucket ?? getAvatarsBucket();
 
-    // 安全检查：验证存储桶在白名单中
-    const allowedBuckets = getAllowedBuckets();
-    if (!allowedBuckets.includes(bucket)) {
-      throw new Error("不允许访问该存储桶");
-    }
-
-    // 安全检查：确保用户只能上传自己的文件
-    // 文件键名必须包含用户 ID
-    if (!key.includes(userId)) {
-      throw new Error("文件路径无效：必须包含用户 ID");
+    // 安全检查：存储桶白名单 + 键名格式(含路径遍历防护) + 文件归属(锚定 userId)
+    // 校验逻辑集中在 ./validation，测试直接 import 同一份函数，避免漂移
+    const validation = validateUploadRequest({
+      key,
+      bucket,
+      contentType,
+      userId,
+      allowedBuckets: getAllowedBuckets(),
+    });
+    if (!validation.valid) {
+      throw new Error(validation.error);
     }
 
     // 获取签名上传 URL

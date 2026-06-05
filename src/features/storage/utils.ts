@@ -41,8 +41,8 @@ export function isExternalUrl(value: string | null | undefined): boolean {
  * // => "https://avatars.githubusercontent.com/u/12345"
  *
  * // 存储键名
- * getAvatarUrl("user-abc123-1234567890.jpg")
- * // => "/image-proxy/avatars/user-abc123-1234567890.jpg"
+ * getAvatarUrl("user-abc123/1234567890.jpg")
+ * // => "/image-proxy/avatars/user-abc123/1234567890.jpg"
  *
  * // 空值
  * getAvatarUrl(null) // => undefined
@@ -67,9 +67,12 @@ export function getAvatarUrl(
 }
 
 /**
- * 生成唯一的头像文件名
+ * 生成唯一的头像文件键名
  *
- * 格式: {userId}-{timestamp}.{extension}
+ * 格式: {userId}/{timestamp}.{extension}
+ *
+ * 将 userId 作为**首个路径段**，使服务端可锚定校验文件归属
+ * (参见 validation.ts 的 isKeyOwnedByUser)，避免子串伪造攻击。
  *
  * @param userId - 用户 ID
  * @param file - 上传的文件
@@ -78,5 +81,5 @@ export function getAvatarUrl(
 export function generateAvatarKey(userId: string, file: File): string {
   const timestamp = Date.now();
   const extension = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-  return `${userId}-${timestamp}.${extension}`;
+  return `${userId}/${timestamp}.${extension}`;
 }

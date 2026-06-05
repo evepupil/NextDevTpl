@@ -7,16 +7,6 @@ import { getAllBlogSlugs, getAllLegalSlugs } from "@/lib/source";
 /** Supported locales */
 const locales = ["en", "zh"] as const;
 
-/** Solution types */
-const solutionTypes = [
-  "text",
-  "pdf",
-  "url",
-  "video",
-  "word",
-  "markdown",
-] as const;
-
 /**
  * 动态生成 sitemap.xml
  *
@@ -41,16 +31,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: "weekly" as const,
       priority: path === "" ? 1 : 0.8,
-    }))
-  );
-
-  // Solution pages for each locale
-  const solutionRoutes = locales.flatMap((locale) =>
-    solutionTypes.map((type) => ({
-      url: `${baseUrl}/${locale}/solutions/${type}`,
-      lastModified: now,
-      changeFrequency: "monthly" as const,
-      priority: 0.9,
     }))
   );
 
@@ -84,11 +64,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
-  return [
-    ...staticRoutes,
-    ...solutionRoutes,
-    ...blogRoutes,
-    ...legalRoutes,
-    ...pseoRoutes,
-  ];
+  return [...staticRoutes, ...blogRoutes, ...legalRoutes, ...pseoRoutes];
 }
