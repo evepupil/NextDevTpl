@@ -21,7 +21,7 @@ export default async function DashboardLayout({
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen bg-[#f5f5f5]">
+      <div className="min-h-screen bg-muted/40">
         <DashboardSidebar />
         <DashboardMainWrapper>{children}</DashboardMainWrapper>
       </div>
