@@ -6,16 +6,33 @@
   },
   "Hero": {
     "badge": "全新：支持 AI 模型集成",
-    "title1": "终极 Next.js 启动模板",
-    "titleHighlight": "助力您的下一个项目",
-    "subtitle": "使用生产就绪的基础设施更快地构建和发布。开箱即用的认证、支付和精美 UI 组件。",
-    "getStarted": "开始使用",
-    "seeDemo": "查看演示",
+    "eyebrow": "Next.js 16 · Drizzle · Better Auth · Inngest",
+    "title1": "先把 SaaS 做出来。",
+    "titleHighlight": "别再纠结脚手架。",
+    "subtitle": "一套生产级的 Next.js 模板——认证、支付、积分、后台任务、国际化、管理后台，全部端到端接好。把第一周花在你的产品上，而不是第六个月的基建上。",
+    "getStarted": "开始构建",
+    "seeDemo": "看看怎么用",
     "trustLine": "深受全球开发者喜爱",
     "stats": {
       "cards": "已创建项目",
       "users": "开发者",
       "rating": "满意度"
+    },
+    "meta": {
+      "modules": "个功能模块",
+      "tests": "个测试，全绿",
+      "errors": "类型 / lint 错误",
+      "license": "可自托管 · MIT"
+    },
+    "panel": {
+      "title": "生产环境 · 读数",
+      "region": "/usr/app · us-east-1",
+      "p95": "P95 延迟",
+      "uptime": "可用性",
+      "jobs": "任务 / 分",
+      "signups": "注册 · 近 14 天",
+      "pillOk": "部署通过",
+      "pillStack": "Vercel · Neon · R2"
     }
   },
   "Features": {
@@ -330,6 +347,7 @@
     "saveSettings": "保存设置"
   },
   "Pricing": {
+    "label": "定价",
     "title": "简单透明的定价",
     "subtitle": "按积分付费，<strong>永久有效</strong>，没用完也不浪费。年付立省 40%。",
     "creditsUpfront": "一次性到账",

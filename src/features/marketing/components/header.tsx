@@ -69,7 +69,7 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/70">
       <div className="container flex h-16 items-center justify-between">
         {/* 左侧 - Logo + 导航菜单 */}
         <div className="flex items-center gap-8">
@@ -79,15 +79,24 @@ export function Header() {
             <svg
               className="h-6 w-6 text-primary"
               viewBox="0 0 24 24"
-              fill="currentColor"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.4}
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <rect x="2" y="2" width="9" height="9" rx="2" />
-              <rect x="13" y="2" width="9" height="9" rx="2" opacity="0.5" />
-              <rect x="2" y="13" width="9" height="9" rx="2" opacity="0.5" />
-              <rect x="13" y="13" width="9" height="9" rx="2" />
+              <path d="M3 17 L9 7 L13 14 L21 4" />
+              <circle cx="9" cy="7" r="1.4" fill="currentColor" stroke="none" />
+              <circle
+                cx="21"
+                cy="4"
+                r="1.4"
+                fill="currentColor"
+                stroke="none"
+              />
             </svg>
             <span className="text-xl font-bold tracking-tight">
-              NextDev<span className="text-primary">Tpl</span>
+              NextDev<span className="text-muted-foreground">Tpl</span>
             </span>
           </Link>
 

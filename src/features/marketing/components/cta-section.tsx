@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -9,43 +9,32 @@ export function CTASection() {
   const t = useTranslations("CTA");
 
   return (
-    <section className="container py-24">
-      <div className="mx-auto max-w-4xl">
-        <div className="relative overflow-hidden rounded-3xl bg-primary p-8 text-center text-primary-foreground md:p-16">
-          {/* Background decoration */}
-          <div className="absolute -left-20 -top-20 h-60 w-60 rounded-full bg-white/10 blur-3xl" />
-          <div className="absolute -bottom-20 -right-20 h-60 w-60 rounded-full bg-white/10 blur-3xl" />
+    <section className="border-t py-24">
+      <div className="container">
+        {/* spec-sheet 风格盒子：卡片底 + 顶部主色光晕 + 网格 + 颗粒 */}
+        <div className="aura grain relative overflow-hidden rounded-2xl border bg-card px-6 py-16 text-center shadow-soft md:px-16 md:py-20">
+          <div
+            aria-hidden
+            className="bg-grid pointer-events-none absolute inset-0 opacity-60 [mask-image:radial-gradient(60%_60%_at_50%_0%,black,transparent)]"
+          />
+          <div className="relative mx-auto max-w-2xl">
+            <span className="eyebrow justify-center">{t("badge")}</span>
 
-          <div className="relative">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm">
-              <Sparkles className="h-4 w-4" />
-              {t("badge")}
-            </div>
-
-            <h2 className="mb-4 text-balance text-3xl font-bold tracking-tight md:text-4xl">
+            <h2 className="mt-5 text-balance text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
               {t("title")}
             </h2>
-            <p className="mx-auto mb-8 max-w-xl text-primary-foreground/80">
+            <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
               {t("subtitle")}
             </p>
 
-            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button
-                size="lg"
-                className="gap-2 bg-primary-foreground text-primary hover:bg-primary-foreground/90"
-                asChild
-              >
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Button size="lg" asChild className="group">
                 <Link href="/sign-up">
                   {t("getStarted")}
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="transition-transform group-hover:translate-x-0.5" />
                 </Link>
               </Button>
-              <Button
-                size="lg"
-                variant="ghost"
-                className="text-primary-foreground hover:bg-white/10 hover:text-primary-foreground"
-                asChild
-              >
+              <Button size="lg" variant="outline" asChild>
                 <Link href="/dashboard/generate">{t("seeDemo")}</Link>
               </Button>
             </div>

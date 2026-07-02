@@ -1,75 +1,104 @@
 "use client";
 
-import { Check, Download, FileUp, Sparkles } from "lucide-react";
+import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 
-const stepConfig = [
-  { key: "upload" as const, icon: FileUp, step: "01" },
-  { key: "generate" as const, icon: Sparkles, step: "02" },
-  { key: "export" as const, icon: Download, step: "03" },
+/**
+ * HowItWorks —— 三步流程
+ *
+ * 用编号 01/02/03 是因为内容本身就是有序流程（克隆 → 配置 → 上线），
+ * 编码承载信息，所以保留；非装饰性编号。
+ */
+const steps: {
+  key: "upload" | "generate" | "export";
+  n: string;
+  code: ReactNode;
+}[] = [
+  {
+    key: "upload",
+    n: "01",
+    code: (
+      <code className="block">
+        <span className="text-muted-foreground/60">$</span> git clone
+        nextdev-tpl{"\n"}
+        <span className="text-muted-foreground/60">$</span> pnpm install
+      </code>
+    ),
+  },
+  {
+    key: "generate",
+    n: "02",
+    code: (
+      <code className="block">
+        <span className="text-muted-foreground/60">.env</span>
+        {"\n"}DATABASE_URL=
+        <span className="text-muted-foreground">postgres://…</span>
+        {"\n"}BETTER_AUTH_SECRET=
+        <span className="text-muted-foreground">…</span>
+        {"\n"}AI_PROVIDER=<span className="text-primary">"openai"</span>
+      </code>
+    ),
+  },
+  {
+    key: "export",
+    n: "03",
+    code: (
+      <code className="block">
+        <span className="text-muted-foreground/60">$</span> pnpm build{" "}
+        <span className="text-muted-foreground/60">&amp;&amp;</span> deploy
+        {"\n"}
+        <span className="text-muted-foreground/60">→</span> live in ~6 min
+      </code>
+    ),
+  },
 ];
 
 export function HowItWorks() {
   const t = useTranslations("HowItWorks");
 
   return (
-    <section id="how-it-works" className="container py-24 bg-muted/30">
-      <div className="mx-auto max-w-4xl">
-        {/* Header */}
-        <div className="mb-16 text-center">
-          <p className="mb-2 text-sm font-medium uppercase tracking-wider text-primary">
-            {t("label")}
-          </p>
-          <h2 className="mb-4 text-balance text-3xl font-bold tracking-tight md:text-4xl">
+    <section id="how-it-works" className="border-t bg-muted/30 py-24">
+      <div className="container">
+        {/* 头部 */}
+        <div className="mb-14 max-w-2xl">
+          <span className="eyebrow">{t("label")}</span>
+          <h2 className="mt-4 text-balance text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
             {t("title")}
           </h2>
-          <p className="mx-auto max-w-2xl text-muted-foreground">
-            {t("subtitle")}
-          </p>
+          <p className="mt-4 text-muted-foreground">{t("subtitle")}</p>
         </div>
 
-        {/* Steps */}
-        <div className="space-y-12">
-          {stepConfig.map((step, index) => {
-            const Icon = step.icon;
-            return (
-              <div key={step.step} className="relative flex gap-6 md:gap-10">
-                {/* Connector Line */}
-                {index < stepConfig.length - 1 && (
-                  <div className="absolute left-6 top-16 h-[calc(100%-2rem)] w-px bg-border md:left-10" />
-                )}
-
-                {/* Icon */}
-                <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border bg-background shadow-sm md:h-20 md:w-20">
-                  <Icon className="h-5 w-5 text-primary md:h-8 md:w-8" />
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 pb-8">
-                  <div className="mb-2 flex items-center gap-3">
-                    <span className="text-sm font-medium text-primary">
-                      Step {step.step}
-                    </span>
-                  </div>
-                  <h3 className="mb-2 text-xl font-semibold">
-                    {t(`steps.${step.key}.title`)}
-                  </h3>
-                  <p className="text-muted-foreground">
-                    {t(`steps.${step.key}.description`)}
-                  </p>
-                </div>
+        {/* 三步流程 */}
+        <div className="grid gap-8 md:grid-cols-3">
+          {steps.map((s) => (
+            <div key={s.key}>
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-sm font-bold text-primary">
+                  {s.n}
+                </span>
+                <span className="h-px flex-1 bg-border" />
               </div>
-            );
-          })}
+              <h3 className="mt-5 text-xl font-bold tracking-tight text-foreground">
+                {t(`steps.${s.key}.title`)}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                {t(`steps.${s.key}.description`)}
+              </p>
+              <pre className="mt-5 overflow-x-auto rounded-lg border bg-card p-4 font-mono text-xs leading-relaxed text-foreground">
+                {s.code}
+              </pre>
+            </div>
+          ))}
         </div>
 
-        {/* Completion */}
-        <div className="mt-8 flex items-center justify-center gap-3 rounded-xl border bg-card p-6">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-950 dark:text-green-400">
+        {/* 完成提示条 */}
+        <div className="mt-10 flex items-center gap-4 rounded-xl border bg-card p-6">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-success/15 text-success">
             <Check className="h-5 w-5" />
           </div>
           <div>
-            <p className="font-medium">{t("completion.title")}</p>
+            <p className="font-semibold">{t("completion.title")}</p>
             <p className="text-sm text-muted-foreground">
               {t("completion.description")}
             </p>

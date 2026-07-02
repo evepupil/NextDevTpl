@@ -27,9 +27,14 @@ export function FAQSection() {
   ];
 
   return (
-    <section className="py-24">
+    <section className="border-t py-24">
       <div className="container max-w-3xl">
-        <h2 className="mb-12 text-center text-3xl font-bold">{t("title")}</h2>
+        <div className="mb-12 text-center">
+          <span className="eyebrow justify-center">{t("label")}</span>
+          <h2 className="mt-4 text-balance text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
+            {t("title")}
+          </h2>
+        </div>
         <Accordion type="single" collapsible className="w-full">
           {faqItems.map((faq, index) => (
             <AccordionItem

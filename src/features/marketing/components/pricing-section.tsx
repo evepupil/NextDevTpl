@@ -213,14 +213,15 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
   };
 
   return (
-    <section id="pricing" className="container py-24">
-      <div className="mx-auto max-w-6xl">
+    <section id="pricing" className="border-t py-24">
+      <div className="container">
         {/* Header */}
-        <div className="mb-12 text-center">
-          <h2 className="mb-4 text-balance text-3xl font-bold tracking-tight md:text-4xl">
+        <div className="mx-auto mb-12 max-w-2xl text-center">
+          <span className="eyebrow">{t("label")}</span>
+          <h2 className="mt-4 text-balance text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
             {t("title")}
           </h2>
-          <p className="mx-auto max-w-2xl text-muted-foreground">
+          <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
             {t.rich("subtitle", {
               strong: (chunks) => (
                 <strong className="font-semibold text-primary">{chunks}</strong>
@@ -274,9 +275,9 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
               <Card
                 key={planId}
                 className={cn(
-                  "relative flex flex-col rounded-xl",
-                  popular && "border-primary shadow-lg shadow-primary/10",
-                  isCurrent && "ring-2 ring-green-500"
+                  "relative flex flex-col shadow-none transition-all duration-300 hover:shadow-soft",
+                  popular && "border-primary shadow-soft",
+                  isCurrent && "border-primary ring-1 ring-primary"
                 )}
               >
                 {popular && !isCurrent && (
@@ -285,12 +286,12 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
                   </Badge>
                 )}
                 {isCurrent && (
-                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-600">
+                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary">
                     {t("currentPlan")}
                   </Badge>
                 )}
                 <CardHeader>
-                  <CardTitle className="text-lg font-semibold">
+                  <CardTitle className="text-lg font-semibold tracking-tight">
                     {t(`plans.${planId}.name`)}
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">
@@ -299,7 +300,7 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
                 </CardHeader>
                 <CardContent className="flex flex-1 flex-col">
                   <div className="mb-4">
-                    <span className="text-4xl font-bold">
+                    <span className="mono-data text-4xl font-bold tracking-tight">
                       $<AnimatedPrice value={price} />
                     </span>
                     <span className="text-sm text-muted-foreground">
@@ -310,7 +311,7 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
                   {/* Credits highlight */}
                   <div className="mb-5 rounded-lg border bg-muted/30 px-3 py-2.5">
                     <div className="flex items-center gap-1.5">
-                      <Coins className="size-4 text-amber-500" />
+                      <Coins className="size-4 text-primary" />
                       <span className="text-lg font-bold">
                         {planId === "free" ? (
                           t(`plans.${planId}.creditsAmount`)
