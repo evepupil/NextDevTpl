@@ -216,6 +216,13 @@ function ProductionPanel() {
     const accent = cs.getPropertyValue("--primary").trim() || "#0F5C57";
     const hair = cs.getPropertyValue("--border").trim() || "#ddd";
 
+    // 把任意 CSS 颜色（含 oklch）转成带透明度的合法颜色字符串。
+    // 注意：不能用 hex 拼接 `${accent}55`——主色是 oklch 时拼出来是非法颜色，
+    // 会让 canvas addColorStop 抛异常、整个组件白屏。color-mix 在所有现代浏览器
+    // 都支持，且能正确处理 oklch / hex / rgb。
+    const withAlpha = (color: string, pct: number) =>
+      `color-mix(in srgb, ${color} ${pct}%, transparent)`;
+
     // 基线
     ctx.strokeStyle = hair;
     ctx.lineWidth = 1;
@@ -226,8 +233,8 @@ function ProductionPanel() {
 
     // 区域填充
     const grad = ctx.createLinearGradient(0, 0, 0, h);
-    grad.addColorStop(0, `${accent}55`);
-    grad.addColorStop(1, `${accent}00`);
+    grad.addColorStop(0, withAlpha(accent, 33));
+    grad.addColorStop(1, withAlpha(accent, 0));
     ctx.beginPath();
     ctx.moveTo(X(0), h - pad);
     data.forEach((v, i) => {
@@ -255,7 +262,7 @@ function ProductionPanel() {
     const ly = Y(last);
     ctx.beginPath();
     ctx.arc(lx, ly, 7, 0, Math.PI * 2);
-    ctx.fillStyle = `${accent}22`;
+    ctx.fillStyle = withAlpha(accent, 13);
     ctx.fill();
     ctx.beginPath();
     ctx.arc(lx, ly, 3.2, 0, Math.PI * 2);
