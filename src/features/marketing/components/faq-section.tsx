@@ -1,6 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+
+import { Reveal } from "@/components/motion/reveal";
 import {
   Accordion,
   AccordionContent,
@@ -29,26 +31,28 @@ export function FAQSection() {
   return (
     <section className="border-t py-24">
       <div className="container max-w-3xl">
-        <div className="mb-12 text-center">
-          <span className="eyebrow justify-center">{t("label")}</span>
-          <h2 className="mt-4 text-balance text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
-            {t("title")}
-          </h2>
-        </div>
-        <Accordion type="single" collapsible className="w-full">
-          {faqItems.map((faq, index) => (
-            <AccordionItem
+        <Reveal>
+          <div className="mb-12 text-center">
+            <span className="eyebrow justify-center">{t("label")}</span>
+            <h2 className="mt-4 text-balance text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
+              {t("title")}
+            </h2>
+          </div>
+        </Reveal>
+
+        <Reveal delay={0.08}>
+          <Accordion type="single" collapsible className="w-full">
+            {faqItems.map((faq, index) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: static FAQ list
-              key={index}
-              value={`item-${index}`}
-            >
-              <AccordionTrigger className="text-left">
-                {faq.question}
-              </AccordionTrigger>
-              <AccordionContent>{faq.answer}</AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+              <AccordionItem key={index} value={`item-${index}`}>
+                <AccordionTrigger className="text-left">
+                  {faq.question}
+                </AccordionTrigger>
+                <AccordionContent>{faq.answer}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </Reveal>
       </div>
     </section>
   );
