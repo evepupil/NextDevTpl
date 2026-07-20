@@ -11,16 +11,19 @@ export function AuthLogo() {
       <svg
         className="h-7 w-7 text-primary"
         viewBox="0 0 24 24"
-        fill="currentColor"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2.4}
+        strokeLinecap="round"
+        strokeLinejoin="round"
       >
         <title>Logo</title>
-        <rect x="2" y="2" width="9" height="9" rx="2" />
-        <rect x="13" y="2" width="9" height="9" rx="2" opacity="0.5" />
-        <rect x="2" y="13" width="9" height="9" rx="2" opacity="0.5" />
-        <rect x="13" y="13" width="9" height="9" rx="2" />
+        <path d="M3 17 L9 7 L13 14 L21 4" />
+        <circle cx="9" cy="7" r="1.4" fill="currentColor" stroke="none" />
+        <circle cx="21" cy="4" r="1.4" fill="currentColor" stroke="none" />
       </svg>
       <span className="text-xl font-bold tracking-tight">
-        NextDev<span className="text-primary">Tpl</span>
+        NextDev<span className="text-muted-foreground">Tpl</span>
       </span>
     </div>
   );

@@ -37,7 +37,7 @@ export function StatsChartCard({
         <div className="text-2xl font-bold">{value}</div>
         <p
           className={`text-xs ${
-            changeType === "positive" ? "text-emerald-500" : "text-red-500"
+            changeType === "positive" ? "text-success" : "text-destructive"
           }`}
         >
           {change}
@@ -49,7 +49,7 @@ export function StatsChartCard({
                 <Line
                   type="monotone"
                   dataKey="value"
-                  stroke="hsl(var(--primary))"
+                  stroke="var(--primary)"
                   strokeWidth={2}
                   dot={false}
                 />
@@ -60,12 +60,12 @@ export function StatsChartCard({
                   <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
                     <stop
                       offset="5%"
-                      stopColor="hsl(var(--primary))"
+                      stopColor="var(--primary)"
                       stopOpacity={0.3}
                     />
                     <stop
                       offset="95%"
-                      stopColor="hsl(var(--primary))"
+                      stopColor="var(--primary)"
                       stopOpacity={0}
                     />
                   </linearGradient>
@@ -73,7 +73,7 @@ export function StatsChartCard({
                 <Area
                   type="monotone"
                   dataKey="value"
-                  stroke="hsl(var(--primary))"
+                  stroke="var(--primary)"
                   strokeWidth={2}
                   fill="url(#colorValue)"
                 />

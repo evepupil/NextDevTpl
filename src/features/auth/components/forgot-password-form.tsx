@@ -57,7 +57,7 @@ export function ForgotPasswordForm() {
       <div className="w-full max-w-md space-y-6">
         {/* 图标 */}
         <div className="flex flex-col items-center space-y-4 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 text-green-600">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-success/15 text-success">
             <Mail className="h-6 w-6" />
           </div>
           <h1 className="text-2xl font-semibold tracking-tight">
@@ -87,7 +87,7 @@ export function ForgotPasswordForm() {
       {/* Logo 和标题 */}
       <div className="flex flex-col items-center space-y-4 text-center">
         {/* Logo 图标 */}
-        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 text-white">
+        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
           <KeyRound className="h-6 w-6" />
         </div>
         <h1 className="text-2xl font-semibold tracking-tight">
