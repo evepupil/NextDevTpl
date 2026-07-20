@@ -288,12 +288,36 @@
         "credits": {
           "title": "Credits",
           "description": "Available balance"
+        },
+        "plan": {
+          "title": "Plan",
+          "description": "Current subscription"
+        },
+        "earned": {
+          "title": "Total earned",
+          "description": "All-time credits in"
+        },
+        "spent": {
+          "title": "Total spent",
+          "description": "All-time credits out"
         }
       },
       "actions": {
-        "credits": "View Credits",
-        "settings": "Account Settings",
-        "support": "Get Support"
+        "credits": "Get credits",
+        "settings": "Account settings",
+        "support": "Get support"
+      },
+      "transactions": {
+        "title": "Recent activity",
+        "viewAll": "View all",
+        "empty": "No transactions yet — your activity will appear here."
+      },
+      "planCard": {
+        "free": "Free plan",
+        "renews": "Renews {date}",
+        "cancels": "Cancels {date}",
+        "manage": "Manage subscription",
+        "upgrade": "Upgrade plan"
       }
     }
   },

@@ -284,12 +284,36 @@
         "credits": {
           "title": "积分余额",
           "description": "可用余额"
+        },
+        "plan": {
+          "title": "订阅计划",
+          "description": "当前订阅"
+        },
+        "earned": {
+          "title": "累计获得",
+          "description": "历史总收入"
+        },
+        "spent": {
+          "title": "累计消费",
+          "description": "历史总支出"
         }
       },
       "actions": {
-        "credits": "积分",
-        "settings": "设置",
-        "support": "支持"
+        "credits": "获取积分",
+        "settings": "账号设置",
+        "support": "获取支持"
+      },
+      "transactions": {
+        "title": "最近动态",
+        "viewAll": "查看全部",
+        "empty": "还没有交易记录——你的积分动态会显示在这里。"
+      },
+      "planCard": {
+        "free": "免费计划",
+        "renews": "{date} 续期",
+        "cancels": "{date} 到期取消",
+        "manage": "管理订阅",
+        "upgrade": "升级计划"
       }
     }
   },
