@@ -254,6 +254,19 @@
       "privacy": "隐私政策",
       "terms": "服务条款",
       "cookies": "Cookie 设置"
+    },
+    "brand": {
+      "headline": "你的 SaaS，值得这条起跑线。",
+      "sub": "认证、支付、积分、后台任务、国际化、管理后台——全部端到端接好。你只管做产品，基建已经就绪。",
+      "points": {
+        "ship": "几天上线，而不是几个月",
+        "own": "MIT 协议，可自托管，不锁定",
+        "stack": "Next.js 16 · Drizzle · Better Auth · Inngest"
+      },
+      "stat": {
+        "k": "18",
+        "v": "个功能模块，端到端接好"
+      }
     }
   },
   "CTA": {

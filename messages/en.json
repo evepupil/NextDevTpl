@@ -258,6 +258,19 @@
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
       "cookies": "Cookie Settings"
+    },
+    "brand": {
+      "headline": "The head start your SaaS deserved.",
+      "sub": "Auth, payments, credits, background jobs, i18n, and an admin panel \u2014 wired end-to-end. You ship the product; the plumbing is done.",
+      "points": {
+        "ship": "Production-ready in days, not months",
+        "own": "MIT-licensed, self-hostable, no lock-in",
+        "stack": "Next.js 16 \u00b7 Drizzle \u00b7 Better Auth \u00b7 Inngest"
+      },
+      "stat": {
+        "k": "18",
+        "v": "feature modules, wired end-to-end"
+      }
     }
   },
   "CTA": {
