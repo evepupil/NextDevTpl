@@ -220,23 +220,23 @@ export default function AdminUsersPage() {
   const getSubscriptionBadge = (sub: UserWithDetails["subscription"]) => {
     if (!sub) {
       return (
-        <Badge variant="secondary" className="bg-gray-100 text-gray-800">
+        <Badge variant="secondary" className="bg-muted text-muted-foreground">
           无订阅
         </Badge>
       );
     }
 
     const statusMap: Record<string, { label: string; color: string }> = {
-      active: { label: "订阅中", color: "bg-green-100 text-green-800" },
-      canceled: { label: "已取消", color: "bg-yellow-100 text-yellow-800" },
-      past_due: { label: "逾期", color: "bg-red-100 text-red-800" },
-      incomplete: { label: "未完成", color: "bg-gray-100 text-gray-800" },
+      active: { label: "订阅中", color: "bg-success/15 text-success" },
+      canceled: { label: "已取消", color: "bg-warning/15 text-warning" },
+      past_due: { label: "逾期", color: "bg-destructive/15 text-destructive" },
+      incomplete: { label: "未完成", color: "bg-muted text-muted-foreground" },
     };
 
     // 获取配置，使用默认值避免 undefined
     const defaultConfig = {
       label: "未完成",
-      color: "bg-gray-100 text-gray-800",
+      color: "bg-muted text-muted-foreground",
     };
     const config = statusMap[sub.status] ?? defaultConfig;
     return (
@@ -277,7 +277,7 @@ export default function AdminUsersPage() {
             <CardTitle className="text-sm font-medium">管理员</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{adminCount}</div>
+            <div className="text-2xl font-bold text-primary">{adminCount}</div>
           </CardContent>
         </Card>
         <Card>
@@ -285,7 +285,7 @@ export default function AdminUsersPage() {
             <CardTitle className="text-sm font-medium">订阅用户</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-success">
               {activeSubscriptions}
             </div>
           </CardContent>
@@ -295,7 +295,9 @@ export default function AdminUsersPage() {
             <CardTitle className="text-sm font-medium">已封禁</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{bannedCount}</div>
+            <div className="text-2xl font-bold text-destructive">
+              {bannedCount}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -358,7 +360,7 @@ export default function AdminUsersPage() {
           ) : (
             <div className="relative overflow-x-auto">
               <table className="w-full text-sm text-left">
-                <thead className="text-xs uppercase bg-muted/50">
+                <thead className="bg-muted/40 font-mono text-[10px] tracking-[0.14em] text-muted-foreground uppercase">
                   <tr>
                     <th className="px-4 py-3">用户</th>
                     <th className="px-4 py-3">状态</th>
@@ -397,14 +399,14 @@ export default function AdminUsersPage() {
                           ) : u.emailVerified ? (
                             <Badge
                               variant="secondary"
-                              className="bg-green-100 text-green-800"
+                              className="bg-success/15 text-success"
                             >
                               已验证
                             </Badge>
                           ) : (
                             <Badge
                               variant="secondary"
-                              className="bg-yellow-100 text-yellow-800"
+                              className="bg-warning/15 text-warning"
                             >
                               未验证
                             </Badge>
@@ -413,7 +415,7 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <Coins className="h-4 w-4 text-yellow-500" />
+                          <Coins className="h-4 w-4 text-primary" />
                           <span className="font-medium">
                             {u.credits?.balance ?? 0}
                           </span>
