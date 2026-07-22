@@ -39,12 +39,10 @@ export default async function SupportPage() {
   const getStatusBadge = (status: string) => {
     const statusConfig = ticketStatuses.find((s) => s.value === status);
     const colorMap: Record<string, string> = {
-      open: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-      in_progress:
-        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
-      resolved:
-        "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-      closed: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300",
+      open: "bg-primary/15 text-primary",
+      in_progress: "bg-warning/15 text-warning",
+      resolved: "bg-success/15 text-success",
+      closed: "bg-muted text-muted-foreground",
     };
     return (
       <Badge
@@ -62,10 +60,9 @@ export default async function SupportPage() {
   const getPriorityBadge = (priority: string) => {
     const priorityConfig = ticketPriorities.find((p) => p.value === priority);
     const colorMap: Record<string, string> = {
-      low: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-      medium:
-        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
-      high: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+      low: "bg-success/15 text-success",
+      medium: "bg-warning/15 text-warning",
+      high: "bg-destructive/15 text-destructive",
     };
     return (
       <Badge

@@ -15,19 +15,19 @@ export const ticketCategories = [
  * 工单优先级选项
  */
 export const ticketPriorities = [
-  { value: "low", label: "低", color: "bg-green-500" },
-  { value: "medium", label: "中", color: "bg-yellow-500" },
-  { value: "high", label: "高", color: "bg-red-500" },
+  { value: "low", label: "低", color: "bg-success" },
+  { value: "medium", label: "中", color: "bg-warning" },
+  { value: "high", label: "高", color: "bg-destructive" },
 ] as const;
 
 /**
  * 工单状态选项
  */
 export const ticketStatuses = [
-  { value: "open", label: "待处理", color: "bg-blue-500" },
-  { value: "in_progress", label: "处理中", color: "bg-yellow-500" },
-  { value: "resolved", label: "已解决", color: "bg-green-500" },
-  { value: "closed", label: "已关闭", color: "bg-gray-500" },
+  { value: "open", label: "待处理", color: "bg-primary" },
+  { value: "in_progress", label: "处理中", color: "bg-warning" },
+  { value: "resolved", label: "已解决", color: "bg-success" },
+  { value: "closed", label: "已关闭", color: "bg-muted-foreground" },
 ] as const;
 
 /**

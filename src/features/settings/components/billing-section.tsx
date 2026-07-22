@@ -151,7 +151,7 @@ export function BillingSection() {
             {userPlan !== "free" && (
               <div className="flex items-center gap-2">
                 {isCancelPending ? (
-                  <Badge variant="secondary" className="text-amber-600">
+                  <Badge variant="secondary" className="text-warning">
                     {t("currentPlan.cancelPending", {
                       date: formattedRenewalDate ?? "",
                     })}
@@ -226,7 +226,7 @@ export function BillingSection() {
                 {t("currentPlan.renewalDate")}
               </p>
               <p
-                className={`font-medium ${isCancelPending ? "text-amber-600" : ""}`}
+                className={`font-medium ${isCancelPending ? "text-warning" : ""}`}
               >
                 {formattedRenewalDate ?? t("currentPlan.notApplicable")}
               </p>

@@ -66,16 +66,11 @@ export function UserRoleSelect({ userId, currentRole }: UserRoleSelectProps) {
   const getRoleBadge = (r: string) => {
     if (r === "admin") {
       return (
-        <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
-          管理员
-        </Badge>
+        <Badge className="bg-destructive/15 text-destructive">管理员</Badge>
       );
     }
     return (
-      <Badge
-        variant="secondary"
-        className="bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
-      >
+      <Badge variant="secondary" className="bg-muted text-muted-foreground">
         普通用户
       </Badge>
     );
@@ -97,15 +92,12 @@ export function UserRoleSelect({ userId, currentRole }: UserRoleSelectProps) {
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="user">
-          <Badge
-            variant="secondary"
-            className="bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
-          >
+          <Badge variant="secondary" className="bg-muted text-muted-foreground">
             {t("user")}
           </Badge>
         </SelectItem>
         <SelectItem value="admin">
-          <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
+          <Badge className="bg-destructive/15 text-destructive">
             {t("admin")}
           </Badge>
         </SelectItem>

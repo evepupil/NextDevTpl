@@ -86,8 +86,8 @@ export function CreditUsageSection() {
       {/* 可用积分 */}
       <div className="flex items-center justify-between py-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
-            <Coins className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-warning/15">
+            <Coins className="h-5 w-5 text-warning" />
           </div>
           <span className="font-medium">{t("availableCredits")}</span>
         </div>
@@ -132,14 +132,14 @@ export function CreditUsageSection() {
       {expiringBatch && (
         <>
           <Separator />
-          <div className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50/50 px-4 py-3 dark:border-amber-800 dark:bg-amber-900/10">
+          <div className="flex items-center justify-between rounded-lg border border-warning/30 bg-warning/10 px-4 py-3">
             <div className="flex items-center gap-3">
-              <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              <Clock className="h-5 w-5 text-warning" />
               <div>
-                <p className="font-medium text-amber-800 dark:text-amber-300">
+                <p className="font-medium text-warning">
                   {t("expiringSoon.title")}
                 </p>
-                <p className="text-sm text-amber-700 dark:text-amber-400">
+                <p className="text-sm text-warning">
                   {t("expiringSoon.message", {
                     count: expiringBatch.remaining,
                     date: formatDate(expiringBatch.expiresAt, locale),

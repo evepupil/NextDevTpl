@@ -44,7 +44,7 @@ export function CreditBalanceBadge() {
   return (
     <Badge
       variant="secondary"
-      className="gap-1 px-2 py-1 bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-400"
+      className="gap-1 px-2 py-1 bg-warning/15 text-warning hover:bg-warning/25"
       title="Available Credits"
     >
       <Coins className="h-3 w-3" />

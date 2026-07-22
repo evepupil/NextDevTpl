@@ -260,14 +260,14 @@ export function CookieSettingsDialog({ children }: CookieSettingsDialogProps) {
           <div className="flex gap-2">
             <Button
               onClick={handleAcceptAll}
-              className="bg-gray-900 text-white hover:bg-gray-800"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {t("acceptAll")}
             </Button>
             <Button
               variant="outline"
               onClick={handleRejectAll}
-              className="border-gray-900 text-gray-900 hover:bg-gray-100"
+              className="border-border text-foreground hover:bg-muted"
             >
               {t("rejectAll")}
             </Button>

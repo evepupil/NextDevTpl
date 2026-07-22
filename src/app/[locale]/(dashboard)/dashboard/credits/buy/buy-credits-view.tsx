@@ -83,7 +83,7 @@ export function BuyCreditPackagesView() {
               key={pkg.id}
               className={cn(
                 "relative flex flex-col",
-                isPopular && "border-primary shadow-lg"
+                isPopular && "border-primary shadow-soft"
               )}
             >
               {/* 热门标签 */}
@@ -102,7 +102,7 @@ export function BuyCreditPackagesView() {
               <CardContent className="flex-1 space-y-4">
                 {/* 积分数量 */}
                 <div className="flex items-center justify-center gap-2">
-                  <Coins className="h-6 w-6 text-amber-500" />
+                  <Coins className="h-6 w-6 text-warning" />
                   <span className="text-4xl font-bold">{pkg.credits}</span>
                   <span className="text-muted-foreground">credits</span>
                 </div>
@@ -118,15 +118,15 @@ export function BuyCreditPackagesView() {
                 {/* 特性列表 */}
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-emerald-500" />
+                    <Check className="h-4 w-4 text-success" />
                     <span>Instant delivery</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-emerald-500" />
+                    <Check className="h-4 w-4 text-success" />
                     <span>Valid for 90 days</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-emerald-500" />
+                    <Check className="h-4 w-4 text-success" />
                     <span>Use for all AI features</span>
                   </li>
                 </ul>
