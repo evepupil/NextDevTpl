@@ -539,6 +539,18 @@
       "settings": "Settings",
       "support": "Support",
       "newTicket": "New Ticket"
+    },
+    "sidebar": {
+      "settings": "Settings",
+      "logout": "Log out"
+    },
+    "pages": {
+      "dashboard": "Dashboard",
+      "support": "Support",
+      "newTicket": "New Ticket",
+      "ticketDetails": "Ticket Details",
+      "settings": "Settings",
+      "credits": "Credits"
     }
   },
   "Settings": {

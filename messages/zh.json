@@ -535,6 +535,18 @@
       "settings": "设置",
       "support": "支持",
       "newTicket": "新建工单"
+    },
+    "sidebar": {
+      "settings": "设置",
+      "logout": "退出登录"
+    },
+    "pages": {
+      "dashboard": "控制台",
+      "support": "支持",
+      "newTicket": "新建工单",
+      "ticketDetails": "工单详情",
+      "settings": "设置",
+      "credits": "积分"
     }
   },
   "Settings": {

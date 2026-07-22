@@ -14,16 +14,10 @@ function getPageTitleKey(pathname: string): string {
   const path = pathname.replace(/^\/[a-z]{2}\//, "/");
   const keyMap: Record<string, string> = {
     "/dashboard": "dashboard",
-    "/dashboard/generate": "generate",
-    "/dashboard/tasks": "tasks",
-    "/dashboard/decks": "myDecks",
     "/dashboard/support": "support",
     "/dashboard/support/new": "newTicket",
     "/dashboard/settings": "settings",
-    "/dashboard/settings/profile": "profile",
-    "/dashboard/settings/security": "security",
-    "/dashboard/settings/billing": "billing",
-    "/dashboard/settings/notifications": "notifications",
+    "/dashboard/credits/buy": "credits",
   };
 
   // 精确匹配
@@ -31,10 +25,7 @@ function getPageTitleKey(pathname: string): string {
     return keyMap[path];
   }
 
-  // 动态路由匹配 (如 /dashboard/decks/[id], /dashboard/support/[id])
-  if (path.startsWith("/dashboard/decks/")) {
-    return "deckDetails";
-  }
+  // 动态路由：工单详情
   if (path.startsWith("/dashboard/support/")) {
     return "ticketDetails";
   }
