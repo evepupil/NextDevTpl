@@ -114,6 +114,38 @@
   --sidebar-accent-foreground: oklch(0.24 0.006 60);
   --sidebar-border: oklch(0.905 0.006 90);
   --sidebar-ring: oklch(0.40 0.072 184);
+
+  /* ── Fumadocs 主题对齐 ──
+     把 --color-fd-* 全部映射到设计系统 token，让 docs/blog 不再是
+     Fumadocs 默认蓝/灰，而是 Spruce + 暖中性，与全站一致。
+     此处 :root 未分层，优先级高于 Fumadocs 在 @layer theme 里的定义；
+     且值是 var(--token)，会随 .dark 自动切换，故只需写一处。 */
+  --color-fd-background: var(--background);
+  --color-fd-foreground: var(--foreground);
+  --color-fd-muted: var(--muted);
+  --color-fd-muted-foreground: var(--muted-foreground);
+  --color-fd-popover: var(--popover);
+  --color-fd-popover-foreground: var(--popover-foreground);
+  --color-fd-card: var(--card);
+  --color-fd-card-foreground: var(--card-foreground);
+  --color-fd-border: var(--border);
+  --color-fd-primary: var(--primary);
+  --color-fd-primary-foreground: var(--primary-foreground);
+  --color-fd-secondary: var(--secondary);
+  --color-fd-secondary-foreground: var(--secondary-foreground);
+  --color-fd-accent: var(--accent);
+  --color-fd-accent-foreground: var(--accent-foreground);
+  --color-fd-ring: var(--ring);
+  --color-fd-error: var(--destructive);
+  --color-fd-success: var(--success);
+  --color-fd-warning: var(--warning);
+  --color-fd-info: var(--primary);
+  --color-fd-idea: var(--success);
+  --color-fd-diff-add: var(--success);
+  --color-fd-diff-add-symbol: var(--success);
+  --color-fd-diff-remove: var(--destructive);
+  --color-fd-diff-remove-symbol: var(--destructive);
+  --color-fd-overlay: oklch(0.1 0 0 / 0.5);
 }
 
 .dark {
