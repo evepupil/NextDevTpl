@@ -7,13 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { db } from "@/db";
-import { ticket, ticketMessage, user } from "@/db/schema";
-import { TicketMessageForm } from "@/features/support/components/ticket-message-form";
+import { user } from "@/db/schema/auth";
+import { ticket, ticketMessage } from "@/db/schema/support";
+import { TicketMessageForm } from "@/features/support";
 import {
   ticketCategories,
   ticketPriorities,
   ticketStatuses,
-} from "@/features/support/schemas";
+} from "@/features/support";
 import { getServerSession } from "@/lib/auth/server";
 
 interface TicketDetailPageProps {

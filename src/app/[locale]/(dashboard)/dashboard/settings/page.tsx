@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { SettingsProfileView } from "@/features/settings/components";
+import { SettingsProfileView } from "@/features/settings";
 import { getServerSession } from "@/lib/auth/server";
 
 /**

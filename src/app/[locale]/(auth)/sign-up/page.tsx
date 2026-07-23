@@ -1,4 +1,4 @@
-import { SignUpForm } from "@/features/auth/components/sign-up-form";
+import { SignUpForm } from "@/features/auth";
 
 /**
  * 注册页面

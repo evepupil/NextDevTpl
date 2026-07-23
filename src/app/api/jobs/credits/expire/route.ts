@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
-import { processExpiredBatches } from "@/features/credits/core";
+import { processExpiredBatches } from "@/features/credits";
 import { withApiLogging } from "@/lib/api-logger";
 import { logError, logWarn } from "@/lib/logger";
 

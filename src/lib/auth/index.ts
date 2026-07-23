@@ -2,12 +2,12 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 
 import { db } from "@/db";
-import * as schema from "@/db/schema";
+import * as schema from "@/db/schema/auth";
 import {
   ResetPasswordEmail,
   VerifyEmailEmail,
-} from "@/features/mail/templates/primary-action-email";
-import { sendEmail } from "@/features/mail/utils";
+  sendEmail,
+} from "@/features/mail/server";
 
 const isResendConfigured = Boolean(process.env.RESEND_API_KEY);
 

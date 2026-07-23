@@ -8,12 +8,12 @@ import {
   PseoHero,
   PseoRelated,
   PseoUseCases,
-} from "@/features/pseo/components";
+} from "@/features/pseo";
 import {
   getAllPseoParams,
   getPseoPage,
   getRelatedPseoPages,
-} from "@/features/pseo/lib/pseo-data";
+} from "@/features/pseo";
 
 export function generateStaticParams() {
   return getAllPseoParams();

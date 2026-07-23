@@ -1,4 +1,4 @@
-import { AdminSidebar } from "@/features/admin/components";
+import { AdminSidebar } from "@/features/admin";
 import { checkAdmin } from "@/lib/auth/admin";
 
 /**

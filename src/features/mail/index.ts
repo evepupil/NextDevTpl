@@ -3,3 +3,4 @@ export * from "./actions";
 export * from "./client";
 export * from "./templates";
 export * from "./utils";
+export { mailModule } from "./manifest";

@@ -9,7 +9,10 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { db } from "@/db";
-import { creditsBalance, subscription, ticket, user } from "@/db/schema";
+import { user } from "@/db/schema/auth";
+import { creditsBalance } from "@/db/schema/credits";
+import { subscription } from "@/db/schema/subscription";
+import { ticket } from "@/db/schema/support";
 
 /**
  * Admin 控制面板页面

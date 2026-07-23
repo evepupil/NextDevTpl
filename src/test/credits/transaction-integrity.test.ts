@@ -13,12 +13,12 @@
 import { eq } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
 
-import { creditsBalance, creditsBatch } from "@/db/schema";
+import { creditsBalance, creditsBatch } from "@/db/schema/credits";
 import {
   consumeCredits,
   grantCredits,
   processExpiredBatches,
-} from "@/features/credits/core";
+} from "@/features/credits";
 import {
   cleanupTestUsers,
   createTestCreditsBalance,

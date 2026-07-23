@@ -2,7 +2,7 @@ import { ArrowUpRight, Database, LayoutTemplate, Route } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { getPseoPages } from "@/features/pseo/lib/pseo-data";
+import { getPseoPages } from "@/features/pseo";
 import { Link } from "@/i18n/routing";
 
 export default async function PseoIndexPage({

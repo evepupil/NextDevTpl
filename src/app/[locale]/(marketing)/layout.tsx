@@ -1,4 +1,4 @@
-import { Footer, Header } from "@/features/marketing/components";
+import { Footer, Header } from "@/features/marketing";
 
 export default function MarketingLayout({
   children,

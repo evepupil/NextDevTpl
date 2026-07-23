@@ -10,7 +10,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "@/db";
-import { newsletterSubscriber } from "@/db/schema";
+import { newsletterSubscriber } from "@/db/schema/mail";
 import { actionClient } from "@/lib/safe-action";
 
 const withMailAction = (name: string) =>

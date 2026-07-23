@@ -4,8 +4,7 @@ import { ChevronsUpDown, LogOut, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useAction } from "next-safe-action/hooks";
-import { useEffect, useState } from "react";
+import { type ReactNode, useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -16,14 +15,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { dashboardConfig } from "@/config";
-import { CreditBalanceBadge } from "@/features/credits/components";
 import { useSidebar } from "@/features/dashboard/context";
-import { ModeToggle } from "@/features/shared/components";
-import { getMyPlanAction } from "@/features/subscription/actions/get-user-plan";
-import {
-  PlanBadge,
-  type PlanType,
-} from "@/features/subscription/components/plan-badge";
+import { ModeToggle } from "@/features/shared";
 import { signOut, useSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
 
@@ -38,7 +31,13 @@ import { cn } from "@/lib/utils";
  * - 登出功能
  * - 支持折叠/展开
  */
-export function DashboardSidebar() {
+export function DashboardSidebar({
+  compactAccountBadge,
+  accountPlanBadge,
+}: {
+  compactAccountBadge?: ReactNode;
+  accountPlanBadge?: ReactNode;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const { isCollapsed, isMobileOpen, setMobileOpen, toggleSidebar } =
@@ -52,30 +51,8 @@ export function DashboardSidebar() {
   // Popover 开关状态
   const [open, setOpen] = useState(false);
 
-  // 获取用户订阅计划
-  const { execute: fetchPlan, result: planResult } = useAction(getMyPlanAction);
-  const userPlan = (planResult.data?.plan as PlanType) || "free";
-
-  // 用户登录后获取计划
-  useEffect(() => {
-    if (user) {
-      fetchPlan();
-    }
-  }, [user, fetchPlan]);
-
-  /**
-   * 导航项标题映射到翻译键
-   */
-  const getNavTitle = (title: string): string => {
-    const titleMap: Record<string, string> = {
-      Dashboard: t("nav.dashboard"),
-      Credits: t("nav.credits"),
-      Settings: t("nav.settings"),
-      Support: t("nav.support"),
-      "New Ticket": t("nav.newTicket"),
-    };
-    return titleMap[title] || title;
-  };
+  const getNavTitle = (title: string, translationKey?: string) =>
+    translationKey ? t(translationKey) : title;
 
   /**
    * 获取用户名首字母作为头像回退
@@ -172,7 +149,7 @@ export function DashboardSidebar() {
               {/* Group Label - 折叠时隐藏 */}
               {!collapsed && (
                 <p className="mb-1.5 px-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  {getNavTitle(group.title)}
+                  {getNavTitle(group.title, group.translationKey)}
                 </p>
               )}
               <div className="space-y-0.5">
@@ -184,7 +161,10 @@ export function DashboardSidebar() {
                     (item.href !== "/dashboard" &&
                       normalizedPath.startsWith(`${item.href}/`));
                   const Icon = item.icon;
-                  const translatedTitle = getNavTitle(item.title);
+                  const translatedTitle = getNavTitle(
+                    item.title,
+                    item.translationKey
+                  );
                   return (
                     <Link
                       key={item.href}
@@ -237,7 +217,7 @@ export function DashboardSidebar() {
                       <div className="flex-1 truncate text-left">
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-medium">{user.name}</p>
-                          <CreditBalanceBadge />
+                          {compactAccountBadge}
                         </div>
                         <p className="truncate text-xs text-muted-foreground">
                           {user.email}
@@ -269,7 +249,7 @@ export function DashboardSidebar() {
                   <div className="flex-1 truncate">
                     <div className="flex items-center gap-2">
                       <p className="font-medium">{user.name}</p>
-                      <PlanBadge plan={userPlan} size="xs" />
+                      {accountPlanBadge}
                     </div>
                     <p className="truncate text-sm text-muted-foreground">
                       {user.email}

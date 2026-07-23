@@ -5,8 +5,8 @@ import { z } from "zod";
 
 import { findPlanByPriceId, getBaseUrl, paymentConfig } from "@/config/payment";
 import { db } from "@/db";
-import { subscription } from "@/db/schema";
-import { PaymentType } from "@/features/payment/types";
+import { subscription } from "@/db/schema/subscription";
+import { PaymentType } from "./types";
 import { logEvent } from "@/lib/logger";
 import { protectedAction } from "@/lib/safe-action";
 

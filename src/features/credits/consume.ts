@@ -11,7 +11,11 @@
 import { and, asc, eq, gt, isNull, or, sql } from "drizzle-orm";
 
 import { db } from "@/db";
-import { creditsBalance, creditsBatch, creditsTransaction } from "@/db/schema";
+import {
+  creditsBalance,
+  creditsBatch,
+  creditsTransaction,
+} from "@/db/schema/credits";
 
 import { AccountFrozenError, InsufficientCreditsError } from "./errors";
 import type { ConsumeCreditsParams, ConsumeCreditsResult } from "./types";

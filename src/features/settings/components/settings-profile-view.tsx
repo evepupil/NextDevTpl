@@ -46,13 +46,9 @@ import {
   updateProfileAction,
 } from "@/features/settings/actions";
 import { updateProfileSchema } from "@/features/settings/schemas";
-import {
-  ALLOWED_IMAGE_TYPES,
-  generateAvatarKey,
-  getAvatarUrl,
-  getSignedUploadUrlAction,
-  MAX_FILE_SIZE,
-} from "@/features/storage";
+import { getSignedUploadUrlAction } from "@/features/storage/actions";
+import { ALLOWED_IMAGE_TYPES, MAX_FILE_SIZE } from "@/features/storage/types";
+import { generateAvatarKey, getAvatarUrl } from "@/features/storage/utils";
 import { usePathname, useRouter } from "@/i18n/routing";
 import { signOut } from "@/lib/auth/client";
 

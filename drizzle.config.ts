@@ -28,7 +28,7 @@ if (!databaseUrl) {
  */
 export default defineConfig({
   // 数据库 Schema 文件路径
-  schema: "./src/db/schema.ts",
+  schema: "./src/db/schema/index.ts",
 
   // 迁移文件输出目录
   out: "./drizzle",

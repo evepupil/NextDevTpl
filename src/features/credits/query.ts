@@ -5,7 +5,7 @@
 import { and, asc, eq, gt, isNull, or, sql } from "drizzle-orm";
 
 import { db } from "@/db";
-import { creditsBatch, creditsTransaction } from "@/db/schema";
+import { creditsBatch, creditsTransaction } from "@/db/schema/credits";
 
 /**
  * 获取用户的活跃批次列表

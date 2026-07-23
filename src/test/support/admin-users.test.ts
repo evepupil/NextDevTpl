@@ -12,9 +12,10 @@
 import { eq, ilike, or } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
 
-import { creditsBalance, subscription, user } from "@/db/schema";
-import { CREDITS_EXPIRY_DAYS } from "@/features/credits/config";
-import { grantCredits } from "@/features/credits/core";
+import { user } from "@/db/schema/auth";
+import { creditsBalance } from "@/db/schema/credits";
+import { subscription } from "@/db/schema/subscription";
+import { CREDITS_EXPIRY_DAYS, grantCredits } from "@/features/credits";
 import {
   cleanupTestUsers,
   createTestCreditsBalance,

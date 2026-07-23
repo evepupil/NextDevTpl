@@ -4,7 +4,8 @@ import { and, desc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/db";
-import { ticket, ticketMessage, user } from "@/db/schema";
+import { user } from "@/db/schema/auth";
+import { ticket, ticketMessage } from "@/db/schema/support";
 import {
   addTicketMessageSchema,
   createTicketSchema,

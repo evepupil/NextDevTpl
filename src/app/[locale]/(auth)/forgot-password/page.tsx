@@ -1,4 +1,4 @@
-import { ForgotPasswordForm } from "@/features/auth/components/forgot-password-form";
+import { ForgotPasswordForm } from "@/features/auth";
 
 /**
  * 忘记密码页面

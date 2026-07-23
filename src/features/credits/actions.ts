@@ -9,7 +9,7 @@
 import { z } from "zod";
 
 import { getBaseUrl } from "@/config/payment";
-import { creem } from "@/features/payment/creem";
+import { creem } from "@/features/payment/server";
 import { logEvent } from "@/lib/logger";
 import { actionClient, protectedAction } from "@/lib/safe-action";
 

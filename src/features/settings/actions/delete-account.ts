@@ -4,8 +4,8 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { db, user } from "@/db";
-import { subscription } from "@/db/schema";
-import { creem } from "@/features/payment/creem";
+import { subscription } from "@/db/schema/subscription";
+import { creem } from "@/features/payment/server";
 import { protectedAction } from "@/lib/safe-action";
 
 export const deleteAccountAction = protectedAction

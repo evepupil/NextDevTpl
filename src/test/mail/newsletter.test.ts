@@ -13,7 +13,7 @@
 import { eq } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
 
-import { newsletterSubscriber } from "@/db/schema";
+import { newsletterSubscriber } from "@/db/schema/mail";
 import { cleanupTestNewsletterSubscribers, testDb } from "../utils";
 
 // 收集测试中创建的订阅者邮箱，用于清理

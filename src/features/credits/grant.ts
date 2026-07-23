@@ -10,7 +10,11 @@
 import { eq, sql } from "drizzle-orm";
 
 import { db } from "@/db";
-import { creditsBalance, creditsBatch, creditsTransaction } from "@/db/schema";
+import {
+  creditsBalance,
+  creditsBatch,
+  creditsTransaction,
+} from "@/db/schema/credits";
 
 import { AccountFrozenError } from "./errors";
 import type { GrantCreditsParams } from "./types";

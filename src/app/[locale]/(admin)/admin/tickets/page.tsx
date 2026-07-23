@@ -4,12 +4,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { db } from "@/db";
-import { ticket, user } from "@/db/schema";
+import { user } from "@/db/schema/auth";
+import { ticket } from "@/db/schema/support";
 import {
   ticketCategories,
   ticketPriorities,
   ticketStatuses,
-} from "@/features/support/schemas";
+} from "@/features/support";
 
 /**
  * 管理员 - 工单管理列表页面

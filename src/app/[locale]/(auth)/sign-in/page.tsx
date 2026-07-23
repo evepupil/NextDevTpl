@@ -1,4 +1,4 @@
-import { SignInForm } from "@/features/auth/components/sign-in-form";
+import { SignInForm } from "@/features/auth";
 
 /**
  * 登录页面

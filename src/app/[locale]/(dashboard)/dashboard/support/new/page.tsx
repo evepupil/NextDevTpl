@@ -17,8 +17,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { createTicketAction } from "@/features/support/actions";
-import { ticketCategories, ticketPriorities } from "@/features/support/schemas";
+import {
+  createTicketAction,
+  ticketCategories,
+  ticketPriorities,
+} from "@/features/support";
 
 /**
  * 新建工单页面

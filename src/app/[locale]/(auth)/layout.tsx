@@ -1,5 +1,4 @@
-import { AuthBrandPanel } from "@/features/auth/components/auth-brand-panel";
-import { AuthFooter } from "@/features/auth/components/auth-footer";
+import { AuthBrandPanel, AuthFooter } from "@/features/auth";
 
 /**
  * Auth 路由组布局

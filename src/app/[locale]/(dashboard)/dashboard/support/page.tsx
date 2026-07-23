@@ -6,12 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { db } from "@/db";
-import { ticket } from "@/db/schema";
+import { ticket } from "@/db/schema/support";
 import {
   ticketCategories,
   ticketPriorities,
   ticketStatuses,
-} from "@/features/support/schemas";
+} from "@/features/support";
 import { getServerSession } from "@/lib/auth/server";
 
 /**

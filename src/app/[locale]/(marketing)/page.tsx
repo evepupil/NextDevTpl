@@ -10,7 +10,7 @@ import {
   PricingSection,
   Testimonials,
   UseCasesSection,
-} from "@/features/marketing/components";
+} from "@/features/marketing";
 
 /**
  * 生成首页 Metadata

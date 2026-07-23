@@ -14,7 +14,7 @@
 import { eq } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
 
-import { user } from "@/db/schema";
+import { user } from "@/db/schema/auth";
 import { cleanupTestUsers, createTestUser, testDb } from "../utils";
 
 // 收集测试中创建的用户 ID，用于清理

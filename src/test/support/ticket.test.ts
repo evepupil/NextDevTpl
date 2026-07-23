@@ -11,7 +11,8 @@
 import { desc, eq } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
 
-import { ticket, user } from "@/db/schema";
+import { user } from "@/db/schema/auth";
+import { ticket } from "@/db/schema/support";
 import {
   cleanupTestUsers,
   createTestTicket,

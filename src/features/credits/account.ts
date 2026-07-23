@@ -5,7 +5,7 @@
 import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
-import { creditsBalance } from "@/db/schema";
+import { creditsBalance } from "@/db/schema/credits";
 
 /**
  * 确保用户有积分账户

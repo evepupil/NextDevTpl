@@ -34,11 +34,8 @@ import {
   type SubscriptionPlan,
 } from "@/config/subscription-plan";
 import { cancelSubscription } from "@/features/payment/actions";
-import { getMyPlanAction } from "@/features/subscription/actions/get-user-plan";
-import {
-  PlanBadge,
-  type PlanType,
-} from "@/features/subscription/components/plan-badge";
+import { getMyPlanAction } from "@/features/subscription/actions";
+import { PlanBadge, type PlanType } from "@/features/subscription/components";
 import { Link } from "@/i18n/routing";
 
 /**

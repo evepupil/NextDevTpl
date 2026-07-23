@@ -13,7 +13,7 @@ import {
   checkFileSizePrivilege,
   getUserPlan,
   getUserPlanType,
-} from "@/features/subscription/services/user-plan";
+} from "@/features/subscription";
 import {
   cleanupTestUsers,
   createTestSubscription,
@@ -138,10 +138,7 @@ describe("checkFileSizePrivilege", () => {
     const testUser = await createTestUser();
     createdUserIds.push(testUser.id);
 
-    const result = await checkFileSizePrivilege(
-      testUser.id,
-      3 * 1024 * 1024
-    );
+    const result = await checkFileSizePrivilege(testUser.id, 3 * 1024 * 1024);
 
     expect(result.allowed).toBe(true);
   });
@@ -150,10 +147,7 @@ describe("checkFileSizePrivilege", () => {
     const testUser = await createTestUser();
     createdUserIds.push(testUser.id);
 
-    const result = await checkFileSizePrivilege(
-      testUser.id,
-      10 * 1024 * 1024
-    );
+    const result = await checkFileSizePrivilege(testUser.id, 10 * 1024 * 1024);
 
     expect(result.allowed).toBe(false);
     expect(result.errorMessage).toBeDefined();

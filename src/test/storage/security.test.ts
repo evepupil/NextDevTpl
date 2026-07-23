@@ -20,7 +20,7 @@ import {
   validateDeleteRequest,
   validateKeyFormat,
   validateUploadRequest,
-} from "@/features/storage/validation";
+} from "@/features/storage";
 
 // 测试用白名单与用户（纯函数测试，无需访问数据库）
 const ALLOWED_BUCKETS = ["test-avatars-bucket", "nextdevtpl-avatars"];

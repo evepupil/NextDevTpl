@@ -14,7 +14,7 @@ import { afterAll, describe, expect, it } from "vitest";
 import {
   CREDITS_EXPIRY_DAYS,
   REGISTRATION_BONUS_CREDITS,
-} from "@/features/credits/config";
+} from "@/features/credits";
 
 import {
   AccountFrozenError,
@@ -29,7 +29,7 @@ import {
   InsufficientCreditsError,
   processExpiredBatches,
   unfreezeCreditsAccount,
-} from "@/features/credits/core";
+} from "@/features/credits";
 import {
   cleanupTestUsers,
   createTestCreditsBalance,

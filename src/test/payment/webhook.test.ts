@@ -16,9 +16,8 @@
 import { eq } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
 
-import { subscription } from "@/db/schema";
-import { CREDITS_EXPIRY_DAYS } from "@/features/credits/config";
-import { grantCredits } from "@/features/credits/core";
+import { subscription } from "@/db/schema/subscription";
+import { CREDITS_EXPIRY_DAYS, grantCredits } from "@/features/credits";
 import {
   cleanupTestUsers,
   createTestSubscription,

@@ -2,7 +2,7 @@ import { siteConfig } from "@/config";
 import {
   createOgImageResponse,
   OG_IMAGE_SIZE,
-} from "@/features/shared/components/og-image-template";
+} from "@/components/seo/og-image-template";
 
 /**
  * Open Graph 图片配置

@@ -14,7 +14,7 @@
 import { afterAll, describe, expect, it } from "vitest";
 import { PRICE_IDS, SUBSCRIPTION_MONTHLY_CREDITS } from "@/config/payment";
 import { getPlanFromPriceId } from "@/config/subscription-plan";
-import { grantCredits } from "@/features/credits/core";
+import { grantCredits } from "@/features/credits";
 import {
   cleanupTestUsers,
   createTestSubscription,

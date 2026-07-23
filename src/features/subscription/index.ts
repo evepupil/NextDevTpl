@@ -7,7 +7,12 @@
 // Actions
 export { getMyPlanAction } from "./actions";
 // 组件
-export { type BadgeSize, PlanBadge, type PlanType } from "./components";
+export {
+  type BadgeSize,
+  CurrentPlanBadge,
+  PlanBadge,
+  type PlanType,
+} from "./components";
 
 // 服务
 export {
@@ -17,3 +22,4 @@ export {
   type PrivilegeCheckResult,
   type UserPlanInfo,
 } from "./services/user-plan";
+export { subscriptionModule } from "./manifest";

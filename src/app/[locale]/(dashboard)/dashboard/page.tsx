@@ -14,9 +14,9 @@ import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { db } from "@/db";
-import { creditsBalance } from "@/db/schema";
-import { getUserTransactions } from "@/features/credits/query";
-import { getUserPlan } from "@/features/subscription/services/user-plan";
+import { creditsBalance } from "@/db/schema/credits";
+import { getUserTransactions } from "@/features/credits";
+import { getUserPlan } from "@/features/subscription";
 import { Link } from "@/i18n/routing";
 import { auth } from "@/lib/auth";
 

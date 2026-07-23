@@ -11,7 +11,8 @@
 import { eq } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
 
-import { subscription, user } from "@/db/schema";
+import { user } from "@/db/schema/auth";
+import { subscription } from "@/db/schema/subscription";
 import {
   cleanupTestUsers,
   createTestSubscription,

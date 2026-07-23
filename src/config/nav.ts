@@ -16,12 +16,19 @@ import {
   Zap,
 } from "lucide-react";
 
+import type {
+  ModuleNavigationArea,
+  ModuleNavigationIcon,
+} from "@/core/modules";
+import { moduleRegistry } from "@/modules";
+
 /**
  * 导航链接类型
  */
 export interface NavItem {
   title: string;
   href: string;
+  translationKey?: string;
   disabled?: boolean;
   external?: boolean;
   icon?: LucideIcon;
@@ -33,6 +40,7 @@ export interface NavItem {
  */
 export interface NavGroup {
   title: string;
+  translationKey?: string;
   items: NavItem[];
 }
 
@@ -165,70 +173,43 @@ export const footerNav = {
   ] as NavItem[],
 };
 
-// ============================================
-// Dashboard 导航配置
-// ============================================
+const moduleNavigationIcons: Record<ModuleNavigationIcon, LucideIcon> = {
+  coins: Coins,
+  dashboard: LayoutDashboard,
+  headset: Headset,
+  settings: Settings,
+  ticket: Ticket,
+  users: Users,
+};
 
-/**
- * Dashboard 侧边栏导航分组
- */
-export const dashboardNav: NavGroup[] = [
-  {
-    title: "Dashboard",
-    items: [
-      {
-        title: "Dashboard",
-        href: "/dashboard",
-        icon: LayoutDashboard,
-      },
-      {
-        title: "Credits",
-        href: "/dashboard/credits",
-        icon: Coins,
-      },
-      {
-        title: "Settings",
-        href: "/dashboard/settings",
-        icon: Settings,
-      },
-      {
-        title: "Support",
-        href: "/dashboard/support",
-        icon: Headset,
-      },
-    ],
-  },
-];
+function createModuleNavigation(area: ModuleNavigationArea): NavGroup[] {
+  const contributions = moduleRegistry.manifests
+    .flatMap((manifest) => manifest.navigation)
+    .filter((item) => item.area === area)
+    .sort((left, right) => left.order - right.order);
+  const groups = new Map<string, NavGroup>();
 
-// ============================================
-// Admin 导航配置
-// ============================================
+  for (const contribution of contributions) {
+    const group = groups.get(contribution.group) ?? {
+      title: contribution.group,
+      translationKey: contribution.groupTranslationKey,
+      items: [],
+    };
 
-/**
- * Admin 侧边栏导航分组
- */
-export const adminNav: NavGroup[] = [
-  {
-    title: "管理中心",
-    items: [
-      {
-        title: "控制面板",
-        href: "/admin",
-        icon: LayoutDashboard,
-      },
-      {
-        title: "用户管理",
-        href: "/admin/users",
-        icon: Users,
-      },
-      {
-        title: "工单管理",
-        href: "/admin/tickets",
-        icon: Ticket,
-      },
-    ],
-  },
-];
+    group.items.push({
+      title: contribution.translationKey,
+      translationKey: contribution.translationKey,
+      href: contribution.href,
+      icon: moduleNavigationIcons[contribution.icon],
+    });
+    groups.set(contribution.group, group);
+  }
+
+  return [...groups.values()];
+}
+
+export const dashboardNav = createModuleNavigation("dashboard");
+export const adminNav = createModuleNavigation("admin");
 
 // ============================================
 // 导出配置对象

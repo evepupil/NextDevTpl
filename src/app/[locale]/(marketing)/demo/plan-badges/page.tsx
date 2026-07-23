@@ -1,7 +1,4 @@
-import {
-  PlanBadge,
-  type PlanType,
-} from "@/features/subscription/components/plan-badge";
+import { PlanBadge, type PlanType } from "@/features/subscription";
 
 const plans: PlanType[] = ["free", "starter", "pro", "ultra"];
 const sizes: Array<"xs" | "sm" | "md" | "lg"> = ["xs", "sm", "md", "lg"];

@@ -3,7 +3,7 @@ import { drizzle as drizzleNeonWs } from "drizzle-orm/neon-serverless";
 import { drizzle as drizzlePg } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 
-import * as schema from "./schema";
+import * as schema from "./schema/index";
 
 /**
  * 数据库连接配置
@@ -68,4 +68,4 @@ function createDatabaseConnection() {
 export const db = createDatabaseConnection();
 
 // 导出 Schema 以便在其他地方使用
-export * from "./schema";
+export * from "./schema/index";

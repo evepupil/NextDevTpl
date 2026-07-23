@@ -5,9 +5,10 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { db } from "@/db";
-import { creditsBalance, subscription, user } from "@/db/schema";
-import { CREDITS_EXPIRY_DAYS } from "@/features/credits/config";
-import { grantCredits } from "@/features/credits/core";
+import { user } from "@/db/schema/auth";
+import { creditsBalance } from "@/db/schema/credits";
+import { subscription } from "@/db/schema/subscription";
+import { CREDITS_EXPIRY_DAYS, grantCredits } from "@/features/credits";
 import { adminAction } from "@/lib/safe-action";
 
 const withAdminUsersAction = (name: string) =>
@@ -75,19 +76,18 @@ export const getAllUsersAction = withAdminUsersAction("getAllUsers")
     };
 
     // 根据是否有搜索条件构建查询
-    const users =
-      query?.trim()
-        ? await db
-            .select(userSelectFields)
-            .from(user)
-            .where(
-              or(
-                ilike(user.email, `%${query.trim()}%`),
-                ilike(user.name, `%${query.trim()}%`)
-              )
+    const users = query?.trim()
+      ? await db
+          .select(userSelectFields)
+          .from(user)
+          .where(
+            or(
+              ilike(user.email, `%${query.trim()}%`),
+              ilike(user.name, `%${query.trim()}%`)
             )
-            .orderBy(user.createdAt)
-        : await db.select(userSelectFields).from(user).orderBy(user.createdAt);
+          )
+          .orderBy(user.createdAt)
+      : await db.select(userSelectFields).from(user).orderBy(user.createdAt);
 
     // 获取所有用户的积分余额
     const balances = await db

@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { adminConfig, siteConfig } from "@/config";
-import { ModeToggle } from "@/features/shared/components";
+import { ModeToggle } from "@/features/shared";
 import { signOut, useSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
 
@@ -30,15 +30,8 @@ export function AdminSidebar() {
   const router = useRouter();
   const t = useTranslations("AdminSidebar");
 
-  const getNavTitle = (title: string): string => {
-    const titleMap: Record<string, string> = {
-      管理中心: t("nav.controlPanel"),
-      控制面板: t("nav.dashboard"),
-      用户管理: t("nav.userManagement"),
-      工单管理: t("nav.ticketManagement"),
-    };
-    return titleMap[title] || title;
-  };
+  const getNavTitle = (title: string, translationKey?: string) =>
+    translationKey ? t(translationKey) : title;
 
   const { data: session } = useSession();
   const user = session?.user;
@@ -94,7 +87,7 @@ export function AdminSidebar() {
         {adminConfig.sidebarNav.map((group) => (
           <div key={group.title}>
             <p className="mb-1.5 px-2 font-mono text-[10px] font-semibold tracking-[0.14em] text-sidebar-foreground/40 uppercase">
-              {getNavTitle(group.title)}
+              {getNavTitle(group.title, group.translationKey)}
             </p>
             <div className="space-y-0.5">
               {group.items.map((item) => {
@@ -112,7 +105,7 @@ export function AdminSidebar() {
                     )}
                   >
                     {Icon && <Icon className="h-4 w-4 shrink-0" />}
-                    {getNavTitle(item.title)}
+                    {getNavTitle(item.title, item.translationKey)}
                   </Link>
                 );
               })}

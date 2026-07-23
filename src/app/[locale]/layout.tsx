@@ -5,7 +5,7 @@ import { getMessages } from "next-intl/server";
 import { Toaster } from "sonner";
 import { siteConfig } from "@/config";
 import { Analytics } from "@/features/analytics";
-import { CookieConsent } from "@/features/marketing/components";
+import { CookieConsent } from "@/features/marketing";
 import { Providers } from "@/features/shared";
 import { routing } from "@/i18n/routing";
 

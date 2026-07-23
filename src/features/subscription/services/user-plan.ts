@@ -14,7 +14,7 @@ import {
   type SubscriptionPlan,
 } from "@/config/subscription-plan";
 import { db } from "@/db";
-import { subscription } from "@/db/schema";
+import { subscription } from "@/db/schema/subscription";
 
 // ============================================
 // 类型定义

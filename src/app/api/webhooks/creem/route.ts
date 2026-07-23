@@ -4,15 +4,16 @@ import { NextResponse } from "next/server";
 import { SUBSCRIPTION_MONTHLY_CREDITS } from "@/config/payment";
 import { getPlanFromPriceId } from "@/config/subscription-plan";
 import { db } from "@/db";
-import { creditsBatch, subscription, user } from "@/db/schema";
-import { CREDITS_EXPIRY_DAYS } from "@/features/credits/config";
-import { grantCredits } from "@/features/credits/core";
+import { user } from "@/db/schema/auth";
+import { creditsBatch } from "@/db/schema/credits";
+import { subscription } from "@/db/schema/subscription";
+import { CREDITS_EXPIRY_DAYS, grantCredits } from "@/features/credits";
 import {
   type CreemCheckoutCompletedData,
   type CreemSubscription,
   type CreemWebhookEvent,
   constructCreemEvent,
-} from "@/features/payment/creem";
+} from "@/features/payment/server";
 import { withApiLogging } from "@/lib/api-logger";
 import { logError, logEvent, logWarn } from "@/lib/logger";
 

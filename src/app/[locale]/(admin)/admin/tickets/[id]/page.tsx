@@ -7,14 +7,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { db } from "@/db";
-import { ticket, ticketMessage, user } from "@/db/schema";
-import { AdminTicketReplyForm } from "@/features/support/components/admin-ticket-reply-form";
-import { AdminTicketStatusSelect } from "@/features/support/components/admin-ticket-status-select";
+import { user } from "@/db/schema/auth";
+import { ticket, ticketMessage } from "@/db/schema/support";
+import {
+  AdminTicketReplyForm,
+  AdminTicketStatusSelect,
+} from "@/features/support";
 import {
   ticketCategories,
   ticketPriorities,
   ticketStatuses,
-} from "@/features/support/schemas";
+} from "@/features/support";
 
 interface AdminTicketDetailPageProps {
   params: Promise<{

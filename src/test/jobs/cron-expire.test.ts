@@ -11,7 +11,7 @@
 
 import { afterAll, describe, expect, it } from "vitest";
 
-import { processExpiredBatches } from "@/features/credits/core";
+import { processExpiredBatches } from "@/features/credits";
 import {
   cleanupTestUsers,
   createTestCreditsBalance,

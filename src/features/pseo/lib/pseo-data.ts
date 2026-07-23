@@ -45,7 +45,7 @@ export interface PseoFaqItem {
   answer: string;
 }
 
-export interface PseoCta {
+export interface PseoCtaData {
   title: string;
   description: string;
   primaryCta: PseoCtaLink;
@@ -69,7 +69,7 @@ export interface PseoLocaleData {
   features: PseoFeature[];
   useCases: PseoUseCase[];
   faq: PseoFaqItem[];
-  cta: PseoCta;
+  cta: PseoCtaData;
 }
 
 export interface PseoPageRecord {

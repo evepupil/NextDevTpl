@@ -1,9 +1,11 @@
 import { redirect } from "next/navigation";
+import { CreditBalanceBadge } from "@/features/credits";
 import {
   DashboardMainWrapper,
   DashboardSidebar,
-} from "@/features/dashboard/components";
-import { SidebarProvider } from "@/features/dashboard/context";
+  SidebarProvider,
+} from "@/features/dashboard";
+import { CurrentPlanBadge } from "@/features/subscription";
 import { getServerSession } from "@/lib/auth/server";
 
 export default async function DashboardLayout({
@@ -22,7 +24,10 @@ export default async function DashboardLayout({
   return (
     <SidebarProvider>
       <div className="min-h-screen bg-muted/40">
-        <DashboardSidebar />
+        <DashboardSidebar
+          compactAccountBadge={<CreditBalanceBadge />}
+          accountPlanBadge={<CurrentPlanBadge />}
+        />
         <DashboardMainWrapper>{children}</DashboardMainWrapper>
       </div>
     </SidebarProvider>

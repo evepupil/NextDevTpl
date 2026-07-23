@@ -3,3 +3,4 @@
  */
 
 export { type BadgeSize, PlanBadge, type PlanType } from "./plan-badge";
+export { CurrentPlanBadge } from "./current-plan-badge";

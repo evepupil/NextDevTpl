@@ -8,7 +8,11 @@
 import { and, eq, gt, lt, sql } from "drizzle-orm";
 
 import { db } from "@/db";
-import { creditsBalance, creditsBatch, creditsTransaction } from "@/db/schema";
+import {
+  creditsBalance,
+  creditsBatch,
+  creditsTransaction,
+} from "@/db/schema/credits";
 import { logEvent } from "@/lib/logger";
 
 export async function processExpiredBatches() {

@@ -14,18 +14,18 @@
 import { eq } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
 
-import { creditsTransaction } from "@/db/schema";
+import { creditsTransaction } from "@/db/schema/credits";
 import {
   CREDIT_PACKAGES,
   CREDITS_EXPIRY_DAYS,
   MONTHLY_SUBSCRIPTION_CREDITS,
   REGISTRATION_BONUS_CREDITS,
-} from "@/features/credits/config";
+} from "@/features/credits";
 import {
   ensureRegistrationBonus,
   getCreditsBalance,
   grantCredits,
-} from "@/features/credits/core";
+} from "@/features/credits";
 import {
   cleanupTestUsers,
   createTestUser,
