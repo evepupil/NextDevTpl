@@ -2,6 +2,10 @@
   "name": "NextjsTpl",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.21.0",
+  "engines": {
+    "node": ">=24.18.0 <25"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
