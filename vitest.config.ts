@@ -17,14 +17,19 @@ export default defineConfig({
     // 集成测试需要更长的超时时间
     testTimeout: 30000,
     hookTimeout: 30000,
-    // 顺序执行测试，避免数据库竞争
+    // 测试文件和文件内用例均串行执行，避免数据库连接竞争
+    fileParallelism: false,
     sequence: {
       concurrent: false,
     },
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
-      include: ["src/features/**/*.ts", "src/lib/**/*.ts", "src/config/**/*.ts"],
+      include: [
+        "src/features/**/*.ts",
+        "src/lib/**/*.ts",
+        "src/config/**/*.ts",
+      ],
       exclude: [
         "node_modules/",
         ".next/",
