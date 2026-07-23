@@ -7,6 +7,10 @@
     ".node-version",
     "biome.json",
     "components.json",
+    ".dockerignore",
+    "compose.yaml",
+    "deploy",
+    "Dockerfile",
     "drizzle.config.ts",
     "LICENSE",
     "messages",
@@ -23,6 +27,7 @@
     "source.config.ts",
     "src",
     "tsconfig.json",
+    "vercel.json",
     "vitest.config.ts"
   ]
 }

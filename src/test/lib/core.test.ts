@@ -7,9 +7,14 @@
  * - middleware 路径匹配
  */
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { getFileTypeFromMime, getFileTypeFromName } from "@/lib/file-utils";
+import {
+  createHealthReport,
+  runHealthProbe,
+  validateDeploymentEnvironment,
+} from "@/lib/health/core";
 
 describe("getFileTypeFromName", () => {
   it("应识别 .pdf 文件", () => {
@@ -112,5 +117,73 @@ describe("validateCronSecret", () => {
 
   it("不带 Bearer 前缀的纯 token 也应支持", () => {
     expect(validateCronSecret(testSecret, testSecret)).toBe(true);
+  });
+});
+
+const validDeploymentEnvironment: Readonly<Record<string, string | undefined>> =
+  {
+    DATABASE_URL: "postgresql://user:password@localhost:5432/app",
+    BETTER_AUTH_SECRET: "test-secret",
+    BETTER_AUTH_URL: "https://example.com",
+    NEXT_PUBLIC_APP_URL: "https://example.com",
+  };
+
+describe("deployment health", () => {
+  it("validates required deployment configuration", () => {
+    expect(validateDeploymentEnvironment(validDeploymentEnvironment)).toEqual(
+      []
+    );
+    expect(
+      validateDeploymentEnvironment({
+        ...validDeploymentEnvironment,
+        DATABASE_URL: "mysql://localhost/app",
+        BETTER_AUTH_URL: "invalid",
+      })
+    ).toEqual(["DATABASE_URL", "BETTER_AUTH_URL"]);
+  });
+
+  it("marks a report unhealthy when one check fails", () => {
+    const report = createHealthReport({
+      version: "test-version",
+      now: new Date("2026-07-23T00:00:00.000Z"),
+      checks: {
+        application: { status: "pass", durationMs: 0 },
+        database: { status: "fail", durationMs: 12 },
+      },
+    });
+
+    expect(report).toEqual({
+      status: "unhealthy",
+      version: "test-version",
+      timestamp: "2026-07-23T00:00:00.000Z",
+      checks: {
+        application: { status: "pass", durationMs: 0 },
+        database: { status: "fail", durationMs: 12 },
+      },
+    });
+  });
+
+  it("hides probe errors behind a failed result", async () => {
+    let time = 10;
+    await expect(
+      runHealthProbe(
+        async () => {
+          time = 17;
+          throw new Error("postgresql://secret@private-host/database");
+        },
+        { timeoutMs: 100, now: () => time }
+      )
+    ).resolves.toEqual({ status: "fail", durationMs: 7 });
+  });
+
+  it("fails a probe that exceeds its timeout", async () => {
+    vi.useFakeTimers();
+    const result = runHealthProbe(() => new Promise<void>(() => undefined), {
+      timeoutMs: 50,
+    });
+
+    await vi.advanceTimersByTimeAsync(50);
+    await expect(result).resolves.toMatchObject({ status: "fail" });
+    vi.useRealTimers();
   });
 });

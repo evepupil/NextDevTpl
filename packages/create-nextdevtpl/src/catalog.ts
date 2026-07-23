@@ -123,11 +123,6 @@ export async function findGeneratorAssets(): Promise<GeneratorAssets> {
   const repositoryRoot = resolve(current, "..", "..", "..");
   const candidates: GeneratorAssets[] = [
     {
-      catalogPath: resolve(packageRoot, "catalog.json"),
-      templateManifestPath: resolve(packageRoot, "template", "manifest.json"),
-      templateRoot: resolve(packageRoot, "template"),
-    },
-    {
       catalogPath: resolve(repositoryRoot, "recipes", "catalog.json"),
       templateManifestPath: resolve(
         repositoryRoot,
@@ -136,6 +131,11 @@ export async function findGeneratorAssets(): Promise<GeneratorAssets> {
         "manifest.json"
       ),
       templateRoot: repositoryRoot,
+    },
+    {
+      catalogPath: resolve(packageRoot, "catalog.json"),
+      templateManifestPath: resolve(packageRoot, "template", "manifest.json"),
+      templateRoot: resolve(packageRoot, "template"),
     },
   ];
 

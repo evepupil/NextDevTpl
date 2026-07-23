@@ -1,3 +1,4 @@
+import { spawn } from "node:child_process";
 import {
   access,
   cp,
@@ -8,7 +9,6 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
-import { spawn } from "node:child_process";
 
 interface TemplateManifest {
   entries: readonly string[];
@@ -90,6 +90,28 @@ export async function installDependencies(
     child.once("exit", (code) => {
       if (code === 0) resolvePromise();
       else reject(new Error(`${packageManager} install exited with ${code}`));
+    });
+  });
+}
+
+export async function runPackageScript(
+  target: string,
+  packageManager: string,
+  script: string
+): Promise<void> {
+  await new Promise<void>((resolvePromise, reject) => {
+    const child = spawn(packageManager, ["run", script], {
+      cwd: target,
+      stdio: "inherit",
+      shell: process.platform === "win32",
+    });
+    child.once("error", reject);
+    child.once("exit", (code) => {
+      if (code === 0) resolvePromise();
+      else
+        reject(
+          new Error(`${packageManager} run ${script} exited with ${code}`)
+        );
     });
   });
 }

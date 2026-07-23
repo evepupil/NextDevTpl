@@ -14,8 +14,14 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "standalone",
   // Exclude packages with webpack-specific syntax from server bundling
-  serverExternalPackages: ["pino", "pino-pretty"],
+  serverExternalPackages: [
+    "@neondatabase/serverless",
+    "pino",
+    "pino-pretty",
+    "ws",
+  ],
 };
 
 // 组合插件: MDX -> NextIntl -> NextConfig

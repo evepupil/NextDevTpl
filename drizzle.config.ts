@@ -14,13 +14,11 @@ if (isTestEnv) {
   dotenv.config({ path: ".env" });
 }
 
-// 确保环境变量存在 (drizzle-kit 命令运行时检查)
-const databaseUrl = process.env.DATABASE_URL;
-if (!databaseUrl) {
-  throw new Error(
-    "DATABASE_URL 环境变量未设置，请在 .env 文件中配置数据库连接"
-  );
-}
+// `generate` 只读取 Schema，不连接数据库，因此允许使用不会实际访问的占位 URL。
+// `migrate`、`push` 和 `studio` 仍会在连接阶段拒绝这个地址。
+const databaseUrl =
+  process.env.DATABASE_URL ??
+  "postgresql://drizzle:drizzle@127.0.0.1:5432/drizzle";
 
 /**
  * Drizzle Kit 配置

@@ -16,6 +16,10 @@ const requestedCases = process.env.NEXTDEVTPL_VERIFY_PRESETS?.split(",").filter(
 const verificationCases = [
   { name: "minimal", options: { preset: "minimal" } },
   { name: "saas", options: { preset: "saas" } },
+  {
+    name: "saas-docker",
+    options: { preset: "saas", target: "docker" },
+  },
   { name: "ai-saas", options: { preset: "ai-saas" } },
   {
     name: "custom",
@@ -55,16 +59,20 @@ try {
     if (requestedCases && !requestedCases.includes(verification.name)) continue;
     const target = join(root, verification.name);
     process.stdout.write(`\nVerifying generated preset: ${verification.name}\n`);
-    await generateProject({
+    const { manifest } = await generateProject({
       targetDirectory: target,
       ...verification.options,
       install: false,
     });
     run("pnpm", ["install", "--prefer-offline"], target);
+    run("pnpm", ["db:generate:init"], target);
     run("pnpm", ["lint"], target);
     run("pnpm", ["typecheck"], target);
     run("pnpm", ["test:run"], target);
     run("pnpm", ["build"], target);
+    if (manifest.target !== "cloudflare") {
+      run("pnpm", ["verify:health"], target);
+    }
   }
 } finally {
   await rm(root, { recursive: true, force: true });

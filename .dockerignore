@@ -1,0 +1,14 @@
+.git
+.next
+.source
+.vercel
+coverage
+deploy.tgz
+docs
+node_modules
+packages
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+!.env.test.example

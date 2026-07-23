@@ -1,5 +1,5 @@
+import { readdir, readFile, rm } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
-import { readFile, readdir, rm } from "node:fs/promises";
 
 import { findGeneratorAssets, loadCatalog } from "./catalog.js";
 import {
@@ -7,6 +7,7 @@ import {
   installDependencies,
   prepareTarget,
   removePath,
+  runPackageScript,
   writeJson,
   writeText,
 } from "./filesystem.js";
@@ -34,11 +35,16 @@ const SERVICE_KINDS: readonly ServiceKind[] = [
 ];
 
 const ENV_DEFAULTS: Readonly<Record<string, string>> = {
+  APP_VERSION: "local",
   DATABASE_URL: "postgresql://postgres:password@localhost:5432/nextdevtpl",
   BETTER_AUTH_SECRET: "replace-with-a-long-random-secret",
   BETTER_AUTH_URL: "http://localhost:3000",
   NEXT_PUBLIC_APP_URL: "http://localhost:3000",
   NEXT_PUBLIC_APP_NAME: "NextDevTpl",
+  PORT: "3000",
+  POSTGRES_DB: "nextdevtpl",
+  POSTGRES_PASSWORD: "replace-with-a-long-random-password",
+  POSTGRES_USER: "nextdevtpl",
 };
 
 function hasModule(selection: ProjectSelection, id: string): boolean {
@@ -75,7 +81,15 @@ async function pruneModules(
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 /** @type {import("next").NextConfig} */
-const nextConfig = { serverExternalPackages: ["pino", "pino-pretty"] };
+const nextConfig = {
+  output: "standalone",
+  serverExternalPackages: [
+    "@neondatabase/serverless",
+    "pino",
+    "pino-pretty",
+    "ws",
+  ],
+};
 
 export default withNextIntl(nextConfig);
 `
@@ -438,9 +452,15 @@ async function rewriteEnvironment(
   selection: ProjectSelection
 ): Promise<void> {
   const keys = [
+    "APP_VERSION",
     "NEXT_PUBLIC_APP_URL",
     "NEXT_PUBLIC_APP_NAME",
     ...selection.env,
+    ...(selection.target === "docker"
+      ? ["PORT", "POSTGRES_DB", "POSTGRES_PASSWORD", "POSTGRES_USER"]
+      : selection.target === "server"
+        ? ["PORT"]
+        : []),
   ];
   const unique = [...new Set(keys)].sort();
   await writeText(
@@ -449,6 +469,61 @@ async function rewriteEnvironment(
       .map((key) => `${key}=${ENV_DEFAULTS[key] ?? ""}`)
       .join("\n")}\n`
   );
+}
+
+async function rewriteDeployment(
+  target: string,
+  selection: ProjectSelection
+): Promise<void> {
+  const removeDocker = async () => {
+    await removePath(join(target, ".dockerignore"));
+    await removePath(join(target, "compose.yaml"));
+    await removePath(join(target, "Dockerfile"));
+    await removePath(join(target, "deploy", "docker"));
+  };
+  const removeServer = async () => {
+    await removePath(join(target, "deploy", "server"));
+  };
+  const removeVercel = async () => {
+    await removePath(join(target, "deploy", "vercel"));
+    await removePath(join(target, "vercel.json"));
+  };
+
+  if (selection.target === "docker") {
+    await removeServer();
+    await removeVercel();
+    return;
+  }
+  if (selection.target === "server") {
+    await removeDocker();
+    await removeVercel();
+    return;
+  }
+  if (selection.target === "vercel") {
+    await removeDocker();
+    await removeServer();
+    const vercelConfig = {
+      $schema: "https://openapi.vercel.sh/vercel.json",
+      framework: "nextjs",
+      buildCommand: "pnpm build",
+      ...(hasModule(selection, "credits")
+        ? {
+            crons: [
+              {
+                path: "/api/jobs/credits/expire",
+                schedule: "0 0 * * *",
+              },
+            ],
+          }
+        : {}),
+    };
+    await writeJson(join(target, "vercel.json"), vercelConfig);
+    return;
+  }
+
+  await removePath(join(target, "deploy"));
+  await removeDocker();
+  await removeVercel();
 }
 
 async function rewritePackage(
@@ -489,6 +564,18 @@ async function rewritePackage(
       .replace(/^-+|-+$/g, "") || "nextdevtpl-app";
   packageJson.private = true;
   delete packageJson.scripts["verify:generated"];
+  delete packageJson.scripts["deploy:check"];
+  delete packageJson.scripts["deploy:server:build"];
+  delete packageJson.scripts["verify:health"];
+  packageJson.scripts["db:generate:init"] = "drizzle-kit generate --name init";
+  if (selection.target !== "cloudflare") {
+    packageJson.scripts["deploy:check"] = "node deploy/check-health.mjs";
+    packageJson.scripts["verify:health"] =
+      "node deploy/verify-production-health.mjs";
+  }
+  if (selection.target === "server") {
+    packageJson.scripts["deploy:server:build"] = "bash deploy/server/build.sh";
+  }
   await writeJson(path, packageJson);
 }
 
@@ -536,6 +623,7 @@ export async function generateProject(
     await rewriteTranslations(target.path, selection, catalog);
     await rewriteComposition(target.path, selection);
     await rewriteEnvironment(target.path, selection);
+    await rewriteDeployment(target.path, selection);
     await rewritePackage(target.path, selection, catalog);
 
     const manifest: GeneratedProjectManifest = {
@@ -549,7 +637,9 @@ export async function generateProject(
     await writeJson(join(target.path, "nextdevtpl.generated.json"), manifest);
     await writeSmokeTest(target.path, manifest);
     if (options.install !== false) {
-      await installDependencies(target.path, options.packageManager ?? "pnpm");
+      const packageManager = options.packageManager ?? "pnpm";
+      await installDependencies(target.path, packageManager);
+      await runPackageScript(target.path, packageManager, "db:generate:init");
     }
     return { manifest, targetDirectory: target.path };
   } catch (error) {

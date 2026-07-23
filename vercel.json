@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "buildCommand": "pnpm build",
+  "crons": [
+    {
+      "path": "/api/jobs/credits/expire",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}

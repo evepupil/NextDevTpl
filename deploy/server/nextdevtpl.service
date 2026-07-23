@@ -1,0 +1,19 @@
+[Unit]
+Description=NextDevTpl application
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=nextdevtpl
+Group=nextdevtpl
+WorkingDirectory=/opt/nextdevtpl/current
+EnvironmentFile=/opt/nextdevtpl/shared/.env.production
+ExecStart=/opt/nextdevtpl/current/start.sh
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,7 +1,7 @@
 import {
   access,
-  mkdtemp,
   mkdir,
+  mkdtemp,
   readFile,
   rm,
   writeFile,
@@ -53,6 +53,9 @@ describe("project generation", () => {
     expect(packageJson.dependencies).not.toHaveProperty("inngest");
     expect(packageJson.dependencies).not.toHaveProperty("@upstash/ratelimit");
     expect(packageJson.dependencies).not.toHaveProperty("@aws-sdk/client-s3");
+    expect(await exists(join(target, "deploy/server/build.sh"))).toBe(true);
+    expect(await exists(join(target, "Dockerfile"))).toBe(false);
+    expect(await exists(join(target, "vercel.json"))).toBe(false);
   });
 
   it("keeps only SaaS preset adapters", async () => {
@@ -71,6 +74,8 @@ describe("project generation", () => {
     expect(packageJson.dependencies).not.toHaveProperty("openai");
     expect(await exists(join(target, "src/features/analytics"))).toBe(false);
     expect(await exists(join(target, "src/features/blog"))).toBe(false);
+    expect(await exists(join(target, "vercel.json"))).toBe(true);
+    expect(await exists(join(target, "Dockerfile"))).toBe(false);
   });
 
   it("records Cloudflare bindings for the AI SaaS preset", async () => {
@@ -94,6 +99,8 @@ describe("project generation", () => {
     expect(await exists(join(target, "src/adapters/ai/workers-ai.ts"))).toBe(
       true
     );
+    expect(await exists(join(target, "deploy"))).toBe(false);
+    expect(await exists(join(target, "vercel.json"))).toBe(false);
   });
 
   it("generates a stable custom module and adapter selection", async () => {
@@ -121,6 +128,23 @@ describe("project generation", () => {
     expect(await exists(join(target, "src/adapters/mail/resend.ts"))).toBe(
       false
     );
+  });
+
+  it("keeps only the Docker deployment preset", async () => {
+    const target = join(root, "docker");
+    await generateProject({
+      targetDirectory: target,
+      preset: "saas",
+      target: "docker",
+      install: false,
+    });
+
+    expect(await exists(join(target, "Dockerfile"))).toBe(true);
+    expect(await exists(join(target, "compose.yaml"))).toBe(true);
+    expect(await exists(join(target, "deploy/docker/README.md"))).toBe(true);
+    expect(await exists(join(target, "deploy/server"))).toBe(false);
+    expect(await exists(join(target, "deploy/vercel"))).toBe(false);
+    expect(await exists(join(target, "vercel.json"))).toBe(false);
   });
 
   it("rejects a non-empty target without changing it", async () => {
