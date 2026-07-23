@@ -20,7 +20,10 @@ import { paymentService } from "@/services/payment";
 
 export const POST = withApiLogging(async (request: Request) => {
   const payload = await request.text();
-  const signature = (await headers()).get("creem-signature");
+  const requestHeaders = await headers();
+  const signature =
+    requestHeaders.get("creem-signature") ??
+    requestHeaders.get("stripe-signature");
 
   if (!signature) {
     return NextResponse.json(

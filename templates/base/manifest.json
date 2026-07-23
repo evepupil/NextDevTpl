@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "entries": [
+    ".env.example",
+    ".gitattributes",
+    ".gitignore",
+    ".node-version",
+    "biome.json",
+    "components.json",
+    "drizzle.config.ts",
+    "LICENSE",
+    "messages",
+    "next-env.d.ts",
+    "next.config.mjs",
+    "package.json",
+    "pnpm-lock.yaml",
+    "postcss.config.mjs",
+    "public",
+    "README.md",
+    "sentry.client.config.ts",
+    "sentry.edge.config.ts",
+    "sentry.server.config.ts",
+    "source.config.ts",
+    "src",
+    "tsconfig.json",
+    "vitest.config.ts"
+  ]
+}

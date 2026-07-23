@@ -5,7 +5,7 @@ export const blogModule = defineModule({
   name: "Blog",
   description: "内容博客与文章列表",
   kind: "optional",
-  dependencies: [],
+  dependencies: ["marketing"],
   routes: [
     {
       path: "/blog",

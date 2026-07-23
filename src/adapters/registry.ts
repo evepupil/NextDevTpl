@@ -48,6 +48,15 @@ const manifests = [
     bindings: ["R2Bucket"],
   }),
   defineServiceAdapter({
+    id: "mail:disabled",
+    service: "mail",
+    source: "src/adapters/mail/disabled.ts",
+    runtime: "universal",
+    packages: [],
+    env: [],
+    bindings: [],
+  }),
+  defineServiceAdapter({
     id: "mail:resend",
     service: "mail",
     source: "src/adapters/mail/resend.ts",
@@ -128,6 +137,15 @@ const manifests = [
     packages: [],
     env: [],
     bindings: ["Workflow"],
+  }),
+  defineServiceAdapter({
+    id: "rate-limit:noop",
+    service: "rate-limit",
+    source: "src/adapters/rate-limit/noop.ts",
+    runtime: "universal",
+    packages: [],
+    env: [],
+    bindings: [],
   }),
   defineServiceAdapter({
     id: "rate-limit:upstash",

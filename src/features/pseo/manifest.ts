@@ -5,7 +5,7 @@ export const pseoModule = defineModule({
   name: "Programmatic SEO",
   description: "结构化 SEO 落地页和静态参数",
   kind: "optional",
-  dependencies: [],
+  dependencies: ["marketing"],
   routes: [
     {
       path: "/pseo",

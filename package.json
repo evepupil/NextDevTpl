@@ -21,7 +21,8 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "verify:generated": "pnpm --filter create-nextdevtpl build && node scripts/verify-generated-projects.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.975.0",

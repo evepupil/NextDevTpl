@@ -5,6 +5,7 @@
 
 # dependencies
 /node_modules
+**/node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -22,6 +23,9 @@
 
 # production
 /build
+packages/*/dist/
+packages/*/template/
+packages/*/catalog.json
 
 # misc
 .DS_Store

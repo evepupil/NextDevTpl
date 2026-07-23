@@ -1,0 +1,385 @@
+{
+  "version": 1,
+  "modules": {
+    "admin": {
+      "kind": "optional",
+      "dependencies": ["shared", "support"],
+      "routes": [
+        "src/app/[locale]/(admin)/admin/page.tsx",
+        "src/app/[locale]/(admin)/admin/users/page.tsx"
+      ],
+      "schema": [],
+      "translations": ["AdminSidebar"],
+      "env": []
+    },
+    "analytics": {
+      "kind": "optional",
+      "dependencies": [],
+      "routes": [],
+      "schema": [],
+      "translations": [],
+      "env": [
+        "NEXT_PUBLIC_GA_ID",
+        "NEXT_PUBLIC_SENTRY_DSN",
+        "SENTRY_AUTH_TOKEN"
+      ]
+    },
+    "auth": {
+      "kind": "core",
+      "dependencies": ["mail", "shared"],
+      "routes": [
+        "src/app/[locale]/(auth)/sign-in/page.tsx",
+        "src/app/[locale]/(auth)/sign-up/page.tsx",
+        "src/app/[locale]/(auth)/forgot-password/page.tsx",
+        "src/app/api/auth/[...all]/route.ts"
+      ],
+      "schema": ["auth"],
+      "translations": ["Auth"],
+      "env": [
+        "DATABASE_URL",
+        "BETTER_AUTH_SECRET",
+        "BETTER_AUTH_URL",
+        "GITHUB_CLIENT_ID",
+        "GITHUB_CLIENT_SECRET",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET"
+      ]
+    },
+    "blog": {
+      "kind": "optional",
+      "dependencies": ["marketing"],
+      "routes": [
+        "src/app/[locale]/(marketing)/blog/page.tsx",
+        "src/app/[locale]/(marketing)/blog/[slug]/page.tsx"
+      ],
+      "schema": [],
+      "translations": [],
+      "env": []
+    },
+    "credits": {
+      "kind": "optional",
+      "dependencies": ["payment"],
+      "routes": [
+        "src/app/[locale]/(dashboard)/dashboard/credits/page.tsx",
+        "src/app/[locale]/(dashboard)/dashboard/credits/buy/page.tsx",
+        "src/app/api/jobs/credits/expire/route.ts"
+      ],
+      "schema": ["credits"],
+      "translations": ["CreditTransactions"],
+      "env": ["CRON_SECRET"]
+    },
+    "dashboard": {
+      "kind": "core",
+      "dependencies": ["shared"],
+      "routes": ["src/app/[locale]/(dashboard)/dashboard/page.tsx"],
+      "schema": [],
+      "translations": ["Dashboard", "DashboardPages"],
+      "env": []
+    },
+    "mail": {
+      "kind": "core",
+      "dependencies": [],
+      "routes": [],
+      "schema": ["mail"],
+      "translations": [],
+      "env": []
+    },
+    "marketing": {
+      "kind": "optional",
+      "dependencies": ["payment", "shared"],
+      "routes": [
+        "src/app/[locale]/(marketing)/page.tsx",
+        "src/app/[locale]/(marketing)/legal/[slug]/page.tsx"
+      ],
+      "schema": [],
+      "translations": [
+        "HomePage",
+        "Hero",
+        "Features",
+        "HowItWorks",
+        "UseCases",
+        "Testimonials",
+        "FAQ",
+        "CTA",
+        "Header",
+        "Navigation",
+        "Pricing",
+        "Footer"
+      ],
+      "env": []
+    },
+    "payment": {
+      "kind": "optional",
+      "dependencies": ["subscription"],
+      "routes": ["src/app/api/webhooks/payment/route.ts"],
+      "schema": [],
+      "translations": [],
+      "env": [
+        "NEXT_PUBLIC_PRICE_STARTER_MONTHLY",
+        "NEXT_PUBLIC_PRICE_STARTER_YEARLY",
+        "NEXT_PUBLIC_PRICE_PRO_MONTHLY",
+        "NEXT_PUBLIC_PRICE_PRO_YEARLY",
+        "NEXT_PUBLIC_PRICE_ULTRA_MONTHLY",
+        "NEXT_PUBLIC_PRICE_ULTRA_YEARLY"
+      ]
+    },
+    "pseo": {
+      "kind": "optional",
+      "dependencies": ["marketing"],
+      "routes": [
+        "src/app/[locale]/(marketing)/pseo/page.tsx",
+        "src/app/[locale]/(marketing)/pseo/[slug]/page.tsx"
+      ],
+      "schema": [],
+      "translations": [],
+      "env": []
+    },
+    "settings": {
+      "kind": "optional",
+      "dependencies": ["credits", "payment", "storage", "subscription"],
+      "routes": ["src/app/[locale]/(dashboard)/dashboard/settings/page.tsx"],
+      "schema": [],
+      "translations": ["Settings"],
+      "env": []
+    },
+    "shared": {
+      "kind": "core",
+      "dependencies": [],
+      "routes": [],
+      "schema": [],
+      "translations": ["Common", "Cookie"],
+      "env": []
+    },
+    "storage": {
+      "kind": "optional",
+      "dependencies": [],
+      "routes": [
+        "src/app/api/upload/presigned/route.ts",
+        "src/app/image-proxy/[...path]/route.ts"
+      ],
+      "schema": [],
+      "translations": [],
+      "env": ["STORAGE_BUCKET_NAME", "NEXT_PUBLIC_AVATARS_BUCKET_NAME"]
+    },
+    "subscription": {
+      "kind": "optional",
+      "dependencies": [],
+      "routes": [],
+      "schema": ["subscription"],
+      "translations": ["Subscription"],
+      "env": []
+    },
+    "support": {
+      "kind": "optional",
+      "dependencies": ["credits"],
+      "routes": [
+        "src/app/[locale]/(dashboard)/dashboard/support/page.tsx",
+        "src/app/[locale]/(dashboard)/dashboard/support/new/page.tsx",
+        "src/app/[locale]/(dashboard)/dashboard/support/[id]/page.tsx",
+        "src/app/[locale]/(admin)/admin/tickets/page.tsx",
+        "src/app/[locale]/(admin)/admin/tickets/[id]/page.tsx"
+      ],
+      "schema": ["support"],
+      "translations": ["Support"],
+      "env": []
+    }
+  },
+  "adapters": {
+    "payment:creem": {
+      "service": "payment",
+      "source": "src/adapters/payment/creem.ts",
+      "packages": [],
+      "env": ["CREEM_API_KEY", "CREEM_WEBHOOK_SECRET"],
+      "bindings": [],
+      "runtime": "node"
+    },
+    "payment:stripe": {
+      "service": "payment",
+      "source": "src/adapters/payment/stripe.ts",
+      "packages": [],
+      "env": ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"],
+      "bindings": [],
+      "runtime": "universal"
+    },
+    "storage:s3-compatible": {
+      "service": "storage",
+      "source": "src/adapters/storage/s3-compatible.ts",
+      "packages": ["@aws-sdk/client-s3", "@aws-sdk/s3-request-presigner"],
+      "env": [
+        "STORAGE_ACCESS_KEY_ID",
+        "STORAGE_SECRET_ACCESS_KEY",
+        "STORAGE_ENDPOINT",
+        "STORAGE_REGION"
+      ],
+      "bindings": [],
+      "runtime": "node"
+    },
+    "storage:r2-binding": {
+      "service": "storage",
+      "source": "src/adapters/storage/r2-binding.ts",
+      "packages": [],
+      "env": [],
+      "bindings": ["R2Bucket"],
+      "runtime": "worker"
+    },
+    "mail:disabled": {
+      "service": "mail",
+      "source": "src/adapters/mail/disabled.ts",
+      "packages": [],
+      "env": [],
+      "bindings": [],
+      "runtime": "universal"
+    },
+    "mail:resend": {
+      "service": "mail",
+      "source": "src/adapters/mail/resend.ts",
+      "packages": ["resend"],
+      "env": ["RESEND_API_KEY", "EMAIL_FROM"],
+      "bindings": [],
+      "runtime": "universal"
+    },
+    "mail:smtp": {
+      "service": "mail",
+      "source": "src/adapters/mail/smtp.ts",
+      "packages": ["nodemailer"],
+      "env": [
+        "SMTP_HOST",
+        "SMTP_PORT",
+        "SMTP_SECURE",
+        "SMTP_USER",
+        "SMTP_PASS"
+      ],
+      "bindings": [],
+      "runtime": "node"
+    },
+    "mail:cloudflare-email": {
+      "service": "mail",
+      "source": "src/adapters/mail/cloudflare-email.ts",
+      "packages": [],
+      "env": ["EMAIL_FROM"],
+      "bindings": ["SendEmail"],
+      "runtime": "worker"
+    },
+    "ai:openai-compatible": {
+      "service": "ai",
+      "source": "src/adapters/ai/openai-compatible.ts",
+      "packages": ["openai"],
+      "env": [
+        "AI_PROVIDER",
+        "OPENAI_API_KEY",
+        "OPENAI_MODEL",
+        "DEEPSEEK_API_KEY",
+        "DEEPSEEK_MODEL",
+        "MIMO_API_KEY",
+        "MIMO_MODEL",
+        "CF_AIG_BASE_URL",
+        "CF_AIG_TOKEN"
+      ],
+      "bindings": [],
+      "runtime": "universal"
+    },
+    "ai:anthropic": {
+      "service": "ai",
+      "source": "src/adapters/ai/anthropic.ts",
+      "packages": [],
+      "env": ["ANTHROPIC_API_KEY", "ANTHROPIC_MODEL"],
+      "bindings": [],
+      "runtime": "universal"
+    },
+    "ai:workers-ai": {
+      "service": "ai",
+      "source": "src/adapters/ai/workers-ai.ts",
+      "packages": [],
+      "env": ["WORKERS_AI_MODEL"],
+      "bindings": ["Ai"],
+      "runtime": "worker"
+    },
+    "jobs:inngest": {
+      "service": "jobs",
+      "source": "src/adapters/jobs/inngest",
+      "packages": ["inngest"],
+      "env": ["INNGEST_EVENT_KEY", "INNGEST_SIGNING_KEY"],
+      "bindings": [],
+      "runtime": "universal"
+    },
+    "jobs:cloudflare-workflows": {
+      "service": "jobs",
+      "source": "src/adapters/jobs/cloudflare-workflows.ts",
+      "packages": [],
+      "env": [],
+      "bindings": ["Workflow"],
+      "runtime": "worker"
+    },
+    "rate-limit:noop": {
+      "service": "rate-limit",
+      "source": "src/adapters/rate-limit/noop.ts",
+      "packages": [],
+      "env": [],
+      "bindings": [],
+      "runtime": "universal"
+    },
+    "rate-limit:upstash": {
+      "service": "rate-limit",
+      "source": "src/adapters/rate-limit/upstash.ts",
+      "packages": ["@upstash/ratelimit", "@upstash/redis"],
+      "env": ["UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"],
+      "bindings": [],
+      "runtime": "universal"
+    },
+    "rate-limit:cloudflare-rate-limit": {
+      "service": "rate-limit",
+      "source": "src/adapters/rate-limit/cloudflare.ts",
+      "packages": [],
+      "env": [],
+      "bindings": ["RateLimit"],
+      "runtime": "worker"
+    }
+  },
+  "presets": {
+    "minimal": {
+      "modules": ["auth", "dashboard"],
+      "adapters": { "mail": "mail:disabled", "rate-limit": "rate-limit:noop" },
+      "target": "server"
+    },
+    "saas": {
+      "modules": [
+        "admin",
+        "auth",
+        "dashboard",
+        "marketing",
+        "settings",
+        "support"
+      ],
+      "adapters": {
+        "payment": "payment:creem",
+        "storage": "storage:s3-compatible",
+        "mail": "mail:resend",
+        "jobs": "jobs:inngest",
+        "rate-limit": "rate-limit:upstash"
+      },
+      "target": "vercel"
+    },
+    "ai-saas": {
+      "modules": [
+        "admin",
+        "analytics",
+        "auth",
+        "blog",
+        "dashboard",
+        "marketing",
+        "pseo",
+        "settings",
+        "support"
+      ],
+      "adapters": {
+        "payment": "payment:stripe",
+        "storage": "storage:r2-binding",
+        "mail": "mail:cloudflare-email",
+        "ai": "ai:workers-ai",
+        "jobs": "jobs:cloudflare-workflows",
+        "rate-limit": "rate-limit:cloudflare-rate-limit"
+      },
+      "target": "cloudflare"
+    }
+  }
+}

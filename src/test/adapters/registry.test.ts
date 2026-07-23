@@ -19,6 +19,7 @@ import {
   createCloudflareEmailAdapter,
   createResendMailAdapter,
   createSmtpMailAdapter,
+  disabledMailAdapter,
 } from "@/adapters/mail";
 import {
   createCreemPaymentAdapter,
@@ -27,6 +28,7 @@ import {
 import {
   createCloudflareRateLimitAdapter,
   createUpstashServices,
+  noopRateLimitAdapter,
 } from "@/adapters/rate-limit";
 import {
   createR2BindingStorageAdapter,
@@ -58,6 +60,7 @@ describe("service adapter registry", () => {
         id: "storage:r2-binding",
         adapter: createR2BindingStorageAdapter({}),
       },
+      { id: "mail:disabled", adapter: disabledMailAdapter },
       { id: "mail:resend", adapter: createResendMailAdapter() },
       { id: "mail:smtp", adapter: createSmtpMailAdapter() },
       {
@@ -87,6 +90,10 @@ describe("service adapter registry", () => {
       {
         id: "jobs:cloudflare-workflows",
         adapter: createCloudflareWorkflowsAdapter({}),
+      },
+      {
+        id: "rate-limit:noop",
+        adapter: noopRateLimitAdapter,
       },
       {
         id: "rate-limit:upstash",

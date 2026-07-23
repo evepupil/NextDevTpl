@@ -8,8 +8,8 @@ export const paymentModule = defineModule({
   dependencies: ["subscription"],
   routes: [
     {
-      path: "/api/webhooks/creem",
-      source: "src/app/api/webhooks/creem/route.ts",
+      path: "/api/webhooks/payment",
+      source: "src/app/api/webhooks/payment/route.ts",
     },
   ],
   navigation: [],

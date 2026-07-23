@@ -1,6 +1,6 @@
 import type { AdapterDescriptor } from "./common";
 
-export type MailProvider = "cloudflare-email" | "resend" | "smtp";
+export type MailProvider = "cloudflare-email" | "disabled" | "resend" | "smtp";
 
 export interface MailCapabilities {
   attachments: boolean;

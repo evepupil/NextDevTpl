@@ -5,7 +5,7 @@ export const adminModule = defineModule({
   name: "Admin",
   description: "管理后台、用户管理与平台运营入口",
   kind: "optional",
-  dependencies: ["shared"],
+  dependencies: ["shared", "support"],
   routes: [
     {
       path: "/admin",

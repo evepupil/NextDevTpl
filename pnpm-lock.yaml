@@ -250,6 +250,15 @@ importers:
         specifier: ^8.19.0
         version: 8.19.0
 
+  packages/create-nextdevtpl:
+    devDependencies:
+      '@types/node':
+        specifier: ^20
+        version: 20.19.30
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+
 packages:
 
   '@acemir/cssom@0.9.31':

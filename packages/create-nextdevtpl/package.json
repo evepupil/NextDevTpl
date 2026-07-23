@@ -1,0 +1,31 @@
+{
+  "name": "create-nextdevtpl",
+  "version": "2.3.0",
+  "description": "Create a clean NextDevTpl project from composable recipes",
+  "type": "module",
+  "bin": {
+    "create-nextdevtpl": "dist/cli.js"
+  },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "template",
+    "catalog.json",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=24.18.0 <25"
+  },
+  "scripts": {
+    "assemble-template": "node scripts/assemble-template.mjs",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "prepack": "pnpm run assemble-template && pnpm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "typescript": "^5"
+  }
+}
