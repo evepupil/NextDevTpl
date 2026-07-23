@@ -13,8 +13,12 @@
       "**/*.js",
       "**/*.jsx",
       "**/*.json",
+      "cloudflare/**/*.mjs",
+      "!.next",
+      "!.open-next",
       "!packages/*/dist",
-      "!packages/*/template"
+      "!packages/*/template",
+      "!worker-configuration.d.ts"
     ]
   },
   "formatter": {

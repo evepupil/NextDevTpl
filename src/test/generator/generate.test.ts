@@ -42,20 +42,36 @@ describe("project generation", () => {
     });
     const packageJson = JSON.parse(
       await readFile(join(target, "package.json"), "utf8")
-    ) as { dependencies: Record<string, string> };
+    ) as {
+      dependencies: Record<string, string>;
+      devDependencies: Record<string, string>;
+    };
 
     expect(manifest.modules).toEqual(["mail", "shared", "auth", "dashboard"]);
     expect(await exists(join(target, "src/features/credits"))).toBe(false);
     expect(await exists(join(target, "src/app/api/inngest"))).toBe(false);
     expect(await exists(join(target, "src/lib/ai"))).toBe(false);
+    expect(
+      await exists(join(target, "src/app/[locale]/opengraph-image.tsx"))
+    ).toBe(false);
+    expect(
+      await exists(join(target, "src/app/[locale]/twitter-image.tsx"))
+    ).toBe(false);
     expect(packageJson.dependencies).not.toHaveProperty("resend");
     expect(packageJson.dependencies).not.toHaveProperty("openai");
     expect(packageJson.dependencies).not.toHaveProperty("inngest");
     expect(packageJson.dependencies).not.toHaveProperty("@upstash/ratelimit");
     expect(packageJson.dependencies).not.toHaveProperty("@aws-sdk/client-s3");
+    expect(packageJson.devDependencies).not.toHaveProperty(
+      "@opennextjs/cloudflare"
+    );
+    expect(packageJson.devDependencies).not.toHaveProperty("wrangler");
     expect(await exists(join(target, "deploy/server/build.sh"))).toBe(true);
     expect(await exists(join(target, "Dockerfile"))).toBe(false);
     expect(await exists(join(target, "vercel.json"))).toBe(false);
+    expect(await exists(join(target, "wrangler.jsonc"))).toBe(false);
+    expect(await exists(join(target, "open-next.config.ts"))).toBe(false);
+    expect(await exists(join(target, "cloudflare"))).toBe(false);
   });
 
   it("keeps only SaaS preset adapters", async () => {
@@ -85,6 +101,44 @@ describe("project generation", () => {
       preset: "ai-saas",
       install: false,
     });
+    const packageJson = JSON.parse(
+      await readFile(join(target, "package.json"), "utf8")
+    ) as {
+      dependencies: Record<string, string>;
+      devDependencies: Record<string, string>;
+      scripts: Record<string, string>;
+    };
+    const wrangler = JSON.parse(
+      await readFile(join(target, "wrangler.jsonc"), "utf8")
+    ) as {
+      ai: { binding: string };
+      main: string;
+      observability: { enabled: boolean };
+      r2_buckets: Array<{ binding: string }>;
+      ratelimits: Array<{
+        name: string;
+        simple: { limit: number; period: number };
+      }>;
+      send_email: Array<{ name: string }>;
+      workflows: Array<{ binding: string; class_name: string }>;
+    };
+    const database = await readFile(join(target, "src/db/index.ts"), "utf8");
+    const storage = await readFile(
+      join(target, "src/services/storage.ts"),
+      "utf8"
+    );
+    const ai = await readFile(join(target, "src/services/ai.ts"), "utf8");
+    const mail = await readFile(join(target, "src/services/mail.ts"), "utf8");
+    const jobs = await readFile(join(target, "src/services/jobs.ts"), "utf8");
+    const rateLimit = await readFile(
+      join(target, "src/services/rate-limit.ts"),
+      "utf8"
+    );
+    const monitoring = await readFile(
+      join(target, "src/lib/monitoring/index.ts"),
+      "utf8"
+    );
+    const environment = await readFile(join(target, ".env.example"), "utf8");
 
     expect(manifest.bindings).toEqual([
       "R2Bucket",
@@ -101,6 +155,51 @@ describe("project generation", () => {
     );
     expect(await exists(join(target, "deploy"))).toBe(false);
     expect(await exists(join(target, "vercel.json"))).toBe(false);
+    expect(await exists(join(target, "open-next.config.ts"))).toBe(true);
+    expect(await exists(join(target, "cloudflare/worker.mjs"))).toBe(true);
+    expect(wrangler.main).toBe("cloudflare/worker.mjs");
+    expect(wrangler.observability.enabled).toBe(true);
+    expect(wrangler.r2_buckets).toEqual([{ binding: "NEXTDEVTPL_STORAGE" }]);
+    expect(wrangler.ai.binding).toBe("AI");
+    expect(wrangler.workflows).toEqual([
+      expect.objectContaining({
+        binding: "NEXTDEVTPL_WORKFLOW",
+        class_name: "NextDevTplWorkflow",
+      }),
+    ]);
+    expect(wrangler.send_email).toEqual([{ name: "NEXTDEVTPL_EMAIL" }]);
+    expect(wrangler.ratelimits).toHaveLength(6);
+    expect(wrangler.ratelimits).toContainEqual({
+      name: "RATE_LIMIT_AUTH",
+      namespace_id: "1002",
+      simple: { limit: 5, period: 60 },
+    });
+    expect(database).toContain('from "drizzle-orm/neon-http"');
+    expect(database).not.toContain('from "drizzle-orm/node-postgres"');
+    expect(database).not.toContain('require("ws")');
+    expect(storage).toContain('"NEXTDEVTPL_STORAGE"');
+    expect(ai).toContain('"AI"');
+    expect(mail).toContain('"NEXTDEVTPL_EMAIL"');
+    expect(jobs).toContain('"NEXTDEVTPL_WORKFLOW"');
+    expect(rateLimit).toContain('"RATE_LIMIT_AUTH"');
+    expect(storage).not.toContain("replaces this empty map");
+    expect(ai).not.toContain("binding is not injected");
+    expect(packageJson.devDependencies).toHaveProperty(
+      "@opennextjs/cloudflare"
+    );
+    expect(packageJson.devDependencies).toHaveProperty("wrangler");
+    expect(packageJson.devDependencies).not.toHaveProperty("@types/pg");
+    expect(packageJson.devDependencies).not.toHaveProperty("@types/ws");
+    expect(packageJson.dependencies).not.toHaveProperty("pg");
+    expect(packageJson.dependencies).not.toHaveProperty("ws");
+    expect(packageJson.dependencies).not.toHaveProperty("@sentry/nextjs");
+    expect(packageJson.scripts["cf:types"]).toBe("wrangler types");
+    expect(monitoring).not.toContain("@sentry/nextjs");
+    expect(monitoring).toContain("console.error");
+    expect(await exists(join(target, "src/instrumentation.ts"))).toBe(false);
+    expect(await exists(join(target, "sentry.server.config.ts"))).toBe(false);
+    expect(environment).not.toContain("SENTRY_AUTH_TOKEN");
+    expect(environment).not.toContain("NEXT_PUBLIC_SENTRY_DSN");
   });
 
   it("generates a stable custom module and adapter selection", async () => {

@@ -41,10 +41,12 @@ export const paymentService = createStripePaymentAdapter();
 
 export const storageService = createS3CompatibleStorageAdapter();
 `,
-  "storage:r2-binding": `import { createR2BindingStorageAdapter } from "@/adapters/storage";
+  "storage:r2-binding": `import { createR2BindingStorageAdapter, type R2BucketPort } from "@/adapters/storage";
+import { createCloudflareBindingMap } from "@/lib/cloudflare/bindings";
 
-// M5 replaces this empty map with runtime Env bindings.
-export const storageService = createR2BindingStorageAdapter({});
+export const storageService = createR2BindingStorageAdapter(
+  createCloudflareBindingMap<R2BucketPort>("NEXTDEVTPL_STORAGE")
+);
 `,
   "mail:disabled": `import { disabledMailAdapter } from "@/adapters/mail";
 
@@ -70,16 +72,15 @@ export function isMailServiceConfigured(): boolean {
   return Boolean(process.env.SMTP_HOST);
 }
 `,
-  "mail:cloudflare-email": `import { createCloudflareEmailAdapter } from "@/adapters/mail";
+  "mail:cloudflare-email": `import { createCloudflareEmailAdapter, type CloudflareEmailBindingPort } from "@/adapters/mail";
+import { createLazyCloudflareBinding } from "@/lib/cloudflare/bindings";
 
-export const mailService = createCloudflareEmailAdapter({
-  async send() {
-    throw new Error("Cloudflare SendEmail binding is not injected; complete M5 deployment wiring");
-  },
-});
+export const mailService = createCloudflareEmailAdapter(
+  createLazyCloudflareBinding<CloudflareEmailBindingPort>("NEXTDEVTPL_EMAIL")
+);
 
 export function isMailServiceConfigured(): boolean {
-  return false;
+  return true;
 }
 `,
   "ai:openai-compatible": `import { createOpenAICompatibleAdapter } from "@/adapters/ai";
@@ -122,7 +123,8 @@ export const aiService = createAnthropicAdapter({
   model: getAIModel(),
 });
 `,
-  "ai:workers-ai": `import { createWorkersAIAdapter } from "@/adapters/ai";
+  "ai:workers-ai": `import { createWorkersAIAdapter, type WorkersAIBindingPort } from "@/adapters/ai";
+import { createLazyCloudflareBinding } from "@/lib/cloudflare/bindings";
 
 export function getAIProvider() {
   return "workers-ai" as const;
@@ -134,21 +136,19 @@ export function getAIModel(): string {
 
 export const aiService = createWorkersAIAdapter({
   model: getAIModel(),
-  binding: {
-    async run() {
-      throw new Error("Workers AI binding is not injected; complete M5 deployment wiring");
-    },
-  },
+  binding: createLazyCloudflareBinding<WorkersAIBindingPort>("AI"),
 });
 `,
   "jobs:inngest": `import { createInngestJobAdapter } from "@/adapters/jobs";
 
 export const jobService = createInngestJobAdapter();
 `,
-  "jobs:cloudflare-workflows": `import { createCloudflareWorkflowsAdapter } from "@/adapters/jobs";
+  "jobs:cloudflare-workflows": `import { createCloudflareWorkflowsAdapter, type WorkflowBindingPort } from "@/adapters/jobs";
+import { createCloudflareBindingMap } from "@/lib/cloudflare/bindings";
 
-// M5 replaces this empty map with runtime Env bindings.
-export const jobService = createCloudflareWorkflowsAdapter({});
+export const jobService = createCloudflareWorkflowsAdapter(
+  createCloudflareBindingMap<WorkflowBindingPort>("NEXTDEVTPL_WORKFLOW")
+);
 `,
   "rate-limit:noop": `import { noopRateLimitAdapter, noopUsageQuotaAdapter } from "@/adapters/rate-limit";
 
@@ -164,10 +164,20 @@ const upstash = url && token ? createUpstashServices({ url, token }) : null;
 export const rateLimitService = upstash?.rateLimit ?? noopRateLimitAdapter;
 export const anonymousQuotaService = upstash?.quota ?? noopUsageQuotaAdapter;
 `,
-  "rate-limit:cloudflare-rate-limit": `import { createCloudflareRateLimitAdapter, noopUsageQuotaAdapter } from "@/adapters/rate-limit";
+  "rate-limit:cloudflare-rate-limit": `import { createCloudflareRateLimitAdapter, type CloudflareRateLimitBindingPort, noopUsageQuotaAdapter } from "@/adapters/rate-limit";
+import { createLazyCloudflareBinding } from "@/lib/cloudflare/bindings";
 
-// M5 replaces this empty map with runtime Env bindings.
-export const rateLimitService = createCloudflareRateLimitAdapter({});
+const binding = (name: string) =>
+  createLazyCloudflareBinding<CloudflareRateLimitBindingPort>(name);
+
+export const rateLimitService = createCloudflareRateLimitAdapter({
+  ai: binding("RATE_LIMIT_AI"),
+  auth: binding("RATE_LIMIT_AUTH"),
+  global: binding("RATE_LIMIT_GLOBAL"),
+  payment: binding("RATE_LIMIT_PAYMENT"),
+  strict: binding("RATE_LIMIT_STRICT"),
+  upload: binding("RATE_LIMIT_UPLOAD"),
+});
 export const anonymousQuotaService = noopUsageQuotaAdapter;
 `,
 };

@@ -7,6 +7,7 @@
     ".node-version",
     "biome.json",
     "components.json",
+    "cloudflare",
     ".dockerignore",
     "compose.yaml",
     "deploy",
@@ -16,6 +17,7 @@
     "messages",
     "next-env.d.ts",
     "next.config.mjs",
+    "open-next.config.ts",
     "package.json",
     "pnpm-lock.yaml",
     "postcss.config.mjs",
@@ -28,6 +30,7 @@
     "src",
     "tsconfig.json",
     "vercel.json",
-    "vitest.config.ts"
+    "vitest.config.ts",
+    "wrangler.jsonc"
   ]
 }

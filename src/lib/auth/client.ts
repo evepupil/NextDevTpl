@@ -37,6 +37,13 @@ export const {
   signUp, // 注册新用户 (邮箱密码)
 } = authClient;
 
+function getResponseErrorMessage(value: unknown): string | undefined {
+  if (typeof value !== "object" || value === null || !("message" in value)) {
+    return undefined;
+  }
+  return typeof value.message === "string" ? value.message : undefined;
+}
+
 /**
  * 发送密码重置邮件
  * 通过调用 Better Auth API 端点发送重置链接
@@ -178,10 +185,12 @@ export async function changePassword(
     }),
   });
 
-  const data = await response.json();
+  const data: unknown = await response.json();
 
   if (!response.ok) {
-    throw new Error(data?.message || "Failed to change password");
+    throw new Error(
+      getResponseErrorMessage(data) ?? "Failed to change password"
+    );
   }
 
   return data;

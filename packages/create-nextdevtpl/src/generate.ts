@@ -47,6 +47,171 @@ const ENV_DEFAULTS: Readonly<Record<string, string>> = {
   POSTGRES_USER: "nextdevtpl",
 };
 
+const CLOUDFLARE_RATE_LIMITS = [
+  { id: "1001", limit: 100, name: "RATE_LIMIT_GLOBAL" },
+  { id: "1002", limit: 5, name: "RATE_LIMIT_AUTH" },
+  { id: "1003", limit: 20, name: "RATE_LIMIT_AI" },
+  { id: "1004", limit: 10, name: "RATE_LIMIT_PAYMENT" },
+  { id: "1005", limit: 30, name: "RATE_LIMIT_UPLOAD" },
+  { id: "1006", limit: 3, name: "RATE_LIMIT_STRICT" },
+] as const;
+
+function projectName(target: string): string {
+  return (
+    basename(target)
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "nextdevtpl-app"
+  );
+}
+
+function cloudflareDatabaseSource(): string {
+  return `import { neon } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-http";
+
+import * as schema from "./schema/index";
+
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+  throw new Error("DATABASE_URL is required");
+}
+
+const sql = neon(databaseUrl);
+export const db = drizzle(sql, { schema });
+
+export * from "./schema/index";
+`;
+}
+
+function cloudflareMonitoringSource(): string {
+  return `export type SeverityLevel = "debug" | "error" | "fatal" | "info" | "log" | "warning";
+
+export function isSentryEnabled(): boolean {
+  return false;
+}
+
+export function initSentryServer(): void {}
+export function initSentryClient(): void {}
+
+export function captureError(
+  error: unknown,
+  context?: Record<string, unknown>
+): void {
+  console.error("[Error]", error, context);
+}
+
+export function captureMessage(
+  message: string,
+  level: SeverityLevel = "info",
+  context?: Record<string, unknown>
+): void {
+  let log = console.log;
+  if (level === "error" || level === "fatal") log = console.error;
+  if (level === "warning") log = console.warn;
+  log(\`[\${level}]\`, message, context);
+}
+
+export function setUser(_user: { id: string; email?: string; username?: string } | null): void {}
+export function clearUser(): void {}
+export function setTag(_key: string, _value: string): void {}
+export function setContext(_name: string, _context: Record<string, unknown>): void {}
+
+export function startSpan(
+  _operation: string,
+  _description?: string
+): undefined {
+  return undefined;
+}
+
+export async function withSpan<T>(
+  _operation: string,
+  _description: string,
+  fn: () => Promise<T>
+): Promise<T> {
+  return fn();
+}
+
+export function withSentryAction<TInput, TOutput>(
+  action: (input: TInput) => Promise<TOutput>
+): (input: TInput) => Promise<TOutput> {
+  return async (input: TInput) => {
+    try {
+      return await action(input);
+    } catch (error) {
+      captureError(error, { action: action.name });
+      throw error;
+    }
+  };
+}
+
+export function withSentryHandler<T extends Response>(
+  handler: (request: Request) => Promise<T>
+): (request: Request) => Promise<T | Response> {
+  return async (request: Request) => {
+    try {
+      return await handler(request);
+    } catch (error) {
+      captureError(error, { method: request.method, path: new URL(request.url).pathname });
+      return Response.json({ error: "Internal Server Error" }, { status: 500 });
+    }
+  };
+}
+`;
+}
+
+function cloudflareConfig(
+  target: string,
+  selection: ProjectSelection
+): Record<string, unknown> {
+  const name = projectName(target);
+  const bindings = new Set(selection.bindings);
+  return {
+    $schema: "node_modules/wrangler/config-schema.json",
+    name,
+    main: "cloudflare/worker.mjs",
+    compatibility_date: new Date().toISOString().slice(0, 10),
+    compatibility_flags: ["nodejs_compat", "global_fetch_strictly_public"],
+    assets: { directory: ".open-next/assets", binding: "ASSETS" },
+    services: [{ binding: "WORKER_SELF_REFERENCE", service: name }],
+    observability: {
+      enabled: true,
+      logs: {
+        enabled: true,
+        head_sampling_rate: 1,
+        invocation_logs: true,
+      },
+      traces: { enabled: true, head_sampling_rate: 0.1 },
+    },
+    ...(bindings.has("R2Bucket")
+      ? { r2_buckets: [{ binding: "NEXTDEVTPL_STORAGE" }] }
+      : {}),
+    ...(bindings.has("Ai") ? { ai: { binding: "AI" } } : {}),
+    ...(bindings.has("Workflow")
+      ? {
+          workflows: [
+            {
+              binding: "NEXTDEVTPL_WORKFLOW",
+              name: `${name}-jobs`,
+              class_name: "NextDevTplWorkflow",
+            },
+          ],
+        }
+      : {}),
+    ...(bindings.has("SendEmail")
+      ? { send_email: [{ name: "NEXTDEVTPL_EMAIL" }] }
+      : {}),
+    ...(bindings.has("RateLimit")
+      ? {
+          ratelimits: CLOUDFLARE_RATE_LIMITS.map((item) => ({
+            name: item.name,
+            namespace_id: item.id,
+            simple: { limit: item.limit, period: 60 },
+          })),
+        }
+      : {}),
+  };
+}
+
 function hasModule(selection: ProjectSelection, id: string): boolean {
   return selection.modules.includes(id);
 }
@@ -69,6 +234,12 @@ async function pruneModules(
   if (!hasModule(selection, "marketing")) {
     await removePath(join(target, "src", "app", "[locale]", "(marketing)"));
     await removePath(join(target, "src", "app", "[locale]", "docs"));
+    await removePath(
+      join(target, "src", "app", "[locale]", "opengraph-image.tsx")
+    );
+    await removePath(
+      join(target, "src", "app", "[locale]", "twitter-image.tsx")
+    );
     await removePath(join(target, "src", "app", "api", "search"));
     await removePath(join(target, "src", "lib", "source.ts"));
     await removePath(join(target, "src", "types", "fumadocs-source.d.ts"));
@@ -462,7 +633,13 @@ async function rewriteEnvironment(
         ? ["PORT"]
         : []),
   ];
-  const unique = [...new Set(keys)].sort();
+  const unique = [...new Set(keys)]
+    .filter(
+      (key) =>
+        selection.target !== "cloudflare" ||
+        (key !== "NEXT_PUBLIC_SENTRY_DSN" && key !== "SENTRY_AUTH_TOKEN")
+    )
+    .sort();
   await writeText(
     join(target, ".env.example"),
     `# Generated for the ${selection.preset} preset (${selection.target}).\n${unique
@@ -488,20 +665,29 @@ async function rewriteDeployment(
     await removePath(join(target, "deploy", "vercel"));
     await removePath(join(target, "vercel.json"));
   };
+  const removeCloudflare = async () => {
+    await removePath(join(target, "cloudflare"));
+    await removePath(join(target, "open-next.config.ts"));
+    await removePath(join(target, "src", "lib", "cloudflare"));
+    await removePath(join(target, "wrangler.jsonc"));
+  };
 
   if (selection.target === "docker") {
     await removeServer();
     await removeVercel();
+    await removeCloudflare();
     return;
   }
   if (selection.target === "server") {
     await removeDocker();
     await removeVercel();
+    await removeCloudflare();
     return;
   }
   if (selection.target === "vercel") {
     await removeDocker();
     await removeServer();
+    await removeCloudflare();
     const vercelConfig = {
       $schema: "https://openapi.vercel.sh/vercel.json",
       framework: "nextjs",
@@ -524,6 +710,22 @@ async function rewriteDeployment(
   await removePath(join(target, "deploy"));
   await removeDocker();
   await removeVercel();
+  await writeJson(
+    join(target, "wrangler.jsonc"),
+    cloudflareConfig(target, selection)
+  );
+  await writeText(
+    join(target, "src", "db", "index.ts"),
+    cloudflareDatabaseSource()
+  );
+  await writeText(
+    join(target, "src", "lib", "monitoring", "index.ts"),
+    cloudflareMonitoringSource()
+  );
+  await removePath(join(target, "src", "instrumentation.ts"));
+  await removePath(join(target, "sentry.client.config.ts"));
+  await removePath(join(target, "sentry.edge.config.ts"));
+  await removePath(join(target, "sentry.server.config.ts"));
 }
 
 async function rewritePackage(
@@ -557,11 +759,7 @@ async function rewritePackage(
   } else {
     packageJson.scripts.postinstall = "fumadocs-mdx";
   }
-  packageJson.name =
-    basename(target)
-      .toLowerCase()
-      .replace(/[^a-z0-9._-]+/g, "-")
-      .replace(/^-+|-+$/g, "") || "nextdevtpl-app";
+  packageJson.name = projectName(target);
   packageJson.private = true;
   delete packageJson.scripts["verify:generated"];
   delete packageJson.scripts["deploy:check"];
@@ -575,6 +773,26 @@ async function rewritePackage(
   }
   if (selection.target === "server") {
     packageJson.scripts["deploy:server:build"] = "bash deploy/server/build.sh";
+  }
+  if (selection.target === "cloudflare") {
+    delete packageJson.dependencies["@sentry/nextjs"];
+    delete packageJson.dependencies.pg;
+    delete packageJson.dependencies.ws;
+    delete packageJson.devDependencies["@types/pg"];
+    delete packageJson.devDependencies["@types/ws"];
+    packageJson.scripts["cf:build"] = "opennextjs-cloudflare build";
+    packageJson.scripts["cf:deploy"] =
+      "opennextjs-cloudflare build && wrangler deploy";
+    packageJson.scripts["cf:preview"] =
+      "opennextjs-cloudflare build && wrangler dev";
+    packageJson.scripts["cf:types"] = "wrangler types";
+  } else {
+    delete packageJson.scripts["cf:build"];
+    delete packageJson.scripts["cf:deploy"];
+    delete packageJson.scripts["cf:preview"];
+    delete packageJson.scripts["cf:types"];
+    delete packageJson.devDependencies["@opennextjs/cloudflare"];
+    delete packageJson.devDependencies.wrangler;
   }
   await writeJson(path, packageJson);
 }
@@ -640,6 +858,9 @@ export async function generateProject(
       const packageManager = options.packageManager ?? "pnpm";
       await installDependencies(target.path, packageManager);
       await runPackageScript(target.path, packageManager, "db:generate:init");
+      if (selection.target === "cloudflare") {
+        await runPackageScript(target.path, packageManager, "cf:types");
+      }
     }
     return { manifest, targetDirectory: target.path };
   } catch (error) {

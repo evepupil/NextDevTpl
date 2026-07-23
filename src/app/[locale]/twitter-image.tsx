@@ -7,7 +7,7 @@ import {
 /**
  * Twitter 图片配置
  */
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const alt = siteConfig.name;
 export const size = OG_IMAGE_SIZE;
 export const contentType = "image/png";
