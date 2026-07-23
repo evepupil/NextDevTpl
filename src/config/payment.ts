@@ -18,15 +18,15 @@ import {
 // ============================================
 
 /**
- * Creem 产品/价格 ID（从环境变量读取）
+ * 支付供应商产品/价格 ID（从环境变量读取）
  */
 export const PRICE_IDS = {
-  STARTER_MONTHLY: process.env.NEXT_PUBLIC_CREEM_PRICE_STARTER_MONTHLY ?? "",
-  STARTER_YEARLY: process.env.NEXT_PUBLIC_CREEM_PRICE_STARTER_YEARLY ?? "",
-  PRO_MONTHLY: process.env.NEXT_PUBLIC_CREEM_PRICE_PRO_MONTHLY ?? "",
-  PRO_YEARLY: process.env.NEXT_PUBLIC_CREEM_PRICE_PRO_YEARLY ?? "",
-  ULTRA_MONTHLY: process.env.NEXT_PUBLIC_CREEM_PRICE_ULTRA_MONTHLY ?? "",
-  ULTRA_YEARLY: process.env.NEXT_PUBLIC_CREEM_PRICE_ULTRA_YEARLY ?? "",
+  STARTER_MONTHLY: process.env.NEXT_PUBLIC_PRICE_STARTER_MONTHLY ?? "",
+  STARTER_YEARLY: process.env.NEXT_PUBLIC_PRICE_STARTER_YEARLY ?? "",
+  PRO_MONTHLY: process.env.NEXT_PUBLIC_PRICE_PRO_MONTHLY ?? "",
+  PRO_YEARLY: process.env.NEXT_PUBLIC_PRICE_PRO_YEARLY ?? "",
+  ULTRA_MONTHLY: process.env.NEXT_PUBLIC_PRICE_ULTRA_MONTHLY ?? "",
+  ULTRA_YEARLY: process.env.NEXT_PUBLIC_PRICE_ULTRA_YEARLY ?? "",
 } as const;
 
 // ============================================

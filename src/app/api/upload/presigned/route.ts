@@ -1,24 +1,10 @@
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { nanoid } from "nanoid";
 import { type NextRequest, NextResponse } from "next/server";
+import { DEFAULT_SIGNED_URL_EXPIRES } from "@/features/storage/types";
 import { withApiLogging } from "@/lib/api-logger";
 import { auth } from "@/lib/auth";
 import { getFileTypeFromName } from "@/lib/file-utils";
-
-/**
- * S3/R2 客户端配置
- */
-const s3Client = new S3Client({
-  region: process.env.STORAGE_REGION || "auto",
-  ...(process.env.STORAGE_ENDPOINT && {
-    endpoint: process.env.STORAGE_ENDPOINT,
-  }),
-  credentials: {
-    accessKeyId: process.env.STORAGE_ACCESS_KEY_ID || "",
-    secretAccessKey: process.env.STORAGE_SECRET_ACCESS_KEY || "",
-  },
-});
+import { storageService } from "@/services/storage";
 
 const BUCKET_NAME = process.env.STORAGE_BUCKET_NAME || "nextdevtpl-uploads";
 
@@ -85,25 +71,22 @@ export const POST = withApiLogging(async (request: NextRequest) => {
     const fileExtension = filename.match(/\.[^.]+$/)?.[0] || "";
     const fileKey = `uploads/${session.user.id}/${nanoid()}${fileExtension}`;
 
-    // 创建预签名 URL
-    const command = new PutObjectCommand({
-      Bucket: BUCKET_NAME,
-      Key: fileKey,
-      ContentType: contentType,
+    const presignedUrl = await storageService.createUploadUrl({
+      bucket: BUCKET_NAME,
+      key: fileKey,
+      contentType,
+      expiresIn: DEFAULT_SIGNED_URL_EXPIRES,
     });
-
-    const presignedUrl = await getSignedUrl(s3Client, command, {
-      expiresIn: 3600, // 1 hour
-    });
-
-    // 构建文件访问 URL
-    const fileUrl = `${process.env.STORAGE_ENDPOINT}/${BUCKET_NAME}/${fileKey}`;
+    const fileUrl = new URL(
+      `/image-proxy/${BUCKET_NAME}/${fileKey}`,
+      request.url
+    ).toString();
 
     return NextResponse.json({
       presignedUrl,
       fileKey,
       fileUrl,
-      expiresIn: 3600,
+      expiresIn: DEFAULT_SIGNED_URL_EXPIRES,
     });
   } catch (error) {
     console.error("Error creating presigned URL:", error);

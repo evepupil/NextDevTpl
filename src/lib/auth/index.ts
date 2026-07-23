@@ -8,8 +8,9 @@ import {
   VerifyEmailEmail,
   sendEmail,
 } from "@/features/mail/server";
+import { isMailServiceConfigured } from "@/services/mail";
 
-const isResendConfigured = Boolean(process.env.RESEND_API_KEY);
+const isEmailConfigured = isMailServiceConfigured();
 
 /**
  * Better Auth 服务端配置
@@ -78,7 +79,7 @@ export const auth = betterAuth({
    */
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: isResendConfigured,
+    requireEmailVerification: isEmailConfigured,
     sendResetPassword: async ({ user, url }) => {
       await sendEmail({
         to: user.email,
@@ -94,7 +95,7 @@ export const auth = betterAuth({
   /**
    * 邮箱验证配置
    */
-  ...(isResendConfigured
+  ...(isEmailConfigured
     ? {
         emailVerification: {
           sendOnSignUp: true,

@@ -9,10 +9,8 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 
-import {
-  DEFAULT_SIGNED_URL_EXPIRES,
-  getStorageProvider,
-} from "@/features/storage";
+import { DEFAULT_SIGNED_URL_EXPIRES } from "@/features/storage/types";
+import { storageService } from "@/services/storage";
 
 // ============================================
 // 配置
@@ -25,14 +23,15 @@ import {
  */
 function getAllowedBuckets(): string[] {
   const avatarsBucket = process.env.NEXT_PUBLIC_AVATARS_BUCKET_NAME;
+  const uploadsBucket = process.env.STORAGE_BUCKET_NAME ?? "nextdevtpl-uploads";
 
-  const buckets: string[] = [];
+  const buckets = new Set<string>([uploadsBucket]);
 
   if (avatarsBucket) {
-    buckets.push(avatarsBucket);
+    buckets.add(avatarsBucket);
   }
 
-  return buckets;
+  return [...buckets];
 }
 
 /**
@@ -91,8 +90,11 @@ export async function GET(
     }
 
     // 生成签名 URL
-    const provider = getStorageProvider();
-    const signedUrl = await provider.getSignedUrl(key, bucket, CACHE_MAX_AGE);
+    const signedUrl = await storageService.createDownloadUrl({
+      key,
+      bucket,
+      expiresIn: CACHE_MAX_AGE,
+    });
 
     // 重定向到签名 URL
     // 设置缓存头，让浏览器/CDN 缓存响应

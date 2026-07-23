@@ -1,110 +1,47 @@
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+
 import { SUBSCRIPTION_MONTHLY_CREDITS } from "@/config/payment";
 import { getPlanFromPriceId } from "@/config/subscription-plan";
+import type {
+  PaymentCheckout,
+  PaymentSubscription,
+  PaymentWebhookEvent,
+} from "@/core/services";
 import { db } from "@/db";
 import { user } from "@/db/schema/auth";
 import { creditsBatch } from "@/db/schema/credits";
 import { subscription } from "@/db/schema/subscription";
 import { CREDITS_EXPIRY_DAYS, grantCredits } from "@/features/credits";
-import {
-  type CreemCheckoutCompletedData,
-  type CreemSubscription,
-  type CreemWebhookEvent,
-  constructCreemEvent,
-} from "@/features/payment/server";
 import { withApiLogging } from "@/lib/api-logger";
 import { logError, logEvent, logWarn } from "@/lib/logger";
+import { paymentService } from "@/services/payment";
 
-/** 从 CreemSubscription 中安全提取产品 ID */
-function getProductId(sub: CreemSubscription): string {
-  return typeof sub.product === "string"
-    ? sub.product
-    : (sub.product?.id ?? "");
-}
-
-/**
- * Creem Webhook 处理器
- *
- * 处理来自 Creem 的事件通知
- * 文档: https://docs.creem.io/code/webhooks
- */
-export const POST = withApiLogging(async (req: Request) => {
-  const body = await req.text();
-  const headersList = await headers();
-  const signature = headersList.get("creem-signature");
+export const POST = withApiLogging(async (request: Request) => {
+  const payload = await request.text();
+  const signature = (await headers()).get("creem-signature");
 
   if (!signature) {
     return NextResponse.json(
-      { error: "Missing creem-signature header" },
+      { error: "Missing payment signature header" },
       { status: 400 }
     );
   }
 
-  let event: CreemWebhookEvent;
-
+  let event: PaymentWebhookEvent;
   try {
-    // 验证 Webhook 签名并解析事件
-    event = constructCreemEvent(body, signature);
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : "Unknown error";
-    logError(err, { source: "creem-webhook", stage: "signature" });
-    return NextResponse.json(
-      { error: `Webhook Error: ${errorMessage}` },
-      { status: 400 }
-    );
+    event = await paymentService.verifyWebhook({ payload, signature });
+  } catch (error) {
+    logError(error, { source: "payment-webhook", stage: "signature" });
+    return NextResponse.json({ error: "Invalid webhook" }, { status: 400 });
   }
 
   try {
-    // 处理不同类型的事件
-    switch (event.eventType) {
-      // ============================================
-      // Checkout 完成事件
-      // ============================================
-      case "checkout.completed": {
-        await handleCheckoutCompleted(
-          event.object as CreemCheckoutCompletedData
-        );
-        break;
-      }
-
-      // ============================================
-      // 订阅相关事件
-      // ============================================
-      case "subscription.active": {
-        await handleSubscriptionActive(event.object as CreemSubscription);
-        break;
-      }
-
-      case "subscription.renewed":
-      case "subscription.paid": {
-        await handleSubscriptionRenewed(event.object as CreemSubscription);
-        break;
-      }
-
-      case "subscription.canceled": {
-        await handleSubscriptionCanceled(event.object as CreemSubscription);
-        break;
-      }
-
-      case "subscription.past_due": {
-        await handleSubscriptionPastDue(event.object as CreemSubscription);
-        break;
-      }
-
-      case "subscription.paused": {
-        await handleSubscriptionPaused(event.object as CreemSubscription);
-        break;
-      }
-
-      default:
-        logEvent("webhook.creem.unhandled", { eventType: event.eventType });
-    }
-
+    await handlePaymentEvent(event);
     return NextResponse.json({ received: true });
   } catch (error) {
-    logError(error, { source: "creem-webhook", stage: "handler" });
+    logError(error, { source: "payment-webhook", stage: "handler" });
     return NextResponse.json(
       { error: "Webhook handler failed" },
       { status: 500 }
@@ -112,275 +49,244 @@ export const POST = withApiLogging(async (req: Request) => {
   }
 });
 
-// ============================================
-// Checkout 完成处理
-// ============================================
+async function handlePaymentEvent(event: PaymentWebhookEvent): Promise<void> {
+  switch (event.type) {
+    case "checkout.completed":
+      if (event.checkout) {
+        await handleCheckoutCompleted(event.checkout);
+      }
+      return;
+    case "subscription.active":
+      if (event.subscription) {
+        await handleSubscriptionActive(event.subscription);
+      }
+      return;
+    case "subscription.paid":
+    case "subscription.renewed":
+      if (event.subscription) {
+        await handleSubscriptionRenewed(event.subscription);
+      }
+      return;
+    case "subscription.canceled":
+    case "subscription.expired":
+      if (event.subscription) {
+        await handleSubscriptionCanceled(event.subscription);
+      }
+      return;
+    case "subscription.past_due":
+      if (event.subscription) {
+        await updateSubscriptionState(event.subscription, "past_due");
+      }
+      return;
+    case "subscription.paused":
+      if (event.subscription) {
+        await updateSubscriptionState(event.subscription, "paused");
+      }
+      return;
+  }
+}
 
-/**
- * 处理 Checkout 完成事件
- *
- * 当用户完成支付后，创建或更新订阅记录
- */
-async function handleCheckoutCompleted(data: CreemCheckoutCompletedData) {
-  const userId = data.metadata?.userId;
-  const customerId = data.customer.id;
-  const productId = data.product?.id || data.order?.product;
-
+async function handleCheckoutCompleted(data: PaymentCheckout): Promise<void> {
+  const userId = data.metadata.userId;
   if (!userId) {
     logError("Missing userId in checkout metadata");
     return;
   }
 
-  // 更新用户的 customerId
-  await db.update(user).set({ customerId }).where(eq(user.id, userId));
+  await db
+    .update(user)
+    .set({ customerId: data.customer.id })
+    .where(eq(user.id, userId));
 
-  // 如果有订阅信息，创建订阅记录
   if (data.subscription) {
     await createOrUpdateSubscription(userId, data.subscription);
   }
 
   logEvent("payment.checkout.completed", {
     userId,
-    customerId,
-    productId,
+    customerId: data.customer.id,
+    productId: data.productId,
     subscriptionId: data.subscription?.id,
-    billingType: data.product?.billing_type,
-    checkoutType: data.metadata?.type ?? "subscription",
+    checkoutType: data.metadata.type ?? data.mode,
+    provider: paymentService.provider,
   });
 }
 
-// ============================================
-// 订阅事件处理
-// ============================================
-
-/**
- * 处理订阅激活事件
- *
- * 首次订阅激活时触发，发放积分
- */
-async function handleSubscriptionActive(sub: CreemSubscription) {
-  const userId = sub.metadata?.userId;
+async function handleSubscriptionActive(
+  externalSubscription: PaymentSubscription
+): Promise<void> {
+  const metadataUserId = externalSubscription.metadata.userId;
+  const userId =
+    metadataUserId ?? (await findSubscriptionUserId(externalSubscription.id));
 
   if (!userId) {
-    // 尝试从数据库查找
-    const [existingSub] = await db
-      .select({ userId: subscription.userId })
-      .from(subscription)
-      .where(eq(subscription.subscriptionId, sub.id))
-      .limit(1);
-
-    if (!existingSub) {
-      logError("Cannot find userId for subscription", {
-        subscriptionId: sub.id,
-      });
-      return;
-    }
-
-    await updateSubscriptionStatus(sub);
-    await grantSubscriptionCredits(
-      existingSub.userId,
-      sub,
-      "subscription_create"
-    );
-    logEvent("payment.subscription.created", {
-      userId: existingSub.userId,
-      subscriptionId: sub.id,
-      priceId: getProductId(sub),
-      status: sub.status,
+    logError("Cannot find userId for subscription", {
+      subscriptionId: externalSubscription.id,
     });
     return;
   }
 
-  await createOrUpdateSubscription(userId, sub);
-  await grantSubscriptionCredits(userId, sub, "subscription_create");
+  if (metadataUserId) {
+    await createOrUpdateSubscription(userId, externalSubscription);
+  } else {
+    await updateSubscription(externalSubscription);
+  }
+
+  await grantSubscriptionCredits(
+    userId,
+    externalSubscription,
+    "subscription_create"
+  );
   logEvent("payment.subscription.created", {
     userId,
-    subscriptionId: sub.id,
-    priceId: getProductId(sub),
-    status: sub.status,
+    subscriptionId: externalSubscription.id,
+    priceId: externalSubscription.productId,
+    status: externalSubscription.status,
+    provider: paymentService.provider,
   });
 }
 
-/**
- * 处理订阅续期事件
- *
- * 订阅周期结束续费时触发，发放积分
- */
-async function handleSubscriptionRenewed(sub: CreemSubscription) {
-  await updateSubscriptionStatus(sub);
+async function handleSubscriptionRenewed(
+  externalSubscription: PaymentSubscription
+): Promise<void> {
+  await updateSubscription(externalSubscription);
+  const userId = await findSubscriptionUserId(externalSubscription.id);
 
-  // 从数据库获取 userId
-  const [existingSub] = await db
-    .select({ userId: subscription.userId })
-    .from(subscription)
-    .where(eq(subscription.subscriptionId, sub.id))
-    .limit(1);
-
-  if (!existingSub) {
-    logError("Subscription not found for renewal", { subscriptionId: sub.id });
+  if (!userId) {
+    logError("Subscription not found for renewal", {
+      subscriptionId: externalSubscription.id,
+    });
     return;
   }
 
-  await grantSubscriptionCredits(existingSub.userId, sub, "subscription_cycle");
+  await grantSubscriptionCredits(
+    userId,
+    externalSubscription,
+    "subscription_cycle"
+  );
 }
 
-/**
- * 处理订阅取消事件
- */
-async function handleSubscriptionCanceled(sub: CreemSubscription) {
-  // 判断当前周期是否未结束
-  const periodEnd = new Date(sub.current_period_end_date);
-  const isStillInPeriod = periodEnd > new Date();
+async function handleSubscriptionCanceled(
+  externalSubscription: PaymentSubscription
+): Promise<void> {
+  const periodEnd = externalSubscription.currentPeriodEnd;
+  const isStillInPeriod = periodEnd !== null && periodEnd > new Date();
 
-  if (isStillInPeriod) {
-    // 周期未结束：保持 active，标记 cancelAtPeriodEnd
-    // 不管 Creem 传来的 cancel_at_period_end 是什么值
-    await db
-      .update(subscription)
-      .set({
-        status: "active",
-        cancelAtPeriodEnd: true,
-        currentPeriodEnd: periodEnd,
-        updatedAt: new Date(),
-      })
-      .where(eq(subscription.subscriptionId, sub.id));
-  } else {
-    // 已过期：标记为 canceled
-    await db
-      .update(subscription)
-      .set({
-        status: "canceled",
-        cancelAtPeriodEnd: false,
-        updatedAt: new Date(),
-      })
-      .where(eq(subscription.subscriptionId, sub.id));
-  }
-
-  const [existingSub] = await db
-    .select({ userId: subscription.userId })
-    .from(subscription)
-    .where(eq(subscription.subscriptionId, sub.id))
-    .limit(1);
+  await db
+    .update(subscription)
+    .set({
+      status: isStillInPeriod ? "active" : "canceled",
+      cancelAtPeriodEnd: isStillInPeriod,
+      ...(periodEnd ? { currentPeriodEnd: periodEnd } : {}),
+      updatedAt: new Date(),
+    })
+    .where(eq(subscription.subscriptionId, externalSubscription.id));
 
   logEvent("payment.subscription.canceled", {
-    userId: existingSub?.userId,
-    subscriptionId: sub.id,
+    userId: await findSubscriptionUserId(externalSubscription.id),
+    subscriptionId: externalSubscription.id,
     cancelAtPeriodEnd: isStillInPeriod,
-    periodEnd: sub.current_period_end_date,
+    periodEnd: periodEnd?.toISOString(),
+    provider: paymentService.provider,
   });
 }
 
-/**
- * 处理订阅逾期事件
- */
-async function handleSubscriptionPastDue(sub: CreemSubscription) {
+async function updateSubscriptionState(
+  externalSubscription: PaymentSubscription,
+  status: "past_due" | "paused"
+): Promise<void> {
   await db
     .update(subscription)
-    .set({
-      status: "past_due",
-      updatedAt: new Date(),
-    })
-    .where(eq(subscription.subscriptionId, sub.id));
+    .set({ status, updatedAt: new Date() })
+    .where(eq(subscription.subscriptionId, externalSubscription.id));
 
-  logEvent("webhook.creem.subscription.past_due", { subscriptionId: sub.id });
+  logEvent(`payment.subscription.${status}`, {
+    subscriptionId: externalSubscription.id,
+    provider: paymentService.provider,
+  });
 }
 
-/**
- * 处理订阅暂停事件
- */
-async function handleSubscriptionPaused(sub: CreemSubscription) {
-  await db
-    .update(subscription)
-    .set({
-      status: "paused",
-      updatedAt: new Date(),
-    })
-    .where(eq(subscription.subscriptionId, sub.id));
-
-  logEvent("webhook.creem.subscription.paused", { subscriptionId: sub.id });
+async function findSubscriptionUserId(
+  subscriptionId: string
+): Promise<string | undefined> {
+  const [existing] = await db
+    .select({ userId: subscription.userId })
+    .from(subscription)
+    .where(eq(subscription.subscriptionId, subscriptionId))
+    .limit(1);
+  return existing?.userId;
 }
 
-// ============================================
-// 辅助函数
-// ============================================
-
-/**
- * 创建或更新订阅记录
- */
 async function createOrUpdateSubscription(
   userId: string,
-  sub: CreemSubscription
-) {
-  const [existingSub] = await db
-    .select()
+  externalSubscription: PaymentSubscription
+): Promise<void> {
+  const [existing] = await db
+    .select({ id: subscription.id })
     .from(subscription)
     .where(eq(subscription.userId, userId))
     .limit(1);
+  const data = subscriptionValues(externalSubscription);
 
-  const subscriptionData = {
-    subscriptionId: sub.id,
-    priceId: getProductId(sub),
-    status: sub.status,
-    currentPeriodStart: new Date(sub.current_period_start_date),
-    currentPeriodEnd: new Date(sub.current_period_end_date),
-    cancelAtPeriodEnd: sub.cancel_at_period_end,
-    updatedAt: new Date(),
-  };
-
-  if (existingSub) {
+  if (existing) {
     await db
       .update(subscription)
-      .set(subscriptionData)
+      .set(data)
       .where(eq(subscription.userId, userId));
   } else {
     await db.insert(subscription).values({
       id: crypto.randomUUID(),
       userId,
-      ...subscriptionData,
+      ...data,
     });
   }
 
-  logEvent("webhook.creem.subscription.upserted", { userId });
+  logEvent("payment.subscription.upserted", {
+    userId,
+    provider: paymentService.provider,
+  });
 }
 
-/**
- * 更新订阅状态
- */
-async function updateSubscriptionStatus(sub: CreemSubscription) {
+function subscriptionValues(externalSubscription: PaymentSubscription) {
+  return {
+    subscriptionId: externalSubscription.id,
+    priceId: externalSubscription.productId,
+    status: externalSubscription.status,
+    currentPeriodStart: externalSubscription.currentPeriodStart,
+    currentPeriodEnd: externalSubscription.currentPeriodEnd,
+    cancelAtPeriodEnd: externalSubscription.cancelAtPeriodEnd,
+    updatedAt: new Date(),
+  };
+}
+
+async function updateSubscription(
+  externalSubscription: PaymentSubscription
+): Promise<void> {
   await db
     .update(subscription)
-    .set({
-      status: sub.status,
-      currentPeriodStart: new Date(sub.current_period_start_date),
-      currentPeriodEnd: new Date(sub.current_period_end_date),
-      cancelAtPeriodEnd: sub.cancel_at_period_end,
-      updatedAt: new Date(),
-    })
-    .where(eq(subscription.subscriptionId, sub.id));
+    .set(subscriptionValues(externalSubscription))
+    .where(eq(subscription.subscriptionId, externalSubscription.id));
 }
 
-/**
- * 发放订阅积分
- *
- * @param userId - 用户 ID
- * @param sub - 订阅信息
- * @param billingReason - 计费原因 (subscription_create | subscription_cycle)
- */
 async function grantSubscriptionCredits(
   userId: string,
-  sub: CreemSubscription,
+  externalSubscription: PaymentSubscription,
   billingReason: "subscription_create" | "subscription_cycle"
-) {
-  const priceId = getProductId(sub);
-  const planType = getPlanFromPriceId(priceId);
-
-  if (!planType) {
-    logError("Unknown priceId", { priceId });
+): Promise<void> {
+  const { currentPeriodStart, currentPeriodEnd, productId, id } =
+    externalSubscription;
+  if (!currentPeriodStart || !currentPeriodEnd) {
+    logWarn("Subscription period is incomplete", { subscriptionId: id });
     return;
   }
 
-  // 幂等性检查：同一订阅 + 同一周期只发放一次积分
-  const periodKey = `${sub.id}:${sub.current_period_start_date}`;
+  const planType = getPlanFromPriceId(productId);
+  if (!planType) {
+    logError("Unknown priceId", { priceId: productId });
+    return;
+  }
+
+  const periodKey = `${id}:${currentPeriodStart.toISOString()}`;
   const [existingBatch] = await db
     .select({ id: creditsBatch.id })
     .from(creditsBatch)
@@ -393,11 +299,10 @@ async function grantSubscriptionCredits(
     .limit(1);
 
   if (existingBatch) {
-    logEvent("webhook.creem.credits.already_granted", { periodKey });
+    logEvent("payment.credits.already_granted", { periodKey });
     return;
   }
 
-  // 获取该计划的月度积分配额
   const monthlyCredits =
     SUBSCRIPTION_MONTHLY_CREDITS[
       planType as keyof typeof SUBSCRIPTION_MONTHLY_CREDITS
@@ -407,51 +312,43 @@ async function grantSubscriptionCredits(
     return;
   }
 
-  // 判断是否为年付（通过周期长度判断）
-  const periodStart = new Date(sub.current_period_start_date);
-  const periodEnd = new Date(sub.current_period_end_date);
   const periodDays = Math.round(
-    (periodEnd.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24)
+    (currentPeriodEnd.getTime() - currentPeriodStart.getTime()) /
+      (1000 * 60 * 60 * 24)
   );
-  const isYearly = periodDays > 60; // 超过60天认为是年付
-
-  // 计算应发放积分：月付发月度积分，年付发12个月积分
-  const creditsToGrant = isYearly ? monthlyCredits * 12 : monthlyCredits;
-
-  // 计算积分过期时间
+  const isYearly = periodDays > 60;
+  const amount = isYearly ? monthlyCredits * 12 : monthlyCredits;
   const expiresAt = CREDITS_EXPIRY_DAYS
     ? new Date(Date.now() + CREDITS_EXPIRY_DAYS * 24 * 60 * 60 * 1000)
     : null;
 
-  // 发放积分
   try {
     const result = await grantCredits({
       userId,
-      amount: creditsToGrant,
+      amount,
       sourceType: "subscription",
-      debitAccount: `SUBSCRIPTION:${sub.id}`,
+      debitAccount: `SUBSCRIPTION:${id}`,
       transactionType: "monthly_grant",
       expiresAt,
       sourceRef: periodKey,
       description: isYearly
-        ? `${planType.charAt(0).toUpperCase() + planType.slice(1)} 年度订阅积分 (${monthlyCredits} × 12)`
-        : `${planType.charAt(0).toUpperCase() + planType.slice(1)} 月度订阅积分`,
+        ? `${planType} 年度订阅积分 (${monthlyCredits} × 12)`
+        : `${planType} 月度订阅积分`,
       metadata: {
-        subscriptionId: sub.id,
-        priceId,
+        subscriptionId: id,
+        priceId: productId,
         planType,
         billingReason,
         interval: isYearly ? "year" : "month",
-        periodStart: sub.current_period_start_date,
-        periodEnd: sub.current_period_end_date,
+        periodStart: currentPeriodStart.toISOString(),
+        periodEnd: currentPeriodEnd.toISOString(),
       },
     });
 
-    logEvent("webhook.creem.credits.grant_success", {
+    logEvent("payment.credits.grant_success", {
       userId,
-      credits: creditsToGrant,
+      credits: amount,
       planType,
-      period: isYearly ? "yearly" : "monthly",
       batchId: result.batchId,
     });
   } catch (error) {
@@ -459,7 +356,5 @@ async function grantSubscriptionCredits(
       error: String(error),
       userId,
     });
-    // 不抛出错误，让 webhook 返回成功
-    // 积分发放失败可通过日志追踪，手动补发
   }
 }

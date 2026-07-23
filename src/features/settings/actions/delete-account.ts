@@ -5,8 +5,8 @@ import { z } from "zod";
 
 import { db, user } from "@/db";
 import { subscription } from "@/db/schema/subscription";
-import { creem } from "@/features/payment/server";
 import { protectedAction } from "@/lib/safe-action";
+import { paymentService } from "@/services/payment";
 
 export const deleteAccountAction = protectedAction
   .metadata({ action: "settings.deleteAccount" })
@@ -29,7 +29,9 @@ export const deleteAccountAction = protectedAction
         activeSubscription.status
       )
     ) {
-      await creem.cancelSubscription(activeSubscription.subscriptionId);
+      await paymentService.cancelSubscription(
+        activeSubscription.subscriptionId
+      );
     }
 
     const [deletedUser] = await db

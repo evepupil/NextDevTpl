@@ -6,14 +6,14 @@ import { z } from "zod";
 import { findPlanByPriceId, getBaseUrl, paymentConfig } from "@/config/payment";
 import { db } from "@/db";
 import { subscription } from "@/db/schema/subscription";
-import { PaymentType } from "./types";
 import { logEvent } from "@/lib/logger";
 import { protectedAction } from "@/lib/safe-action";
+import { paymentService } from "@/services/payment";
 
-import { creem } from "./creem";
+import { PaymentType } from "./types";
 
 /**
- * 创建 Creem Checkout Session
+ * 创建支付 Checkout Session
  *
  * 支持订阅支付和一次性支付两种模式
  */
@@ -28,7 +28,7 @@ export const createCheckoutSession = protectedAction
     })
   )
   .action(async ({ parsedInput, ctx }) => {
-    const { priceId, successUrl } = parsedInput;
+    const { cancelUrl, priceId, successUrl, type } = parsedInput;
     const { userId } = ctx;
 
     // 检查是否已有活跃订阅
@@ -54,29 +54,30 @@ export const createCheckoutSession = protectedAction
       userId,
       priceId,
       planId: plan?.id ?? "unknown",
-      provider: "creem",
+      provider: paymentService.provider,
     });
 
-    // 创建 Creem Checkout
-    const checkout = await creem.createCheckout({
-      product_id: priceId,
-      success_url:
+    const checkout = await paymentService.createCheckout({
+      productId: priceId,
+      mode: type === PaymentType.ONE_TIME ? "one-time" : "subscription",
+      successUrl:
         successUrl ??
         `${baseUrl}${paymentConfig.redirectAfterCheckout}?success=true`,
-      request_id: `${userId}_${Date.now()}`,
+      cancelUrl: cancelUrl ?? `${baseUrl}${paymentConfig.redirectAfterCancel}`,
+      requestId: `${userId}_${Date.now()}`,
       metadata: {
         userId,
         planId: plan?.id ?? "unknown",
       },
     });
 
-    return { url: checkout.checkout_url };
+    return { url: checkout.url };
   });
 
 /**
  * 取消订阅
  *
- * 调用 Creem API 取消用户的订阅
+ * 调用支付服务取消用户的订阅
  */
 export const cancelSubscription = protectedAction
   .metadata({ action: "payment.cancelSubscription" })
@@ -94,8 +95,7 @@ export const cancelSubscription = protectedAction
       throw new Error("您还没有订阅任何计划");
     }
 
-    // 调用 Creem API 取消订阅
-    await creem.cancelSubscription(userSubscription.subscriptionId);
+    await paymentService.cancelSubscription(userSubscription.subscriptionId);
 
     // 更新数据库状态
     await db

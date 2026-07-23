@@ -9,9 +9,13 @@
 import { z } from "zod";
 
 import { protectedAction } from "@/lib/safe-action";
+import { storageService } from "@/services/storage";
 
-import { getStorageProvider } from "./providers";
-import { ALLOWED_IMAGE_TYPES, type AllowedImageType } from "./types";
+import {
+  ALLOWED_IMAGE_TYPES,
+  DEFAULT_UPLOAD_URL_EXPIRES,
+  type AllowedImageType,
+} from "./types";
 import { validateUploadRequest } from "./validation";
 
 const withStorageAction = (name: string) =>
@@ -88,12 +92,12 @@ export const getSignedUploadUrlAction = withStorageAction("getSignedUploadUrl")
     }
 
     // 获取签名上传 URL
-    const provider = getStorageProvider();
-    const uploadUrl = await provider.getSignedUploadUrl(
-      key,
+    const uploadUrl = await storageService.createUploadUrl({
       bucket,
-      contentType as AllowedImageType
-    );
+      key,
+      contentType: contentType as AllowedImageType,
+      expiresIn: DEFAULT_UPLOAD_URL_EXPIRES,
+    });
 
     return {
       uploadUrl,

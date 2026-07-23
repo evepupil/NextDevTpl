@@ -4,6 +4,8 @@
  * 定义支付相关的所有类型、枚举和接口
  */
 
+import type { PaymentProvider } from "@/core/services";
+
 // ============================================
 // 支付类型枚举
 // ============================================
@@ -60,7 +62,7 @@ export enum SubscriptionStatus {
 export interface PriceConfig {
   /** 支付类型 */
   type: PaymentType;
-  /** 价格 ID（来自 Creem） */
+  /** 支付供应商价格 ID */
   priceId: string;
   /** 金额 */
   amount: number;
@@ -120,7 +122,7 @@ export interface Plan extends PlanConfig, PlanDisplayInfo {}
  */
 export interface PaymentConfig {
   /** 支付提供商 */
-  provider: "creem";
+  provider: PaymentProvider;
   /** 货币 */
   currency: string;
   /** 年付折扣百分比 */

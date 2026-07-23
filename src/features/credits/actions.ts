@@ -9,9 +9,9 @@
 import { z } from "zod";
 
 import { getBaseUrl } from "@/config/payment";
-import { creem } from "@/features/payment/server";
 import { logEvent } from "@/lib/logger";
 import { actionClient, protectedAction } from "@/lib/safe-action";
+import { paymentService } from "@/services/payment";
 
 import {
   CREDIT_PACKAGES,
@@ -304,7 +304,7 @@ export const grantMonthlySubscriptionCredits = withPublicCreditsAction(
 /**
  * 购买积分 (内部函数)
  *
- * 由 Creem Webhook 调用，在支付成功后发放积分
+ * 由支付 Webhook 调用，在支付成功后发放积分
  * 注意: 这个函数不应该直接被前端调用
  */
 export const purchaseCredits = withProtectedCreditsAction("purchaseCredits")
@@ -358,7 +358,7 @@ export const purchaseCredits = withProtectedCreditsAction("purchaseCredits")
 /**
  * 创建积分购买 Checkout Session
  *
- * 创建 Creem Checkout Session 用于购买积分套餐
+ * 创建支付 Checkout Session 用于购买积分套餐
  * metadata 中包含 type: 'credit_purchase' 和 credits 数量
  * Webhook 会根据这些信息发放积分
  */
@@ -388,28 +388,26 @@ export const createCreditsPurchaseCheckout = withProtectedCreditsAction(
       userId,
       packageId: pkg.id,
       credits: pkg.credits,
-      provider: "creem",
+      provider: paymentService.provider,
       checkoutType: "credits",
     });
 
-    // 创建 Creem Checkout Session（一次性支付）
-    // 注意：Creem 需要预先在后台创建产品，这里使用 packageId 作为 product_id
-    // 实际使用时需要在 Creem 后台创建对应的积分产品
-    const checkout = await creem.createCheckout({
-      product_id: `credits_${packageId}`, // 需要在 Creem 后台创建对应产品
-      success_url:
+    const checkout = await paymentService.createCheckout({
+      productId: `credits_${packageId}`,
+      mode: "one-time",
+      successUrl:
         successUrl ??
         `${baseUrl}/dashboard/settings?tab=usage&success=true&credits=${pkg.credits}`,
-      request_id: `credit_purchase_${userId}_${Date.now()}`,
+      requestId: `credit_purchase_${userId}_${Date.now()}`,
       metadata: {
         userId,
-        type: "credit_purchase", // 关键: Webhook 用此判断类型
+        type: "credit_purchase",
         credits: String(pkg.credits),
         packageId: pkg.id,
       },
     });
 
-    return { url: checkout.checkout_url };
+    return { url: checkout.url };
   });
 
 /**

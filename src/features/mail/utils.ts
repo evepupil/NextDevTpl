@@ -1,6 +1,11 @@
+import { render, toPlainText } from "@react-email/render";
 import type { ReactElement } from "react";
 
-import { DEFAULT_FROM_EMAIL, getResendClient } from "./client";
+import type { MailAddress } from "@/core/services";
+import { mailService } from "@/services/mail";
+
+export const DEFAULT_FROM_EMAIL =
+  process.env.EMAIL_FROM ?? "NextDevTpl <noreply@example.com>";
 
 /**
  * 邮件发送工具
@@ -40,12 +45,27 @@ export interface SendEmailParams {
 export interface SendEmailResult {
   /** 是否成功 */
   success: boolean;
-  /** Resend 返回的邮件 ID (生产环境) */
+  /** 邮件供应商返回的邮件 ID (生产环境) */
   id?: string;
   /** 错误信息 */
   error?: string;
   /** 是否为模拟发送 (开发环境) */
   simulated?: boolean;
+}
+
+function parseMailAddress(value: string): MailAddress {
+  const match = /^\s*(.*?)\s*<([^>]+)>\s*$/.exec(value);
+  if (!match) {
+    return { email: value.trim() };
+  }
+
+  const email = match[2];
+  if (!email) {
+    return { email: value.trim() };
+  }
+
+  const name = match[1]?.trim();
+  return name ? { email, name } : { email };
 }
 
 // ============================================
@@ -140,40 +160,23 @@ export async function sendEmail(
 
   // 真实发送邮件
   try {
-    const resend = getResendClient();
-
-    // 构建邮件选项 (避免传递 undefined 值以满足 exactOptionalPropertyTypes)
-    const emailOptions: Parameters<typeof resend.emails.send>[0] = {
-      from: from ?? DEFAULT_FROM_EMAIL,
+    const html = await render(react);
+    const result = await mailService.send({
+      from: parseMailAddress(from ?? DEFAULT_FROM_EMAIL),
       to: Array.isArray(to) ? to : [to],
       subject,
-      react,
-    };
-
-    // 仅在有值时添加可选字段
-    if (cc) {
-      emailOptions.cc = Array.isArray(cc) ? cc : [cc];
-    }
-    if (bcc) {
-      emailOptions.bcc = Array.isArray(bcc) ? bcc : [bcc];
-    }
-    if (replyTo) {
-      emailOptions.replyTo = Array.isArray(replyTo) ? replyTo : [replyTo];
-    }
-
-    const { data, error } = await resend.emails.send(emailOptions);
-
-    if (error) {
-      console.error("Failed to send email:", error);
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
+      html,
+      text: toPlainText(html),
+      ...(cc ? { cc: Array.isArray(cc) ? cc : [cc] } : {}),
+      ...(bcc ? { bcc: Array.isArray(bcc) ? bcc : [bcc] } : {}),
+      ...(replyTo
+        ? { replyTo: Array.isArray(replyTo) ? replyTo : [replyTo] }
+        : {}),
+    });
 
     return {
       success: true,
-      id: data?.id,
+      ...(result.id ? { id: result.id } : {}),
     };
   } catch (error) {
     const errorMessage =

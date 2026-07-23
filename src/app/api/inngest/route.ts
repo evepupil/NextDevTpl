@@ -1,5 +1,4 @@
-import { serve } from "inngest/next";
-import { functions, inngest } from "@/inngest";
+import { inngestHandlers } from "@/adapters/jobs/inngest";
 import { withApiLogging } from "@/lib/api-logger";
 
 /**
@@ -8,11 +7,6 @@ import { withApiLogging } from "@/lib/api-logger";
  * 处理 Inngest 的 webhook 请求
  * 支持开发模式和生产模式
  */
-const inngestHandlers = serve({
-  client: inngest,
-  functions,
-});
-
 export const GET = withApiLogging(inngestHandlers.GET);
 export const POST = withApiLogging(inngestHandlers.POST);
 export const PUT = withApiLogging(inngestHandlers.PUT);
