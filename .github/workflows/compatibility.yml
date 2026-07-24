@@ -1,0 +1,93 @@
+name: Compatibility matrix
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: compatibility-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: nextdevtpl_test
+          POSTGRES_PASSWORD: nextdevtpl
+          POSTGRES_USER: nextdevtpl
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nextdevtpl -d nextdevtpl_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      BETTER_AUTH_SECRET: compatibility-only-secret-value-for-ci
+      BETTER_AUTH_URL: http://127.0.0.1:3000
+      DATABASE_URL: postgresql://nextdevtpl:nextdevtpl@127.0.0.1:5432/nextdevtpl_test
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec biome ci .
+      - run: pnpm typecheck
+      - run: pnpm db:push
+      - run: pnpm test:run
+
+  generated-project:
+    needs: quality
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        case:
+          - minimal-server
+          - saas-docker
+          - saas-vercel
+          - ai-saas-cloudflare
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: nextdevtpl_test
+          POSTGRES_PASSWORD: nextdevtpl
+          POSTGRES_USER: nextdevtpl
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nextdevtpl -d nextdevtpl_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      BETTER_AUTH_SECRET: compatibility-only-secret-value-for-ci
+      BETTER_AUTH_URL: http://127.0.0.1:3000
+      DATABASE_URL: postgresql://nextdevtpl:nextdevtpl@127.0.0.1:5432/nextdevtpl_test
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+      POSTGRES_PASSWORD: nextdevtpl
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm verify:compatibility --case ${{ matrix.case }}
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compatibility-${{ matrix.case }}
+          path: artifacts/compatibility/${{ matrix.case }}.json
+          if-no-files-found: error

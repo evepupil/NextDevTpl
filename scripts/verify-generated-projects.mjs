@@ -64,7 +64,11 @@ try {
       ...verification.options,
       install: false,
     });
-    run("pnpm", ["install", "--prefer-offline"], target);
+    run(
+      "pnpm",
+      ["install", "--frozen-lockfile", "--prefer-offline"],
+      target
+    );
     run("pnpm", ["db:generate:init"], target);
     run("pnpm", ["lint"], target);
     run("pnpm", ["typecheck"], target);

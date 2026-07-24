@@ -4,14 +4,11 @@
  * Provides the shared test DB connection plus cleanup and inspection helpers.
  */
 
-import { neonConfig, Pool } from "@neondatabase/serverless";
 import { eq, inArray, sql } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/neon-serverless";
-import ws from "ws";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 
 import * as schema from "@/db/schema";
-
-neonConfig.webSocketConstructor = ws;
 
 let pool: Pool | null = null;
 let legacySchemaSynced = false;

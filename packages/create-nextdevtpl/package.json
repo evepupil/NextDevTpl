@@ -24,6 +24,9 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "prepack": "pnpm run assemble-template && pnpm run build"
   },
+  "dependencies": {
+    "yaml": "^2.8.2"
+  },
   "devDependencies": {
     "@types/node": "^20",
     "typescript": "^5"

@@ -1,6 +1,8 @@
 import { readdir, readFile, rm } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
 
+import { parse, stringify } from "yaml";
+
 import { findGeneratorAssets, loadCatalog } from "./catalog.js";
 import {
   copyTemplate,
@@ -858,6 +860,54 @@ async function rewritePackage(
   await writeJson(path, packageJson);
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+async function rewriteLockfile(target: string): Promise<void> {
+  const packageJson = JSON.parse(
+    await readFile(join(target, "package.json"), "utf8")
+  ) as Record<string, unknown>;
+  const lockfilePath = join(target, "pnpm-lock.yaml");
+  const lockfile = parse(await readFile(lockfilePath, "utf8")) as unknown;
+  if (!isRecord(lockfile) || !isRecord(lockfile.importers)) {
+    throw new Error("Generated pnpm lockfile has no importers");
+  }
+  const rootImporter = lockfile.importers["."];
+  if (!isRecord(rootImporter)) {
+    throw new Error("Generated pnpm lockfile has no root importer");
+  }
+
+  for (const group of [
+    "dependencies",
+    "devDependencies",
+    "optionalDependencies",
+  ] as const) {
+    const selected = packageJson[group];
+    const locked = rootImporter[group];
+    if (selected === undefined) {
+      delete rootImporter[group];
+      continue;
+    }
+    if (!isRecord(selected) || !isRecord(locked)) {
+      throw new Error(`Generated pnpm lockfile is missing ${group}`);
+    }
+    rootImporter[group] = Object.fromEntries(
+      Object.entries(selected).map(([name, specifier]) => {
+        const entry = locked[name];
+        if (!isRecord(entry) || typeof specifier !== "string") {
+          throw new Error(
+            `Generated pnpm lockfile is missing ${group}.${name}`
+          );
+        }
+        return [name, { ...entry, specifier }];
+      })
+    );
+  }
+
+  await writeText(lockfilePath, stringify(lockfile, { lineWidth: 0 }));
+}
+
 async function writeSmokeTest(
   target: string,
   manifest: GeneratedProjectManifest
@@ -904,6 +954,7 @@ export async function generateProject(
     await rewriteEnvironment(target.path, selection);
     await rewriteDeployment(target.path, selection);
     await rewritePackage(target.path, selection, catalog);
+    await rewriteLockfile(target.path);
 
     const manifest: GeneratedProjectManifest = {
       catalogVersion: catalog.version,

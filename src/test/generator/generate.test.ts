@@ -46,6 +46,7 @@ describe("project generation", () => {
       dependencies: Record<string, string>;
       devDependencies: Record<string, string>;
     };
+    const lockfile = await readFile(join(target, "pnpm-lock.yaml"), "utf8");
 
     expect(manifest.modules).toEqual(["mail", "shared", "auth", "dashboard"]);
     expect(await exists(join(target, "src/features/credits"))).toBe(false);
@@ -66,6 +67,8 @@ describe("project generation", () => {
       "@opennextjs/cloudflare"
     );
     expect(packageJson.devDependencies).not.toHaveProperty("wrangler");
+    expect(lockfile).not.toContain("specifier: ^6.8.0");
+    expect(lockfile).not.toContain("specifier: 4.113.0");
     expect(await exists(join(target, "deploy/server/build.sh"))).toBe(true);
     expect(await exists(join(target, "Dockerfile"))).toBe(false);
     expect(await exists(join(target, "vercel.json"))).toBe(false);

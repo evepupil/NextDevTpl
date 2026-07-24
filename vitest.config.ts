@@ -12,7 +12,10 @@ export default defineConfig({
     environment: "node",
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
-    include: ["src/test/**/*.{test,spec}.{ts,tsx}"],
+    include: [
+      "src/test/**/*.{test,spec}.{ts,tsx}",
+      "tests/compatibility/**/*.{test,spec}.{ts,mjs}",
+    ],
     exclude: ["node_modules", ".next", "dist"],
     // 集成测试需要更长的超时时间
     testTimeout: 30000,

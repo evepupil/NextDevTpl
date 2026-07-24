@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "id": "minimal-server",
+      "preset": "minimal",
+      "target": "server",
+      "buildScript": "build",
+      "healthCheck": true,
+      "requiredPaths": ["deploy/server/build.sh"],
+      "forbiddenPaths": [
+        "Dockerfile",
+        "compose.yaml",
+        "vercel.json",
+        "wrangler.jsonc"
+      ]
+    },
+    {
+      "id": "saas-docker",
+      "preset": "saas",
+      "target": "docker",
+      "buildScript": "build",
+      "healthCheck": true,
+      "requiredPaths": [
+        "Dockerfile",
+        "compose.yaml",
+        "deploy/docker/README.md"
+      ],
+      "forbiddenPaths": [
+        "deploy/server",
+        "deploy/vercel",
+        "vercel.json",
+        "wrangler.jsonc"
+      ]
+    },
+    {
+      "id": "saas-vercel",
+      "preset": "saas",
+      "target": "vercel",
+      "buildScript": "build",
+      "healthCheck": true,
+      "requiredPaths": ["vercel.json", "deploy/vercel/README.md"],
+      "forbiddenPaths": [
+        "Dockerfile",
+        "compose.yaml",
+        "deploy/server",
+        "wrangler.jsonc"
+      ]
+    },
+    {
+      "id": "ai-saas-cloudflare",
+      "preset": "ai-saas",
+      "target": "cloudflare",
+      "buildScript": "cf:build",
+      "healthCheck": false,
+      "requiredPaths": [
+        "cloudflare/worker.mjs",
+        "open-next.config.ts",
+        "wrangler.jsonc"
+      ],
+      "forbiddenPaths": ["Dockerfile", "compose.yaml", "deploy", "vercel.json"]
+    }
+  ]
+}
