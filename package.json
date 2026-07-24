@@ -31,6 +31,7 @@
     "verify:generated": "pnpm --filter create-nextdevtpl build && node scripts/verify-generated-projects.mjs",
     "verify:compatibility": "pnpm --filter create-nextdevtpl build && node scripts/verify-compatibility.mjs",
     "verify:compatibility:structure": "pnpm --filter create-nextdevtpl build && node scripts/verify-compatibility.mjs --structure-only",
+    "release:check": "pnpm --filter create-nextdevtpl run prepack && node scripts/verify-release-package.mjs",
     "verify:health": "node deploy/verify-production-health.mjs",
     "deploy:check": "node deploy/check-health.mjs",
     "deploy:server:build": "bash deploy/server/build.sh"

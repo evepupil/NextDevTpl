@@ -15,6 +15,7 @@ export default defineConfig({
     include: [
       "src/test/**/*.{test,spec}.{ts,tsx}",
       "tests/compatibility/**/*.{test,spec}.{ts,mjs}",
+      "tests/release/**/*.{test,spec}.{ts,mjs}",
     ],
     exclude: ["node_modules", ".next", "dist"],
     // 集成测试需要更长的超时时间

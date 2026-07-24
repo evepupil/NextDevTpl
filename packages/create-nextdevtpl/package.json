@@ -1,7 +1,27 @@
 {
   "name": "create-nextdevtpl",
-  "version": "2.3.0",
+  "version": "2.6.0",
   "description": "Create a clean NextDevTpl project from composable recipes",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/evepupil/NextDevTpl.git",
+    "directory": "packages/create-nextdevtpl"
+  },
+  "homepage": "https://github.com/evepupil/NextDevTpl#readme",
+  "bugs": {
+    "url": "https://github.com/evepupil/NextDevTpl/issues"
+  },
+  "keywords": [
+    "nextjs",
+    "saas",
+    "starter",
+    "cloudflare-workers",
+    "vercel"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "bin": {
     "create-nextdevtpl": "dist/cli.js"

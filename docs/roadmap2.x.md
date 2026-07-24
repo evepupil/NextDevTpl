@@ -105,18 +105,18 @@ HTTP、认证、Neon、R2 和 Workflow 线上冒烟验证；验证后的临时�
 Cloudflare Workers 均完成真实只读健康检查。收尾提交 `fa16cbe` 对应的 GitHub
 Actions run `30075328006` 五个任务全部通过，M6 已完成。
 
-## 计划中的仓库形态
+## 当前仓库形态
 
 ```text
-templates/base/               基础模板
-recipes/                      可选功能与供应商适配器
-packages/create-nextdevtpl/   项目生成器
-examples/full/                完整 SaaS 演示项目
-tests/compatibility/          组合与部署验证
+./                             完整模板的开发源码
+templates/base/manifest.json   发布快照清单
+recipes/catalog.json           模块、适配器和部署目标清单
+packages/create-nextdevtpl/    项目生成器与只读发布快照
+tests/compatibility/           组合与部署验证
 ```
 
-目录调整必须分阶段完成。每一步都要保持当前模板可构建，禁止一次性搬迁导致
-长时间不可用。
+完整模板继续在仓库根目录开发。生成器发布前按 manifest 组装只读快照，避免维护
+第二套源码；生成项目再根据 recipe 清单裁剪为用户选择的组合。
 
 ## 核心验证矩阵
 
