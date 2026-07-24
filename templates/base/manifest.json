@@ -15,7 +15,6 @@
     "drizzle.config.ts",
     "LICENSE",
     "messages",
-    "next-env.d.ts",
     "next.config.mjs",
     "open-next.config.ts",
     "package.json",

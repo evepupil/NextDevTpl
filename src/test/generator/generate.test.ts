@@ -77,6 +77,7 @@ describe("project generation", () => {
     expect(await exists(join(target, "wrangler.jsonc"))).toBe(false);
     expect(await exists(join(target, "open-next.config.ts"))).toBe(false);
     expect(await exists(join(target, "cloudflare"))).toBe(false);
+    expect(await exists(join(target, "next-env.d.ts"))).toBe(false);
   });
 
   it("keeps only SaaS preset adapters", async () => {
