@@ -10,6 +10,7 @@
     "dev": "next dev --turbopack",
     "build": "next build --webpack",
     "start": "next start",
+    "postinstall": "fumadocs-mdx",
     "lint": "biome lint .",
     "format": "biome format --write .",
     "check": "biome check --write .",

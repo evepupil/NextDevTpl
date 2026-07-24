@@ -45,6 +45,7 @@ describe("project generation", () => {
     ) as {
       dependencies: Record<string, string>;
       devDependencies: Record<string, string>;
+      scripts: Record<string, string>;
     };
     const lockfile = await readFile(join(target, "pnpm-lock.yaml"), "utf8");
 
@@ -67,6 +68,7 @@ describe("project generation", () => {
       "@opennextjs/cloudflare"
     );
     expect(packageJson.devDependencies).not.toHaveProperty("wrangler");
+    expect(packageJson.scripts).not.toHaveProperty("postinstall");
     expect(lockfile).not.toContain("specifier: ^6.8.0");
     expect(lockfile).not.toContain("specifier: 4.113.0");
     expect(await exists(join(target, "deploy/server/build.sh"))).toBe(true);
@@ -86,11 +88,15 @@ describe("project generation", () => {
     });
     const packageJson = JSON.parse(
       await readFile(join(target, "package.json"), "utf8")
-    ) as { dependencies: Record<string, string> };
+    ) as {
+      dependencies: Record<string, string>;
+      scripts: Record<string, string>;
+    };
 
     expect(packageJson.dependencies).toHaveProperty("resend");
     expect(packageJson.dependencies).toHaveProperty("inngest");
     expect(packageJson.dependencies).not.toHaveProperty("openai");
+    expect(packageJson.scripts.postinstall).toBe("fumadocs-mdx");
     expect(await exists(join(target, "src/features/analytics"))).toBe(false);
     expect(await exists(join(target, "src/features/blog"))).toBe(false);
     expect(await exists(join(target, "vercel.json"))).toBe(true);
