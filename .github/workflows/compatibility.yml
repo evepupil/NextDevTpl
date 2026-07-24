@@ -43,7 +43,7 @@ jobs:
       - run: pnpm exec biome format .
       - run: pnpm lint
       - run: pnpm typecheck
-      - run: pnpm db:push
+      - run: pnpm exec drizzle-kit push --force
       - run: pnpm test:run
 
   generated-project:
