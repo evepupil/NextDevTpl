@@ -171,6 +171,7 @@ function cloudflareConfig(
     main: "cloudflare/worker.mjs",
     compatibility_date: new Date().toISOString().slice(0, 10),
     compatibility_flags: ["nodejs_compat", "global_fetch_strictly_public"],
+    minify: true,
     assets: { directory: ".open-next/assets", binding: "ASSETS" },
     services: [{ binding: "WORKER_SELF_REFERENCE", service: name }],
     observability: {
@@ -210,6 +211,62 @@ function cloudflareConfig(
         }
       : {}),
   };
+}
+
+async function rewriteCloudflareRuntime(
+  target: string,
+  selection: ProjectSelection
+): Promise<void> {
+  const templateRoot = join(target, "cloudflare", "templates", "mail");
+  const mailRoot = join(target, "src", "features", "mail");
+
+  if (hasModule(selection, "mail")) {
+    await removePath(join(mailRoot, "templates"));
+    await writeText(
+      join(mailRoot, "templates", "index.ts"),
+      await readFile(join(templateRoot, "templates.ts"), "utf8")
+    );
+    await writeText(
+      join(mailRoot, "utils.ts"),
+      await readFile(join(templateRoot, "utils.ts"), "utf8")
+    );
+    await writeText(
+      join(mailRoot, "server.ts"),
+      await readFile(join(templateRoot, "server.ts"), "utf8")
+    );
+    await writeText(
+      join(mailRoot, "index.ts"),
+      `export * from "./actions";\nexport { mailModule } from "./manifest";\nexport * from "./templates";\nexport * from "./utils";\n`
+    );
+  }
+
+  if (hasModule(selection, "auth")) {
+    const authPath = join(target, "src", "lib", "auth", "index.ts");
+    const authSource = await readFile(authPath, "utf8");
+    const workerAuthSource = authSource
+      .replace("ResetPasswordEmail,", "createResetPasswordEmail,")
+      .replace("VerifyEmailEmail,", "createVerifyEmail,")
+      .replace(
+        "react: ResetPasswordEmail({",
+        "content: createResetPasswordEmail({"
+      )
+      .replace("react: VerifyEmailEmail({", "content: createVerifyEmail({");
+    if (
+      workerAuthSource === authSource ||
+      workerAuthSource.includes("react:")
+    ) {
+      throw new Error(
+        "Cloudflare mail rewrite no longer matches the auth source"
+      );
+    }
+    await writeText(authPath, workerAuthSource);
+  }
+
+  await removePath(
+    join(target, "src", "app", "[locale]", "opengraph-image.tsx")
+  );
+  await removePath(join(target, "src", "app", "[locale]", "twitter-image.tsx"));
+  await removePath(join(target, "cloudflare", "templates"));
 }
 
 function hasModule(selection: ProjectSelection, id: string): boolean {
@@ -726,6 +783,7 @@ async function rewriteDeployment(
   await removePath(join(target, "sentry.client.config.ts"));
   await removePath(join(target, "sentry.edge.config.ts"));
   await removePath(join(target, "sentry.server.config.ts"));
+  await rewriteCloudflareRuntime(target, selection);
 }
 
 async function rewritePackage(
@@ -775,6 +833,9 @@ async function rewritePackage(
     packageJson.scripts["deploy:server:build"] = "bash deploy/server/build.sh";
   }
   if (selection.target === "cloudflare") {
+    delete packageJson.dependencies["@react-email/components"];
+    delete packageJson.dependencies["@react-email/render"];
+    delete packageJson.dependencies["@react-email/tailwind"];
     delete packageJson.dependencies["@sentry/nextjs"];
     delete packageJson.dependencies.pg;
     delete packageJson.dependencies.ws;
@@ -782,7 +843,7 @@ async function rewritePackage(
     delete packageJson.devDependencies["@types/ws"];
     packageJson.scripts["cf:build"] = "opennextjs-cloudflare build";
     packageJson.scripts["cf:deploy"] =
-      "opennextjs-cloudflare build && wrangler deploy";
+      "opennextjs-cloudflare build && wrangler deploy --minify";
     packageJson.scripts["cf:preview"] =
       "opennextjs-cloudflare build && wrangler dev";
     packageJson.scripts["cf:types"] = "wrangler types";

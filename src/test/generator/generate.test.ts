@@ -113,6 +113,7 @@ describe("project generation", () => {
     ) as {
       ai: { binding: string };
       main: string;
+      minify: boolean;
       observability: { enabled: boolean };
       r2_buckets: Array<{ binding: string }>;
       ratelimits: Array<{
@@ -158,6 +159,7 @@ describe("project generation", () => {
     expect(await exists(join(target, "open-next.config.ts"))).toBe(true);
     expect(await exists(join(target, "cloudflare/worker.mjs"))).toBe(true);
     expect(wrangler.main).toBe("cloudflare/worker.mjs");
+    expect(wrangler.minify).toBe(true);
     expect(wrangler.observability.enabled).toBe(true);
     expect(wrangler.r2_buckets).toEqual([{ binding: "NEXTDEVTPL_STORAGE" }]);
     expect(wrangler.ai.binding).toBe("AI");
@@ -193,6 +195,29 @@ describe("project generation", () => {
     expect(packageJson.dependencies).not.toHaveProperty("pg");
     expect(packageJson.dependencies).not.toHaveProperty("ws");
     expect(packageJson.dependencies).not.toHaveProperty("@sentry/nextjs");
+    expect(packageJson.dependencies).not.toHaveProperty(
+      "@react-email/components"
+    );
+    expect(packageJson.dependencies).not.toHaveProperty("@react-email/render");
+    expect(packageJson.dependencies).not.toHaveProperty(
+      "@react-email/tailwind"
+    );
+    expect(packageJson.scripts["cf:deploy"]).toContain("--minify");
+    expect(
+      await exists(join(target, "src/app/[locale]/opengraph-image.tsx"))
+    ).toBe(false);
+    expect(
+      await exists(join(target, "src/app/[locale]/twitter-image.tsx"))
+    ).toBe(false);
+    expect(await exists(join(target, "cloudflare/templates"))).toBe(false);
+    const auth = await readFile(join(target, "src/lib/auth/index.ts"), "utf8");
+    const mailServer = await readFile(
+      join(target, "src/features/mail/server.ts"),
+      "utf8"
+    );
+    expect(auth).toContain("content: createResetPasswordEmail");
+    expect(auth).toContain("content: createVerifyEmail");
+    expect(mailServer).toContain("createResetPasswordEmail");
     expect(packageJson.scripts["cf:types"]).toBe("wrangler types");
     expect(monitoring).not.toContain("@sentry/nextjs");
     expect(monitoring).toContain("console.error");
@@ -227,6 +252,22 @@ describe("project generation", () => {
     expect(await exists(join(target, "src/adapters/mail/resend.ts"))).toBe(
       false
     );
+  });
+
+  it("generates a Cloudflare project without auth or mail modules", async () => {
+    const target = join(root, "cloudflare-dashboard");
+    const { manifest } = await generateProject({
+      targetDirectory: target,
+      preset: "custom",
+      modules: ["dashboard"],
+      target: "cloudflare",
+      install: false,
+    });
+
+    expect(manifest.modules).toEqual(["shared", "dashboard"]);
+    expect(await exists(join(target, "src/features/mail"))).toBe(false);
+    expect(await exists(join(target, "wrangler.jsonc"))).toBe(true);
+    expect(await exists(join(target, "cloudflare/templates"))).toBe(false);
   });
 
   it("keeps only the Docker deployment preset", async () => {
