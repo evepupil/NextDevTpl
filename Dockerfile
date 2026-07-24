@@ -8,7 +8,7 @@ WORKDIR /app
 
 FROM base AS dependencies
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 FROM dependencies AS builder
 COPY . .
@@ -18,6 +18,7 @@ ENV DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build
 ENV BETTER_AUTH_SECRET=build-only-secret
 ENV BETTER_AUTH_URL=http://localhost:3000
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
+RUN pnpm run --if-present postinstall
 RUN pnpm build
 
 FROM dependencies AS migrator

@@ -220,7 +220,13 @@ async function rewriteCloudflareRuntime(
   selection: ProjectSelection
 ): Promise<void> {
   const templateRoot = join(target, "cloudflare", "templates", "mail");
+  const loggerTemplate = join(target, "cloudflare", "templates", "logger.ts");
   const mailRoot = join(target, "src", "features", "mail");
+
+  await writeText(
+    join(target, "src", "lib", "logger", "index.ts"),
+    await readFile(loggerTemplate, "utf8")
+  );
 
   if (hasModule(selection, "mail")) {
     await removePath(join(mailRoot, "templates"));
@@ -839,10 +845,12 @@ async function rewritePackage(
     delete packageJson.dependencies["@react-email/render"];
     delete packageJson.dependencies["@react-email/tailwind"];
     delete packageJson.dependencies["@sentry/nextjs"];
+    delete packageJson.dependencies.pino;
     delete packageJson.dependencies.pg;
     delete packageJson.dependencies.ws;
     delete packageJson.devDependencies["@types/pg"];
     delete packageJson.devDependencies["@types/ws"];
+    delete packageJson.devDependencies["pino-pretty"];
     packageJson.scripts["cf:build"] = "opennextjs-cloudflare build";
     packageJson.scripts["cf:deploy"] =
       "opennextjs-cloudflare build && wrangler deploy --minify";

@@ -40,6 +40,45 @@ export async function assertGeneratedProject(target, matrixCase, manifest) {
       `${matrixCase.id} is missing build script: ${matrixCase.buildScript}`
     );
   }
+
+  if (matrixCase.target === "docker") {
+    const dockerfile = await readFile(join(target, "Dockerfile"), "utf8");
+    if (!dockerfile.includes("pnpm install --frozen-lockfile --ignore-scripts")) {
+      throw new Error(
+        `${matrixCase.id} must defer lifecycle scripts until source is copied`
+      );
+    }
+    if (!dockerfile.includes("pnpm run --if-present postinstall")) {
+      throw new Error(`${matrixCase.id} must run optional postinstall in builder`);
+    }
+    const compose = await readFile(join(target, "compose.yaml"), "utf8");
+    if (!compose.includes("  PORT: 3000")) {
+      throw new Error(
+        `${matrixCase.id} must keep the container port fixed at 3000`
+      );
+    }
+  }
+
+  if (matrixCase.target === "cloudflare") {
+    const logger = await readFile(
+      join(target, "src", "lib", "logger", "index.ts"),
+      "utf8"
+    );
+    if (packageJson.dependencies?.pino || packageJson.devDependencies?.pino) {
+      throw new Error(`${matrixCase.id} must not retain Pino`);
+    }
+    if (
+      packageJson.dependencies?.["pino-pretty"] ||
+      packageJson.devDependencies?.["pino-pretty"]
+    ) {
+      throw new Error(`${matrixCase.id} must not retain pino-pretty`);
+    }
+    if (logger.includes('from "pino"') || !logger.includes("console[")) {
+      throw new Error(
+        `${matrixCase.id} must use the Workers-compatible console logger`
+      );
+    }
+  }
 }
 
 export async function assertBuildArtifact(target, matrixCase) {

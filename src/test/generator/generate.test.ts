@@ -149,6 +149,10 @@ describe("project generation", () => {
       join(target, "src/lib/monitoring/index.ts"),
       "utf8"
     );
+    const logger = await readFile(
+      join(target, "src/lib/logger/index.ts"),
+      "utf8"
+    );
     const environment = await readFile(join(target, ".env.example"), "utf8");
 
     expect(manifest.bindings).toEqual([
@@ -205,6 +209,8 @@ describe("project generation", () => {
     expect(packageJson.dependencies).not.toHaveProperty("pg");
     expect(packageJson.dependencies).not.toHaveProperty("ws");
     expect(packageJson.dependencies).not.toHaveProperty("@sentry/nextjs");
+    expect(packageJson.dependencies).not.toHaveProperty("pino");
+    expect(packageJson.devDependencies).not.toHaveProperty("pino-pretty");
     expect(packageJson.dependencies).not.toHaveProperty(
       "@react-email/components"
     );
@@ -231,6 +237,8 @@ describe("project generation", () => {
     expect(packageJson.scripts["cf:types"]).toBe("wrangler types");
     expect(monitoring).not.toContain("@sentry/nextjs");
     expect(monitoring).toContain("console.error");
+    expect(logger).not.toContain('from "pino"');
+    expect(logger).toContain("console[CONSOLE_METHODS[level]]");
     expect(await exists(join(target, "src/instrumentation.ts"))).toBe(false);
     expect(await exists(join(target, "sentry.server.config.ts"))).toBe(false);
     expect(environment).not.toContain("SENTRY_AUTH_TOKEN");
@@ -288,6 +296,8 @@ describe("project generation", () => {
       target: "docker",
       install: false,
     });
+    const dockerfile = await readFile(join(target, "Dockerfile"), "utf8");
+    const compose = await readFile(join(target, "compose.yaml"), "utf8");
 
     expect(await exists(join(target, "Dockerfile"))).toBe(true);
     expect(await exists(join(target, "compose.yaml"))).toBe(true);
@@ -295,6 +305,11 @@ describe("project generation", () => {
     expect(await exists(join(target, "deploy/server"))).toBe(false);
     expect(await exists(join(target, "deploy/vercel"))).toBe(false);
     expect(await exists(join(target, "vercel.json"))).toBe(false);
+    expect(dockerfile).toContain(
+      "pnpm install --frozen-lockfile --ignore-scripts"
+    );
+    expect(dockerfile).toContain("pnpm run --if-present postinstall");
+    expect(compose).toContain("  PORT: 3000");
   });
 
   it("rejects a non-empty target without changing it", async () => {

@@ -6,6 +6,7 @@ x-app-environment: &app-environment
   BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
   DATABASE_URL: postgresql://${POSTGRES_USER:-nextdevtpl}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.production}@database:5432/${POSTGRES_DB:-nextdevtpl}
   NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+  PORT: 3000
 
 services:
   database:
