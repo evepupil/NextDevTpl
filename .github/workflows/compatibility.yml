@@ -40,7 +40,8 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec biome ci .
+      - run: pnpm exec biome format .
+      - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm db:push
       - run: pnpm test:run
