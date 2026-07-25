@@ -14,7 +14,7 @@ This page lists the most common places to edit when turning NextDevTpl into your
 | Site name, URL, metadata | `src/config/site.ts` |
 | Logo | `public/logo.svg` and header components |
 | Global styles | `src/app/globals.css` |
-| Open Graph image template | `src/features/shared/components/og-image-template.tsx` |
+| Open Graph image template | `src/components/seo/og-image-template.tsx` |
 
 ## Navigation
 
@@ -68,12 +68,14 @@ Recommended shape:
 src/features/example/
 ├── actions.ts
 ├── components/
-├── schemas/
-├── types.ts
+├── manifest.ts
 └── index.ts
 ```
 
-Keep route-specific composition in `src/app` and reusable business logic inside the feature module.
+Keep route-specific composition in `src/app` and reusable business logic inside
+the feature module. `manifest.ts` declares dependencies, routes, schema, and
+translation namespaces; `index.ts` exports the public surface. Call external
+services through `src/services`.
 
 ## Content
 
@@ -82,14 +84,15 @@ Keep route-specific composition in `src/app` and reusable business logic inside 
 | Docs | `src/content/docs/<locale>` |
 | Blog | `src/content/blog/<locale>` |
 | Legal | `src/content/legal/<locale>` |
-| PSEO data | `src/features/pseo/data/pseo-pages.json` |
+| PSEO data | `src/features/pseo/lib/pseo-data.ts` |
 
 ## Before committing customizations
 
 ```bash
 pnpm typecheck
 pnpm lint
+pnpm test:run
+pnpm build
 ```
 
 Run focused tests if you changed auth, credits, payments, storage, support, or jobs.
-

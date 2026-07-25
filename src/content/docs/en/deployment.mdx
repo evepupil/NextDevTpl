@@ -1,62 +1,99 @@
 ---
 title: Deployment
-description: Deploy NextDevTpl with the existing scripts or a managed Next.js platform.
+description: Deploy to a server, Docker Compose, Vercel, or Cloudflare Workers.
 ---
 
 # Deployment
 
-The repository includes a self-hosted deployment flow and can also be deployed on managed Next.js platforms.
+The generator retains one platform configuration based on `--target`. Confirm
+`target` in `nextdevtpl.generated.json`, apply production migrations and
+environment variables, then follow the matching flow.
 
-## Self-hosted flow
-
-The existing script pair is:
-
-| File | Runs on | Purpose |
-| --- | --- | --- |
-| `deploy-build.bat` | Windows/local machine | Build, package, upload artifacts |
-| `start-prod.sh` | Linux/server | Install production dependencies and start/restart app |
-
-Typical flow:
-
-1. Configure SSH host, deploy path, and key path in `deploy-build.bat`.
-2. Confirm production `.env` exists on the server.
-3. Run the script locally:
-
-```bat
-deploy-build.bat
-```
-
-4. The script builds locally, creates an archive, uploads it, then starts the app on the server.
-
-## Production environment
-
-At minimum, production needs:
+## Shared release gate
 
 ```bash
-DATABASE_URL="postgresql://..."
-BETTER_AUTH_SECRET="strong-production-secret"
-BETTER_AUTH_URL="https://your-domain.com"
+pnpm install --frozen-lockfile
+pnpm lint
+pnpm typecheck
+pnpm test:run
+pnpm build
 ```
 
-Add the optional services you actually use: Creem, Resend, storage, Redis, Sentry, Axiom, Inngest, and AI provider credentials.
+Set both `NEXT_PUBLIC_APP_URL` and `BETTER_AUTH_URL` to the production URL.
+Update OAuth callbacks, payment webhooks, Inngest, storage CORS, and other
+provider dashboards to use the same domain.
+
+## Server
+
+The server target requires Node.js 24, pnpm 10, PostgreSQL, and systemd.
+
+1. Fill `.env.production` and keep it in a protected server directory.
+2. Generate and review the initial migration with `pnpm db:generate:init`.
+3. Load production variables and run `pnpm deploy:server:build`.
+4. Upload `.release/` and adjust `deploy/server/nextdevtpl.service` for the real user and path.
+5. Terminate TLS with Nginx, Caddy, or another proxy and forward original protocol and host headers.
+
+See `deploy/server/README.md` for file-level instructions.
+
+## Docker Compose
+
+Compose contains PostgreSQL, a one-shot migration service, and the app. The
+database uses a named volume.
+
+```bash
+docker compose --env-file .env.production up -d --build
+```
+
+At minimum, replace `POSTGRES_PASSWORD`, `BETTER_AUTH_SECRET`, and site URLs.
+The app starts only after `migrate` succeeds. Back up the named volume or
+external database before upgrades. See `deploy/docker/README.md`.
 
 ## Vercel
 
-For Vercel:
+1. Import the project into Vercel with Node.js 24 and pnpm.
+2. Configure variables retained in the generated `.env.example` for each environment.
+3. Run `pnpm db:migrate` locally or in a controlled single-instance release job.
+4. Deploy and configure OAuth, payment, and Inngest callbacks.
+5. Run the health check against the production domain.
 
-1. Import the GitHub repository.
-2. Set all production environment variables.
-3. Make sure the database is reachable from Vercel.
-4. Configure webhook URLs with the Vercel production domain.
-5. Run migrations before or during release.
+Do not put migrations in Vercel's `buildCommand`; concurrent builds can execute
+them more than once. Vercel works well with Neon, S3-compatible storage,
+Upstash, and Inngest, subject to the generated selection.
 
-## Release checklist
+## Cloudflare Workers
 
-- `pnpm typecheck` passes.
-- `pnpm build` passes.
-- Database migrations are ready.
-- `BETTER_AUTH_URL` uses the production domain.
-- OAuth callback URLs use the production domain.
-- Creem webhook URL points to `/api/webhooks/creem`.
-- Sentry/Axiom do not receive raw secrets.
+The Cloudflare target uses OpenNext. It generates `open-next.config.ts`, the
+Worker entry, `wrangler.jsonc`, and `cf:*` scripts, then adds R2, AI, Email,
+Workflow, and Rate Limiting bindings when selected.
 
+1. Create the real resources and check service and bucket names in `wrangler.jsonc`.
+2. Add `DATABASE_URL`, auth secrets, and provider credentials with `wrangler secret put`.
+3. Generate Worker types and build:
+
+```bash
+pnpm cf:types
+pnpm cf:build
+pnpm exec wrangler deploy --dry-run --minify
+```
+
+4. Deploy:
+
+```bash
+pnpm cf:deploy
+```
+
+The 2.x Worker target uses PostgreSQL through Neon HTTP or Hyperdrive. D1 is
+outside the 2.x support scope. Generated Worker projects use a console logger
+and remove Pino's Node file-writing dependencies.
+
+## Production check
+
+All four targets expose `/api/health`:
+
+```bash
+pnpm deploy:check -- https://your-domain.example/api/health
+```
+
+After it returns HTTP 200 with `status: healthy`, verify login, database access,
+and each selected payment, mail, storage, AI, jobs, and rate-limit flow. The
+health response never returns secret values.

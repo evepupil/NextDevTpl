@@ -18,8 +18,22 @@ pnpm dlx create-nextdevtpl@2.6.0 my-app --preset saas --target vercel
 - Targets: `server`, `docker`, `vercel`, and `cloudflare`
 - Services: payment, storage, mail, AI, jobs, and rate limiting
 
-Use non-interactive flags in CI or run the command without a preset for the
-guided flow.
+The current CLI uses flags. Omitting `--preset` creates `minimal` for the
+`server` target. Use `custom` when selecting modules or overriding services.
+
+```bash
+pnpm dlx create-nextdevtpl@2.6.0 my-app \
+  --preset custom \
+  --modules auth,dashboard,marketing,blog \
+  --target docker \
+  --payment stripe \
+  --mail smtp \
+  --rate-limit noop
+```
+
+The generator resolves module dependencies, removes unselected source and
+packages, creates a selection-specific `.env.example`, and writes
+`nextdevtpl.generated.json`. Keep that manifest for later upgrade comparisons.
 
 ```bash
 pnpm dlx create-nextdevtpl@2.6.0 --help

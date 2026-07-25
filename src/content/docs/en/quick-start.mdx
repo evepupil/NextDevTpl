@@ -1,113 +1,107 @@
 ---
 title: Quick Start
-description: Run NextDevTpl locally with the minimum required services.
+description: Generate an app, configure database and auth, and complete the first local verification.
 ---
 
 # Quick Start
-
-This guide starts the app locally with the smallest useful configuration.
 
 ## Requirements
 
 | Tool | Version | Notes |
 | --- | --- | --- |
-| Node.js | 20+ | Required by Next.js and Inngest dependencies in this project |
-| pnpm | 10+ recommended | The lockfile is maintained with pnpm |
-| PostgreSQL | 14+ recommended | Local PostgreSQL, Neon, Supabase, or another compatible host |
+| Node.js | 24.x | The generator and project target Node 24 |
+| pnpm | 10.x | The workspace and lockfile use pnpm |
+| PostgreSQL | 14+ | Local PostgreSQL, Neon, or another compatible service |
 
-## Install dependencies
+## Generate a project
 
-```bash
-git clone git@github.com:evepupil/NextDevTpl.git
-cd NextDevTpl
-pnpm install
-```
-
-## Create environment file
+For a conventional SaaS app:
 
 ```bash
-cp .env.example .env.local
+pnpm dlx create-nextdevtpl@latest my-app --preset saas --target vercel
+cd my-app
 ```
 
-On Windows PowerShell:
+For auth and a dashboard only:
+
+```bash
+pnpm dlx create-nextdevtpl@latest my-app --preset minimal
+```
+
+See [Generator and Presets](/en/docs/generator) for all three official presets
+and custom flags.
+
+## Inspect the generated selection
+
+```powershell
+Get-Content nextdevtpl.generated.json
+```
+
+It records the effective modules, adapters, and target. Configure only the
+capabilities listed there.
+
+## Configure environment variables
 
 ```powershell
 Copy-Item .env.example .env.local
 ```
 
-## Minimal environment variables
+On macOS or Linux:
 
-Only these variables are required for a basic local boot:
+```bash
+cp .env.example .env.local
+```
+
+A basic boot needs:
 
 ```bash
 DATABASE_URL="postgresql://postgres:password@localhost:5432/nextdevtpl"
-BETTER_AUTH_SECRET="replace-with-a-random-secret"
+BETTER_AUTH_SECRET="replace-with-a-long-random-secret"
 BETTER_AUTH_URL="http://localhost:3000"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 
-Generate a strong local secret with:
+The generated `.env.example` is selection-specific. Fill OAuth, payment, mail,
+storage, AI, jobs, and rate limiting only when selected. See
+[Configuration](/en/docs/configuration) for the variable map.
 
-```bash
-openssl rand -base64 32
-```
+## Initialize and run
 
-OAuth, email, payments, storage, Redis, logging, monitoring, AI, and background jobs can be enabled later.
-
-## Initialize the database
-
-For a new local database, push the current Drizzle schema:
+For a new local database, push the schema and start the app:
 
 ```bash
 pnpm db:push
-```
-
-Use migrations for shared or production databases:
-
-```bash
-pnpm db:generate
-pnpm db:migrate
-```
-
-## Start the dev server
-
-```bash
 pnpm dev
 ```
 
-Open:
+Open `http://localhost:3000`. Use migrations for shared and production
+databases:
 
-```txt
-http://localhost:3000
+```bash
+pnpm db:generate:init
+pnpm db:migrate
 ```
 
-The middleware will route you to the active locale, for example `/en` or `/zh`.
+Review generated SQL before committing migration files.
 
-## Verify the app
-
-After startup, verify these flows:
+## First verification
 
 | Check | Expected result |
 | --- | --- |
-| Home page | Marketing page renders without missing translation errors |
-| Sign up | Email/password account can be created |
-| Sign in | Authenticated user reaches `/dashboard` |
-| Dashboard | Sidebar, settings, credits, and support links render |
-| Admin | User with `role = "admin"` can access `/admin` |
-| Docs | `/en/docs` and `/zh/docs` show language-specific content |
+| Home | `/en` and `/zh` work when `marketing` is selected |
+| Auth | An email/password user can reach `/dashboard` |
+| Docs | `/en/docs` and `/zh/docs` work when `marketing` is selected |
+| Health | `/api/health` returns HTTP 200 and `healthy` |
+| Optional services | Verify only adapters listed in `nextdevtpl.generated.json` |
 
-## Common commands
+Before committing:
 
 ```bash
-pnpm dev            # Start Next.js dev server
-pnpm build          # Create a production build
-pnpm start          # Start production server
-pnpm typecheck      # Run TypeScript type checking
-pnpm lint           # Run Biome lint
-pnpm check          # Run Biome check with fixes
-pnpm db:push        # Push Drizzle schema in development
-pnpm db:generate    # Generate migration files
-pnpm db:migrate     # Run migrations
-pnpm db:studio      # Open Drizzle Studio
-pnpm test:run       # Run tests once
+pnpm format
+pnpm lint
+pnpm typecheck
+pnpm test:run
+pnpm build
 ```
 
+Continue with [Deployment](/en/docs/deployment) when preparing production.

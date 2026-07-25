@@ -1,110 +1,103 @@
 ---
 title: 快速开始
-description: 使用最小配置在本地启动 NextDevTpl。
+description: 生成一个项目，配置数据库与认证，并完成首次本地验证。
 ---
 
 # 快速开始
-
-这篇文档用于用最小配置启动本地开发环境。
 
 ## 前置要求
 
 | 工具 | 版本 | 说明 |
 | --- | --- | --- |
-| Node.js | 20+ | 当前依赖要求 Node 20 以上 |
-| pnpm | 推荐 10+ | lockfile 使用 pnpm 维护 |
-| PostgreSQL | 推荐 14+ | 可以用本地 PostgreSQL、Neon、Supabase 等兼容服务 |
+| Node.js | 24.x | 生成器和项目锁定在 Node 24 |
+| pnpm | 10.x | 项目使用 pnpm workspace 与 lockfile |
+| PostgreSQL | 14+ | 本地 PostgreSQL、Neon 或其他兼容服务 |
 
-## 安装依赖
+## 生成项目
 
-```bash
-git clone git@github.com:evepupil/NextDevTpl.git
-cd NextDevTpl
-pnpm install
-```
-
-## 创建环境变量文件
+常规 SaaS 项目：
 
 ```bash
-cp .env.example .env.local
+pnpm dlx create-nextdevtpl@latest my-app --preset saas --target vercel
+cd my-app
 ```
 
-Windows PowerShell：
+只需要认证和 Dashboard 时：
+
+```bash
+pnpm dlx create-nextdevtpl@latest my-app --preset minimal
+```
+
+三个官方预设和自定义参数见[生成器与预设](/zh/docs/generator)。
+
+## 查看生成清单
+
+```powershell
+Get-Content nextdevtpl.generated.json
+```
+
+其中记录实际模块、适配器和部署目标。后续只配置这里列出的能力。
+
+## 配置环境变量
 
 ```powershell
 Copy-Item .env.example .env.local
 ```
 
-## 最小启动配置
+macOS 或 Linux：
 
-只要下面 3 个变量存在，项目就应该能完成基础启动：
+```bash
+cp .env.example .env.local
+```
+
+基础启动至少需要：
 
 ```bash
 DATABASE_URL="postgresql://postgres:password@localhost:5432/nextdevtpl"
-BETTER_AUTH_SECRET="replace-with-a-random-secret"
+BETTER_AUTH_SECRET="replace-with-a-long-random-secret"
 BETTER_AUTH_URL="http://localhost:3000"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 
-可以用下面命令生成随机密钥：
+`.env.example` 已按生成选择裁剪。OAuth、支付、邮件、存储、AI、任务和限流按需
+填写，详细变量见[配置说明](/zh/docs/configuration)。
 
-```bash
-openssl rand -base64 32
-```
+## 初始化并启动
 
-OAuth、邮件、支付、对象存储、Redis、日志、监控、AI、后台任务都可以后续再接。
-
-## 初始化数据库
-
-新本地库建议直接推送当前 Drizzle schema：
+新本地数据库可以直接同步 Schema：
 
 ```bash
 pnpm db:push
-```
-
-共享环境或生产环境建议走迁移：
-
-```bash
-pnpm db:generate
-pnpm db:migrate
-```
-
-## 启动开发服务
-
-```bash
 pnpm dev
 ```
 
-打开：
-
-```txt
-http://localhost:3000
-```
-
-中间件会根据语言配置进入对应路径，例如 `/en` 或 `/zh`。
-
-## 启动后检查
-
-| 检查项 | 预期结果 |
-| --- | --- |
-| 首页 | 营销页正常渲染，没有缺失翻译报错 |
-| 注册 | 可以创建邮箱密码账号 |
-| 登录 | 登录后进入 `/dashboard` |
-| Dashboard | 侧边栏、设置、积分、工单入口正常 |
-| Admin | `role = "admin"` 的用户可以访问 `/admin` |
-| Docs | `/en/docs` 和 `/zh/docs` 显示各自语言的内容 |
-
-## 常用命令
+打开 `http://localhost:3000`。共享环境和生产环境使用迁移：
 
 ```bash
-pnpm dev            # 启动 Next.js 开发服务
-pnpm build          # 生产构建
-pnpm start          # 启动生产服务
-pnpm typecheck      # TypeScript 类型检查
-pnpm lint           # Biome lint
-pnpm check          # Biome check 并自动修复
-pnpm db:push        # 开发环境推送 Drizzle schema
-pnpm db:generate    # 生成迁移文件
-pnpm db:migrate     # 执行迁移
-pnpm db:studio      # 打开 Drizzle Studio
-pnpm test:run       # 单次运行测试
+pnpm db:generate:init
+pnpm db:migrate
 ```
+
+检查生成的 SQL 后再提交迁移文件。
+
+## 首次验证
+
+| 检查 | 预期结果 |
+| --- | --- |
+| 首页 | 带 `marketing` 时 `/en` 和 `/zh` 可访问 |
+| 注册登录 | 邮箱密码账号可以进入 `/dashboard` |
+| 文档 | 带 `marketing` 时 `/en/docs` 和 `/zh/docs` 可访问 |
+| 健康检查 | `/api/health` 返回 HTTP 200 和 `healthy` |
+| 可选服务 | 只验证 `nextdevtpl.generated.json` 中选中的适配器 |
+
+提交前运行：
+
+```bash
+pnpm format
+pnpm lint
+pnpm typecheck
+pnpm test:run
+pnpm build
+```
+
+准备上线时进入[部署](/zh/docs/deployment)。

@@ -1,0 +1,94 @@
+---
+title: Generator and Presets
+description: Use create-nextdevtpl to select modules, service adapters, and a deployment target.
+---
+
+# Generator and Presets
+
+`create-nextdevtpl` produces a standalone project. It copies the template,
+resolves module dependencies, removes unselected source and packages, composes
+the database schema and translations, and writes environment and deployment
+files. The generated app has no runtime dependency on the generator.
+
+## Basic command
+
+Node.js 24 and pnpm 10 are required:
+
+```bash
+pnpm dlx create-nextdevtpl@latest my-app --preset saas --target vercel
+```
+
+The current CLI is flag-driven. Omitting `--preset` uses `minimal`; omitting the
+target uses the preset default. List every option with:
+
+```bash
+pnpm dlx create-nextdevtpl@latest --help
+```
+
+## Official presets
+
+| Preset | Best for | Default target | Main selection |
+| --- | --- | --- | --- |
+| `minimal` | Starting from a small shell | `server` | Auth, dashboard, disabled mail, no-op rate limit |
+| `saas` | A conventional subscription product | `vercel` | Marketing, settings, admin, support, Creem, S3, Resend, Inngest, Upstash |
+| `ai-saas` | An AI SaaS on Cloudflare | `cloudflare` | Full product surface, Stripe, R2, Email Binding, Workers AI, Workflows, native rate limits |
+| `custom` | Exact source control | `server` | Modules and adapters supplied with flags |
+
+Preset services and targets can be overridden:
+
+```bash
+pnpm dlx create-nextdevtpl@latest my-app \
+  --preset saas \
+  --target docker \
+  --payment stripe \
+  --mail smtp \
+  --rate-limit noop
+```
+
+## Custom selection
+
+```bash
+pnpm dlx create-nextdevtpl@latest my-app \
+  --preset custom \
+  --modules auth,dashboard,marketing,blog \
+  --target docker \
+  --payment stripe \
+  --mail smtp \
+  --rate-limit noop
+```
+
+See [Feature Modules](/en/docs/feature-modules) and
+[Service Adapters](/en/docs/service-adapters) for valid choices. Dependencies
+are added automatically. Worker-only adapters require the `cloudflare` target;
+Node-only adapters are rejected for that target.
+
+## Common flags
+
+| Flag | Values |
+| --- | --- |
+| `--preset` | `minimal`, `saas`, `ai-saas`, `custom` |
+| `--modules` | Comma-separated module IDs for a custom selection |
+| `--target` | `server`, `docker`, `vercel`, `cloudflare` |
+| `--payment` | `creem`, `stripe`, `none` |
+| `--storage` | `s3-compatible`, `r2-binding`, `none` |
+| `--mail` | `disabled`, `resend`, `smtp`, `cloudflare-email` |
+| `--ai` | `openai-compatible`, `anthropic`, `workers-ai`, `none` |
+| `--jobs` | `inngest`, `cloudflare-workflows`, `none` |
+| `--rate-limit` | `noop`, `upstash`, `cloudflare-rate-limit` |
+| `--no-install` | Generate files without installing dependencies |
+
+## After generation
+
+`nextdevtpl.generated.json` records the effective selection without secrets.
+Inspect it, copy `.env.example`, and fill only the variables that remain:
+
+```powershell
+Set-Location my-app
+Get-Content nextdevtpl.generated.json
+Copy-Item .env.example .env.local
+pnpm db:push
+pnpm dev
+```
+
+Keep `nextdevtpl.generated.json`; it recreates the same comparison project for
+future upgrades.

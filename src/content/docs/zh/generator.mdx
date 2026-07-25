@@ -1,0 +1,91 @@
+---
+title: 生成器与预设
+description: 使用 create-nextdevtpl 选择模块、服务适配器和部署目标。
+---
+
+# 生成器与预设
+
+`create-nextdevtpl` 会生成一份独立项目。它会复制模板、解析模块依赖、删除未选
+源码和依赖、组合数据库 Schema 与翻译、生成环境变量和部署文件。生成后的应用
+运行时不依赖生成器。
+
+## 基本命令
+
+需要 Node.js 24 和 pnpm 10：
+
+```bash
+pnpm dlx create-nextdevtpl@latest my-app --preset saas --target vercel
+```
+
+当前 CLI 通过参数选择配置。省略 `--preset` 时使用 `minimal`，省略目标时使用
+预设默认目标。查看全部参数：
+
+```bash
+pnpm dlx create-nextdevtpl@latest --help
+```
+
+## 官方预设
+
+| 预设 | 适合场景 | 默认目标 | 主要内容 |
+| --- | --- | --- | --- |
+| `minimal` | 从小骨架开始 | `server` | 认证、Dashboard、禁用邮件、空限流 |
+| `saas` | 常规订阅产品 | `vercel` | 营销页、设置、管理、工单、Creem、S3、Resend、Inngest、Upstash |
+| `ai-saas` | Cloudflare 上的 AI SaaS | `cloudflare` | 完整产品页、Stripe、R2、Email Binding、Workers AI、Workflows、原生限流 |
+| `custom` | 精确控制源码 | `server` | 通过参数选择模块与适配器 |
+
+可以覆盖预设的部署目标和服务：
+
+```bash
+pnpm dlx create-nextdevtpl@latest my-app \
+  --preset saas \
+  --target docker \
+  --payment stripe \
+  --mail smtp \
+  --rate-limit noop
+```
+
+## 自定义组合
+
+```bash
+pnpm dlx create-nextdevtpl@latest my-app \
+  --preset custom \
+  --modules auth,dashboard,marketing,blog \
+  --target docker \
+  --payment stripe \
+  --mail smtp \
+  --rate-limit noop
+```
+
+可用模块见[功能模块](/zh/docs/feature-modules)，可用服务见
+[服务适配器](/zh/docs/service-adapters)。生成器会自动补齐模块依赖；选择
+Worker 专用适配器时必须使用 `cloudflare` 目标，Node 专用适配器不能用于该目标。
+
+## 常用参数
+
+| 参数 | 值 |
+| --- | --- |
+| `--preset` | `minimal`、`saas`、`ai-saas`、`custom` |
+| `--modules` | 逗号分隔的模块 id，仅自定义组合使用 |
+| `--target` | `server`、`docker`、`vercel`、`cloudflare` |
+| `--payment` | `creem`、`stripe`、`none` |
+| `--storage` | `s3-compatible`、`r2-binding`、`none` |
+| `--mail` | `disabled`、`resend`、`smtp`、`cloudflare-email` |
+| `--ai` | `openai-compatible`、`anthropic`、`workers-ai`、`none` |
+| `--jobs` | `inngest`、`cloudflare-workflows`、`none` |
+| `--rate-limit` | `noop`、`upstash`、`cloudflare-rate-limit` |
+| `--no-install` | 只生成文件，跳过依赖安装 |
+
+## 生成后
+
+`nextdevtpl.generated.json` 记录本次实际选择，不含密钥。先查看该文件，再复制
+`.env.example` 并填写其中留下的变量：
+
+```powershell
+Set-Location my-app
+Get-Content nextdevtpl.generated.json
+Copy-Item .env.example .env.local
+pnpm db:push
+pnpm dev
+```
+
+保留 `nextdevtpl.generated.json`。后续升级时需要用它还原相同组合并比较差异。

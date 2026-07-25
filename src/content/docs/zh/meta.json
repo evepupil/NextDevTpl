@@ -4,6 +4,9 @@
   "pages": [
     "index",
     "quick-start",
+    "generator",
+    "feature-modules",
+    "service-adapters",
     "project-structure",
     "configuration",
     "authentication",
@@ -12,11 +15,13 @@
     "payments",
     "email",
     "storage",
+    "ai",
     "internationalization",
     "background-jobs",
     "admin-and-support",
     "observability",
     "deployment",
+    "upgrade",
     "customization"
   ]
 }

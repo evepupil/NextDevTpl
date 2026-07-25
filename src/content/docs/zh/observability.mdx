@@ -1,68 +1,57 @@
 ---
-title: 可观测性
-description: 配置日志、监控、限流和请求诊断。
+title: 可观测性与限流
+description: 配置日志、Sentry、Axiom、健康检查和三种限流方式。
 ---
 
-# 可观测性
-
-NextDevTpl 包含结构化日志、可选云端日志、Sentry 监控、限流和 API 请求日志工具。
+# 可观测性与限流
 
 ## 日志
 
-| 路径 | 作用 |
-| --- | --- |
-| `src/lib/logger/index.ts` | Pino logger wrapper |
-| `src/lib/api-logger.ts` | API logging helpers |
+Server、Docker 和 Vercel 使用 `src/lib/logger` 的结构化日志。配置
+`AXIOM_TOKEN` 与 `AXIOM_DATASET` 后可发送到 Axiom；未配置时保留本地输出。
 
-配置 Axiom 后，日志可以发送到 Axiom。未配置时，日志应仍然能在本地看到。
+Cloudflare 生成项目会换成 Worker 安全的 console logger，并移除 Pino 与文件写入
+依赖。支付、webhook 和任务日志应携带 request id 或外部事件 id，禁止记录密钥、
+Cookie、Authorization header 和完整用户内容。
 
-常见变量：
+## Sentry
 
-```bash
-AXIOM_TOKEN="xaat-..."
-AXIOM_DATASET="nextdevtpl"
-```
-
-## 错误监控
-
-Sentry 配置文件：
-
-| 路径 | 作用 |
-| --- | --- |
-| `sentry.client.config.ts` | 浏览器 Sentry 配置 |
-| `sentry.server.config.ts` | 服务端 Sentry 配置 |
-| `sentry.edge.config.ts` | Edge Sentry 配置 |
-| `src/instrumentation.ts` | Next.js instrumentation hook |
-| `src/lib/monitoring/index.ts` | Monitoring helpers |
-
-常见变量：
+选择 `analytics` 模块时，使用：
 
 ```bash
 NEXT_PUBLIC_SENTRY_DSN="https://..."
 SENTRY_AUTH_TOKEN="sntrys_..."
 ```
 
-## 限流
+DSN 用于运行时上报，Auth Token 只供构建或发布上传 sourcemap。Cloudflare Free
+组合为了包体和运行时兼容会使用 console 监控替代实现。
 
-限流代码在：
+## 限流适配器
 
-```txt
-src/lib/rate-limit
-```
+| 选择 | 配置 | 用途 |
+| --- | --- | --- |
+| `noop` | 无 | 本地或可信环境，不提供防滥用 |
+| `upstash` | REST URL、REST Token | Server、Docker、Vercel |
+| `cloudflare-rate-limit` | 六个 Rate Limiting Binding | Cloudflare Workers |
 
-Upstash 变量：
+Cloudflare 组合按 `global`、`auth`、`ai`、`payment`、`upload`、`strict` 分开绑定。
+生成的默认阈值是起点，上线前按实际流量和接口成本调整。
+
+## 健康检查
+
+`/api/health` 检查配置与数据库连通性，只返回状态和安全诊断，不返回变量值。
 
 ```bash
-UPSTASH_REDIS_REST_URL="https://..."
-UPSTASH_REDIS_REST_TOKEN="..."
+pnpm deploy:check -- https://your-domain.example/api/health
 ```
 
-没有 Redis 时，开发环境不应该因为限流配置缺失而启动失败。
+HTTP 200 且 `status` 为 `healthy` 表示基础运行条件就绪。支付、邮件、存储、AI 和
+任务仍需分别做真实冒烟验证。
 
-## 生产 checklist
+## 上线检查
 
-- 用户可见错误接入 Sentry。
-- webhook 和支付流程开启结构化日志。
-- 支付和 job retry 日志记录外部事件 id。
-- 不记录原始密钥、token、authorization headers。
-- 检查公开 mutation endpoint 的限流。
+- 所有公开 mutation 路由有合适限流。
+- 日志和错误事件经过脱敏。
+- Sentry 和 Axiom 的采样、保留期限、告警已配置。
+- `/api/health` 受监控，但不会向公网泄露内部连接细节。
+- Worker 日志中没有 `node:fs`、`SonicBoom` 或 Pino 初始化错误。

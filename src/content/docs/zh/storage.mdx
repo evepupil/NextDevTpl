@@ -1,51 +1,46 @@
 ---
 title: 对象存储
-description: 配置 S3 或 Cloudflare R2 兼容存储和 presigned upload。
+description: 使用 S3 Compatible 或 Cloudflare R2 Binding 保存用户文件。
 ---
 
 # 对象存储
 
-存储层兼容 S3 风格服务，例如 AWS S3、Cloudflare R2 和 MinIO。
+存储模块提供统一对象接口、预签名上传和图片代理。生成时选择 S3 Compatible 或
+Cloudflare 原生 R2 Binding。
 
-## 主要文件
+## 适配器
+
+| 选择 | 配置 | 运行环境 |
+| --- | --- | --- |
+| `s3-compatible` | `STORAGE_ENDPOINT`、`STORAGE_REGION`、`STORAGE_BUCKET_NAME`、Access Key/Secret | Server、Docker、Vercel |
+| `r2-binding` | `NEXTDEVTPL_STORAGE` R2 Binding | Cloudflare Workers |
+
+头像 bucket 由 `NEXT_PUBLIC_AVATARS_BUCKET_NAME` 指定。未设置上传 bucket 时，
+通用上传默认使用 `nextdevtpl-uploads`，生产环境建议显式配置。
+
+## 上传流程
+
+1. 浏览器向 `/api/upload/presigned` 请求上传信息。
+2. 服务端检查登录状态、文件类型、大小和 object key。
+3. S3 组合返回预签名 URL，浏览器直传对象存储。
+4. 应用保存 object key，通过 `/image-proxy/...` 或受控 URL 读取。
+
+R2 Binding 在 Worker 请求期间延迟注入，业务代码继续通过 `storageService` 调用。
+
+## 主要代码
 
 | 路径 | 作用 |
 | --- | --- |
-| `src/features/storage/providers/s3.ts` | S3-compatible provider |
-| `src/features/storage/actions.ts` | 存储 Server Actions |
-| `src/features/storage/utils.ts` | 工具函数 |
-| `src/features/storage/types.ts` | 存储类型 |
-| `src/app/api/upload/presigned/route.ts` | Presigned upload endpoint |
-| `src/app/image-proxy/[...path]/route.ts` | 图片代理路由 |
-| `src/test/storage/security.test.ts` | 存储安全测试 |
+| `src/core/services/storage.ts` | 统一对象存储接口 |
+| `src/adapters/storage` | S3 和 R2 实现 |
+| `src/services/storage.ts` | 当前存储实例 |
+| `src/app/api/upload/presigned/route.ts` | 上传入口 |
+| `src/app/image-proxy/[...path]/route.ts` | 受控图片读取 |
 
-## 环境变量
+## 安全检查
 
-| 变量 | 作用 |
-| --- | --- |
-| `STORAGE_ENDPOINT` | Provider endpoint，例如 R2 endpoint |
-| `STORAGE_REGION` | S3 region 或兼容值 |
-| `STORAGE_BUCKET` | Bucket 名称 |
-| `STORAGE_ACCESS_KEY_ID` | Access key |
-| `STORAGE_SECRET_ACCESS_KEY` | Secret key |
-
-## 上传模型
-
-1. 客户端请求 presigned upload URL。
-2. 服务端校验请求并返回上传 metadata。
-3. 客户端直传到对象存储。
-4. 应用保存或使用 object key。
-5. 公开展示时可以走 image proxy。
-
-## 安全 checklist
-
-- 创建 presigned URL 前校验文件类型和大小。
-- object key 要有作用域，不要可预测。
-- 不要把 secret key 暴露给浏览器。
-- 优先使用私有 bucket，配合 signed read 或 proxy route。
-- 修改上传规则后运行存储安全测试。
-
-```bash
-pnpm test:run src/test/storage
-```
-
+- Bucket 默认保持私有，限制 CORS 到应用域名。
+- 在签名或写入前校验文件类型、大小和用户作用域。
+- object key 使用不可预测值，禁止接收任意路径穿越片段。
+- Access Key 只放服务端，R2 Binding 权限缩到所需 bucket。
+- 修改后运行 `pnpm test:run -- src/test/storage/security.test.ts`。

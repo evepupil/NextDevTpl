@@ -1,0 +1,45 @@
+---
+title: AI
+description: Configure and call OpenAI-compatible providers, Anthropic, or Workers AI through one service.
+---
+
+# AI
+
+AI is optional. `src/services/ai.ts` and its provider implementation are kept
+only when an AI adapter was selected during generation.
+
+## Adapters
+
+| Selection | Configuration | Notes |
+| --- | --- | --- |
+| `openai-compatible` | `AI_PROVIDER` plus the provider key and model | OpenAI, DeepSeek, and MiMo; optional Cloudflare AI Gateway |
+| `anthropic` | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` | Calls the Anthropic Messages API directly |
+| `workers-ai` | `WORKERS_AI_MODEL` and the `AI` binding | Cloudflare Workers only |
+
+OpenAI-compatible defaults to `AI_PROVIDER=openai`. Set it to `deepseek` or
+`mimo` and provide the corresponding variables to switch. AI Gateway is used
+only when both `CF_AIG_BASE_URL` and `CF_AIG_TOKEN` are present.
+
+## Call the service
+
+```ts
+import { aiService } from "@/services/ai";
+
+const result = await aiService.complete({
+  messages: [{ role: "user", content: "Summarize this document" }],
+  maxTokens: 800,
+});
+
+console.log(result.content);
+```
+
+The contract covers text messages, temperature, and maximum tokens. JSON,
+tool-calling, and streaming capabilities differ by provider; inspect the
+adapter `capabilities` instead of assuming identical behavior.
+
+## Verification
+
+- Keep provider keys in server-side environment variables.
+- Add product-level timeouts, retries, and usage limits.
+- Limit user input and sanitize model output before rendering HTML.
+- Run `pnpm test:run -- src/test/adapters/ai.test.ts` after adapter changes.

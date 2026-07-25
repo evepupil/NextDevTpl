@@ -1,48 +1,64 @@
 ---
 title: 介绍
-description: 了解 NextDevTpl 内置能力，以及如何把它作为生产级 SaaS 起点。
+description: 了解 NextDevTpl 2.x 的生成方式、内置能力和推荐使用路径。
 ---
 
 # NextDevTpl 文档
 
-NextDevTpl 是一个偏生产落地的 SaaS 启动模板，基于 Next.js、React、TypeScript、PostgreSQL、Drizzle ORM、Better Auth、next-intl、Creem 支付、积分系统、管理后台、工单、邮件、对象存储、可观测性和后台任务构建。
+NextDevTpl 2.x 是可组合的 Next.js SaaS 模板。你可以选择产品模块、外部服务实现
+和部署平台，生成器只把选中的源码、依赖、环境变量、数据库表和部署文件放进
+新项目。生成后的代码归项目自己维护。
 
-它不是只展示一个首页的 UI 模板，而是提供一套可以继续二开的产品骨架。
+## 先确认项目包含什么
 
-## 内置能力
+生成项目根目录的 `nextdevtpl.generated.json` 是实际选择清单：
 
-| 模块 | 说明 |
+```json
+{
+  "preset": "saas",
+  "target": "vercel",
+  "modules": ["auth", "dashboard", "marketing"],
+  "adapters": { "payment": "payment:creem" }
+}
+```
+
+先看这份文件，再阅读对应功能文档。未选能力已经从生成结果删除，无需配置。
+
+## 2.x 能力
+
+| 类别 | 已支持内容 |
 | --- | --- |
-| 应用骨架 | 多语言营销页、博客、文档、Dashboard、Admin、法律页面 |
-| 认证 | Better Auth 邮箱密码、OAuth、session、角色权限 |
-| 数据库 | PostgreSQL schema、Drizzle ORM、迁移和集成测试 |
-| 支付 | Creem checkout、订阅、webhook、一次性积分购买 |
-| 积分 | 账本式积分记录、FIFO 批次过期、余额读取 |
-| 运营 | 用户管理、工单、日志、监控、限流、后台任务 |
-| 内容 | Fumadocs 文档、MDX 博客、next-intl UI 翻译 |
+| 生成 | `minimal`、`saas`、`ai-saas`、自定义组合，自动补依赖并裁剪源码 |
+| 产品 | 认证、Dashboard、营销页、设置、订阅、积分、管理后台、工单、博客、PSEO |
+| 支付 | 统一接口，Creem 或 Stripe，支持订阅、一次性购买和验签 webhook |
+| 邮件 | Disabled、Resend、SMTP、Cloudflare Email |
+| 存储 | S3 Compatible 预签名上传或 Cloudflare R2 Binding |
+| AI | OpenAI Compatible、Anthropic、Workers AI |
+| 后台任务 | Inngest 或 Cloudflare Workflows，另有受保护 cron |
+| 限流 | No-op、Upstash Redis 或 Cloudflare Rate Limiting Binding |
+| 平台 | Server、Docker Compose、Vercel、Cloudflare Workers |
+| 运维 | 健康检查、结构化日志、Sentry、Axiom、组合兼容性门禁 |
 
-## 推荐阅读顺序
+## 推荐路径
 
-如果你想先跑起来，建议看：
+第一次使用：
 
-- [快速开始](/zh/docs/quick-start)
-- [项目结构](/zh/docs/project-structure)
-- [配置说明](/zh/docs/configuration)
+1. [快速开始](/zh/docs/quick-start)
+2. [生成器与预设](/zh/docs/generator)
+3. [功能模块](/zh/docs/feature-modules)
+4. [配置说明](/zh/docs/configuration)
 
-如果你要接入业务功能，建议看：
+接入外部服务：
 
-- [认证](/zh/docs/authentication)
-- [支付](/zh/docs/payments)
-- [积分系统](/zh/docs/credits)
-- [国际化](/zh/docs/internationalization)
+1. [服务适配器](/zh/docs/service-adapters)
+2. 对应的支付、邮件、存储、AI、后台任务或可观测性页面
 
-如果你准备上线，建议看：
+准备上线：
 
-- [部署](/zh/docs/deployment)
-- [可观测性](/zh/docs/observability)
-- [后台任务](/zh/docs/background-jobs)
+1. [部署](/zh/docs/deployment)
+2. [升级与兼容性](/zh/docs/upgrade)
 
-## 核心原则
+## 两种使用方式
 
-本地开发时，大多数外部服务都应该是可选的。项目先用数据库和基础认证跑起来，再按产品需要逐步启用 OAuth、邮件、支付、对象存储、Redis、Sentry、Axiom 和 Inngest。
-
+产品项目推荐使用 `create-nextdevtpl` 创建干净项目。克隆完整仓库适合参与模板
+开发、扩展官方模块、运行组合矩阵或准备生成器发布包。

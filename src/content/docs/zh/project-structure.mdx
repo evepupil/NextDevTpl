@@ -1,82 +1,74 @@
 ---
 title: 项目结构
-description: 了解应用目录、功能模块和基础设施代码如何组织。
+description: 了解 2.x 的模块内核、服务适配器、业务功能和部署目录。
 ---
 
 # 项目结构
 
-NextDevTpl 使用按功能组织的结构。路由放在 `src/app`，可复用产品模块放在 `src/features`，底层工具和基础设施放在 `src/lib`。
+生成项目按职责分层。业务页面放在 `app` 和 `features`，可组合规则放在
+`core/modules`，供应商差异放在 `adapters`，业务统一从 `services` 调用外部能力。
 
-## 顶层文件
+## 核心目录
+
+```text
+src/
+├── app/                 # 页面、Layout、API、webhook、health
+├── core/modules/        # 模块契约与校验
+├── core/services/       # 支付、邮件、存储、AI、任务、限流契约
+├── modules/             # 当前生成项目的模块注册表
+├── adapters/            # 当前选中的供应商实现
+├── services/            # 业务层使用的服务实例
+├── features/            # 产品功能模块
+├── db/schema/           # 按模块拆分的 Drizzle Schema
+├── content/             # 文档、博客和法律页 MDX
+├── config/              # 站点、导航、价格和套餐
+└── test/                # 核心逻辑和集成测试
+```
+
+## 生成与选择
 
 | 路径 | 作用 |
 | --- | --- |
-| `package.json` | 脚本和依赖版本 |
-| `next.config.mjs` | Next.js、MDX、构建配置 |
-| `source.config.ts` | Fumadocs 内容集合配置 |
-| `drizzle.config.ts` | Drizzle 迁移配置 |
-| `.env.example` | 环境变量参考 |
-| `deploy-build.bat` | Windows 本地构建和上传脚本 |
-| `start-prod.sh` | Linux 服务器生产启动脚本 |
+| `nextdevtpl.generated.json` | 当前项目实际模块、适配器、目标和 catalog 版本 |
+| `src/modules/registry.ts` | 运行时代码能看到的模块清单 |
+| `src/adapters/registry.ts` | 当前适配器声明和环境要求 |
+| `.env.example` | 按生成选择留下的环境变量 |
 
-## 应用路由
+模板仓库还包含 `recipes/catalog.json`、`templates/base/manifest.json`、
+`packages/create-nextdevtpl` 和 `tests/compatibility`。普通生成项目不会携带这些
+生成器维护文件。
 
-```txt
+## 路由
+
+```text
 src/app/
 ├── [locale]/
-│   ├── (marketing)/     # 首页、博客、法律页面、PSEO 等公开页面
+│   ├── (marketing)/     # 首页、定价、博客、法律页、PSEO
 │   ├── (auth)/          # 登录、注册、找回密码
-│   ├── (dashboard)/     # 登录后的用户工作台
-│   ├── (admin)/         # 管理员后台
+│   ├── (dashboard)/     # 用户工作台、积分、设置、工单
+│   ├── (admin)/         # 管理后台
 │   └── docs/            # Fumadocs 文档
-└── api/                 # Route handlers 和 webhooks
+└── api/
+    ├── auth/            # Better Auth
+    ├── webhooks/payment # 当前支付适配器的统一 webhook
+    ├── upload/          # 预签名上传
+    ├── jobs/            # 受保护 cron
+    └── health/          # 部署健康检查
 ```
 
-`[locale]` 由 `next-intl` 处理。当前语言配置在 `src/i18n/routing.ts`。
+生成器会删除未选模块对应的路由。直接访问缺失路由得到 404 属于预期行为。
 
-## 功能模块
+## 改代码时放哪里
 
-| 模块 | 作用 |
+| 改动 | 目录 |
 | --- | --- |
-| `src/features/auth` | 登录、注册等认证 UI 和 hooks |
-| `src/features/credits` | 积分账本、购买、余额工具 |
-| `src/features/payment` | Creem checkout 和支付 actions |
-| `src/features/subscription` | 用户套餐查询和订阅 UI |
-| `src/features/settings` | 资料、安全、账单、账户设置 |
-| `src/features/support` | 用户工单和管理员回复 |
-| `src/features/admin` | 管理后台 UI 组件 |
-| `src/features/marketing` | Header、Footer、Hero、Pricing、FAQ 等首页模块 |
-| `src/features/storage` | S3/R2 上传和存储 provider |
-| `src/features/mail` | React Email 模板和发信逻辑 |
-| `src/features/shared` | Providers、主题切换、语言切换、共享图标 |
+| 页面或业务流程 | `src/features/<模块>` 与对应 `src/app` 路由 |
+| 外部供应商 API | `src/adapters/<服务>` |
+| 业务调用的统一入口 | `src/services/<服务>.ts` |
+| 新模块声明 | `src/features/<模块>/manifest.ts` |
+| 数据表 | `src/db/schema/<分组>.ts` |
+| UI 文案 | `messages/en.json`、`messages/zh.json` |
+| 文档 | `src/content/docs/en`、`src/content/docs/zh` |
+| 部署 | `deploy/`、`Dockerfile`、`compose.yaml`、`vercel.json`、`wrangler.jsonc` |
 
-## 基础设施模块
-
-| 路径 | 职责 |
-| --- | --- |
-| `src/db/schema.ts` | 数据库表定义 |
-| `src/lib/auth` | Better Auth server/client/edge/admin helpers |
-| `src/lib/rate-limit` | 基于 Upstash 的限流和降级逻辑 |
-| `src/lib/logger` | Pino logger 和 Axiom 集成 |
-| `src/lib/monitoring` | Sentry 监控 helpers |
-| `src/lib/source.ts` | Docs、Blog、Legal 内容加载器 |
-| `src/lib/safe-action.ts` | Server Action client 配置 |
-| `src/inngest` | Inngest client 和后台函数 |
-
-## 内容目录
-
-| 路径 | 内容 |
-| --- | --- |
-| `src/content/docs/en` | 英文文档 |
-| `src/content/docs/zh` | 中文文档 |
-| `src/content/blog/en` | 英文博客 |
-| `src/content/blog/zh` | 中文博客 |
-| `src/content/legal/en` | 英文法律页面 |
-| `src/content/legal/zh` | 中文法律页面 |
-| `messages/en.json` | 英文 UI 文案 |
-| `messages/zh.json` | 中文 UI 文案 |
-
-## 测试
-
-集成测试在 `src/test`。目前覆盖支付、积分、工单、存储安全、设置、后台任务和邮件等流程。
-
+业务代码优先依赖 `src/services` 和公开模块出口，避免跨目录导入适配器内部文件。

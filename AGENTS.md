@@ -4,9 +4,9 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 ## Project Overview
 
-NextDevTpl is a production-ready Next.js SaaS template. It provides a complete foundation for building SaaS products with authentication, payments, credits system, background job processing, i18n, admin panel, support tickets, and more. Clone, customize, and ship.
+NextDevTpl is a composable, production-ready Next.js SaaS template. `create-nextdevtpl` generates a standalone project from selected product modules, service adapters, and a deployment target. Unselected source, dependencies, environment variables, database schema, and deployment files are removed.
 
-**Deployment:** Self-hosted or Vercel + Neon PostgreSQL + Cloudflare R2 (storage)
+**Deployment:** Server, Docker Compose, Vercel, or Cloudflare Workers
 
 ## Commands
 
@@ -34,11 +34,12 @@ Tests live in `src/test/` (not colocated), run sequentially to avoid DB race con
 - **Database:** PostgreSQL (Neon) via Drizzle ORM (edge compatible)
 - **Auth:** Better Auth (email/password + Google + GitHub OAuth)
 - **Validation:** Zod, React Hook Form, next-safe-action
-- **Async Processing:** Inngest (solves Vercel 60s timeout)
-- **AI:** OpenAI / DeepSeek / Xiaomi MiMo (switchable via `AI_PROVIDER` env var), optional Cloudflare AI Gateway proxy
-- **Storage:** Cloudflare R2 / S3 via `@aws-sdk/client-s3`
-- **Payment:** Creem (subscriptions + one-time purchases)
-- **Rate Limiting:** Upstash Redis (gracefully disabled when not configured)
+- **Async Processing:** Inngest or Cloudflare Workflows through a shared jobs contract
+- **AI:** OpenAI Compatible (OpenAI / DeepSeek / MiMo), Anthropic, or Workers AI; optional Cloudflare AI Gateway
+- **Storage:** S3 Compatible or a native Cloudflare R2 Binding
+- **Payment:** Creem or Stripe through a shared payment contract
+- **Mail:** Disabled, Resend, SMTP, or Cloudflare Email
+- **Rate Limiting:** No-op, Upstash Redis, or Cloudflare Rate Limiting bindings
 - **Logging:** Pino + optional Axiom cloud logging
 - **Monitoring:** Optional Sentry integration
 - **i18n:** next-intl (locales: `en`, `zh`)
@@ -48,6 +49,16 @@ Tests live in `src/test/` (not colocated), run sequentially to avoid DB race con
 - **Testing:** Vitest
 
 ## Architecture
+
+### Composition Layers
+
+- `src/core/modules/` — stable module contract and validation
+- `src/modules/` — registry containing only modules selected for the generated project
+- `src/core/services/` — provider-neutral payment, storage, mail, AI, jobs, and rate-limit contracts
+- `src/adapters/` — selected provider implementations and runtime bindings
+- `src/services/` — business-facing service instances; feature code imports these instead of provider SDKs
+- `recipes/catalog.json` — source of truth for modules, adapters, presets, environment variables, and runtime constraints
+- `nextdevtpl.generated.json` — generated-project record of the effective selection
 
 ### Route Groups (`src/app/[locale]/`)
 
@@ -60,9 +71,9 @@ All routes are under `[locale]` for i18n:
 
 ### API Routes (`src/app/api/`)
 
-- `inngest/route.ts` — Inngest webhook (GET/POST/PUT)
+- `inngest/route.ts` — present only with the Inngest adapter
 - `upload/presigned/route.ts` — Presigned S3/R2 upload URLs
-- `webhooks/creem/route.ts` — Creem payment webhook
+- `webhooks/payment/route.ts` — shared Creem/Stripe payment webhook
 - `auth/[...all]/route.ts` — Better Auth catch-all
 - `search/route.ts` — Search API
 - `jobs/credits/expire/route.ts` — Credits expiration cron
@@ -81,9 +92,9 @@ src/features/[name]/
 
 Key modules: `credits/`, `payment/`, `subscription/`, `storage/`, `marketing/`, `dashboard/`, `admin/`, `auth/`, `support/`, `settings/`, `mail/`, `shared/`, `blog/`, `analytics/`
 
-### Async Processing (Inngest)
+### Async Processing
 
-Inngest handles background job processing. A hello-world example function is provided in `src/inngest/functions.ts` as a template for adding custom async workflows. The pattern is: server action sends event → Inngest function processes in background.
+Product code calls `jobService`. The selected implementation lives under `src/adapters/jobs/`: Inngest for conventional runtimes or Cloudflare Workflows for Workers. Protected cron handlers remain under `src/app/api/jobs/`.
 
 ### Server Action Tiers (`src/lib/safe-action.ts`)
 
@@ -102,7 +113,7 @@ export const myAction = withFeatureAction("myAction")
   .action(async ({ parsedInput, ctx }) => { /* ... */ });
 ```
 
-### Credits System (`src/features/credits/core.ts`)
+### Credits System (`src/features/credits/`)
 
 Double-entry bookkeeping with FIFO batch expiration:
 - Every credit movement creates a transaction with debit/credit accounts
@@ -111,11 +122,11 @@ Double-entry bookkeeping with FIFO batch expiration:
 
 ### Subscription Plans (`src/config/subscription-plan.ts`)
 
-4 tiers (Free, Starter, Pro, Ultra) with per-plan limits on: file size, queue priority, monthly credits. `getUserPlan()` in `src/features/subscription/services/user-plan.ts` maps Creem `priceId` to plan.
+4 tiers (Free, Starter, Pro, Ultra) with per-plan limits on file size, queue priority, and monthly credits. `getUserPlan()` maps the selected payment provider's normalized product ID to a plan.
 
-### Database Schema (`src/db/schema.ts`)
+### Database Schema (`src/db/schema/`)
 
-Uses Drizzle ORM with typed enums. Key tables: `user`, `session`, `account`, `verification`, `subscription`, `creditsBalance`, `creditsBatch`, `creditsTransaction`, `ticket`, `ticketMessage`, `newsletterSubscriber`.
+Uses Drizzle ORM with typed enums. Schema is split into `auth`, `credits`, `subscription`, `support`, and `mail` groups. The generator exports only groups required by selected modules.
 
 All tables use `text` primary keys with `nanoid()` defaults.
 
@@ -126,9 +137,9 @@ Handles three concerns in order:
 2. **Auth protection** — `/dashboard/**` requires session token cookie, auth routes redirect if logged in
 3. **i18n routing** — next-intl locale prefix handling
 
-### AI Provider Abstraction (`src/lib/ai/openai.ts`)
+### AI Provider Abstraction (`src/services/ai.ts`)
 
-Switchable between OpenAI, DeepSeek, and MiMo via `AI_PROVIDER` env var. Optional Cloudflare AI Gateway proxying. Provides a generic `chatCompletion()` function for LLM calls.
+The shared `aiService` supports OpenAI Compatible, Anthropic, and Workers AI adapters. OpenAI Compatible can switch between OpenAI, DeepSeek, and MiMo through `AI_PROVIDER`, with optional Cloudflare AI Gateway proxying.
 
 ## Coding Conventions
 
@@ -144,4 +155,4 @@ Switchable between OpenAI, DeepSeek, and MiMo via `AI_PROVIDER` env var. Optiona
 
 ## Environment Variables
 
-See `.env.example` for the full list. Key pattern: only `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, and at least one AI provider key are required. Everything else (OAuth, Creem, storage, Redis, Axiom, Sentry) is optional with graceful degradation.
+See the generated `.env.example` for the exact list. A basic authenticated app needs `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, and `NEXT_PUBLIC_APP_URL`. Provider variables are required only when their adapter is selected. Worker bindings are configured in `wrangler.jsonc` and secrets through Wrangler or the platform secret manager.

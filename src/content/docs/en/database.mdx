@@ -5,13 +5,16 @@ description: Work with PostgreSQL and Drizzle ORM in NextDevTpl.
 
 # Database
 
-NextDevTpl uses PostgreSQL with Drizzle ORM. The schema is the source of truth for auth, credits, payments, support tickets, and user data.
+NextDevTpl uses PostgreSQL with Drizzle ORM. The generator composes schema
+groups from selected modules, so tables for unselected modules do not enter the
+generated project.
 
 ## Main files
 
 | Path | Purpose |
 | --- | --- |
-| `src/db/schema.ts` | Table definitions |
+| `src/db/schema/` | Tables split into `auth`, `credits`, `subscription`, `support`, and `mail` groups |
+| `src/db/schema/index.ts` | Schema exports selected for this generated project |
 | `src/db/index.ts` | Database client |
 | `drizzle.config.ts` | Drizzle config |
 | `drizzle/` | Generated migration files and snapshots |
@@ -43,12 +46,12 @@ pnpm db:studio
 | Command | Use it when |
 | --- | --- |
 | `pnpm db:push` | You are bootstrapping or iterating on a local database |
-| `pnpm db:generate` | You changed `src/db/schema.ts` and need a migration file |
+| `pnpm db:generate` | You changed `src/db/schema/` and need a migration file |
 | `pnpm db:migrate` | You want to apply committed migrations |
 
 ## Schema changes checklist
 
-1. Update `src/db/schema.ts`.
+1. Update `src/db/schema/<group>.ts`; give a new module its own group.
 2. Update any feature service/action that reads or writes the changed table.
 3. Generate or push the schema depending on environment.
 4. Add or update tests under `src/test`.
@@ -62,5 +65,4 @@ pnpm db:studio
 | Credits and transactions | Credits ledger and purchases |
 | Subscriptions | Payment and plan lookup |
 | Support tickets | User support and admin ticket queue |
-| Storage records | Upload and file security tests |
-
+| Newsletter | Mail subscriptions and unsubscribe state |

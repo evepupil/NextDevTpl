@@ -1,51 +1,49 @@
 ---
 title: Storage
-description: Configure S3 or Cloudflare R2 compatible storage and presigned uploads.
+description: Store user files with S3-compatible APIs or a Cloudflare R2 binding.
 ---
 
 # Storage
 
-The storage layer is compatible with S3-style providers such as AWS S3, Cloudflare R2, and MinIO.
+The storage module provides a shared object interface, presigned uploads, and
+image proxying. Choose S3 Compatible or a native Cloudflare R2 binding during
+generation.
 
-## Main files
+## Adapters
+
+| Selection | Configuration | Runtime |
+| --- | --- | --- |
+| `s3-compatible` | `STORAGE_ENDPOINT`, `STORAGE_REGION`, `STORAGE_BUCKET_NAME`, access key and secret | Server, Docker, Vercel |
+| `r2-binding` | `NEXTDEVTPL_STORAGE` R2 binding | Cloudflare Workers |
+
+`NEXT_PUBLIC_AVATARS_BUCKET_NAME` selects the avatar bucket. Generic uploads
+default to `nextdevtpl-uploads` when no bucket is set; configure it explicitly
+for production.
+
+## Upload flow
+
+1. The browser requests upload data from `/api/upload/presigned`.
+2. The server checks the session, type, size, and object key.
+3. The S3 combination returns a presigned URL for a direct browser upload.
+4. The app stores the object key and reads through `/image-proxy/...` or a controlled URL.
+
+The R2 binding is injected lazily during a Worker request while product code
+continues to call `storageService`.
+
+## Main code
 
 | Path | Purpose |
 | --- | --- |
-| `src/features/storage/providers/s3.ts` | S3-compatible provider |
-| `src/features/storage/actions.ts` | Storage Server Actions |
-| `src/features/storage/utils.ts` | Utility helpers |
-| `src/features/storage/types.ts` | Storage types |
-| `src/app/api/upload/presigned/route.ts` | Presigned upload endpoint |
-| `src/app/image-proxy/[...path]/route.ts` | Image proxy route |
-| `src/test/storage/security.test.ts` | Storage security tests |
+| `src/core/services/storage.ts` | Shared object storage contract |
+| `src/adapters/storage` | S3 and R2 implementations |
+| `src/services/storage.ts` | Selected storage instance |
+| `src/app/api/upload/presigned/route.ts` | Upload entry point |
+| `src/app/image-proxy/[...path]/route.ts` | Controlled image reads |
 
-## Environment variables
+## Security checks
 
-| Variable | Purpose |
-| --- | --- |
-| `STORAGE_ENDPOINT` | Provider endpoint, for example R2 endpoint |
-| `STORAGE_REGION` | S3 region or provider-compatible value |
-| `STORAGE_BUCKET` | Bucket name |
-| `STORAGE_ACCESS_KEY_ID` | Access key |
-| `STORAGE_SECRET_ACCESS_KEY` | Secret key |
-
-## Upload model
-
-1. Client requests a presigned upload URL.
-2. Server validates the request and returns upload metadata.
-3. Client uploads directly to the storage provider.
-4. App stores or uses the returned object key.
-5. Public display can go through the image proxy when needed.
-
-## Security checklist
-
-- Validate file type and size before creating presigned URLs.
-- Keep object keys scoped and hard to guess.
-- Do not expose secret keys to the browser.
-- Prefer private buckets plus signed reads or proxy routes.
-- Run storage security tests after changing upload rules.
-
-```bash
-pnpm test:run src/test/storage
-```
-
+- Keep buckets private by default and restrict CORS to application domains.
+- Validate type, size, and user scope before signing or writing.
+- Use unpredictable object keys and reject path traversal input.
+- Keep access keys server-side and scope R2 binding access to the required bucket.
+- Run `pnpm test:run -- src/test/storage/security.test.ts` after changes.

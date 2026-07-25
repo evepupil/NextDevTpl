@@ -1,0 +1,44 @@
+---
+title: AI
+description: 配置并通过统一服务调用 OpenAI Compatible、Anthropic 或 Workers AI。
+---
+
+# AI
+
+AI 是可选服务。只有生成时选择了 AI 适配器，项目里才会保留 `src/services/ai.ts`
+和对应实现。
+
+## 适配器
+
+| 选择 | 配置 | 说明 |
+| --- | --- | --- |
+| `openai-compatible` | `AI_PROVIDER` 和对应 API Key/模型 | 支持 OpenAI、DeepSeek、MiMo；可选 Cloudflare AI Gateway |
+| `anthropic` | `ANTHROPIC_API_KEY`、`ANTHROPIC_MODEL` | 直接调用 Anthropic Messages API |
+| `workers-ai` | `WORKERS_AI_MODEL` 和 `AI` Binding | 只用于 Cloudflare Workers |
+
+OpenAI Compatible 默认 `AI_PROVIDER=openai`。切换时设置 `deepseek` 或 `mimo`，并
+填写对应的 `DEEPSEEK_*` 或 `MIMO_*` 变量。只有 `CF_AIG_BASE_URL` 和
+`CF_AIG_TOKEN` 同时存在时才通过 AI Gateway。
+
+## 调用
+
+```ts
+import { aiService } from "@/services/ai";
+
+const result = await aiService.complete({
+  messages: [{ role: "user", content: "Summarize this document" }],
+  maxTokens: 800,
+});
+
+console.log(result.content);
+```
+
+统一接口支持文本消息、温度和最大 token。不同供应商的 JSON、工具调用和流式能力
+有差异，调用前可以查看适配器的 `capabilities`，不要假设所有实现行为完全一致。
+
+## 验证
+
+- 密钥只放在服务端环境变量。
+- 为模型调用设置业务级超时、重试和用量限制。
+- 对用户输入做长度限制，输出进入 HTML 前完成转义或清洗。
+- 修改适配器后运行 `pnpm test:run -- src/test/adapters/ai.test.ts`。

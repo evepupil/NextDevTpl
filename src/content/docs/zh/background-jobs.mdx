@@ -1,53 +1,47 @@
 ---
 title: 后台任务
-description: 使用 Inngest 运行异步产品流程。
+description: 使用 Inngest、Cloudflare Workflows 或受保护 cron 运行异步任务。
 ---
 
 # 后台任务
 
-后台任务使用 Inngest。适合处理不应该阻塞请求的流程，例如积分过期、投递重试、邮件批处理、异步产品任务等。
+生成器支持 Inngest 和 Cloudflare Workflows。业务代码通过 `jobService` 发送任务，
+供应商实现负责事件格式和运行环境。
 
-## 主要文件
+## Inngest
 
-| 路径 | 作用 |
+适用于 Server、Docker 和 Vercel：
+
+| 配置 | 作用 |
 | --- | --- |
-| `src/inngest/client.ts` | Inngest client |
-| `src/inngest/functions.ts` | function 定义 |
-| `src/inngest/index.ts` | exports |
-| `src/app/api/inngest/route.ts` | Inngest route handler |
-| `src/app/api/jobs/credits/expire/route.ts` | 积分过期 job endpoint |
-| `src/test/jobs/cron-expire.test.ts` | job 测试 |
+| `INNGEST_EVENT_KEY` | 生产环境发送事件 |
+| `INNGEST_SIGNING_KEY` | 校验 `/api/inngest` 请求 |
+| `src/adapters/jobs/inngest` | Client、handler 和 function 实现 |
+| `src/app/api/inngest/route.ts` | Inngest 回调入口 |
 
-## 本地开发
+本地需要查看或触发 function 时，单独运行 Inngest Dev Server。
 
-先启动应用：
+## Cloudflare Workflows
+
+Cloudflare 目标通过 `NEXTDEVTPL_WORKFLOW` Binding 调用 Workflow。生成的
+`wrangler.jsonc` 声明 binding、workflow 名和 class。部署前创建资源并检查命名，
+运行时由 Worker 上下文延迟注入。
+
+## Cron
+
+积分过期接口位于 `/api/jobs/credits/expire`，由 `CRON_SECRET` 保护。Vercel 目标
+会按选中模块生成 cron 配置；其他平台使用自己的 scheduler 调用该端点。
+
+## 编写任务
+
+- 任务需要幂等，重复事件不会重复收费、发积分或发送关键邮件。
+- 重试所需状态保存到数据库或工作流状态中。
+- 日志记录 job id 和外部事件 id，过滤密钥和用户敏感内容。
+- 长任务拆成可重试步骤，外部调用设置超时。
+
+修改后运行：
 
 ```bash
-pnpm dev
+pnpm test:run -- src/test/jobs
+pnpm test:run -- src/test/adapters/cloudflare.test.ts
 ```
-
-如果需要本地检查或触发 function，再使用 Inngest dev server。
-
-## 生产环境变量
-
-| 变量 | 作用 |
-| --- | --- |
-| `INNGEST_EVENT_KEY` | 向 Inngest 发送事件 |
-| `INNGEST_SIGNING_KEY` | 校验 Inngest 请求 |
-
-## Job 设计规则
-
-- job 必须尽量幂等。
-- 保存足够状态，方便 retry 后恢复。
-- 不要因为重复 webhook 或重复事件重复发积分。
-- 优先拆成小的可组合函数。
-- 日志里记录 job id 和外部事件 id。
-
-## 测试
-
-修改过期逻辑后运行：
-
-```bash
-pnpm test:run src/test/jobs
-```
-

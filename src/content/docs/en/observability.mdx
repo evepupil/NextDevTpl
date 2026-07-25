@@ -1,69 +1,62 @@
 ---
-title: Observability
-description: Configure logging, monitoring, rate limits, and request diagnostics.
+title: Observability and Rate Limits
+description: Configure logs, Sentry, Axiom, health checks, and three rate-limit modes.
 ---
 
-# Observability
-
-NextDevTpl includes structured logging, optional cloud log shipping, Sentry monitoring, rate limiting, and API request logging utilities.
+# Observability and Rate Limits
 
 ## Logging
 
-| Path | Purpose |
-| --- | --- |
-| `src/lib/logger/index.ts` | Pino logger wrapper |
-| `src/lib/api-logger.ts` | API logging helpers |
+Server, Docker, and Vercel use structured logging from `src/lib/logger`.
+Configure `AXIOM_TOKEN` and `AXIOM_DATASET` to ship logs to Axiom; local output
+remains available without them.
 
-When Axiom is configured, logs can be shipped to Axiom. Without Axiom, logs should still be available locally.
+Cloudflare generation substitutes a Worker-safe console logger and removes
+Pino and file-writing dependencies. Payment, webhook, and job logs should carry
+a request or external event ID while excluding keys, cookies, authorization
+headers, and complete user content.
 
-Common variables:
+## Sentry
 
-```bash
-AXIOM_TOKEN="xaat-..."
-AXIOM_DATASET="nextdevtpl"
-```
-
-## Error monitoring
-
-Sentry config files:
-
-| Path | Purpose |
-| --- | --- |
-| `sentry.client.config.ts` | Browser Sentry setup |
-| `sentry.server.config.ts` | Server Sentry setup |
-| `sentry.edge.config.ts` | Edge Sentry setup |
-| `src/instrumentation.ts` | Next.js instrumentation hook |
-| `src/lib/monitoring/index.ts` | Monitoring helpers |
-
-Common variables:
+When the `analytics` module is selected, use:
 
 ```bash
 NEXT_PUBLIC_SENTRY_DSN="https://..."
 SENTRY_AUTH_TOKEN="sntrys_..."
 ```
 
-## Rate limiting
+The DSN is used at runtime. Keep the auth token in the build or release system
+for source-map upload. The Cloudflare Free combination uses a console monitoring
+replacement for bundle size and runtime compatibility.
 
-Rate limiting lives in:
+## Rate-limit adapters
 
-```txt
-src/lib/rate-limit
-```
+| Selection | Configuration | Use case |
+| --- | --- | --- |
+| `noop` | None | Local or trusted environments; no abuse protection |
+| `upstash` | REST URL and REST token | Server, Docker, Vercel |
+| `cloudflare-rate-limit` | Six Rate Limiting bindings | Cloudflare Workers |
 
-Upstash variables:
+Cloudflare separates `global`, `auth`, `ai`, `payment`, `upload`, and `strict`
+bindings. Generated thresholds are a starting point; tune them for real traffic
+and endpoint cost.
+
+## Health check
+
+`/api/health` checks configuration and database reachability. It returns safe
+status data without exposing variable values.
 
 ```bash
-UPSTASH_REDIS_REST_URL="https://..."
-UPSTASH_REDIS_REST_TOKEN="..."
+pnpm deploy:check -- https://your-domain.example/api/health
 ```
 
-If Redis is missing, development should continue without a hard startup failure.
+HTTP 200 with `status: healthy` confirms the base runtime. Payment, mail,
+storage, AI, and jobs still need separate real smoke tests.
 
-## Production checklist
+## Production checks
 
-- Enable Sentry for user-visible errors.
-- Enable structured logs for webhook and payment debugging.
-- Log external event IDs for payment and job retries.
-- Avoid logging raw credentials, tokens, or authorization headers.
-- Verify rate limits on public mutation endpoints.
-
+- Apply a suitable rate limit to every public mutation route.
+- Redact logs and error events.
+- Configure sampling, retention, and alerts in Sentry and Axiom.
+- Monitor `/api/health` without exposing internal connection details.
+- Confirm Worker logs contain no `node:fs`, `SonicBoom`, or Pino initialization errors.

@@ -1,0 +1,63 @@
+---
+title: Service Adapters
+description: Select and use payment, storage, mail, AI, job, and rate-limit implementations.
+---
+
+# Service Adapters
+
+Product code calls external capabilities through `src/services`.
+`src/adapters` owns provider APIs, SDKs, and Cloudflare bindings, while
+`src/core/services` defines the shared contracts. Replacing a provider should
+leave most product flows unchanged.
+
+## Support matrix
+
+| Service | Adapter | Runtime | Configuration |
+| --- | --- | --- | --- |
+| Payment | `creem` | Node | `CREEM_API_KEY`, `CREEM_WEBHOOK_SECRET` |
+| Payment | `stripe` | Universal | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` |
+| Storage | `s3-compatible` | Node | Endpoint, region, bucket, and access keys |
+| Storage | `r2-binding` | Worker | `NEXTDEVTPL_STORAGE` R2 binding |
+| Mail | `disabled` | Universal | None; calls report an explicit configuration error |
+| Mail | `resend` | Universal | `RESEND_API_KEY`, `EMAIL_FROM` |
+| Mail | `smtp` | Node | `SMTP_HOST`, port, and optional credentials |
+| Mail | `cloudflare-email` | Worker | `NEXTDEVTPL_EMAIL` Email binding |
+| AI | `openai-compatible` | Universal | OpenAI, DeepSeek, or MiMo key and model |
+| AI | `anthropic` | Universal | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` |
+| AI | `workers-ai` | Worker | `AI` binding and `WORKERS_AI_MODEL` |
+| Jobs | `inngest` | Universal | `INNGEST_EVENT_KEY`, `INNGEST_SIGNING_KEY` |
+| Jobs | `cloudflare-workflows` | Worker | `NEXTDEVTPL_WORKFLOW` binding |
+| Rate limit | `noop` | Universal | None; suitable for local or trusted networks |
+| Rate limit | `upstash` | Universal | Upstash REST URL and token |
+| Rate limit | `cloudflare-rate-limit` | Worker | Six Rate Limiting bindings |
+
+The generator keeps only the selected implementation, packages, and variables.
+For Cloudflare it writes required bindings to `wrangler.jsonc`; create remote
+resources such as R2 buckets and then replace generated placeholders as needed.
+
+## Call a service
+
+Import the stable service entry point:
+
+```ts
+import { paymentService } from "@/services/payment";
+
+const checkout = await paymentService.createCheckout({
+  productId,
+  successUrl,
+  metadata: { userId },
+});
+```
+
+The same pattern applies to `mailService`, `storageService`, `aiService`,
+`jobService`, and `rateLimitService`. Provider fields are normalized inside
+the adapter.
+
+## Replace an adapter
+
+Choose the desired adapter when generating a new app. For an existing app,
+generate a temporary project with the target adapter, then merge the matching
+`src/adapters/<service>`, `src/services/<service>.ts`, package, environment,
+and deployment binding changes. Run the adapter tests and full build afterward.
+
+Editing `nextdevtpl.generated.json` alone does not change generated source.

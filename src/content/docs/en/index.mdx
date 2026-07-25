@@ -1,48 +1,68 @@
 ---
 title: Introduction
-description: Learn what NextDevTpl includes and how to use the template as a production SaaS starting point.
+description: Learn how NextDevTpl 2.x generates apps, what it includes, and where to start.
 ---
 
 # NextDevTpl Documentation
 
-NextDevTpl is a production-oriented SaaS starter built on Next.js, React, TypeScript, PostgreSQL, Drizzle ORM, Better Auth, next-intl, Creem payments, credits, admin tools, support tickets, email, storage, observability, and background jobs.
+NextDevTpl 2.x is a composable Next.js SaaS starter. Select product modules,
+external service implementations, and a deployment platform; the generator
+keeps only the chosen source, packages, environment variables, database schema,
+and deployment files. Your project owns the generated code.
 
-The goal of the template is not only to show a landing page. It gives you a working product shell that can be customized into a real SaaS application.
+## Confirm what your project contains
 
-## What is included
+`nextdevtpl.generated.json` in a generated project records the effective
+selection:
 
-| Area | What you get |
+```json
+{
+  "preset": "saas",
+  "target": "vercel",
+  "modules": ["auth", "dashboard", "marketing"],
+  "adapters": { "payment": "payment:creem" }
+}
+```
+
+Read this file first, then follow the matching feature pages. Unselected
+capabilities have already been removed and require no configuration.
+
+## 2.x capabilities
+
+| Area | Supported capabilities |
 | --- | --- |
-| App shell | Localized marketing site, blog, docs, dashboard, admin area, and legal pages |
-| Authentication | Better Auth with email/password, OAuth providers, session handling, and roles |
-| Database | PostgreSQL schema with Drizzle ORM, migrations, and integration tests |
-| Billing | Creem checkout, subscription flow, webhook handling, and one-time credit purchases |
-| Credits | Ledger-style credit accounting, FIFO batch expiration, and balance reads |
-| Operations | Admin users, support tickets, logging, monitoring, rate limiting, and jobs |
-| Content | Fumadocs-powered docs, MDX blog, and next-intl translated UI |
+| Generation | `minimal`, `saas`, `ai-saas`, and custom selections with dependency resolution and source pruning |
+| Product | Auth, dashboard, marketing, settings, subscriptions, credits, admin, support, blog, and PSEO |
+| Payments | Shared contract with Creem or Stripe, subscriptions, one-time payments, and verified webhooks |
+| Mail | Disabled, Resend, SMTP, or Cloudflare Email |
+| Storage | S3-compatible presigned uploads or a Cloudflare R2 binding |
+| AI | OpenAI-compatible providers, Anthropic, or Workers AI |
+| Jobs | Inngest or Cloudflare Workflows plus protected cron handlers |
+| Rate limiting | No-op, Upstash Redis, or Cloudflare Rate Limiting bindings |
+| Platforms | Server, Docker Compose, Vercel, and Cloudflare Workers |
+| Operations | Health checks, structured logs, Sentry, Axiom, and combination compatibility gates |
 
-## Recommended reading path
+## Recommended path
 
-If you are evaluating the template, start with:
+For a first project:
 
-- [Quick Start](/en/docs/quick-start)
-- [Project Structure](/en/docs/project-structure)
-- [Configuration](/en/docs/configuration)
+1. [Quick Start](/en/docs/quick-start)
+2. [Generator and Presets](/en/docs/generator)
+3. [Feature Modules](/en/docs/feature-modules)
+4. [Configuration](/en/docs/configuration)
 
-If you are integrating product features, read:
+For external services:
 
-- [Authentication](/en/docs/authentication)
-- [Payments](/en/docs/payments)
-- [Credits](/en/docs/credits)
-- [Internationalization](/en/docs/internationalization)
+1. [Service Adapters](/en/docs/service-adapters)
+2. The matching payments, email, storage, AI, jobs, or observability page
 
-If you are preparing production, read:
+Before production:
 
-- [Deployment](/en/docs/deployment)
-- [Observability](/en/docs/observability)
-- [Background Jobs](/en/docs/background-jobs)
+1. [Deployment](/en/docs/deployment)
+2. [Upgrade and Compatibility](/en/docs/upgrade)
 
-## Core principle
+## Two ways to use the project
 
-Most external services are optional during local development. The app should boot with only database and auth basics, then enable OAuth, email, payments, storage, Redis, Sentry, Axiom, and Inngest as your product needs them.
-
+Use `create-nextdevtpl` for a clean product application. Clone the full
+repository when contributing to the template, extending official modules,
+running the compatibility matrix, or preparing a generator release.

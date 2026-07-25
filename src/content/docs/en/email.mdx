@@ -1,48 +1,42 @@
 ---
 title: Email
-description: Send product emails with Resend and React Email templates.
+description: Send product mail with Disabled, Resend, SMTP, or Cloudflare Email.
 ---
 
 # Email
 
-Email delivery uses Resend and React Email templates.
+Auth verification, password reset, and product notifications call a shared
+`mailService`. The generator keeps only the selected implementation and packages.
 
-## Main files
+## Selection and configuration
+
+| Adapter | Configuration | Use case |
+| --- | --- | --- |
+| `disabled` | None | Run local flows that do not require delivery |
+| `resend` | `RESEND_API_KEY`, `EMAIL_FROM` | Managed transactional email |
+| `smtp` | Host, port, secure flag, optional user/password | Private SMTP or compatible providers |
+| `cloudflare-email` | `NEXTDEVTPL_EMAIL` binding, `EMAIL_FROM` | Cloudflare Workers |
+
+The disabled adapter returns an explicit configuration error when called.
+Choose a delivery adapter for verification and password reset flows.
+
+## Main code
 
 | Path | Purpose |
 | --- | --- |
-| `src/features/mail/client.ts` | Resend client setup |
-| `src/features/mail/actions.ts` | Email send actions |
-| `src/features/mail/utils.ts` | Email helpers |
+| `src/core/services/mail.ts` | Shared message and capability contract |
+| `src/adapters/mail` | Provider implementations |
+| `src/services/mail.ts` | Selected mail instance |
 | `src/features/mail/templates` | React Email templates |
-| `src/test/mail/newsletter.test.ts` | Email-related test coverage |
+| `src/features/mail/server.ts` | Product mail entry points |
+| `src/lib/auth` | Verification and reset triggers |
 
-## Environment variables
+## Add an email
 
-| Variable | Purpose |
-| --- | --- |
-| `RESEND_API_KEY` | Authenticates with Resend |
-| `EMAIL_FROM` | Sender address displayed to users |
+1. Create a template in `src/features/mail/templates`.
+2. Build sender, recipients, subject, HTML, and plain text in `src/features/mail/server.ts`.
+3. Deliver it through `mailService.send()`.
+4. Test missing configuration, provider failure, and success without logging content or secrets.
 
-Example:
-
-```bash
-RESEND_API_KEY="re_xxxxxxxxx"
-EMAIL_FROM="NextDevTpl <noreply@example.com>"
-```
-
-## Templates
-
-Templates are React components. Current examples include:
-
-| Template | Purpose |
-| --- | --- |
-| `welcome-email.tsx` | Welcome/onboarding email |
-| `primary-action-email.tsx` | Generic action email with a button |
-
-When editing templates, keep copy short and avoid relying on app-only CSS. Email clients have limited CSS support.
-
-## Local behavior
-
-If Resend is not configured, email-dependent features should be treated as unavailable. Use email/password flows that do not require delivery first, then enable Resend when testing verification and reset flows.
-
+Before production, verify the sender domain, SPF/DKIM/DMARC, and that auth links
+use the production domain.

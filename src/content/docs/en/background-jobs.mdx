@@ -1,53 +1,49 @@
 ---
 title: Background Jobs
-description: Run async product workflows with Inngest.
+description: Run asynchronous work with Inngest, Cloudflare Workflows, or protected cron handlers.
 ---
 
 # Background Jobs
 
-Background jobs are powered by Inngest. Use jobs for workflows that should not block a request, such as credit expiration, delivery retries, email batching, or async product processing.
+The generator supports Inngest and Cloudflare Workflows. Product code sends
+work through `jobService`; the selected adapter owns event format and runtime.
 
-## Main files
+## Inngest
 
-| Path | Purpose |
+Use Inngest on Server, Docker, or Vercel:
+
+| Configuration | Purpose |
 | --- | --- |
-| `src/inngest/client.ts` | Inngest client |
-| `src/inngest/functions.ts` | Function definitions |
-| `src/inngest/index.ts` | Exports |
-| `src/app/api/inngest/route.ts` | Inngest route handler |
-| `src/app/api/jobs/credits/expire/route.ts` | Credit expiration job endpoint |
-| `src/test/jobs/cron-expire.test.ts` | Job test coverage |
+| `INNGEST_EVENT_KEY` | Send production events |
+| `INNGEST_SIGNING_KEY` | Verify `/api/inngest` requests |
+| `src/adapters/jobs/inngest` | Client, handler, and function implementation |
+| `src/app/api/inngest/route.ts` | Inngest callback |
 
-## Local development
+Run the Inngest Dev Server separately when inspecting or triggering local functions.
 
-Start the app:
+## Cloudflare Workflows
+
+The Cloudflare target calls a Workflow through the `NEXTDEVTPL_WORKFLOW`
+binding. Generated `wrangler.jsonc` declares its binding, workflow name, and
+class. Create the resource, check names before deployment, and let request
+context inject the binding lazily at runtime.
+
+## Cron
+
+Credit expiry uses `/api/jobs/credits/expire`, protected by `CRON_SECRET`.
+The Vercel target emits cron configuration when the module is selected; use the
+platform scheduler to call the same endpoint elsewhere.
+
+## Job rules
+
+- Keep work idempotent so duplicate events do not double-charge, grant, or notify.
+- Persist state required for retries in the database or workflow state.
+- Log job and external event IDs while filtering secrets and sensitive content.
+- Split long work into retryable steps and add timeouts to external calls.
+
+After changes:
 
 ```bash
-pnpm dev
+pnpm test:run -- src/test/jobs
+pnpm test:run -- src/test/adapters/cloudflare.test.ts
 ```
-
-Then use the Inngest dev server if you need to inspect or trigger functions locally.
-
-## Production variables
-
-| Variable | Purpose |
-| --- | --- |
-| `INNGEST_EVENT_KEY` | Sends events to Inngest |
-| `INNGEST_SIGNING_KEY` | Verifies requests from Inngest |
-
-## Job design rules
-
-- Keep jobs idempotent.
-- Store enough state to recover from retries.
-- Do not grant credits or change subscription state twice for the same external event.
-- Prefer small composable functions over one large workflow.
-- Log job identifiers and external event IDs.
-
-## Testing
-
-Run job tests after touching expiration logic:
-
-```bash
-pnpm test:run src/test/jobs
-```
-

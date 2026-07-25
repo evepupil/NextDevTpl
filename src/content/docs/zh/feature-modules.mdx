@@ -1,0 +1,60 @@
+---
+title: 功能模块
+description: 了解可选模块、自动依赖和生成后的功能入口。
+---
+
+# 功能模块
+
+生成器会物理删除未选模块及其路由、Schema、翻译、依赖和文档。查看生成项目的
+`nextdevtpl.generated.json`，可以确认当前实际包含哪些模块。
+
+## 模块清单
+
+| 模块 id | 提供的功能 | 主要依赖 |
+| --- | --- | --- |
+| `auth` | 邮箱密码、OAuth、会话和认证页面 | `mail`、`shared` |
+| `dashboard` | 登录后的工作台骨架 | `shared` |
+| `marketing` | 首页、定价、法律页和内置文档 | `payment`、`shared` |
+| `settings` | 资料、头像、订阅、积分和账户设置 | `credits`、`payment`、`storage`、`subscription` |
+| `admin` | 用户、角色、积分和工单管理 | `support`、`shared` |
+| `support` | 用户工单、对话和管理员处理 | `credits` |
+| `payment` | 统一 checkout、订阅和 webhook 流程 | `subscription` |
+| `subscription` | 套餐状态和订阅 UI | 无 |
+| `credits` | 双向账本、FIFO 消耗和过期 | `payment` |
+| `storage` | 预签名上传和图片代理 | 无 |
+| `mail` | 认证邮件和产品邮件入口 | 无 |
+| `blog` | 双语 MDX 博客 | `marketing` |
+| `pseo` | 程序化 SEO 列表和详情页 | `marketing` |
+| `analytics` | Google Analytics 与 Sentry 页面接入 | 无 |
+| `shared` | Theme、语言、Provider 和通用 UI | 无 |
+
+依赖会递归加入。例如选择 `support` 会补齐积分、支付、订阅、邮件、认证和共享
+模块。最终清单始终以生成结果为准。
+
+## 选择与验证
+
+```bash
+pnpm dlx create-nextdevtpl@latest my-app \
+  --preset custom \
+  --modules auth,dashboard,marketing,blog \
+  --payment stripe \
+  --mail resend \
+  --rate-limit upstash
+```
+
+生成后执行：
+
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test:run
+pnpm build
+```
+
+## 二开模块
+
+新增模块时，把 UI、action、hook 和模块声明放在 `src/features/<id>`。业务模块
+依赖稳定内核和 `src/services`，避免直接导入另一个业务模块的内部文件。数据库表
+放入独立 Schema 分组，导航和翻译命名空间写进模块声明。
+
+当前 2.x 生成器负责新项目创建，尚未提供在已有项目内自动安装或卸载模块的命令。

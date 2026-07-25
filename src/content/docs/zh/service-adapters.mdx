@@ -1,0 +1,59 @@
+---
+title: 服务适配器
+description: 选择和使用支付、存储、邮件、AI、任务与限流实现。
+---
+
+# 服务适配器
+
+业务代码统一从 `src/services` 调用外部能力。`src/adapters` 负责供应商 API、SDK
+和 Cloudflare Binding，`src/core/services` 定义双方遵守的接口。更换供应商时，
+业务流程通常无需跟着重写。
+
+## 支持矩阵
+
+| 能力 | 适配器 | 运行环境 | 配置 |
+| --- | --- | --- | --- |
+| 支付 | `creem` | Node | `CREEM_API_KEY`、`CREEM_WEBHOOK_SECRET` |
+| 支付 | `stripe` | 通用 | `STRIPE_SECRET_KEY`、`STRIPE_WEBHOOK_SECRET` |
+| 存储 | `s3-compatible` | Node | Endpoint、Region、Bucket、Access Key |
+| 存储 | `r2-binding` | Worker | `NEXTDEVTPL_STORAGE` R2 Binding |
+| 邮件 | `disabled` | 通用 | 无，调用时明确返回未配置 |
+| 邮件 | `resend` | 通用 | `RESEND_API_KEY`、`EMAIL_FROM` |
+| 邮件 | `smtp` | Node | `SMTP_HOST`、端口和可选账号密码 |
+| 邮件 | `cloudflare-email` | Worker | `NEXTDEVTPL_EMAIL` Email Binding |
+| AI | `openai-compatible` | 通用 | OpenAI、DeepSeek 或 MiMo Key 与模型 |
+| AI | `anthropic` | 通用 | `ANTHROPIC_API_KEY`、`ANTHROPIC_MODEL` |
+| AI | `workers-ai` | Worker | `AI` Binding、`WORKERS_AI_MODEL` |
+| 任务 | `inngest` | 通用 | `INNGEST_EVENT_KEY`、`INNGEST_SIGNING_KEY` |
+| 任务 | `cloudflare-workflows` | Worker | `NEXTDEVTPL_WORKFLOW` Binding |
+| 限流 | `noop` | 通用 | 无，适合本地或可信内网 |
+| 限流 | `upstash` | 通用 | Upstash REST URL 与 Token |
+| 限流 | `cloudflare-rate-limit` | Worker | 六个 Rate Limiting Bindings |
+
+生成器只保留选中的实现、依赖和环境变量。Cloudflare 目标会把所需 Binding 写入
+`wrangler.jsonc`；创建远端 R2 bucket 等资源后，还需要把生成的占位配置补完整。
+
+## 业务代码怎么调用
+
+从稳定服务入口导入：
+
+```ts
+import { paymentService } from "@/services/payment";
+
+const checkout = await paymentService.createCheckout({
+  productId,
+  successUrl,
+  metadata: { userId },
+});
+```
+
+同理使用 `mailService`、`storageService`、`aiService`、`jobService` 和
+`rateLimitService`。供应商字段只在适配器目录转换，业务层使用统一类型。
+
+## 更换适配器
+
+新项目直接通过生成参数选择。已有项目需要生成一份使用目标适配器的临时项目，
+再合并对应 `src/adapters/<service>`、`src/services/<service>.ts`、依赖、环境变量和
+部署 Binding。完成后运行对应适配器单测与完整构建。
+
+不要只改 `nextdevtpl.generated.json`；它是生成记录，不会自动改源码。

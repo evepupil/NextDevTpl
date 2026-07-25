@@ -1,71 +1,76 @@
 ---
 title: Configuration
-description: Configure the required and optional services used by NextDevTpl.
+description: Configure the base environment, selected service adapters, and Cloudflare bindings.
 ---
 
 # Configuration
 
-Configuration is environment-variable driven. Start with the required variables, then enable optional services as needed.
+Start with `nextdevtpl.generated.json` and the generated `.env.example`. The
+generator removes variables for unselected capabilities, so configure only the
+entries that remain.
 
-## Required for local boot
+## Base variables
 
 | Variable | Purpose |
 | --- | --- |
-| `DATABASE_URL` | PostgreSQL connection string used by Drizzle and Better Auth |
-| `BETTER_AUTH_SECRET` | Secret used to sign auth/session data |
-| `BETTER_AUTH_URL` | Base URL for Better Auth callbacks and cookies |
+| `DATABASE_URL` | PostgreSQL connection for Drizzle, auth, and health checks |
+| `BETTER_AUTH_SECRET` | Session signing; use a long random production value |
+| `BETTER_AUTH_URL` | Site URL used by Better Auth callbacks and cookies |
+| `NEXT_PUBLIC_APP_URL` | Browser links, metadata, and return URLs |
+| `NEXT_PUBLIC_APP_NAME` | Display name for the site and email |
 
-Example:
+## Authentication and product
 
-```bash
-DATABASE_URL="postgresql://postgres:password@localhost:5432/nextdevtpl"
-BETTER_AUTH_SECRET="replace-with-a-random-secret"
-BETTER_AUTH_URL="http://localhost:3000"
-```
-
-## Recommended during development
-
-| Service | Variables | Notes |
-| --- | --- | --- |
-| GitHub OAuth | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | Callback: `/api/auth/callback/github` |
-| Google OAuth | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Callback: `/api/auth/callback/google` |
-| Resend | `RESEND_API_KEY`, `EMAIL_FROM` | Enables real email verification and reset emails |
-
-If email is not configured, test authentication flows that do not require delivery first.
-
-## Optional product services
-
-| Service | Variables | Used by |
-| --- | --- | --- |
-| Creem | `CREEM_API_KEY`, `CREEM_WEBHOOK_SECRET` | Subscription checkout, credit purchases, webhooks |
-| S3/R2 | `STORAGE_ENDPOINT`, `STORAGE_REGION`, `STORAGE_BUCKET`, `STORAGE_ACCESS_KEY_ID`, `STORAGE_SECRET_ACCESS_KEY` | File uploads and proxy routes |
-| Upstash Redis | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | API and anonymous rate limiting |
-| Axiom | `AXIOM_TOKEN`, `AXIOM_DATASET` | Structured cloud logs |
-| Sentry | `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_AUTH_TOKEN` | Error capture and release uploads |
-| OpenAI-compatible AI | `OPENAI_API_KEY`, provider-specific base URL/model vars if configured | AI abstraction in `src/lib/ai` |
-| Inngest | `INNGEST_EVENT_KEY`, `INNGEST_SIGNING_KEY` | Background jobs in production |
-
-## Degradation model
-
-Optional services should not block a basic local boot. The intended behavior is:
-
-| Missing service | Expected behavior |
+| Capability | Variables |
 | --- | --- |
-| Redis | Rate limiter falls back instead of crashing |
-| Axiom | Logger writes locally |
-| Sentry | Monitoring hooks become no-op or console-only |
-| Storage | Upload flows are unavailable, app shell still runs |
-| Creem | Payment flows are unavailable, non-payment pages still run |
-| Inngest keys | Local development can run without production signing keys |
+| GitHub OAuth | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` |
+| Google OAuth | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
+| Plan prices | Six `NEXT_PUBLIC_PRICE_*` IDs |
+| Credit expiry cron | `CRON_SECRET` |
+| Analytics | `NEXT_PUBLIC_GA_ID` |
+| Sentry | `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_AUTH_TOKEN` |
+| Axiom | `AXIOM_TOKEN`, `AXIOM_DATASET` |
 
-## Where configuration lives
+OAuth callbacks are `/api/auth/callback/github` and
+`/api/auth/callback/google`. Production provider settings must use the final
+domain.
 
-| Path | What to edit |
+## Adapter configuration
+
+| Selection | Variables or bindings |
 | --- | --- |
-| `src/config/site.ts` | Site name, URL, metadata, social links |
+| Creem | `CREEM_API_KEY`, `CREEM_WEBHOOK_SECRET` |
+| Stripe | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` |
+| S3 Compatible | `STORAGE_ENDPOINT`, `STORAGE_REGION`, `STORAGE_BUCKET_NAME`, access key and secret |
+| R2 Binding | `NEXTDEVTPL_STORAGE` |
+| Resend | `RESEND_API_KEY`, `EMAIL_FROM` |
+| SMTP | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, optional credentials |
+| Cloudflare Email | `NEXTDEVTPL_EMAIL`, `EMAIL_FROM` |
+| OpenAI Compatible | `AI_PROVIDER` and the matching OpenAI/DeepSeek/MiMo key and model |
+| Anthropic | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` |
+| Workers AI | `AI` binding, `WORKERS_AI_MODEL` |
+| Inngest | `INNGEST_EVENT_KEY`, `INNGEST_SIGNING_KEY` |
+| Workflows | `NEXTDEVTPL_WORKFLOW` |
+| Upstash | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` |
+| Cloudflare rate limits | Six bindings including `RATE_LIMIT_GLOBAL` |
+
+Cloudflare bindings live in `wrangler.jsonc`. Configure secrets through
+`wrangler secret put` or the platform secret manager, never in source control.
+
+## Missing configuration
+
+- Missing database or auth base variables causes startup or health checks to fail.
+- Missing credentials for a selected service produce an explicit error when called.
+- Disabled mail and no-op rate limiting are useful locally but provide no delivery or abuse protection.
+- Local logs and console errors remain available without Axiom or Sentry.
+
+## Common edit points
+
+| Path | Content |
+| --- | --- |
+| `src/config/site.ts` | Name, URL, metadata, and social links |
 | `src/config/nav.ts` | Header, footer, dashboard, and admin navigation |
-| `src/config/payment.ts` | Payment product and checkout configuration |
-| `src/config/subscription-plan.ts` | Plan limits and pricing display |
-| `messages/*.json` | UI copy |
-| `.env.local` | Local secrets and service credentials |
-
+| `src/config/payment.ts` | Product IDs and checkout settings |
+| `src/config/subscription-plan.ts` | Plan allowances and display |
+| `src/services/*.ts` | Active adapter instances |
+| `.env.local` | Local variables and secrets |

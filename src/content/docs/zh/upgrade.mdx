@@ -1,0 +1,48 @@
+---
+title: 升级与兼容性
+description: 安全合并 NextDevTpl 新版本并排查组合门禁问题。
+---
+
+# 升级与兼容性
+
+生成项目是独立源码，2.x 没有覆盖已有项目的升级命令。升级采用“还原相同选择、
+生成对照项目、审查差异、分批合并”的方式。
+
+## 升级步骤
+
+1. 提交当前改动，备份数据库，跑完现版本门禁。
+2. 查看并保存 `nextdevtpl.generated.json`。
+3. 用目标版本和相同参数生成临时项目：
+
+```bash
+pnpm dlx create-nextdevtpl@<目标版本> ../nextdevtpl-upgrade \
+  --preset <原预设> --target <原目标> --no-install --yes
+```
+
+4. 依次比较工具链、`src/core`、`src/adapters`、`src/services`、业务模块、Schema、
+   环境变量和部署配置。
+5. 数据库变更生成新的向前迁移，先在测试库执行。
+6. 跑 lint、类型检查、测试、构建和 Preview 健康检查后再发布。
+
+完整仓库维护说明见上游仓库的
+[2.x 升级指南](https://github.com/evepupil/NextDevTpl/blob/master/docs/%E5%8D%87%E7%BA%A7%E6%8C%87%E5%8D%97.md)。
+
+## 组合验证
+
+模板仓库维护者可以运行：
+
+```bash
+pnpm verify:generated
+pnpm verify:compatibility:structure
+pnpm verify:compatibility --case minimal-server
+pnpm release:check
+```
+
+兼容性报告写入 `artifacts/compatibility/<case>.json`。常见问题与 Cloudflare Worker
+运行时排查见上游仓库的
+[兼容性故障排查](https://github.com/evepupil/NextDevTpl/blob/master/docs/%E5%85%BC%E5%AE%B9%E6%80%A7%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5.md)。
+
+## 回退原则
+
+代码回到升级前提交。已经在生产执行过的数据库迁移用新的向前修复迁移处理，
+避免直接改写迁移历史或破坏已有数据。

@@ -14,7 +14,7 @@ description: 常见品牌、导航、定价、页面和模块定制入口。
 | 站点名、URL、metadata | `src/config/site.ts` |
 | Logo | `public/logo.svg` 和 Header 组件 |
 | 全局样式 | `src/app/globals.css` |
-| Open Graph 图片模板 | `src/features/shared/components/og-image-template.tsx` |
+| Open Graph 图片模板 | `src/components/seo/og-image-template.tsx` |
 
 ## 导航
 
@@ -68,12 +68,13 @@ src/features/<your-feature>
 src/features/example/
 ├── actions.ts
 ├── components/
-├── schemas/
-├── types.ts
+├── manifest.ts
 └── index.ts
 ```
 
-路由组合放在 `src/app`，可复用业务逻辑放在 feature module。
+路由组合放在 `src/app`，可复用业务逻辑放在 feature module。`manifest.ts` 声明
+依赖、路由、Schema 和翻译命名空间，公共能力从 `index.ts` 导出。外部服务通过
+`src/services` 调用。
 
 ## 内容
 
@@ -82,14 +83,15 @@ src/features/example/
 | 文档 | `src/content/docs/<locale>` |
 | 博客 | `src/content/blog/<locale>` |
 | 法律页面 | `src/content/legal/<locale>` |
-| PSEO 数据 | `src/features/pseo/data/pseo-pages.json` |
+| PSEO 数据 | `src/features/pseo/lib/pseo-data.ts` |
 
 ## 提交前检查
 
 ```bash
 pnpm typecheck
 pnpm lint
+pnpm test:run
+pnpm build
 ```
 
 如果改了认证、积分、支付、存储、工单或后台任务，要跑对应测试。
-

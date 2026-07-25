@@ -1,0 +1,65 @@
+---
+title: Feature Modules
+description: Understand selectable modules, automatic dependencies, and generated product features.
+---
+
+# Feature Modules
+
+The generator physically removes unselected modules and their routes, schema,
+translations, packages, and docs. Check `nextdevtpl.generated.json` in a
+generated project to see its effective module set.
+
+## Module catalog
+
+| Module ID | Product capability | Main dependencies |
+| --- | --- | --- |
+| `auth` | Email/password, OAuth, sessions, and auth pages | `mail`, `shared` |
+| `dashboard` | Authenticated workspace shell | `shared` |
+| `marketing` | Home, pricing, legal pages, and built-in docs | `payment`, `shared` |
+| `settings` | Profile, avatar, billing, credits, and account settings | `credits`, `payment`, `storage`, `subscription` |
+| `admin` | User, role, credit, and support management | `support`, `shared` |
+| `support` | Customer tickets, threads, and admin handling | `credits` |
+| `payment` | Shared checkout, subscription, and webhook flow | `subscription` |
+| `subscription` | Plan state and subscription UI | None |
+| `credits` | Double-entry ledger, FIFO spending, and expiry | `payment` |
+| `storage` | Presigned uploads and image proxying | None |
+| `mail` | Authentication and product mail entry points | None |
+| `blog` | Localized MDX blog | `marketing` |
+| `pseo` | Programmatic SEO index and detail pages | `marketing` |
+| `analytics` | Google Analytics and Sentry page integration | None |
+| `shared` | Theme, locale, providers, and shared UI | None |
+
+Dependencies are recursive. Selecting `support`, for example, also brings in
+credits, payments, subscriptions, mail, auth, and shared modules. The generated
+manifest is always the final record.
+
+## Select and verify
+
+```bash
+pnpm dlx create-nextdevtpl@latest my-app \
+  --preset custom \
+  --modules auth,dashboard,marketing,blog \
+  --payment stripe \
+  --mail resend \
+  --rate-limit upstash
+```
+
+After generation:
+
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test:run
+pnpm build
+```
+
+## Add product code
+
+Place a new module's UI, actions, hooks, and manifest under
+`src/features/<id>`. Product modules should depend on the stable core and
+`src/services`, without reaching into another feature's internal files. Keep
+tables in a separate schema group and declare navigation and translation
+namespaces in the module manifest.
+
+The 2.x generator creates new projects; it does not yet install or uninstall a
+module inside an existing customized project.

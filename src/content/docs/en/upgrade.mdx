@@ -1,0 +1,51 @@
+---
+title: Upgrade and Compatibility
+description: Merge a newer NextDevTpl release safely and diagnose combination checks.
+---
+
+# Upgrade and Compatibility
+
+A generated app is an independent source tree. NextDevTpl 2.x does not
+overwrite existing projects. Upgrades recreate the same selection in a
+comparison directory, review its diff, and merge changes in small groups.
+
+## Upgrade steps
+
+1. Commit current work, back up the database, and pass the current quality gate.
+2. Inspect and keep `nextdevtpl.generated.json`.
+3. Generate a temporary project with the target version and original choices:
+
+```bash
+pnpm dlx create-nextdevtpl@<target-version> ../nextdevtpl-upgrade \
+  --preset <original-preset> --target <original-target> --no-install --yes
+```
+
+4. Compare tooling, `src/core`, `src/adapters`, `src/services`, feature code,
+   schema, environment variables, and deployment configuration in that order.
+5. Create forward-only database migrations and test them on a non-production DB.
+6. Pass lint, type checking, tests, build, and a Preview health check before release.
+
+Repository maintainers can use the upstream
+[2.x upgrade guide](https://github.com/evepupil/NextDevTpl/blob/master/docs/%E5%8D%87%E7%BA%A7%E6%8C%87%E5%8D%97.md).
+
+## Combination checks
+
+Template maintainers can run:
+
+```bash
+pnpm verify:generated
+pnpm verify:compatibility:structure
+pnpm verify:compatibility --case minimal-server
+pnpm release:check
+```
+
+Compatibility reports are written to `artifacts/compatibility/<case>.json`.
+See upstream
+[compatibility troubleshooting](https://github.com/evepupil/NextDevTpl/blob/master/docs/%E5%85%BC%E5%AE%B9%E6%80%A7%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5.md)
+for common failures and Cloudflare Worker runtime diagnostics.
+
+## Rollback principle
+
+Return application code to the pre-upgrade commit. Repair migrations already
+executed in production with a reviewed forward migration instead of rewriting
+migration history or risking existing data.

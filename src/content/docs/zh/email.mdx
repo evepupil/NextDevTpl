@@ -1,47 +1,41 @@
 ---
 title: 邮件
-description: 使用 Resend 和 React Email 模板发送产品邮件。
+description: 使用 Disabled、Resend、SMTP 或 Cloudflare Email 发送产品邮件。
 ---
 
 # 邮件
 
-邮件发送使用 Resend，模板使用 React Email 组件。
+认证验证、重置密码和产品通知统一调用 `mailService`。生成器只保留选中的邮件
+实现和依赖。
 
-## 主要文件
+## 选择与配置
+
+| 适配器 | 配置 | 场景 |
+| --- | --- | --- |
+| `disabled` | 无 | 本地先跑通不依赖投递的流程 |
+| `resend` | `RESEND_API_KEY`、`EMAIL_FROM` | 托管事务邮件 |
+| `smtp` | Host、Port、Secure、可选 User/Pass | 自有 SMTP 或兼容供应商 |
+| `cloudflare-email` | `NEXTDEVTPL_EMAIL` Binding、`EMAIL_FROM` | Cloudflare Workers |
+
+`disabled` 被调用时会返回明确的未配置错误。需要邮箱验证或找回密码时，应选择
+可投递实现。
+
+## 主要代码
 
 | 路径 | 作用 |
 | --- | --- |
-| `src/features/mail/client.ts` | Resend client 配置 |
-| `src/features/mail/actions.ts` | 发信 actions |
-| `src/features/mail/utils.ts` | 邮件工具函数 |
+| `src/core/services/mail.ts` | 统一邮件消息和能力接口 |
+| `src/adapters/mail` | 供应商实现 |
+| `src/services/mail.ts` | 当前邮件实例 |
 | `src/features/mail/templates` | React Email 模板 |
-| `src/test/mail/newsletter.test.ts` | 邮件相关测试 |
+| `src/features/mail/server.ts` | 产品邮件发送入口 |
+| `src/lib/auth` | 验证和重置密码触发点 |
 
-## 环境变量
+## 新增邮件
 
-| 变量 | 作用 |
-| --- | --- |
-| `RESEND_API_KEY` | Resend API 凭证 |
-| `EMAIL_FROM` | 用户看到的发件人 |
+1. 在 `src/features/mail/templates` 新建模板。
+2. 在 `src/features/mail/server.ts` 组装发件人、收件人、主题、HTML 和纯文本。
+3. 通过 `mailService.send()` 投递。
+4. 测试缺配置、供应商失败和成功返回，不记录收件内容或密钥。
 
-示例：
-
-```bash
-RESEND_API_KEY="re_xxxxxxxxx"
-EMAIL_FROM="NextDevTpl <noreply@example.com>"
-```
-
-## 模板
-
-邮件模板是 React 组件：
-
-| 模板 | 作用 |
-| --- | --- |
-| `welcome-email.tsx` | 欢迎/引导邮件 |
-| `primary-action-email.tsx` | 带按钮的通用操作邮件 |
-
-改邮件模板时，文案尽量短，不要依赖复杂 CSS。邮件客户端的 CSS 支持很有限。
-
-## 本地行为
-
-没有配置 Resend 时，依赖邮件投递的功能应该视为不可用。先测试基础邮箱密码流程，再启用 Resend 测试验证邮件和重置密码。
+生产前完成发件域名验证、SPF/DKIM/DMARC，并验证认证邮件中的 URL 使用正式域名。
