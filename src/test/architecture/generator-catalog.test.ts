@@ -20,6 +20,9 @@ describe("generator catalog", () => {
       expect(catalog.modules[manifest.id]?.dependencies).toEqual(
         manifest.dependencies
       );
+      expect(catalog.modules[manifest.id]?.translations).toEqual(
+        manifest.translations
+      );
     }
   });
 });

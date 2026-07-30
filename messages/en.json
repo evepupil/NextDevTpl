@@ -387,6 +387,12 @@
       "yearsAgo": "{count, plural, one {# year ago} other {# years ago}}"
     }
   },
+  "Theme": {
+    "toggle": "Toggle theme",
+    "lightMode": "Light mode",
+    "darkMode": "Dark mode",
+    "followSystem": "Follow system"
+  },
   "Cookie": {
     "title": "Cookie Settings",
     "description": "We use cookies to ensure you get the best experience on our website. By continuing to use this site, you agree to our",
@@ -744,9 +750,6 @@
     "badge": "ADMIN",
     "roleBadge": "Admin",
     "returnToUser": "Return to dashboard",
-    "lightMode": "Light mode",
-    "darkMode": "Dark mode",
-    "followSystem": "Follow system",
     "signOut": "Sign out",
     "nav": {
       "controlPanel": "Control Panel",

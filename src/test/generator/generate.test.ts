@@ -48,6 +48,14 @@ describe("project generation", () => {
       scripts: Record<string, string>;
     };
     const lockfile = await readFile(join(target, "pnpm-lock.yaml"), "utf8");
+    const translations = await Promise.all(
+      ["en", "zh"].map(
+        async (locale) =>
+          JSON.parse(
+            await readFile(join(target, "messages", `${locale}.json`), "utf8")
+          ) as Record<string, unknown>
+      )
+    );
 
     expect(manifest.modules).toEqual(["mail", "shared", "auth", "dashboard"]);
     expect(await exists(join(target, "src/features/credits"))).toBe(false);
@@ -78,6 +86,10 @@ describe("project generation", () => {
     expect(await exists(join(target, "open-next.config.ts"))).toBe(false);
     expect(await exists(join(target, "cloudflare"))).toBe(false);
     expect(await exists(join(target, "next-env.d.ts"))).toBe(false);
+    for (const messages of translations) {
+      expect(messages).toHaveProperty("Theme");
+      expect(messages).not.toHaveProperty("AdminSidebar");
+    }
   });
 
   it("keeps only SaaS preset adapters", async () => {

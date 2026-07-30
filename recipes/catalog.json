@@ -147,7 +147,7 @@
       "dependencies": [],
       "routes": [],
       "schema": [],
-      "translations": ["Common", "Cookie"],
+      "translations": ["Common", "Cookie", "Theme"],
       "env": []
     },
     "storage": {

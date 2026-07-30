@@ -8,6 +8,6 @@ export const sharedModule = defineModule({
   dependencies: [],
   routes: [],
   navigation: [],
-  translations: ["Common", "Cookie"],
+  translations: ["Common", "Cookie", "Theme"],
   schema: [],
 });

@@ -340,6 +340,12 @@
       "yearsAgo": "{count} 年前"
     }
   },
+  "Theme": {
+    "toggle": "切换主题",
+    "lightMode": "浅色模式",
+    "darkMode": "深色模式",
+    "followSystem": "跟随系统"
+  },
   "Cookie": {
     "title": "Cookie 设置",
     "description": "我们使用 Cookie 来确保您在我们网站上获得最佳体验。继续使用本网站即表示您同意我们的",
@@ -740,9 +746,6 @@
     "badge": "管理",
     "roleBadge": "管理员",
     "returnToUser": "返回用户端",
-    "lightMode": "浅色模式",
-    "darkMode": "深色模式",
-    "followSystem": "跟随系统",
     "signOut": "退出登录",
     "nav": {
       "controlPanel": "管理中心",
