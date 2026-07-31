@@ -1,0 +1,141 @@
+---
+title: "NextDevTpl 2.x: A Composable SaaS Starter for Real Projects"
+description: "NextDevTpl 2.x is released. Learn how the project evolved from a full template into a composable generator with service adapters and four deployment targets."
+date: 2026-07-31
+author: NextDevTpl Team
+tags:
+  - Release
+  - NextDevTpl
+  - SaaS
+  - Open Source
+---
+
+# NextDevTpl 2.x: A Composable SaaS Starter for Real Projects
+
+The stable `v2.6.0` release of NextDevTpl 2.x is now available.
+
+This release focuses on one practical question: how can a SaaS starter get you moving quickly while keeping the generated application clean, replaceable, and independently maintainable? 2.x answers that with three composition layers: product modules, service adapters, and deployment targets.
+
+## What changed in 2.x?
+
+### 1. Generate the project you actually need
+
+Create a standalone app with the published CLI:
+
+```bash
+pnpm dlx create-nextdevtpl@2.6.0 my-app --preset saas --target vercel
+```
+
+The generator handles the repetitive work:
+
+- copies the selected source;
+- resolves module dependencies;
+- removes unselected pages, routes, schema groups, and translations;
+- keeps only the packages and environment variables required by selected adapters;
+- writes the deployment configuration for the selected target;
+- records the effective selection in `nextdevtpl.generated.json`.
+
+The generated application owns its source and has no runtime dependency on the generator. It is ready to become your product repository.
+
+### 2. Clear module boundaries
+
+2.x separates the kernel, product modules, and external services:
+
+- `src/core/modules` owns module contracts and dependency validation;
+- `src/features` contains auth, dashboard, payments, credits, support, admin, and other product features;
+- `src/core/services` defines shared contracts for payments, mail, storage, AI, jobs, and rate limits;
+- `src/adapters` contains provider APIs, SDKs, and Cloudflare bindings;
+- `src/services` is the stable entry point used by product code.
+
+The result is easier to reason about: product flows do not need to understand every provider SDK, and provider changes stay localized.
+
+### 3. Replace services without rewriting product flows
+
+2.x ships six adapter families:
+
+| Capability | Available implementations |
+| --- | --- |
+| Payments | Creem, Stripe |
+| Storage | S3 Compatible, Cloudflare R2 Binding |
+| Mail | Disabled, Resend, SMTP, Cloudflare Email |
+| AI | OpenAI Compatible, Anthropic, Workers AI |
+| Background jobs | Inngest, Cloudflare Workflows |
+| Rate limiting | No-op, Upstash Redis, Cloudflare Rate Limiting |
+
+A conventional Vercel app can use Creem, S3, Resend, Inngest, and Upstash. A Cloudflare Workers app can use R2, Workers AI, Email, Workflows, and native rate limiting. Both combinations use the same business-facing service contracts.
+
+### 4. Four production deployment targets
+
+The generator supports:
+
+- `server`: a Node.js standalone artifact, systemd example, and server build script;
+- `docker`: Dockerfile, Docker Compose, PostgreSQL, and a one-shot migration service;
+- `vercel`: Vercel configuration, health checks, and module-aware cron configuration;
+- `cloudflare`: OpenNext, Worker entrypoint, Wrangler bindings, and Worker-safe replacements.
+
+Every target exposes `/api/health` for a post-deployment configuration and database check.
+
+### 5. Cloudflare Workers is a supported production combination
+
+Cloudflare was the focus of 2.5. The release handles Node.js runtime differences, R2, Workers AI, Cloudflare Email, Workflows, and Rate Limiting bindings, and generates a Worker-safe console logger.
+
+The complete `ai-saas` combination compresses to about `2280.94 KiB gzip`, below the Workers Free `3 MB` Worker size limit. Neon HTTP or Hyperdrive connects the Worker to PostgreSQL; D1 remains outside the 2.x support scope.
+
+### 6. Compatibility checks and an upgrade path
+
+M6 fixed four official combinations in CI:
+
+| Combination | Deployment target |
+| --- | --- |
+| `minimal` | Server |
+| `saas` | Docker Compose |
+| `saas` | Vercel |
+| `ai-saas` | Cloudflare Workers |
+
+Each combination checks generation, installation, migrations, lint, types, tests, build, and health. Upgrades do not overwrite your product code: generate a temporary comparison project with the same selection, review the diff, and merge changes in small groups.
+
+## Three official presets
+
+| Preset | Best for | Default target |
+| --- | --- | --- |
+| `minimal` | Starting with auth and a dashboard | Server |
+| `saas` | A conventional subscription SaaS | Vercel |
+| `ai-saas` | An AI product on Cloudflare | Cloudflare Workers |
+| `custom` | Exact control over modules and services | Server |
+
+Custom selection example:
+
+```bash
+pnpm dlx create-nextdevtpl@2.6.0 my-app \
+  --preset custom \
+  --modules auth,dashboard,marketing,blog \
+  --payment stripe \
+  --mail smtp \
+  --target docker
+```
+
+## How to start
+
+Node.js 24 and pnpm 10 are required. After generation, inspect the manifest, copy `.env.example`, and initialize the database:
+
+```bash
+cd my-app
+Get-Content nextdevtpl.generated.json
+Copy-Item .env.example .env.local
+pnpm db:push
+pnpm dev
+```
+
+Read the full guides:
+
+- [Generator and Presets](/en/docs/generator)
+- [Feature Modules](/en/docs/feature-modules)
+- [Service Adapters](/en/docs/service-adapters)
+- [Deployment](/en/docs/deployment)
+- [Upgrade and Compatibility](/en/docs/upgrade)
+
+## 2.x boundaries
+
+2.x targets Node.js `>=24 <25`, does not ship a first-party D1 recipe, and does not yet provide commands to add or remove modules inside an existing project. These boundaries are documented and covered by compatibility checks so you can evaluate the fit before starting.
+
+Thanks to everyone who tried the releases, reported issues, and helped verify the combinations. The goal of 2.x is simple: remove repeated infrastructure work and give your product and users more of your time.

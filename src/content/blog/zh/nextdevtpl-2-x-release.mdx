@@ -1,0 +1,141 @@
+---
+title: "NextDevTpl 2.x：把 SaaS 模板变成可组合的项目生成器"
+description: "NextDevTpl 2.x 已发布。了解从模块内核、服务适配器到四种部署目标的完整升级，以及如何用 create-nextdevtpl 创建自己的 SaaS。"
+date: 2026-07-31
+author: NextDevTpl 团队
+tags:
+  - 版本发布
+  - NextDevTpl
+  - SaaS
+  - 开源
+---
+
+# NextDevTpl 2.x：把 SaaS 模板变成可组合的项目生成器
+
+NextDevTpl 2.x 的稳定版本 `v2.6.0` 已经发布。
+
+这次升级围绕一个问题展开：SaaS 模板应该让你快速开始业务，同时也要让生成后的项目保持干净、可替换、可独立维护。2.x 把原来的完整模板整理成了模块、服务适配器和部署目标三层组合系统。
+
+## 2.x 主要做了什么？
+
+### 1. 从“整套模板”变成“按选择生成项目”
+
+现在可以直接使用脚手架创建项目：
+
+```bash
+pnpm dlx create-nextdevtpl@2.6.0 my-app --preset saas --target vercel
+```
+
+生成器会根据你的选择处理这些内容：
+
+- 复制需要的源码；
+- 自动补齐模块依赖；
+- 删除未选中的页面、路由、数据库表和翻译；
+- 只保留当前适配器需要的依赖和环境变量；
+- 生成对应平台的部署配置；
+- 把实际选择写入 `nextdevtpl.generated.json`。
+
+生成后的项目拥有完整源码，线上运行不依赖生成器。你可以把它当成自己的产品代码库继续开发。
+
+### 2. 模块边界重新整理
+
+2.x 把内核、产品模块和外部服务分开：
+
+- `src/core/modules` 负责模块契约和依赖校验；
+- `src/features` 放认证、Dashboard、支付、积分、工单、管理后台等产品能力；
+- `src/core/services` 定义支付、邮件、存储、AI、任务和限流的统一接口；
+- `src/adapters` 放供应商 API、SDK 和 Cloudflare Binding；
+- `src/services` 是业务代码调用外部能力的稳定入口。
+
+这样做的效果很直接：业务代码不用了解供应商 SDK，后续替换服务时改动范围更小。
+
+### 3. 服务适配器可以按需替换
+
+2.x 当前提供六类服务适配器：
+
+| 能力 | 可选实现 |
+| --- | --- |
+| 支付 | Creem、Stripe |
+| 存储 | S3 Compatible、Cloudflare R2 Binding |
+| 邮件 | Disabled、Resend、SMTP、Cloudflare Email |
+| AI | OpenAI Compatible、Anthropic、Workers AI |
+| 后台任务 | Inngest、Cloudflare Workflows |
+| 限流 | No-op、Upstash Redis、Cloudflare Rate Limiting |
+
+例如，常规 Vercel 项目可以使用 Creem、S3、Resend、Inngest 和 Upstash；Cloudflare Workers 项目则可以组合 R2、Workers AI、Email、Workflows 和原生限流。
+
+### 4. 正式支持四种部署目标
+
+生成器现在支持：
+
+- `server`：Node.js standalone 产物、systemd 和服务器构建脚本；
+- `docker`：Dockerfile、Docker Compose、PostgreSQL 和一次性迁移服务；
+- `vercel`：Vercel 配置、健康检查和按模块生成的 cron；
+- `cloudflare`：OpenNext、Worker 入口、Wrangler Binding 和 Worker 兼容实现。
+
+每种目标都提供 `/api/health`，可以在部署后检查基础配置和数据库连通性。
+
+### 5. Cloudflare Workers 进入正式组合
+
+Cloudflare 目标是 2.5 的重点。我们处理了 Node.js 运行时差异、R2、Workers AI、Cloudflare Email、Workflows 和 Rate Limiting Binding，并为 Worker 生成专用的 console logger。
+
+完整的 `ai-saas` 组合压缩后约为 `2280.94 KiB gzip`，低于 Workers Free 的 `3 MB` Worker 大小限制。Neon HTTP 或 Hyperdrive 用于连接 PostgreSQL，D1 暂不属于 2.x 的支持范围。
+
+### 6. 兼容性矩阵和升级路径落地
+
+M6 固化了四组官方组合：
+
+| 组合 | 部署目标 |
+| --- | --- |
+| `minimal` | Server |
+| `saas` | Docker Compose |
+| `saas` | Vercel |
+| `ai-saas` | Cloudflare Workers |
+
+每组都会检查生成、安装、迁移、lint、类型、测试、构建和健康检查。升级时，2.x 不会覆盖你的业务代码，推荐用相同选择生成临时对照项目，再审查差异、分批合并。
+
+## 三个官方预设
+
+| 预设 | 适合场景 | 默认目标 |
+| --- | --- | --- |
+| `minimal` | 先从认证和 Dashboard 开始 | Server |
+| `saas` | 常规订阅型 SaaS | Vercel |
+| `ai-saas` | Cloudflare 上的 AI 产品 | Cloudflare Workers |
+| `custom` | 精确控制模块和服务 | Server |
+
+自定义组合示例：
+
+```bash
+pnpm dlx create-nextdevtpl@2.6.0 my-app \
+  --preset custom \
+  --modules auth,dashboard,marketing,blog \
+  --payment stripe \
+  --mail smtp \
+  --target docker
+```
+
+## 现在如何开始？
+
+需要 Node.js 24 和 pnpm 10。创建项目后，查看生成清单，复制 `.env.example`，初始化数据库：
+
+```bash
+cd my-app
+Get-Content nextdevtpl.generated.json
+Copy-Item .env.example .env.local
+pnpm db:push
+pnpm dev
+```
+
+完整操作入口：
+
+- [生成器与预设](/zh/docs/generator)
+- [功能模块](/zh/docs/feature-modules)
+- [服务适配器](/zh/docs/service-adapters)
+- [部署](/zh/docs/deployment)
+- [升级与兼容性](/zh/docs/upgrade)
+
+## 2.x 的边界
+
+2.x 目前要求 Node.js `>=24 <25`，不提供 D1 首发方案，也没有在已有项目中自动追加或卸载模块的命令。这些边界写进了文档和兼容性检查，方便你在选型时提前判断。
+
+感谢每一位试用、反馈和参与验证的朋友。2.x 的目标一直很简单：让你少重复搭建基础设施，把时间留给真正的产品和用户。
