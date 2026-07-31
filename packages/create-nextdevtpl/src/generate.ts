@@ -67,19 +67,84 @@ function projectName(target: string): string {
   );
 }
 
+function cloudflareCompatibilityDate(): string {
+  const today = new Date().toISOString().slice(0, 10);
+  const override = process.env.CF_COMPATIBILITY_DATE?.trim();
+  if (!override) return today;
+  const parsed = /^\d{4}-\d{2}-\d{2}$/u.test(override)
+    ? new Date(`${override}T00:00:00.000Z`)
+    : null;
+  const isValidDate =
+    parsed !== null &&
+    !Number.isNaN(parsed.getTime()) &&
+    parsed.toISOString().slice(0, 10) === override;
+  if (!isValidDate || override > today) {
+    throw new Error(
+      `CF_COMPATIBILITY_DATE must be an existing UTC date no later than ${today}`
+    );
+  }
+  return override;
+}
+
 function cloudflareDatabaseSource(): string {
-  return `import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
+  return `import { neon, Pool as NeonPool } from "@neondatabase/serverless";
+import { drizzle as drizzleNeonHttp } from "drizzle-orm/neon-http";
+import { drizzle as drizzleNeonServerless } from "drizzle-orm/neon-serverless";
+
+import { getRuntimeEnv } from "@/lib/runtime-config";
 
 import * as schema from "./schema/index";
 
-const databaseUrl = process.env.DATABASE_URL;
-if (!databaseUrl) {
-  throw new Error("DATABASE_URL is required");
+type Database = ReturnType<typeof createDatabaseConnection>;
+
+function createTransactionDatabase(pool: NeonPool) {
+  return drizzleNeonServerless(pool, { schema });
 }
 
-const sql = neon(databaseUrl);
-export const db = drizzle(sql, { schema });
+type TransactionDatabase = ReturnType<typeof createTransactionDatabase>;
+type DatabaseTransaction = Parameters<
+  Parameters<TransactionDatabase["transaction"]>[0]
+>[0];
+
+function createDatabaseConnection(databaseUrl: string) {
+  const sql = neon(databaseUrl);
+  return drizzleNeonHttp(sql, { schema });
+}
+
+let database: Database | undefined;
+
+function getDatabase(): Database {
+  if (database) return database;
+
+  const databaseUrl = getRuntimeEnv("DATABASE_URL");
+  if (!databaseUrl) throw new Error("DATABASE_URL is required");
+
+  database = createDatabaseConnection(databaseUrl);
+  return database;
+}
+
+export const db = new Proxy({} as Database, {
+  get(_target, property) {
+    const databaseInstance = getDatabase();
+    const value = Reflect.get(databaseInstance, property);
+    return typeof value === "function" ? value.bind(databaseInstance) : value;
+  },
+});
+
+export async function withDbTransaction<T>(
+  callback: (tx: DatabaseTransaction) => Promise<T>
+): Promise<T> {
+  const databaseUrl = getRuntimeEnv("DATABASE_URL");
+  if (!databaseUrl) throw new Error("DATABASE_URL is required");
+
+  const pool = new NeonPool({ connectionString: databaseUrl });
+  try {
+    const transactionDb = createTransactionDatabase(pool);
+    return await transactionDb.transaction(callback);
+  } finally {
+    await pool.end();
+  }
+}
 
 export * from "./schema/index";
 `;
@@ -171,8 +236,12 @@ function cloudflareConfig(
     $schema: "node_modules/wrangler/config-schema.json",
     name,
     main: "cloudflare/worker.mjs",
-    compatibility_date: new Date().toISOString().slice(0, 10),
-    compatibility_flags: ["nodejs_compat", "global_fetch_strictly_public"],
+    compatibility_date: cloudflareCompatibilityDate(),
+    compatibility_flags: [
+      "nodejs_compat",
+      "nodejs_compat_populate_process_env",
+      "global_fetch_strictly_public",
+    ],
     minify: true,
     assets: { directory: ".open-next/assets", binding: "ASSETS" },
     services: [{ binding: "WORKER_SELF_REFERENCE", service: name }],
@@ -212,6 +281,98 @@ function cloudflareConfig(
           })),
         }
       : {}),
+  };
+}
+
+function cloudflarePreflightConfig(
+  target: string,
+  selection: ProjectSelection
+): Record<string, unknown> {
+  const required = new Set([
+    "DATABASE_URL",
+    "BETTER_AUTH_SECRET",
+    "BETTER_AUTH_URL",
+    "NEXT_PUBLIC_APP_URL",
+  ]);
+  const groups: { label: string; names: string[] }[] = [];
+  const addRequired = (...names: string[]) => {
+    for (const name of names) required.add(name);
+  };
+  const addGroup = (label: string, ...names: string[]) => {
+    groups.push({ label, names });
+  };
+
+  if (selection.modules.includes("storage")) {
+    addRequired("STORAGE_BUCKET_NAME", "NEXT_PUBLIC_AVATARS_BUCKET_NAME");
+  }
+  if (selection.modules.includes("credits")) addRequired("CRON_SECRET");
+
+  for (const adapter of Object.values(selection.adapters)) {
+    switch (adapter) {
+      case "payment:creem":
+        addRequired("CREEM_API_KEY", "CREEM_WEBHOOK_SECRET");
+        break;
+      case "payment:stripe":
+        addRequired("STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET");
+        break;
+      case "storage:s3-compatible":
+        addRequired(
+          "STORAGE_ACCESS_KEY_ID",
+          "STORAGE_SECRET_ACCESS_KEY",
+          "STORAGE_ENDPOINT",
+          "STORAGE_REGION"
+        );
+        break;
+      case "mail:resend":
+        addRequired("RESEND_API_KEY", "EMAIL_FROM");
+        break;
+      case "mail:smtp":
+        addRequired(
+          "SMTP_HOST",
+          "SMTP_PORT",
+          "SMTP_SECURE",
+          "SMTP_USER",
+          "SMTP_PASS"
+        );
+        break;
+      case "mail:cloudflare-email":
+        addRequired("EMAIL_FROM");
+        break;
+      case "ai:openai-compatible":
+        addRequired("AI_PROVIDER");
+        addGroup(
+          "OpenAI-compatible provider key",
+          "OPENAI_API_KEY",
+          "DEEPSEEK_API_KEY",
+          "MIMO_API_KEY"
+        );
+        break;
+      case "ai:anthropic":
+        addRequired("ANTHROPIC_API_KEY");
+        break;
+      case "ai:workers-ai":
+        addRequired("WORKERS_AI_MODEL");
+        break;
+      case "jobs:inngest":
+        addRequired("INNGEST_EVENT_KEY", "INNGEST_SIGNING_KEY");
+        break;
+      case "rate-limit:upstash":
+        addRequired("UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN");
+        break;
+      default:
+        break;
+    }
+  }
+
+  return {
+    required: [...required].sort(),
+    groups,
+    optionalPairs: [
+      ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"],
+      ["GITHUB_CLIENT_ID", "GITHUB_CLIENT_SECRET"],
+    ],
+    oauthCallback: selection.modules.includes("auth"),
+    workerName: projectName(target),
   };
 }
 
@@ -533,7 +694,7 @@ export default async function LocaleLayout({ children, params }: { children: Rea
   if (!routing.locales.includes(locale as "en" | "zh")) notFound();
   const messages = await getMessages();
   return (
-    <NextIntlClientProvider messages={messages}>
+    <NextIntlClientProvider key={locale} messages={messages}>
       <Providers locale={locale}>
         {children}
         ${hasModule(selection, "marketing") ? "<CookieConsent />" : ""}
@@ -779,9 +940,17 @@ async function rewriteDeployment(
     join(target, "wrangler.jsonc"),
     cloudflareConfig(target, selection)
   );
+  await writeJson(
+    join(target, "cloudflare", "preflight-config.json"),
+    cloudflarePreflightConfig(target, selection)
+  );
   await writeText(
     join(target, "src", "db", "index.ts"),
     cloudflareDatabaseSource()
+  );
+  await writeText(
+    join(target, "src", "lib", "runtime-config.ts"),
+    'export { cleanRuntimeValue, getRuntimeEnv, getRuntimeEnvironment } from "../../cloudflare/runtime-config";\n'
   );
   await writeText(
     join(target, "src", "lib", "monitoring", "index.ts"),
@@ -831,7 +1000,12 @@ async function rewritePackage(
   delete packageJson.scripts["deploy:check"];
   delete packageJson.scripts["deploy:server:build"];
   delete packageJson.scripts["verify:health"];
-  packageJson.scripts["db:generate:init"] = "drizzle-kit generate --name init";
+  packageJson.scripts["db:generate"] =
+    "drizzle-kit generate && pnpm exec biome format --write drizzle/meta && node scripts/check-generated-migrations.mjs";
+  packageJson.scripts["db:generate:init"] =
+    "drizzle-kit generate --name init && pnpm exec biome format --write drizzle/meta && node scripts/check-generated-migrations.mjs";
+  packageJson.scripts["db:generate:checked"] =
+    "node scripts/check-generated-migrations.mjs";
   if (selection.target !== "cloudflare") {
     packageJson.scripts["deploy:check"] = "node deploy/check-health.mjs";
     packageJson.scripts["verify:health"] =
@@ -851,16 +1025,19 @@ async function rewritePackage(
     delete packageJson.devDependencies["@types/pg"];
     delete packageJson.devDependencies["@types/ws"];
     delete packageJson.devDependencies["pino-pretty"];
-    packageJson.scripts["cf:build"] = "opennextjs-cloudflare build";
+    packageJson.scripts["cf:check"] = "node cloudflare/preflight.mjs";
+    packageJson.scripts["cf:build"] =
+      "node cloudflare/preflight.mjs --build && opennextjs-cloudflare build";
     packageJson.scripts["cf:deploy"] =
-      "opennextjs-cloudflare build && wrangler deploy --minify";
+      "node cloudflare/preflight.mjs --deploy && opennextjs-cloudflare build && wrangler deploy --minify";
     packageJson.scripts["cf:preview"] =
-      "opennextjs-cloudflare build && wrangler dev";
+      "node cloudflare/preflight.mjs --build && opennextjs-cloudflare build && wrangler dev";
     packageJson.scripts["cf:types"] = "wrangler types";
   } else {
     delete packageJson.scripts["cf:build"];
     delete packageJson.scripts["cf:deploy"];
     delete packageJson.scripts["cf:preview"];
+    delete packageJson.scripts["cf:check"];
     delete packageJson.scripts["cf:types"];
     delete packageJson.devDependencies["@opennextjs/cloudflare"];
     delete packageJson.devDependencies.wrangler;

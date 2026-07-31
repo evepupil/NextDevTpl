@@ -4,9 +4,11 @@ import { DEFAULT_SIGNED_URL_EXPIRES } from "@/features/storage/types";
 import { withApiLogging } from "@/lib/api-logger";
 import { auth } from "@/lib/auth";
 import { getFileTypeFromName } from "@/lib/file-utils";
+import { getRuntimeEnv } from "@/lib/runtime-config";
 import { storageService } from "@/services/storage";
 
-const BUCKET_NAME = process.env.STORAGE_BUCKET_NAME || "nextdevtpl-uploads";
+const BUCKET_NAME =
+  getRuntimeEnv("STORAGE_BUCKET_NAME") || "nextdevtpl-uploads";
 
 /**
  * 允许的文件类型和大小限制

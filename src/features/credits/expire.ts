@@ -7,7 +7,7 @@
 
 import { and, eq, gt, lt, sql } from "drizzle-orm";
 
-import { db } from "@/db";
+import { db, withDbTransaction } from "@/db";
 import {
   creditsBalance,
   creditsBatch,
@@ -38,7 +38,7 @@ export async function processExpiredBatches() {
   }> = [];
 
   for (const batch of expiredBatches) {
-    await db.transaction(async (tx) => {
+    await withDbTransaction(async (tx) => {
       const [expiredBatch] = await tx
         .update(creditsBatch)
         .set({

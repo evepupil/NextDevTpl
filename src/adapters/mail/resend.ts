@@ -6,6 +6,7 @@ import {
   type MailAdapter,
   type MailMessage,
 } from "@/core/services";
+import { getRuntimeEnv } from "@/lib/runtime-config";
 
 interface ResendConfig {
   apiKey?: string;
@@ -25,7 +26,7 @@ export function createResendMailAdapter(
     if (client) {
       return client;
     }
-    const apiKey = config.apiKey ?? process.env.RESEND_API_KEY;
+    const apiKey = config.apiKey ?? getRuntimeEnv("RESEND_API_KEY");
     if (!apiKey) {
       throw new AdapterError({
         code: "configuration",
@@ -49,7 +50,7 @@ export function createResendMailAdapter(
       const { data, error } = await executeAdapterOperation({
         provider,
         fallbackMessage: "Resend delivery failed",
-        secrets: [config.apiKey ?? process.env.RESEND_API_KEY],
+        secrets: [config.apiKey ?? getRuntimeEnv("RESEND_API_KEY")],
         operation: () =>
           getClient().emails.send({
             from: formatAddress(message.from),

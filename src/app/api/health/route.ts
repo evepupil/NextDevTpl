@@ -2,10 +2,12 @@ import { withApiLogging } from "@/lib/api-logger";
 import type { HealthCheckResult } from "@/lib/health";
 import {
   createHealthReport,
+  HEALTH_ENVIRONMENT_KEYS,
   probeDatabase,
   runHealthProbe,
   validateDeploymentEnvironment,
 } from "@/lib/health";
+import { getRuntimeEnv, getRuntimeEnvironment } from "@/lib/runtime-config";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -16,7 +18,7 @@ const FAIL: HealthCheckResult = { status: "fail", durationMs: 0 };
 
 function getVersion(): string {
   return (
-    process.env.APP_VERSION?.trim() ||
+    getRuntimeEnv("APP_VERSION") ||
     process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) ||
     "unknown"
   );
@@ -28,7 +30,9 @@ export const GET = withApiLogging(async (request: Request) => {
 
   if (mode !== "live") {
     const configurationValid =
-      validateDeploymentEnvironment(process.env).length === 0;
+      validateDeploymentEnvironment(
+        getRuntimeEnvironment(HEALTH_ENVIRONMENT_KEYS)
+      ).length === 0;
     checks.configuration = configurationValid ? PASS : FAIL;
     checks.database = configurationValid
       ? await runHealthProbe(probeDatabase, {

@@ -7,6 +7,8 @@ const REQUIRED_ENVIRONMENT_KEYS = [
   "NEXT_PUBLIC_APP_URL",
 ] as const;
 
+export const HEALTH_ENVIRONMENT_KEYS = REQUIRED_ENVIRONMENT_KEYS;
+
 function isHttpUrl(value: string): boolean {
   try {
     const protocol = new URL(value).protocol;

@@ -9,6 +9,7 @@
 import { z } from "zod";
 
 import { protectedAction } from "@/lib/safe-action";
+import { getRuntimeEnv } from "@/lib/runtime-config";
 import { storageService } from "@/services/storage";
 
 import {
@@ -29,7 +30,7 @@ const withStorageAction = (name: string) =>
  * 获取头像存储桶名称
  */
 function getAvatarsBucket(): string {
-  const bucket = process.env.NEXT_PUBLIC_AVATARS_BUCKET_NAME;
+  const bucket = getRuntimeEnv("NEXT_PUBLIC_AVATARS_BUCKET_NAME");
   if (!bucket) {
     throw new Error("NEXT_PUBLIC_AVATARS_BUCKET_NAME 环境变量未设置");
   }

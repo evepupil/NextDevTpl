@@ -57,19 +57,21 @@ export function isMailServiceConfigured(): boolean {
 }
 `,
   "mail:resend": `import { createResendMailAdapter } from "@/adapters/mail";
+import { getRuntimeEnv } from "@/lib/runtime-config";
 
 export const mailService = createResendMailAdapter();
 
 export function isMailServiceConfigured(): boolean {
-  return Boolean(process.env.RESEND_API_KEY);
+  return Boolean(getRuntimeEnv("RESEND_API_KEY"));
 }
 `,
   "mail:smtp": `import { createSmtpMailAdapter } from "@/adapters/mail";
+import { getRuntimeEnv } from "@/lib/runtime-config";
 
 export const mailService = createSmtpMailAdapter();
 
 export function isMailServiceConfigured(): boolean {
-  return Boolean(process.env.SMTP_HOST);
+  return Boolean(getRuntimeEnv("SMTP_HOST"));
 }
 `,
   "mail:cloudflare-email": `import { createCloudflareEmailAdapter, type CloudflareEmailBindingPort } from "@/adapters/mail";
@@ -84,54 +86,57 @@ export function isMailServiceConfigured(): boolean {
 }
 `,
   "ai:openai-compatible": `import { createOpenAICompatibleAdapter } from "@/adapters/ai";
+import { getRuntimeEnv } from "@/lib/runtime-config";
 
 export type OpenAICompatibleProvider = "deepseek" | "mimo" | "openai";
 
 export function getAIProvider(): OpenAICompatibleProvider {
-  const provider = process.env.AI_PROVIDER;
+  const provider = getRuntimeEnv("AI_PROVIDER");
   return provider === "deepseek" || provider === "mimo" ? provider : "openai";
 }
 
 export function getAIModel(): string {
   switch (getAIProvider()) {
-    case "deepseek": return process.env.DEEPSEEK_MODEL ?? "deepseek-chat";
-    case "mimo": return process.env.MIMO_MODEL ?? "mimo-v2-flash";
-    case "openai": return process.env.OPENAI_MODEL ?? "gpt-4o-mini";
+    case "deepseek": return getRuntimeEnv("DEEPSEEK_MODEL") ?? "deepseek-chat";
+    case "mimo": return getRuntimeEnv("MIMO_MODEL") ?? "mimo-v2-flash";
+    case "openai": return getRuntimeEnv("OPENAI_MODEL") ?? "gpt-4o-mini";
   }
 }
 
 const provider = getAIProvider();
 export const aiService = createOpenAICompatibleAdapter({
   model: getAIModel(),
-  ...(provider === "deepseek" ? { apiKey: process.env.DEEPSEEK_API_KEY, baseURL: "https://api.deepseek.com/v1" } : {}),
-  ...(provider === "mimo" ? { apiKey: process.env.MIMO_API_KEY, baseURL: "https://api.xiaomimimo.com/v1" } : {}),
-  ...(provider === "openai" ? { apiKey: process.env.OPENAI_API_KEY } : {}),
+  ...(provider === "deepseek" ? { apiKey: getRuntimeEnv("DEEPSEEK_API_KEY"), baseURL: "https://api.deepseek.com/v1" } : {}),
+  ...(provider === "mimo" ? { apiKey: getRuntimeEnv("MIMO_API_KEY"), baseURL: "https://api.xiaomimimo.com/v1" } : {}),
+  ...(provider === "openai" ? { apiKey: getRuntimeEnv("OPENAI_API_KEY") } : {}),
 });
 `,
   "ai:anthropic": `import { createAnthropicAdapter } from "@/adapters/ai";
+import { getRuntimeEnv } from "@/lib/runtime-config";
 
 export function getAIProvider() {
   return "anthropic" as const;
 }
 
 export function getAIModel(): string {
-  return process.env.ANTHROPIC_MODEL ?? "claude-sonnet";
+  return getRuntimeEnv("ANTHROPIC_MODEL") ?? "claude-sonnet";
 }
 
 export const aiService = createAnthropicAdapter({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+  apiKey: getRuntimeEnv("ANTHROPIC_API_KEY"),
   model: getAIModel(),
 });
 `,
   "ai:workers-ai": `import { createWorkersAIAdapter, type WorkersAIBindingPort } from "@/adapters/ai";
 import { createLazyCloudflareBinding } from "@/lib/cloudflare/bindings";
+import { getRuntimeEnv } from "@/lib/runtime-config";
 
 export function getAIProvider() {
   return "workers-ai" as const;
 }
 
 export function getAIModel(): string {
-  return process.env.WORKERS_AI_MODEL ?? "@cf/meta/llama-3.1-8b-instruct";
+  return getRuntimeEnv("WORKERS_AI_MODEL") ?? "@cf/meta/llama-3.1-8b-instruct";
 }
 
 export const aiService = createWorkersAIAdapter({
@@ -156,9 +161,10 @@ export const rateLimitService = noopRateLimitAdapter;
 export const anonymousQuotaService = noopUsageQuotaAdapter;
 `,
   "rate-limit:upstash": `import { createUpstashServices, noopRateLimitAdapter, noopUsageQuotaAdapter } from "@/adapters/rate-limit";
+import { getRuntimeEnv } from "@/lib/runtime-config";
 
-const url = process.env.UPSTASH_REDIS_REST_URL;
-const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+const url = getRuntimeEnv("UPSTASH_REDIS_REST_URL");
+const token = getRuntimeEnv("UPSTASH_REDIS_REST_TOKEN");
 const upstash = url && token ? createUpstashServices({ url, token }) : null;
 
 export const rateLimitService = upstash?.rateLimit ?? noopRateLimitAdapter;

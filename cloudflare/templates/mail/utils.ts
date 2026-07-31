@@ -1,10 +1,11 @@
 import type { MailAddress } from "@/core/services";
+import { getRuntimeEnv } from "@/lib/runtime-config";
 import { mailService } from "@/services/mail";
 
 import type { RenderedEmail } from "./templates";
 
 export const DEFAULT_FROM_EMAIL =
-  process.env.EMAIL_FROM ?? "NextDevTpl <noreply@example.com>";
+  getRuntimeEnv("EMAIL_FROM") ?? "NextDevTpl <noreply@example.com>";
 
 export interface SendEmailParams {
   bcc?: string | string[];
@@ -40,7 +41,7 @@ function toArray(value: string | string[]): string[] {
 export async function sendEmail(
   params: SendEmailParams
 ): Promise<SendEmailResult> {
-  if (process.env.NODE_ENV === "development" && !params.force) {
+  if (getRuntimeEnv("NODE_ENV") === "development" && !params.force) {
     console.log("Email preview", {
       from: params.from ?? DEFAULT_FROM_EMAIL,
       subject: params.subject,

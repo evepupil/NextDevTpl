@@ -5,6 +5,7 @@ import {
   executeAdapterOperation,
   type MailAdapter,
 } from "@/core/services";
+import { getRuntimeEnv } from "@/lib/runtime-config";
 
 interface SmtpConfig {
   host?: string;
@@ -22,11 +23,11 @@ export function createSmtpMailAdapter(config: SmtpConfig = {}): MailAdapter {
     if (transporter) {
       return transporter;
     }
-    const host = config.host ?? process.env.SMTP_HOST;
-    const port = config.port ?? Number(process.env.SMTP_PORT ?? 587);
-    const user = config.user ?? process.env.SMTP_USER;
-    const pass = config.pass ?? process.env.SMTP_PASS;
-    const secure = config.secure ?? process.env.SMTP_SECURE === "true";
+    const host = config.host ?? getRuntimeEnv("SMTP_HOST");
+    const port = config.port ?? Number(getRuntimeEnv("SMTP_PORT") ?? 587);
+    const user = config.user ?? getRuntimeEnv("SMTP_USER");
+    const pass = config.pass ?? getRuntimeEnv("SMTP_PASS");
+    const secure = config.secure ?? getRuntimeEnv("SMTP_SECURE") === "true";
 
     if (!host || !Number.isInteger(port) || port <= 0) {
       throw new AdapterError({
@@ -57,7 +58,7 @@ export function createSmtpMailAdapter(config: SmtpConfig = {}): MailAdapter {
       const result = await executeAdapterOperation({
         provider,
         fallbackMessage: "SMTP delivery failed",
-        secrets: [config.pass ?? process.env.SMTP_PASS],
+        secrets: [config.pass ?? getRuntimeEnv("SMTP_PASS")],
         operation: () =>
           getTransporter().sendMail({
             from: message.from.name

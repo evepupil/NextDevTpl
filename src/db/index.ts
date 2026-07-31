@@ -3,6 +3,8 @@ import { drizzle as drizzleNeonWs } from "drizzle-orm/neon-serverless";
 import { drizzle as drizzlePg } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 
+import { getRuntimeEnv } from "@/lib/runtime-config";
+
 import * as schema from "./schema/index";
 
 /**
@@ -17,32 +19,15 @@ import * as schema from "./schema/index";
  * - Edge Runtime (CF Workers/Vercel Edge): 使用原生 WebSocket API
  */
 
-// 确保环境变量存在
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL 环境变量未设置，请在 .env 文件中配置数据库连接"
-  );
-}
-
-const databaseUrl = process.env.DATABASE_URL;
-
-/**
- * 检测是否使用 Neon Serverless
- */
-const isNeon = databaseUrl.includes("neon.tech");
-
-/**
- * 检测是否在 Node.js 环境
- * Edge Runtime (CF Workers, Vercel Edge) 没有 process.versions.node
- */
-const isNodeJs = typeof process !== "undefined" && process.versions?.node;
-
 /**
  * 创建数据库实例
  * - Neon: 使用 WebSocket 连接 (支持事务，兼容 Node.js 和 Edge)
  * - 标准 PG: 使用连接池 (本地开发/Docker)
  */
-function createDatabaseConnection() {
+function createDatabaseConnection(databaseUrl: string) {
+  const isNeon = databaseUrl.includes("neon.tech");
+  const isNodeJs = typeof process !== "undefined" && process.versions?.node;
+
   if (isNeon) {
     // Node.js 环境需要手动设置 WebSocket 构造函数
     // Edge Runtime (CF Workers, Vercel Edge) 有原生 WebSocket，无需设置
@@ -54,6 +39,7 @@ function createDatabaseConnection() {
 
     // 使用 WebSocket 连接池，支持事务
     const pool = new NeonPool({ connectionString: databaseUrl });
+    closeDatabaseConnection = () => pool.end();
     return drizzleNeonWs(pool, { schema });
   }
 
@@ -61,11 +47,55 @@ function createDatabaseConnection() {
   const pool = new Pool({
     connectionString: databaseUrl,
   });
+  closeDatabaseConnection = () => pool.end();
   return drizzlePg(pool, { schema });
 }
 
-// 导出数据库实例
-export const db = createDatabaseConnection();
+type Database = ReturnType<typeof createDatabaseConnection>;
+
+let database: Database | undefined;
+let closeDatabaseConnection: (() => Promise<void>) | undefined;
+
+function getDatabase(): Database {
+  if (database) return database;
+
+  const databaseUrl = getRuntimeEnv("DATABASE_URL");
+  if (!databaseUrl) {
+    throw new Error(
+      "DATABASE_URL 环境变量未设置，请在 .env 文件中配置数据库连接"
+    );
+  }
+
+  database = createDatabaseConnection(databaseUrl);
+  return database;
+}
+
+/**
+ * 延迟初始化数据库，避免仅导入认证或健康检查模块时就因缺少 Secret 启动失败。
+ */
+export const db = new Proxy({} as Database, {
+  get(_target, property) {
+    const databaseInstance = getDatabase();
+    const value = Reflect.get(databaseInstance, property);
+    return typeof value === "function" ? value.bind(databaseInstance) : value;
+  },
+});
+
+export async function closeDatabase(): Promise<void> {
+  await closeDatabaseConnection?.();
+  closeDatabaseConnection = undefined;
+  database = undefined;
+}
+
+type DatabaseTransaction = Parameters<
+  Parameters<Database["transaction"]>[0]
+>[0];
+
+export function withDbTransaction<T>(
+  callback: (tx: DatabaseTransaction) => Promise<T>
+): Promise<T> {
+  return db.transaction(callback);
+}
 
 // 导出 Schema 以便在其他地方使用
 export * from "./schema/index";

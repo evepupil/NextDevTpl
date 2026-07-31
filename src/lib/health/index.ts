@@ -1,6 +1,7 @@
 export { probeDatabase } from "./checks";
 export {
   createHealthReport,
+  HEALTH_ENVIRONMENT_KEYS,
   runHealthProbe,
   validateDeploymentEnvironment,
 } from "./core";

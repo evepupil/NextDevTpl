@@ -26,6 +26,7 @@
     "sentry.edge.config.ts",
     "sentry.server.config.ts",
     "source.config.ts",
+    "scripts/check-generated-migrations.mjs",
     "src",
     "tsconfig.json",
     "vercel.json",

@@ -9,7 +9,7 @@
 
 import { eq, sql } from "drizzle-orm";
 
-import { db } from "@/db";
+import { db, withDbTransaction } from "@/db";
 import {
   creditsBalance,
   creditsBatch,
@@ -39,7 +39,7 @@ export async function grantCredits(params: GrantCreditsParams) {
     throw new Error("积分数量必须大于 0");
   }
 
-  return await db.transaction(async (tx) => {
+  return await withDbTransaction(async (tx) => {
     const [balanceRecord] = await tx
       .select()
       .from(creditsBalance)

@@ -1,34 +1,35 @@
 import { createOpenAICompatibleAdapter } from "@/adapters/ai";
+import { getRuntimeEnv } from "@/lib/runtime-config";
 
 export type OpenAICompatibleProvider = "deepseek" | "mimo" | "openai";
 
 export function getAIProvider(): OpenAICompatibleProvider {
-  const provider = process.env.AI_PROVIDER;
+  const provider = getRuntimeEnv("AI_PROVIDER");
   return provider === "deepseek" || provider === "mimo" ? provider : "openai";
 }
 
 export function getAIModel(): string {
   switch (getAIProvider()) {
     case "deepseek":
-      return process.env.DEEPSEEK_MODEL ?? "deepseek-chat";
+      return getRuntimeEnv("DEEPSEEK_MODEL") ?? "deepseek-chat";
     case "mimo":
-      return process.env.MIMO_MODEL ?? "mimo-v2-flash";
+      return getRuntimeEnv("MIMO_MODEL") ?? "mimo-v2-flash";
     case "openai":
-      return process.env.OPENAI_MODEL ?? "gpt-4o-mini";
+      return getRuntimeEnv("OPENAI_MODEL") ?? "gpt-4o-mini";
   }
 }
 
 function createDefaultAIService() {
   const provider = getAIProvider();
-  const gatewayBaseUrl = process.env.CF_AIG_BASE_URL;
-  const gatewayToken = process.env.CF_AIG_TOKEN;
+  const gatewayBaseUrl = getRuntimeEnv("CF_AIG_BASE_URL");
+  const gatewayToken = getRuntimeEnv("CF_AIG_TOKEN");
   const useGateway = Boolean(gatewayBaseUrl && gatewayToken);
   const apiKey =
     provider === "deepseek"
-      ? process.env.DEEPSEEK_API_KEY
+      ? getRuntimeEnv("DEEPSEEK_API_KEY")
       : provider === "mimo"
-        ? process.env.MIMO_API_KEY
-        : process.env.OPENAI_API_KEY;
+        ? getRuntimeEnv("MIMO_API_KEY")
+        : getRuntimeEnv("OPENAI_API_KEY");
 
   return createOpenAICompatibleAdapter({
     model: getAIModel(),

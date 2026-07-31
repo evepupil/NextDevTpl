@@ -10,7 +10,7 @@
 
 import { and, asc, eq, gt, isNull, or, sql } from "drizzle-orm";
 
-import { db } from "@/db";
+import { withDbTransaction } from "@/db";
 import {
   creditsBalance,
   creditsBatch,
@@ -29,7 +29,7 @@ export async function consumeCredits(
     throw new Error("消费数量必须大于 0");
   }
 
-  return await db.transaction(async (tx) => {
+  return await withDbTransaction(async (tx) => {
     const [balanceRecord] = await tx
       .select()
       .from(creditsBalance)

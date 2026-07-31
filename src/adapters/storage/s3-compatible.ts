@@ -13,6 +13,7 @@ import {
   type StorageAdapter,
   type StorageWriteInput,
 } from "@/core/services";
+import { getRuntimeEnv } from "@/lib/runtime-config";
 
 interface S3CompatibleConfig {
   accessKeyId?: string;
@@ -38,11 +39,12 @@ export function createS3CompatibleStorageAdapter(
       return client;
     }
 
-    const accessKeyId = config.accessKeyId ?? process.env.STORAGE_ACCESS_KEY_ID;
+    const accessKeyId =
+      config.accessKeyId ?? getRuntimeEnv("STORAGE_ACCESS_KEY_ID");
     const secretAccessKey =
-      config.secretAccessKey ?? process.env.STORAGE_SECRET_ACCESS_KEY;
-    const endpoint = config.endpoint ?? process.env.STORAGE_ENDPOINT;
-    const region = config.region ?? process.env.STORAGE_REGION ?? "auto";
+      config.secretAccessKey ?? getRuntimeEnv("STORAGE_SECRET_ACCESS_KEY");
+    const endpoint = config.endpoint ?? getRuntimeEnv("STORAGE_ENDPOINT");
+    const region = config.region ?? getRuntimeEnv("STORAGE_REGION") ?? "auto";
 
     if (!accessKeyId || !secretAccessKey || !endpoint) {
       throw new AdapterError({

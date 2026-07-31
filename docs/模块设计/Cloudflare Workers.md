@@ -9,7 +9,7 @@
 >
 > 当前状态：已完成
 >
-> 最近更新时间：2026-07-24
+> 最近更新时间：2026-07-31
 
 ## 职责与边界
 
@@ -22,7 +22,7 @@
 create-nextdevtpl
     |
     +-- 根据所选适配器生成 wrangler.jsonc 与 CloudflareEnv 类型
-    +-- 把数据库入口改为 Neon HTTP
+    +-- 把普通查询入口改为 Neon HTTP，事务入口改为请求级 Neon Serverless
     +-- 把服务入口连接到 Workers env bindings
     |
     v
@@ -31,7 +31,8 @@ OpenNext 构建 .open-next/worker.js 与静态资源
     v
 cloudflare/worker.mjs 转发 Next.js 请求并导出 Workflow 类
     |
-    +-- Neon HTTP       PostgreSQL 与 Better Auth
+    +-- Neon HTTP       普通 PostgreSQL 查询与 Better Auth
+    +-- Neon Serverless 请求级连接池  积分、支付和奖励事务
     +-- R2 binding      对象读写
     +-- Workflow        后台任务与失败重试
     +-- Workers AI      AI 推理（按需）
@@ -46,10 +47,12 @@ Node.js、Vercel 和 Docker 继续使用原部署入口。Cloudflare 文件只�
 
 - 使用 `@opennextjs/cloudflare` 的稳定版本和 `wrangler.jsonc`，生产入口保持
   Workers ES Module 格式。
-- 首版保留 PostgreSQL Schema，Cloudflare 默认使用 Neon HTTP。Hyperdrive 需要
-  账号级配置 ID，作为明确选择后再启用的扩展；D1 继续暂缓。
-- 兼容日期使用生成时的当前日期，并启用 `nodejs_compat`。Bindings 类型由
-  `wrangler types` 生成，禁止手写一份容易漂移的 `Env`。
+- 首版保留 PostgreSQL Schema，Cloudflare 普通查询使用 Neon HTTP，需要事务时
+  通过请求级 Neon Serverless 连接池执行并在请求结束关闭。Hyperdrive 需要账号级
+  配置 ID，作为明确选择后再启用的扩展；D1 继续暂缓。
+- 兼容日期默认使用当前 UTC 日期，也支持 `CF_COMPATIBILITY_DATE` 覆盖；生成器
+  会拒绝格式错误或晚于当前 UTC 日期的值。Bindings 类型由 `wrangler types`
+  生成，禁止手写一份容易漂移的 `Env`。
 - R2 使用 Wrangler 自动预配，配置文件不携带账号资源 ID。Workers AI、
   Rate Limiting、Email 和 Workflows 只在对应适配器被选择时声明。
 - 服务层从 Workers 运行时 `env` 获取 Binding，再注入 M2 适配器；业务模块不
@@ -69,7 +72,8 @@ Node.js、Vercel 和 Docker 继续使用原部署入口。Cloudflare 文件只�
 - 生成器只为 Cloudflare 目标保留 OpenNext 文件和依赖，并按所选适配器生成 R2、
   Workers AI、Email、Workflow 和六组 Rate Limiting Bindings；生成完成后自动执行
   `wrangler types`。
-- Cloudflare 目标使用 Neon HTTP，移除 `pg`、`ws` 和 Sentry 依赖。监控保留
+- Cloudflare 目标使用 Neon HTTP + Neon Serverless 事务入口，移除 `pg`、`ws` 和
+  Sentry 依赖。监控保留
   `console` 错误日志，Sentry 上报和 tracing 在该目标中暂不提供。生成器还会
   用 Workers 专用 `console` logger 替换 Pino，并移除 `pino` 与 `pino-pretty`，
   避免 Pino 的 Node.js stdout 写入在 Worker 内触发运行时异常。
@@ -81,6 +85,13 @@ Node.js、Vercel 和 Docker 继续使用原部署入口。Cloudflare 文件只�
   邮箱验证、纯文本回退、HTML 转义与 Cloudflare Email Binding 发信链路。
 - `wrangler.jsonc` 固化 `minify: true`，`cf:deploy` 同时显式传入 `--minify`，降低用户
   绕过压缩后触发免费额度限制的风险。
+- 生成项目提供 `pnpm cf:check`，检查必需配置、适配器 Secret、OAuth 回调地址和
+  URL 格式，不输出 Secret 值。`cf:build` 与 `cf:deploy` 会先运行预检；部署预检
+  还会读取 Wrangler Secret 名称，并在本地或远端配置缺失时阻止部署。Windows
+  上会提前提示 OpenNext 符号链接限制，推荐在 WSL 或 Linux CI 构建。
+- Wrangler 配置同时启用 `nodejs_compat_populate_process_env`，让较早的
+  Compatibility Date 也能使用 `process.env` 回退；生成器会拒绝无效或晚于 UTC
+  当前日期的 `CF_COMPATIBILITY_DATE`。
 - 兼容性结构检查会确认 Cloudflare 生成结果不再携带 Pino，并验证专用 logger
   已落入最终项目；logger 自身的上下文合并和错误级别输出有独立单测。
 
@@ -151,6 +162,8 @@ Node.js、Vercel 和 Docker 继续使用原部署入口。Cloudflare 文件只�
   现有部署目标。
 - Cloudflare 组合生成后执行依赖安装、`wrangler types --check`、OpenNext build、
   Wrangler dry-run 和基于 `workerd` 的测试。
+- 部署前执行 `pnpm cf:check`，确认本地配置或 Wrangler Secret 清单齐全，再执行
+  `pnpm cf:deploy`。
 - 部署测试 Worker，检查首页和 `/api/health`，确认认证配置和 Neon 数据库可用。
 - 通过测试接口写入、读取并删除 R2 对象，验证 Binding 注入和对象生命周期。
 - 调度测试 Workflow，读取实例状态，验证至少一个持久化步骤完成；失败重试
@@ -185,3 +198,8 @@ Node.js、Vercel 和 Docker 继续使用原部署入口。Cloudflare 文件只�
 - 2026-07-24：M6 线上复验发现 Pino 与 Workers stdout 不兼容；生成器改为输出
   Workers 专用 `console` logger 并移除 Pino 依赖，重新部署后的健康、认证和数据库
   检查通过，临时资源已清理。
+- 2026-07-31：统一运行时配置读取并清理 BOM，Cloudflare Binding 优先于
+  `process.env`；普通查询保留 Neon HTTP，事务改用请求级 Neon Serverless 连接池。
+  Creem 签名改用 Web Crypto，生成项目增加 Cloudflare 部署预检、Windows OpenNext
+  提示和兼容日期校验；部署预检会同时阻止本地配置缺失，主题 Provider 在语言
+  路由切换时按 locale 重置，确保明暗模式文案使用当前语言。

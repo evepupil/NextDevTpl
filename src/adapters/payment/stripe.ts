@@ -8,6 +8,7 @@ import {
   type PaymentSubscription,
   type PaymentWebhookType,
 } from "@/core/services";
+import { getRuntimeEnv } from "@/lib/runtime-config";
 
 interface StripeConfig {
   apiKey?: string;
@@ -148,7 +149,7 @@ export function createStripePaymentAdapter(
   const request = config.fetch ?? globalThis.fetch;
 
   function apiKey(): string {
-    const key = config.apiKey ?? process.env.STRIPE_SECRET_KEY;
+    const key = config.apiKey ?? getRuntimeEnv("STRIPE_SECRET_KEY");
     if (!key) {
       throw new AdapterError({
         code: "configuration",
@@ -249,7 +250,7 @@ export function createStripePaymentAdapter(
       const secret =
         input.secret ??
         config.webhookSecret ??
-        process.env.STRIPE_WEBHOOK_SECRET;
+        getRuntimeEnv("STRIPE_WEBHOOK_SECRET");
       if (!secret) {
         throw new AdapterError({
           code: "configuration",

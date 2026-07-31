@@ -10,7 +10,7 @@ const manifests = [
     id: "payment:creem",
     service: "payment",
     source: "src/adapters/payment/creem.ts",
-    runtime: "node",
+    runtime: "universal",
     packages: [],
     env: ["CREEM_API_KEY", "CREEM_WEBHOOK_SECRET"],
     bindings: [],

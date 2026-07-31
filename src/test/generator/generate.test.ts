@@ -9,7 +9,7 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { generateProject } from "../../../packages/create-nextdevtpl/src/generate";
 
@@ -90,6 +90,21 @@ describe("project generation", () => {
       expect(messages).toHaveProperty("Theme");
       expect(messages).not.toHaveProperty("AdminSidebar");
     }
+    expect(translations[0]?.Theme).toEqual({
+      toggle: "Toggle theme",
+      lightMode: "Light mode",
+      darkMode: "Dark mode",
+      followSystem: "Follow system",
+    });
+    expect(translations[1]?.Theme).toEqual({
+      toggle: "切换主题",
+      lightMode: "浅色模式",
+      darkMode: "深色模式",
+      followSystem: "跟随系统",
+    });
+    expect(
+      await readFile(join(target, "src/app/[locale]/layout.tsx"), "utf8")
+    ).toContain("<NextIntlClientProvider key={locale}");
   });
 
   it("keeps only SaaS preset adapters", async () => {
@@ -134,6 +149,7 @@ describe("project generation", () => {
       await readFile(join(target, "wrangler.jsonc"), "utf8")
     ) as {
       ai: { binding: string };
+      compatibility_flags: string[];
       main: string;
       minify: boolean;
       observability: { enabled: boolean };
@@ -146,6 +162,10 @@ describe("project generation", () => {
       workflows: Array<{ binding: string; class_name: string }>;
     };
     const database = await readFile(join(target, "src/db/index.ts"), "utf8");
+    const runtimeConfig = await readFile(
+      join(target, "cloudflare", "runtime-config.ts"),
+      "utf8"
+    );
     const storage = await readFile(
       join(target, "src/services/storage.ts"),
       "utf8"
@@ -166,6 +186,15 @@ describe("project generation", () => {
       "utf8"
     );
     const environment = await readFile(join(target, ".env.example"), "utf8");
+    const preflight = JSON.parse(
+      await readFile(
+        join(target, "cloudflare", "preflight-config.json"),
+        "utf8"
+      )
+    ) as {
+      groups: Array<{ label: string; names: string[] }>;
+      required: string[];
+    };
 
     expect(manifest.bindings).toEqual([
       "R2Bucket",
@@ -185,6 +214,9 @@ describe("project generation", () => {
     expect(await exists(join(target, "open-next.config.ts"))).toBe(true);
     expect(await exists(join(target, "cloudflare/worker.mjs"))).toBe(true);
     expect(wrangler.main).toBe("cloudflare/worker.mjs");
+    expect(wrangler.compatibility_flags).toContain(
+      "nodejs_compat_populate_process_env"
+    );
     expect(wrangler.minify).toBe(true);
     expect(wrangler.observability.enabled).toBe(true);
     expect(wrangler.r2_buckets).toEqual([{ binding: "NEXTDEVTPL_STORAGE" }]);
@@ -203,8 +235,12 @@ describe("project generation", () => {
       simple: { limit: 5, period: 60 },
     });
     expect(database).toContain('from "drizzle-orm/neon-http"');
+    expect(database).toContain('from "drizzle-orm/neon-serverless"');
+    expect(database).toContain("new Proxy");
     expect(database).not.toContain('from "drizzle-orm/node-postgres"');
     expect(database).not.toContain('require("ws")');
+    expect(runtimeConfig).toContain("getCloudflareContext");
+    expect(runtimeConfig).not.toContain('from "cloudflare:workers"');
     expect(storage).toContain('"NEXTDEVTPL_STORAGE"');
     expect(ai).toContain('"AI"');
     expect(mail).toContain('"NEXTDEVTPL_EMAIL"');
@@ -231,6 +267,23 @@ describe("project generation", () => {
       "@react-email/tailwind"
     );
     expect(packageJson.scripts["cf:deploy"]).toContain("--minify");
+    expect(packageJson.scripts["cf:check"]).toContain(
+      "cloudflare/preflight.mjs"
+    );
+    expect(packageJson.scripts["cf:build"]).toContain("--build");
+    expect(preflight.required).toEqual(
+      expect.arrayContaining([
+        "DATABASE_URL",
+        "BETTER_AUTH_SECRET",
+        "STRIPE_SECRET_KEY",
+        "STRIPE_WEBHOOK_SECRET",
+        "EMAIL_FROM",
+        "NEXT_PUBLIC_AVATARS_BUCKET_NAME",
+        "WORKERS_AI_MODEL",
+        "CRON_SECRET",
+      ])
+    );
+    expect(preflight.required).toContain("WORKERS_AI_MODEL");
     expect(
       await exists(join(target, "src/app/[locale]/opengraph-image.tsx"))
     ).toBe(false);
@@ -298,6 +351,65 @@ describe("project generation", () => {
     expect(await exists(join(target, "src/features/mail"))).toBe(false);
     expect(await exists(join(target, "wrangler.jsonc"))).toBe(true);
     expect(await exists(join(target, "cloudflare/templates"))).toBe(false);
+  });
+
+  it("allows Creem on Cloudflare with a Worker-safe implementation", async () => {
+    const target = join(root, "creem-cloudflare");
+    const { manifest } = await generateProject({
+      targetDirectory: target,
+      preset: "custom",
+      modules: ["auth", "payment"],
+      target: "cloudflare",
+      adapterOverrides: {
+        payment: "payment:creem",
+        mail: "mail:disabled",
+        "rate-limit": "rate-limit:noop",
+      },
+      install: false,
+    });
+    const creem = await readFile(
+      join(target, "src/adapters/payment/creem.ts"),
+      "utf8"
+    );
+
+    expect(manifest.adapters.payment).toBe("payment:creem");
+    expect(creem).not.toContain('from "node:crypto"');
+    expect(creem).not.toContain("Buffer");
+    expect(creem).toContain("crypto.subtle");
+  });
+
+  it("rejects a future Cloudflare compatibility date", async () => {
+    const target = join(root, "future-date");
+    vi.stubEnv("CF_COMPATIBILITY_DATE", "2999-01-01");
+    try {
+      await expect(
+        generateProject({
+          targetDirectory: target,
+          preset: "minimal",
+          target: "cloudflare",
+          install: false,
+        })
+      ).rejects.toThrow("CF_COMPATIBILITY_DATE");
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("rejects an invalid Cloudflare compatibility date", async () => {
+    const target = join(root, "invalid-date");
+    vi.stubEnv("CF_COMPATIBILITY_DATE", "2026-02-30");
+    try {
+      await expect(
+        generateProject({
+          targetDirectory: target,
+          preset: "minimal",
+          target: "cloudflare",
+          install: false,
+        })
+      ).rejects.toThrow("CF_COMPATIBILITY_DATE");
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 
   it("keeps only the Docker deployment preset", async () => {

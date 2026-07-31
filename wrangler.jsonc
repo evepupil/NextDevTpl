@@ -2,8 +2,12 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "nextdevtpl",
   "main": "cloudflare/worker.mjs",
-  "compatibility_date": "2026-07-24",
-  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "compatibility_date": "2026-07-31",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "nodejs_compat_populate_process_env",
+    "global_fetch_strictly_public"
+  ],
   "minify": true,
   "assets": {
     "directory": ".open-next/assets",

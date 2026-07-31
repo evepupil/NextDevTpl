@@ -68,7 +68,7 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <NextIntlClientProvider messages={messages}>
+    <NextIntlClientProvider key={locale} messages={messages}>
       <Providers locale={locale}>
         {children}
         <CookieConsent />

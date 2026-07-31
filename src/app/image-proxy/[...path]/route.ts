@@ -10,6 +10,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import { DEFAULT_SIGNED_URL_EXPIRES } from "@/features/storage/types";
+import { getRuntimeEnv } from "@/lib/runtime-config";
 import { storageService } from "@/services/storage";
 
 // ============================================
@@ -22,8 +23,9 @@ import { storageService } from "@/services/storage";
  * 安全措施：只允许代理访问预定义的存储桶
  */
 function getAllowedBuckets(): string[] {
-  const avatarsBucket = process.env.NEXT_PUBLIC_AVATARS_BUCKET_NAME;
-  const uploadsBucket = process.env.STORAGE_BUCKET_NAME ?? "nextdevtpl-uploads";
+  const avatarsBucket = getRuntimeEnv("NEXT_PUBLIC_AVATARS_BUCKET_NAME");
+  const uploadsBucket =
+    getRuntimeEnv("STORAGE_BUCKET_NAME") ?? "nextdevtpl-uploads";
 
   const buckets = new Set<string>([uploadsBucket]);
 

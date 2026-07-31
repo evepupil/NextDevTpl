@@ -4,6 +4,7 @@
 
 import { afterAll, beforeAll } from "vitest";
 
+import { closeDatabase } from "@/db";
 import { closeTestDb, syncLegacyTestSchema, testDb } from "./utils/db";
 
 const TEST_DATABASE_ATTEMPTS = 3;
@@ -48,6 +49,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await closeTestDb();
+  await closeDatabase();
   console.log("Test database connection closed");
 });
 

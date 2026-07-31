@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { processExpiredBatches } from "@/features/credits";
 import { withApiLogging } from "@/lib/api-logger";
 import { logError, logWarn } from "@/lib/logger";
+import { getRuntimeEnv } from "@/lib/runtime-config";
 
 /**
  * 积分过期处理 Cron Job API
@@ -29,7 +30,7 @@ import { logError, logWarn } from "@/lib/logger";
 function validateCronSecret(authHeader: string | null): boolean {
   if (!authHeader) return false;
 
-  const cronSecret = process.env.CRON_SECRET;
+  const cronSecret = getRuntimeEnv("CRON_SECRET");
   if (!cronSecret) {
     logWarn("CRON_SECRET environment variable is not set");
     return false;

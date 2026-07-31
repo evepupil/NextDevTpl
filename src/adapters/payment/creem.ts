@@ -1,5 +1,3 @@
-import crypto from "node:crypto";
-
 import {
   AdapterError,
   executeAdapterOperation,
@@ -10,6 +8,7 @@ import {
   type PaymentSubscription,
   type PaymentWebhookEvent,
 } from "@/core/services";
+import { getRuntimeEnv } from "@/lib/runtime-config";
 
 interface CreemConfig {
   apiKey?: string;
@@ -20,6 +19,43 @@ interface CreemConfig {
 interface CreemProduct {
   billing_type?: "onetime" | "recurring";
   id: string;
+}
+
+async function hmacHex(secret: string, value: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const signature = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    encoder.encode(value)
+  );
+  return [...new Uint8Array(signature)]
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+async function timingSafeHexEqual(
+  left: string,
+  right: string
+): Promise<boolean> {
+  const encoder = new TextEncoder();
+  const [leftHash, rightHash] = await Promise.all([
+    crypto.subtle.digest("SHA-256", encoder.encode(left)),
+    crypto.subtle.digest("SHA-256", encoder.encode(right)),
+  ]);
+  const leftBytes = new Uint8Array(leftHash);
+  const rightBytes = new Uint8Array(rightHash);
+  let difference = leftBytes.length ^ rightBytes.length;
+  for (let index = 0; index < leftBytes.length; index += 1) {
+    difference |= (leftBytes[index] ?? 0) ^ (rightBytes[index] ?? 0);
+  }
+  return difference === 0;
 }
 
 interface CreemCustomer {
@@ -133,7 +169,7 @@ export function createCreemPaymentAdapter(
   const request = config.fetch ?? globalThis.fetch;
 
   function getApiKey(): string {
-    const apiKey = config.apiKey ?? process.env.CREEM_API_KEY;
+    const apiKey = config.apiKey ?? getRuntimeEnv("CREEM_API_KEY");
     if (!apiKey) {
       throw new AdapterError({
         code: "configuration",
@@ -219,7 +255,7 @@ export function createCreemPaymentAdapter(
       const secret =
         input.secret ??
         config.webhookSecret ??
-        process.env.CREEM_WEBHOOK_SECRET;
+        getRuntimeEnv("CREEM_WEBHOOK_SECRET");
       if (!secret) {
         throw new AdapterError({
           code: "configuration",
@@ -228,15 +264,8 @@ export function createCreemPaymentAdapter(
         });
       }
 
-      const expected = crypto
-        .createHmac("sha256", secret)
-        .update(input.payload)
-        .digest("hex");
-      const suppliedBuffer = Buffer.from(input.signature);
-      const expectedBuffer = Buffer.from(expected);
-      const valid =
-        suppliedBuffer.length === expectedBuffer.length &&
-        crypto.timingSafeEqual(suppliedBuffer, expectedBuffer);
+      const expected = await hmacHex(secret, input.payload);
+      const valid = await timingSafeHexEqual(input.signature.trim(), expected);
 
       if (!valid) {
         throw new AdapterError({
