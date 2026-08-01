@@ -443,6 +443,66 @@ function hasModule(selection: ProjectSelection, id: string): boolean {
   return selection.modules.includes(id);
 }
 
+const AUTHLESS_DASHBOARD_SIDEBAR = `"use client";
+
+export function DashboardSidebar() {
+  return null;
+}
+`;
+
+const AUTHLESS_MIDDLEWARE = `import { type NextRequest, NextResponse } from "next/server";
+import createIntlMiddleware from "next-intl/middleware";
+
+import { routing } from "@/i18n/routing";
+import {
+  checkRateLimit,
+  createRateLimitResponse,
+  getClientIp,
+  getRateLimitHeaders,
+  type RateLimitType,
+} from "@/lib/rate-limit";
+
+const intlMiddleware = createIntlMiddleware(routing);
+const API_RATE_LIMITS: Array<{ pattern: RegExp; type: RateLimitType }> = [
+  { pattern: /^\\/api\\/upload/, type: "upload" },
+];
+
+function getApiRateLimitType(pathname: string): RateLimitType | null {
+  for (const { pattern, type } of API_RATE_LIMITS) {
+    if (pattern.test(pathname)) return type;
+  }
+  return null;
+}
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  if (pathname.startsWith("/api/")) {
+    if (pathname === "/api/health" || pathname.startsWith("/api/webhooks/")) {
+      return NextResponse.next();
+    }
+    const rateLimitType = getApiRateLimitType(pathname);
+    if (!rateLimitType) return NextResponse.next();
+
+    const result = await checkRateLimit(getClientIp(request), rateLimitType);
+    if (!result.success) return createRateLimitResponse(result);
+
+    const response = NextResponse.next();
+    for (const [key, value] of Object.entries(getRateLimitHeaders(result))) {
+      response.headers.set(key, value);
+    }
+    return response;
+  }
+
+  return intlMiddleware(request);
+}
+
+export const config = {
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|sitemap\\.xml|robots\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+  ],
+};
+`;
+
 async function pruneModules(
   target: string,
   selection: ProjectSelection,
@@ -457,6 +517,17 @@ async function pruneModules(
 
   if (!hasModule(selection, "admin")) {
     await removePath(join(target, "src", "app", "[locale]", "(admin)"));
+  }
+  if (!hasModule(selection, "auth")) {
+    await removePath(join(target, "src", "app", "[locale]", "(auth)"));
+    await removePath(join(target, "src", "app", "api", "auth"));
+    await removePath(join(target, "src", "lib", "auth"));
+    await removePath(join(target, "src", "lib", "safe-action.ts"));
+    await writeText(
+      join(target, "src", "features", "dashboard", "components", "sidebar.tsx"),
+      AUTHLESS_DASHBOARD_SIDEBAR
+    );
+    await writeText(join(target, "src", "middleware.ts"), AUTHLESS_MIDDLEWARE);
   }
   if (!hasModule(selection, "marketing")) {
     await removePath(join(target, "src", "app", "[locale]", "(marketing)"));
@@ -638,7 +709,9 @@ async function rewriteSchema(
   ];
   await writeText(
     join(target, "src", "db", "schema", "index.ts"),
-    `${groups.map((group) => `export * from "./${group}";`).join("\n")}\n`
+    groups.length > 0
+      ? `${groups.map((group) => `export * from "./${group}";`).join("\n")}\n`
+      : "export {};\n"
   );
   const selected = new Set(groups);
   for (const file of await readdir(join(target, "src", "db", "schema"))) {
@@ -687,6 +760,7 @@ import { Toaster } from "sonner";
 import { siteConfig } from "@/config";
 ${analyticsImport}${marketingImport}import { Providers } from "@/features/shared";
 import { routing } from "@/i18n/routing";
+import { TelemetryIdentityProvider } from "@/lib/telemetry/identity-provider";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -709,6 +783,7 @@ export default async function LocaleLayout({ children, params }: { children: Rea
         ${hasModule(selection, "marketing") ? "<CookieConsent />" : ""}
         <Toaster richColors position="top-right" />
         ${hasModule(selection, "analytics") ? "<Analytics />" : ""}
+        <TelemetryIdentityProvider />
       </Providers>
     </NextIntlClientProvider>
   );
@@ -717,6 +792,13 @@ export default async function LocaleLayout({ children, params }: { children: Rea
 }
 
 function dashboardLayout(selection: ProjectSelection): string {
+  if (!hasModule(selection, "auth")) {
+    return `export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return <main className="min-h-screen bg-muted/40 p-6">{children}</main>;
+}
+`;
+  }
+
   const creditsImport = hasModule(selection, "credits")
     ? 'import { CreditBalanceBadge } from "@/features/credits";\n'
     : "";
@@ -995,6 +1077,10 @@ async function rewritePackage(
   }
   if (!hasModule(selection, "analytics")) {
     delete packageJson.dependencies["@next/third-parties"];
+  }
+  if (!hasModule(selection, "auth")) {
+    delete packageJson.dependencies["better-auth"];
+    delete packageJson.dependencies["next-safe-action"];
   }
   if (!hasModule(selection, "marketing")) {
     delete packageJson.dependencies["fumadocs-core"];

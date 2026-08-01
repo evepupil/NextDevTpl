@@ -66,6 +66,15 @@ describe("project generation", () => {
     expect(
       await readFile(join(target, "src/services/telemetry.ts"), "utf8")
     ).toContain("trackServerEvent");
+    expect(
+      await readFile(join(target, "src/services/index.ts"), "utf8")
+    ).toContain("trackFirstValueCompleted");
+    expect(
+      await readFile(
+        join(target, "src/lib/telemetry/identity-provider.tsx"),
+        "utf8"
+      )
+    ).toContain("initializeTelemetryIdentity");
     expect(await exists(join(target, "src/adapters/analytics/logger.ts"))).toBe(
       false
     );
@@ -376,6 +385,7 @@ describe("project generation", () => {
     expect(manifest.adapters).not.toHaveProperty("analytics");
     expect(telemetry).toContain('provider: "noop"');
     expect(services).toContain("trackServerEvent");
+    expect(services).toContain("trackCoreActionCompleted");
     expect(await exists(join(target, "src/adapters/analytics"))).toBe(false);
   });
 
@@ -391,6 +401,18 @@ describe("project generation", () => {
 
     expect(manifest.modules).toEqual(["shared", "dashboard"]);
     expect(await exists(join(target, "src/features/mail"))).toBe(false);
+    expect(await exists(join(target, "src/lib/auth"))).toBe(false);
+    expect(await exists(join(target, "src/app/[locale]/(auth)"))).toBe(false);
+    const dashboardLayout = await readFile(
+      join(target, "src/app/[locale]/(dashboard)/layout.tsx"),
+      "utf8"
+    );
+    expect(dashboardLayout).not.toContain("@/lib/auth");
+    const schemaIndex = await readFile(
+      join(target, "src/db/schema/index.ts"),
+      "utf8"
+    );
+    expect(schemaIndex).toBe("export {};\n");
     expect(await exists(join(target, "wrangler.jsonc"))).toBe(true);
     expect(await exists(join(target, "cloudflare/templates"))).toBe(false);
   });

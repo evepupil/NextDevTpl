@@ -1,17 +1,40 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-
-import {
-  ResetPasswordEmail,
-  VerifyEmailEmail,
-  sendEmail,
-} from "@/features/mail/server";
 import { db } from "@/db";
 import * as schema from "@/db/schema/auth";
+import {
+  ResetPasswordEmail,
+  sendEmail,
+  VerifyEmailEmail,
+} from "@/features/mail/server";
 import { getRuntimeEnv } from "@/lib/runtime-config";
+import {
+  createAuthLifecycleTracker,
+  createAuthTelemetryContext,
+  getAuthMethod,
+  isLoginPath,
+  isSignupPath,
+} from "@/lib/telemetry/auth";
+import { normalizeTelemetryValue } from "@/lib/telemetry/identity";
 import { isMailServiceConfigured } from "@/services/mail";
+import { trackServerEvent } from "@/services/telemetry";
 
 const isEmailConfigured = isMailServiceConfigured();
+const authLifecycleTracker = createAuthLifecycleTracker();
+
+function getAuthRequestContext(
+  context: {
+    getCookie?: ((name: string) => string | null) | undefined;
+    headers?: Headers | undefined;
+  } | null
+) {
+  return {
+    headers: context?.headers,
+    getCookie: context?.getCookie
+      ? (name: string) => context.getCookie?.(name) ?? null
+      : undefined,
+  };
+}
 
 /**
  * Better Auth 服务端配置
@@ -50,6 +73,73 @@ export const auth = betterAuth({
       verification: schema.verification,
     },
   }),
+
+  databaseHooks: {
+    account: {
+      create: {
+        after: async (account, context) => {
+          const provider = normalizeTelemetryValue(account.providerId, 64);
+          if (!provider || provider === "credential") return;
+
+          trackServerEvent({
+            attributes: {
+              authMethod: getAuthMethod(context?.path),
+              provider,
+            },
+            context: createAuthTelemetryContext(
+              getAuthRequestContext(context),
+              { userId: account.userId }
+            ),
+            name: "identity.linked",
+            source: "server",
+            version: 1,
+          });
+        },
+      },
+    },
+    session: {
+      create: {
+        after: async (session, context) => {
+          if (!isLoginPath(context?.path)) return;
+          if (authLifecycleTracker.isSignupContext(context)) return;
+
+          trackServerEvent({
+            attributes: {
+              authMethod: getAuthMethod(context?.path),
+            },
+            context: createAuthTelemetryContext(
+              getAuthRequestContext(context),
+              { sessionId: session.id, userId: session.userId }
+            ),
+            name: "login.completed",
+            source: "server",
+            version: 1,
+          });
+        },
+      },
+    },
+    user: {
+      create: {
+        after: async (user, context) => {
+          if (!isSignupPath(context?.path)) return;
+          authLifecycleTracker.markSignupContext(context);
+
+          trackServerEvent({
+            attributes: {
+              authMethod: getAuthMethod(context?.path),
+            },
+            context: createAuthTelemetryContext(
+              getAuthRequestContext(context),
+              { userId: user.id }
+            ),
+            name: "signup.completed",
+            source: "server",
+            version: 1,
+          });
+        },
+      },
+    },
+  },
 
   /**
    * 用户自定义字段配置

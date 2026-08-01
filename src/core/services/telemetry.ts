@@ -22,6 +22,14 @@ export interface TelemetryIdentity {
   userId?: string;
 }
 
+export interface TelemetryUtm {
+  campaign?: string;
+  content?: string;
+  medium?: string;
+  source?: string;
+  term?: string;
+}
+
 export interface TelemetryContext {
   identity?: TelemetryIdentity;
   initialSource?: string;
@@ -29,6 +37,7 @@ export interface TelemetryContext {
   locale?: string;
   requestId?: string;
   sessionId?: string;
+  utm?: TelemetryUtm;
 }
 
 export interface TelemetryEventInput {
@@ -107,6 +116,16 @@ const identitySchema = z
   })
   .strict();
 
+const utmSchema = z
+  .object({
+    campaign: z.string().min(1).max(128).optional(),
+    content: z.string().min(1).max(128).optional(),
+    medium: z.string().min(1).max(128).optional(),
+    source: z.string().min(1).max(128).optional(),
+    term: z.string().min(1).max(128).optional(),
+  })
+  .strict();
+
 const contextSchema = z
   .object({
     identity: identitySchema.optional(),
@@ -115,6 +134,7 @@ const contextSchema = z
     locale: z.string().min(2).max(16).optional(),
     requestId: identifierSchema.optional(),
     sessionId: identifierSchema.optional(),
+    utm: utmSchema.optional(),
   })
   .strict();
 

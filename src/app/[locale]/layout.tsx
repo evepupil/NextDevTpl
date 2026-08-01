@@ -8,6 +8,7 @@ import { Analytics } from "@/features/analytics";
 import { CookieConsent } from "@/features/marketing";
 import { Providers } from "@/features/shared";
 import { routing } from "@/i18n/routing";
+import { TelemetryIdentityProvider } from "@/lib/telemetry/identity-provider";
 
 /**
  * 生成静态参数
@@ -74,6 +75,7 @@ export default async function LocaleLayout({
         <CookieConsent />
         <Toaster richColors position="top-right" />
         <Analytics />
+        <TelemetryIdentityProvider />
       </Providers>
     </NextIntlClientProvider>
   );

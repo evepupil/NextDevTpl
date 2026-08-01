@@ -43,10 +43,23 @@ describe("project generator selection", () => {
     ).toThrow("requires the Cloudflare target");
   });
 
+  it("rejects authenticated modules when auth is not selected", () => {
+    expect(() =>
+      createProjectSelection(catalog, {
+        preset: "custom",
+        modules: ["settings"],
+        adapterOverrides: {
+          payment: "payment:stripe",
+          storage: "storage:s3-compatible",
+        },
+      })
+    ).toThrow("Modules require the auth module");
+  });
+
   it("resolves the custom module closure and adapter packages", () => {
     const selection = createProjectSelection(catalog, {
       preset: "custom",
-      modules: ["settings"],
+      modules: ["auth", "settings"],
       adapterOverrides: {
         payment: "payment:stripe",
         storage: "storage:s3-compatible",
@@ -54,6 +67,9 @@ describe("project generator selection", () => {
     });
 
     expect(selection.modules).toEqual([
+      "mail",
+      "shared",
+      "auth",
       "subscription",
       "payment",
       "credits",

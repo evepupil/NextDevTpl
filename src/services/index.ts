@@ -1,3 +1,7 @@
+export {
+  trackCoreActionCompleted,
+  trackFirstValueCompleted,
+} from "@/lib/telemetry/events";
 export { aiService, getAIModel, getAIProvider } from "./ai";
 export { jobService } from "./jobs";
 export { isMailServiceConfigured, mailService } from "./mail";

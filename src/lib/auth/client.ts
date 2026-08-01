@@ -2,6 +2,8 @@
 
 import { createAuthClient } from "better-auth/react";
 
+import { getClientTelemetryHeaders } from "@/lib/telemetry/identity";
+
 /**
  * Better Auth 客户端配置
  *
@@ -17,6 +19,16 @@ export const authClient = createAuthClient({
    * 默认指向 /api/auth，与 API 路由匹配
    */
   baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+  fetchOptions: {
+    credentials: "include",
+    onRequest(context) {
+      const headers = new Headers(context.headers);
+      for (const [name, value] of Object.entries(getClientTelemetryHeaders())) {
+        headers.set(name, value);
+      }
+      return { ...context, headers };
+    },
+  },
 });
 
 /**

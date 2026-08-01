@@ -300,7 +300,7 @@ export const anonymousQuotaService = noopUsageQuotaAdapter;
 export const serviceExportNames: Readonly<Record<ServiceKind, string>> = {
   ai: 'export { aiService, getAIModel, getAIProvider } from "./ai";\n',
   analytics:
-    'export { telemetryService, trackServerEvent } from "./telemetry";\n',
+    'export { telemetryService, trackServerEvent } from "./telemetry";\nexport { trackCoreActionCompleted, trackFirstValueCompleted } from "@/lib/telemetry/events";\n',
   jobs: 'export { jobService } from "./jobs";\n',
   mail: 'export { isMailServiceConfigured, mailService } from "./mail";\n',
   payment: 'export { paymentService } from "./payment";\n',

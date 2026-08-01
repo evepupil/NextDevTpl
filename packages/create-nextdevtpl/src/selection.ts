@@ -22,6 +22,19 @@ const CUSTOM_DEFAULTS: Readonly<Partial<Record<ServiceKind, string>>> = {
   "rate-limit": "rate-limit:noop",
 };
 
+const AUTHENTICATED_MODULES = [
+  "admin",
+  "blog",
+  "credits",
+  "marketing",
+  "payment",
+  "pseo",
+  "settings",
+  "storage",
+  "subscription",
+  "support",
+] as const;
+
 function resolveModules(
   catalog: RecipeCatalog,
   requested: readonly string[]
@@ -79,6 +92,16 @@ export function createProjectSelection(
       : presetRecipe!.modules;
   const modules = resolveModules(catalog, requestedModules);
   const moduleSet = new Set(modules);
+  if (!moduleSet.has("auth")) {
+    const invalidModules = AUTHENTICATED_MODULES.filter((id) =>
+      moduleSet.has(id)
+    );
+    if (invalidModules.length > 0) {
+      throw new Error(
+        `Modules require the auth module: ${invalidModules.join(", ")}`
+      );
+    }
+  }
   const target = options.target ?? presetRecipe?.target ?? "server";
   const adapters: Partial<Record<ServiceKind, string>> = {
     ...(preset === "custom" ? CUSTOM_DEFAULTS : presetRecipe?.adapters),
