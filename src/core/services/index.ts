@@ -6,3 +6,4 @@ export * from "./manifest";
 export * from "./payment";
 export * from "./rate-limit";
 export * from "./storage";
+export * from "./telemetry";
