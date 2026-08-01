@@ -121,6 +121,24 @@ const manifests = [
     bindings: ["Ai"],
   }),
   defineServiceAdapter({
+    id: "analytics:noop",
+    service: "analytics",
+    source: "src/adapters/analytics/noop.ts",
+    runtime: "universal",
+    packages: [],
+    env: [],
+    bindings: [],
+  }),
+  defineServiceAdapter({
+    id: "analytics:logger",
+    service: "analytics",
+    source: "src/adapters/analytics/logger.ts",
+    runtime: "universal",
+    packages: [],
+    env: [],
+    bindings: [],
+  }),
+  defineServiceAdapter({
     id: "jobs:inngest",
     service: "jobs",
     source: "src/adapters/jobs/inngest",
@@ -185,6 +203,7 @@ export const defaultServiceAdapters = {
   storage: "storage:s3-compatible",
   mail: "mail:resend",
   ai: "ai:openai-compatible",
+  analytics: "analytics:noop",
   jobs: "jobs:inngest",
   "rate-limit": "rate-limit:upstash",
 } as const satisfies Record<ServiceKind, ServiceAdapterId>;

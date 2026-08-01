@@ -1,5 +1,6 @@
 export const SERVICE_KINDS = [
   "ai",
+  "analytics",
   "jobs",
   "mail",
   "payment",

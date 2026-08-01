@@ -18,6 +18,7 @@ describe("project generator selection", () => {
 
     expect(selection.modules).toEqual(["mail", "shared", "auth", "dashboard"]);
     expect(selection.adapters).toEqual({
+      analytics: "analytics:noop",
       mail: "mail:disabled",
       "rate-limit": "rate-limit:noop",
     });

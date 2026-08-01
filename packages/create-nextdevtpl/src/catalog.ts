@@ -43,7 +43,15 @@ function parseModule(id: string, value: unknown): CatalogModule {
 }
 
 function parseAdapter(id: string, value: unknown): CatalogAdapter {
-  const services = ["ai", "jobs", "mail", "payment", "rate-limit", "storage"];
+  const services = [
+    "ai",
+    "analytics",
+    "jobs",
+    "mail",
+    "payment",
+    "rate-limit",
+    "storage",
+  ];
   const runtimes = ["node", "universal", "worker"];
   if (
     !isRecord(value) ||

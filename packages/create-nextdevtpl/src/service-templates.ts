@@ -17,6 +17,9 @@ export const adapterExports: Readonly<Record<string, string>> = {
   "ai:anthropic": 'export { createAnthropicAdapter } from "./anthropic";\n',
   "ai:workers-ai":
     'export { createWorkersAIAdapter, type WorkersAIBindingPort } from "./workers-ai";\n',
+  "analytics:noop": 'export { noopTelemetryAdapter } from "./noop";\n',
+  "analytics:logger":
+    'export { createLoggerTelemetryAdapter, type TelemetryLogSink } from "./logger";\n',
   "jobs:inngest": 'export { createInngestJobAdapter } from "./inngest";\n',
   "jobs:cloudflare-workflows":
     'export { createCloudflareWorkflowsAdapter, type WorkflowBindingPort } from "./cloudflare-workflows";\n',
@@ -144,6 +147,53 @@ export const aiService = createWorkersAIAdapter({
   binding: createLazyCloudflareBinding<WorkersAIBindingPort>("AI"),
 });
 `,
+  "analytics:noop": `import {
+  createTelemetryService,
+  type TelemetryEnvironment,
+} from "@/core/services";
+import { noopTelemetryAdapter } from "@/adapters/analytics";
+import { getRuntimeEnv } from "@/lib/runtime-config";
+
+function getTelemetryEnvironment(): TelemetryEnvironment {
+  switch (getRuntimeEnv("NODE_ENV")) {
+    case "production": return "production";
+    case "test": return "test";
+    case "preview": return "preview";
+    default: return "development";
+  }
+}
+
+const release = getRuntimeEnv("APP_VERSION");
+export const telemetryService = createTelemetryService(noopTelemetryAdapter, {
+  environment: getTelemetryEnvironment(),
+  ...(release ? { release } : {}),
+});
+`,
+  "analytics:logger": `import {
+  createTelemetryService,
+  type TelemetryEnvironment,
+} from "@/core/services";
+import { createLoggerTelemetryAdapter } from "@/adapters/analytics";
+import { getRuntimeEnv } from "@/lib/runtime-config";
+
+function getTelemetryEnvironment(): TelemetryEnvironment {
+  switch (getRuntimeEnv("NODE_ENV")) {
+    case "production": return "production";
+    case "test": return "test";
+    case "preview": return "preview";
+    default: return "development";
+  }
+}
+
+const release = getRuntimeEnv("APP_VERSION");
+export const telemetryService = createTelemetryService(
+  createLoggerTelemetryAdapter(),
+  {
+    environment: getTelemetryEnvironment(),
+    ...(release ? { release } : {}),
+  }
+);
+`,
   "jobs:inngest": `import { createInngestJobAdapter } from "@/adapters/jobs";
 
 export const jobService = createInngestJobAdapter();
@@ -190,6 +240,7 @@ export const anonymousQuotaService = noopUsageQuotaAdapter;
 
 export const serviceExportNames: Readonly<Record<ServiceKind, string>> = {
   ai: 'export { aiService, getAIModel, getAIProvider } from "./ai";\n',
+  analytics: 'export { telemetryService } from "./telemetry";\n',
   jobs: 'export { jobService } from "./jobs";\n',
   mail: 'export { isMailServiceConfigured, mailService } from "./mail";\n',
   payment: 'export { paymentService } from "./payment";\n',

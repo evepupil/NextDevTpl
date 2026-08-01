@@ -11,11 +11,13 @@ const SERVICE_KINDS: readonly ServiceKind[] = [
   "storage",
   "mail",
   "ai",
+  "analytics",
   "jobs",
   "rate-limit",
 ];
 
 const CUSTOM_DEFAULTS: Readonly<Partial<Record<ServiceKind, string>>> = {
+  analytics: "analytics:noop",
   mail: "mail:disabled",
   "rate-limit": "rate-limit:noop",
 };

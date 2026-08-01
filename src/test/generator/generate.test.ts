@@ -58,6 +58,14 @@ describe("project generation", () => {
     );
 
     expect(manifest.modules).toEqual(["mail", "shared", "auth", "dashboard"]);
+    expect(manifest.adapters.analytics).toBe("analytics:noop");
+    expect(await exists(join(target, "src/services/telemetry.ts"))).toBe(true);
+    expect(
+      await readFile(join(target, "src/services/telemetry.ts"), "utf8")
+    ).toContain("noopTelemetryAdapter");
+    expect(await exists(join(target, "src/adapters/analytics/logger.ts"))).toBe(
+      false
+    );
     expect(await exists(join(target, "src/features/credits"))).toBe(false);
     expect(await exists(join(target, "src/app/api/inngest"))).toBe(false);
     expect(await exists(join(target, "src/lib/ai"))).toBe(false);
@@ -326,6 +334,7 @@ describe("project generation", () => {
     });
 
     expect(manifest.adapters).toEqual({
+      analytics: "analytics:noop",
       mail: "mail:smtp",
       storage: "storage:s3-compatible",
       "rate-limit": "rate-limit:noop",

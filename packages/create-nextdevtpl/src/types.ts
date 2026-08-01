@@ -4,6 +4,7 @@ export type PresetName = "ai-saas" | "custom" | "minimal" | "saas";
 
 export type ServiceKind =
   | "ai"
+  | "analytics"
   | "jobs"
   | "mail"
   | "payment"

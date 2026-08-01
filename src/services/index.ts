@@ -4,3 +4,4 @@ export { isMailServiceConfigured, mailService } from "./mail";
 export { paymentService } from "./payment";
 export { anonymousQuotaService, rateLimitService } from "./rate-limit";
 export { storageService } from "./storage";
+export { telemetryService } from "./telemetry";

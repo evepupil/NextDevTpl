@@ -32,6 +32,7 @@ const SERVICE_KINDS: readonly ServiceKind[] = [
   "storage",
   "mail",
   "ai",
+  "analytics",
   "jobs",
   "rate-limit",
 ];
@@ -578,7 +579,8 @@ async function rewriteServices(
   let index = "";
   for (const kind of SERVICE_KINDS) {
     const id = selection.adapters[kind];
-    const path = join(target, "src", "services", `${kind}.ts`);
+    const fileName = kind === "analytics" ? "telemetry" : kind;
+    const path = join(target, "src", "services", `${fileName}.ts`);
     if (!id) {
       await removePath(path);
       continue;

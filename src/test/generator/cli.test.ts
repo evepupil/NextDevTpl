@@ -39,6 +39,14 @@ describe("create-nextdevtpl CLI", () => {
     });
   });
 
+  it("supports selecting the structured analytics logger", () => {
+    expect(parseCliArguments(["my-app", "--analytics", "logger"])).toEqual(
+      expect.objectContaining({
+        adapterOverrides: { analytics: "analytics:logger" },
+      })
+    );
+  });
+
   it("shows help without requiring a target", () => {
     expect(parseCliArguments(["--help"])).toBeNull();
   });

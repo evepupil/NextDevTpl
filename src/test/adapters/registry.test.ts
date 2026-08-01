@@ -3,14 +3,18 @@ import { describe, expect, it } from "vitest";
 import {
   createServiceAdapterSelection,
   defaultServiceAdapters,
-  serviceAdapterRegistry,
   type ServiceAdapterChoices,
+  serviceAdapterRegistry,
 } from "@/adapters";
 import {
   createAnthropicAdapter,
   createOpenAICompatibleAdapter,
   createWorkersAIAdapter,
 } from "@/adapters/ai";
+import {
+  createLoggerTelemetryAdapter,
+  noopTelemetryAdapter,
+} from "@/adapters/analytics";
 import {
   createCloudflareWorkflowsAdapter,
   createInngestJobAdapter,
@@ -86,6 +90,13 @@ describe("service adapter registry", () => {
           binding: { async run() {} },
         }),
       },
+      { id: "analytics:noop", adapter: noopTelemetryAdapter },
+      {
+        id: "analytics:logger",
+        adapter: createLoggerTelemetryAdapter({
+          info() {},
+        }),
+      },
       { id: "jobs:inngest", adapter: createInngestJobAdapter() },
       {
         id: "jobs:cloudflare-workflows",
@@ -123,7 +134,7 @@ describe("service adapter registry", () => {
   it("resolves the complete default adapter selection", () => {
     const selection = createServiceAdapterSelection(defaultServiceAdapters);
 
-    expect(selection.manifests).toHaveLength(6);
+    expect(selection.manifests).toHaveLength(7);
     expect(selection.packages).toEqual(
       expect.arrayContaining([
         "@aws-sdk/client-s3",
@@ -142,6 +153,7 @@ describe("service adapter registry", () => {
       storage: "storage:r2-binding",
       mail: "mail:cloudflare-email",
       ai: "ai:workers-ai",
+      analytics: "analytics:noop",
       jobs: "jobs:cloudflare-workflows",
       "rate-limit": "rate-limit:cloudflare-rate-limit",
     };

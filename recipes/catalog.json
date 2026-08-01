@@ -294,6 +294,22 @@
       "bindings": ["Ai"],
       "runtime": "worker"
     },
+    "analytics:noop": {
+      "service": "analytics",
+      "source": "src/adapters/analytics/noop.ts",
+      "packages": [],
+      "env": [],
+      "bindings": [],
+      "runtime": "universal"
+    },
+    "analytics:logger": {
+      "service": "analytics",
+      "source": "src/adapters/analytics/logger.ts",
+      "packages": [],
+      "env": [],
+      "bindings": [],
+      "runtime": "universal"
+    },
     "jobs:inngest": {
       "service": "jobs",
       "source": "src/adapters/jobs/inngest",
@@ -338,7 +354,11 @@
   "presets": {
     "minimal": {
       "modules": ["auth", "dashboard"],
-      "adapters": { "mail": "mail:disabled", "rate-limit": "rate-limit:noop" },
+      "adapters": {
+        "analytics": "analytics:noop",
+        "mail": "mail:disabled",
+        "rate-limit": "rate-limit:noop"
+      },
       "target": "server"
     },
     "saas": {
@@ -351,6 +371,7 @@
         "support"
       ],
       "adapters": {
+        "analytics": "analytics:noop",
         "payment": "payment:creem",
         "storage": "storage:s3-compatible",
         "mail": "mail:resend",
@@ -372,6 +393,7 @@
         "support"
       ],
       "adapters": {
+        "analytics": "analytics:noop",
         "payment": "payment:stripe",
         "storage": "storage:r2-binding",
         "mail": "mail:cloudflare-email",
