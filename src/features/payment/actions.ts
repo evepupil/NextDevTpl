@@ -9,6 +9,7 @@ import { subscription } from "@/db/schema/subscription";
 import { logEvent } from "@/lib/logger";
 import { protectedAction } from "@/lib/safe-action";
 import { paymentService } from "@/services/payment";
+import { trackServerEvent } from "@/services/telemetry";
 
 import { PaymentType } from "./types";
 
@@ -55,6 +56,19 @@ export const createCheckoutSession = protectedAction
       priceId,
       planId: plan?.id ?? "unknown",
       provider: paymentService.provider,
+    });
+    trackServerEvent({
+      attributes: {
+        checkoutType:
+          type === PaymentType.ONE_TIME ? "one-time" : "subscription",
+        planId: plan?.id ?? "unknown",
+        priceId,
+        provider: paymentService.provider,
+      },
+      context: { identity: { userId } },
+      name: "payment.checkout.started",
+      source: "server",
+      version: 1,
     });
 
     const checkout = await paymentService.createCheckout({
@@ -109,6 +123,16 @@ export const cancelSubscription = protectedAction
     logEvent("payment.subscription.canceled", {
       userId,
       subscriptionId: userSubscription.subscriptionId,
+    });
+    trackServerEvent({
+      attributes: {
+        provider: paymentService.provider,
+        subscriptionId: userSubscription.subscriptionId,
+      },
+      context: { identity: { userId } },
+      name: "payment.subscription.cancel_requested",
+      source: "server",
+      version: 1,
     });
 
     return { success: true };

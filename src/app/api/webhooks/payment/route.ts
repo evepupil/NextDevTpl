@@ -17,6 +17,7 @@ import { CREDITS_EXPIRY_DAYS, grantCredits } from "@/features/credits";
 import { withApiLogging } from "@/lib/api-logger";
 import { logError, logEvent, logWarn } from "@/lib/logger";
 import { paymentService } from "@/services/payment";
+import { trackServerEvent } from "@/services/telemetry";
 
 export const POST = withApiLogging(async (request: Request) => {
   const payload = await request.text();
@@ -113,6 +114,21 @@ async function handleCheckoutCompleted(data: PaymentCheckout): Promise<void> {
     checkoutType: data.metadata.type ?? data.mode,
     provider: paymentService.provider,
   });
+  trackServerEvent({
+    attributes: {
+      checkoutType: data.metadata.type ?? data.mode,
+      customerId: data.customer.id,
+      productId: data.productId,
+      provider: paymentService.provider,
+      ...(data.subscription?.id
+        ? { subscriptionId: data.subscription.id }
+        : {}),
+    },
+    context: { identity: { userId } },
+    name: "payment.checkout.completed",
+    source: "server",
+    version: 1,
+  });
 }
 
 async function handleSubscriptionActive(
@@ -146,6 +162,18 @@ async function handleSubscriptionActive(
     priceId: externalSubscription.productId,
     status: externalSubscription.status,
     provider: paymentService.provider,
+  });
+  trackServerEvent({
+    attributes: {
+      priceId: externalSubscription.productId,
+      provider: paymentService.provider,
+      status: externalSubscription.status,
+      subscriptionId: externalSubscription.id,
+    },
+    context: { identity: { userId } },
+    name: "payment.subscription.created",
+    source: "server",
+    version: 1,
   });
 }
 
@@ -185,12 +213,25 @@ async function handleSubscriptionCanceled(
     })
     .where(eq(subscription.subscriptionId, externalSubscription.id));
 
+  const userId = await findSubscriptionUserId(externalSubscription.id);
   logEvent("payment.subscription.canceled", {
-    userId: await findSubscriptionUserId(externalSubscription.id),
+    userId,
     subscriptionId: externalSubscription.id,
     cancelAtPeriodEnd: isStillInPeriod,
     periodEnd: periodEnd?.toISOString(),
     provider: paymentService.provider,
+  });
+  trackServerEvent({
+    attributes: {
+      cancelAtPeriodEnd: isStillInPeriod,
+      periodEnd: periodEnd?.toISOString() ?? null,
+      provider: paymentService.provider,
+      subscriptionId: externalSubscription.id,
+    },
+    ...(userId ? { context: { identity: { userId } } } : {}),
+    name: "payment.subscription.canceled",
+    source: "server",
+    version: 1,
   });
 }
 
@@ -206,6 +247,16 @@ async function updateSubscriptionState(
   logEvent(`payment.subscription.${status}`, {
     subscriptionId: externalSubscription.id,
     provider: paymentService.provider,
+  });
+  trackServerEvent({
+    attributes: {
+      provider: paymentService.provider,
+      status,
+      subscriptionId: externalSubscription.id,
+    },
+    name: `payment.subscription.${status}`,
+    source: "server",
+    version: 1,
   });
 }
 
@@ -247,6 +298,16 @@ async function createOrUpdateSubscription(
   logEvent("payment.subscription.upserted", {
     userId,
     provider: paymentService.provider,
+  });
+  trackServerEvent({
+    attributes: {
+      provider: paymentService.provider,
+      subscriptionId: externalSubscription.id,
+    },
+    context: { identity: { userId } },
+    name: "payment.subscription.upserted",
+    source: "server",
+    version: 1,
   });
 }
 
@@ -303,6 +364,13 @@ async function grantSubscriptionCredits(
 
   if (existingBatch) {
     logEvent("payment.credits.already_granted", { periodKey });
+    trackServerEvent({
+      attributes: { periodKey },
+      context: { identity: { userId } },
+      name: "payment.credits.already_granted",
+      source: "server",
+      version: 1,
+    });
     return;
   }
 
@@ -353,6 +421,17 @@ async function grantSubscriptionCredits(
       credits: amount,
       planType,
       batchId: result.batchId,
+    });
+    trackServerEvent({
+      attributes: {
+        batchId: result.batchId,
+        credits: amount,
+        planType,
+      },
+      context: { identity: { userId } },
+      name: "payment.credits.grant_success",
+      source: "server",
+      version: 1,
     });
   } catch (error) {
     logError("Failed to grant subscription credits", {

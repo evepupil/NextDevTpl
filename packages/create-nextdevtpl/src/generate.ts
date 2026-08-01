@@ -582,6 +582,13 @@ async function rewriteServices(
     const fileName = kind === "analytics" ? "telemetry" : kind;
     const path = join(target, "src", "services", `${fileName}.ts`);
     if (!id) {
+      if (kind === "analytics") {
+        const fallback = serviceSources["analytics:none"];
+        if (!fallback) throw new Error("Missing analytics fallback template");
+        await writeText(path, fallback);
+        index += serviceExportNames[kind];
+        continue;
+      }
       await removePath(path);
       continue;
     }

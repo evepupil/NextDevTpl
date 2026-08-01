@@ -12,6 +12,7 @@ import { getBaseUrl } from "@/config/payment";
 import { logEvent } from "@/lib/logger";
 import { actionClient, protectedAction } from "@/lib/safe-action";
 import { paymentService } from "@/services/payment";
+import { trackServerEvent } from "@/services/telemetry";
 
 import {
   CREDIT_PACKAGES,
@@ -202,6 +203,13 @@ export const useCredits = withProtectedCreditsAction("useCredits")
         amount,
         serviceName,
       });
+      trackServerEvent({
+        attributes: { amount, serviceName },
+        context: { identity: { userId } },
+        name: "credits.consumed",
+        source: "server",
+        version: 1,
+      });
 
       return {
         success: true,
@@ -342,7 +350,14 @@ export const purchaseCredits = withProtectedCreditsAction("purchaseCredits")
       userId,
       amount,
       paymentId,
-      source: "creem",
+      provider: paymentService.provider,
+    });
+    trackServerEvent({
+      attributes: { amount, paymentId, provider: paymentService.provider },
+      context: { identity: { userId } },
+      name: "credits.purchased",
+      source: "server",
+      version: 1,
     });
 
     return {
@@ -390,6 +405,18 @@ export const createCreditsPurchaseCheckout = withProtectedCreditsAction(
       credits: pkg.credits,
       provider: paymentService.provider,
       checkoutType: "credits",
+    });
+    trackServerEvent({
+      attributes: {
+        checkoutType: "credits",
+        credits: pkg.credits,
+        packageId: pkg.id,
+        provider: paymentService.provider,
+      },
+      context: { identity: { userId } },
+      name: "payment.checkout.started",
+      source: "server",
+      version: 1,
     });
 
     const checkout = await paymentService.createCheckout({

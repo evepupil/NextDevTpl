@@ -63,6 +63,9 @@ describe("project generation", () => {
     expect(
       await readFile(join(target, "src/services/telemetry.ts"), "utf8")
     ).toContain("noopTelemetryAdapter");
+    expect(
+      await readFile(join(target, "src/services/telemetry.ts"), "utf8")
+    ).toContain("trackServerEvent");
     expect(await exists(join(target, "src/adapters/analytics/logger.ts"))).toBe(
       false
     );
@@ -344,6 +347,36 @@ describe("project generation", () => {
     expect(await exists(join(target, "src/adapters/mail/resend.ts"))).toBe(
       false
     );
+  });
+
+  it("keeps telemetry imports usable when analytics is disabled", async () => {
+    const target = join(root, "analytics-none");
+    const { manifest } = await generateProject({
+      targetDirectory: target,
+      preset: "custom",
+      modules: ["auth", "payment", "credits"],
+      target: "server",
+      adapterOverrides: {
+        analytics: null,
+        payment: "payment:creem",
+        mail: "mail:disabled",
+        "rate-limit": "rate-limit:noop",
+      },
+      install: false,
+    });
+    const telemetry = await readFile(
+      join(target, "src/services/telemetry.ts"),
+      "utf8"
+    );
+    const services = await readFile(
+      join(target, "src/services/index.ts"),
+      "utf8"
+    );
+
+    expect(manifest.adapters).not.toHaveProperty("analytics");
+    expect(telemetry).toContain('provider: "noop"');
+    expect(services).toContain("trackServerEvent");
+    expect(await exists(join(target, "src/adapters/analytics"))).toBe(false);
   });
 
   it("generates a Cloudflare project without auth or mail modules", async () => {

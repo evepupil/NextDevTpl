@@ -150,6 +150,7 @@ export const aiService = createWorkersAIAdapter({
   "analytics:noop": `import {
   createTelemetryService,
   type TelemetryEnvironment,
+  type TelemetryEventInput,
 } from "@/core/services";
 import { noopTelemetryAdapter } from "@/adapters/analytics";
 import { getRuntimeEnv } from "@/lib/runtime-config";
@@ -168,10 +169,17 @@ export const telemetryService = createTelemetryService(noopTelemetryAdapter, {
   environment: getTelemetryEnvironment(),
   ...(release ? { release } : {}),
 });
+
+export function trackServerEvent(input: TelemetryEventInput): void {
+  void telemetryService.track(input).catch(() => {
+    // 埋点失败不能影响原始业务请求。
+  });
+}
 `,
   "analytics:logger": `import {
   createTelemetryService,
   type TelemetryEnvironment,
+  type TelemetryEventInput,
 } from "@/core/services";
 import { createLoggerTelemetryAdapter } from "@/adapters/analytics";
 import { getRuntimeEnv } from "@/lib/runtime-config";
@@ -193,6 +201,57 @@ export const telemetryService = createTelemetryService(
     ...(release ? { release } : {}),
   }
 );
+
+export function trackServerEvent(input: TelemetryEventInput): void {
+  void telemetryService.track(input).catch(() => {
+    // 埋点失败不能影响原始业务请求。
+  });
+}
+`,
+  "analytics:none": `import {
+  createTelemetryService,
+  type TelemetryAdapter,
+  type TelemetryEnvironment,
+  type TelemetryEventInput,
+} from "@/core/services";
+import { getRuntimeEnv } from "@/lib/runtime-config";
+
+function getTelemetryEnvironment(): TelemetryEnvironment {
+  switch (getRuntimeEnv("NODE_ENV")) {
+    case "production": return "production";
+    case "test": return "test";
+    case "preview": return "preview";
+    default: return "development";
+  }
+}
+
+const noopTelemetryAdapter: TelemetryAdapter = {
+  provider: "noop",
+  capabilities: {
+    clientEvents: false,
+    identityLinking: false,
+    query: false,
+    serverEvents: true,
+  },
+  async track() {
+    // 未配置分析服务时不产生外部请求。
+  },
+};
+
+const release = getRuntimeEnv("APP_VERSION");
+export const telemetryService = createTelemetryService(
+  noopTelemetryAdapter,
+  {
+    environment: getTelemetryEnvironment(),
+    ...(release ? { release } : {}),
+  }
+);
+
+export function trackServerEvent(input: TelemetryEventInput): void {
+  void telemetryService.track(input).catch(() => {
+    // 埋点失败不能影响原始业务请求。
+  });
+}
 `,
   "jobs:inngest": `import { createInngestJobAdapter } from "@/adapters/jobs";
 
@@ -240,7 +299,8 @@ export const anonymousQuotaService = noopUsageQuotaAdapter;
 
 export const serviceExportNames: Readonly<Record<ServiceKind, string>> = {
   ai: 'export { aiService, getAIModel, getAIProvider } from "./ai";\n',
-  analytics: 'export { telemetryService } from "./telemetry";\n',
+  analytics:
+    'export { telemetryService, trackServerEvent } from "./telemetry";\n',
   jobs: 'export { jobService } from "./jobs";\n',
   mail: 'export { isMailServiceConfigured, mailService } from "./mail";\n',
   payment: 'export { paymentService } from "./payment";\n',

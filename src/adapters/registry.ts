@@ -203,7 +203,7 @@ export const defaultServiceAdapters = {
   storage: "storage:s3-compatible",
   mail: "mail:resend",
   ai: "ai:openai-compatible",
-  analytics: "analytics:noop",
+  analytics: "analytics:logger",
   jobs: "jobs:inngest",
   "rate-limit": "rate-limit:upstash",
 } as const satisfies Record<ServiceKind, ServiceAdapterId>;

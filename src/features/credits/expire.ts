@@ -14,6 +14,7 @@ import {
   creditsTransaction,
 } from "@/db/schema/credits";
 import { logEvent } from "@/lib/logger";
+import { trackServerEvent } from "@/services/telemetry";
 
 export async function processExpiredBatches() {
   const now = new Date();
@@ -105,6 +106,12 @@ export async function processExpiredBatches() {
     logEvent("credits.expired", {
       count: results.length,
       totalExpired,
+    });
+    trackServerEvent({
+      attributes: { count: results.length, totalExpired },
+      name: "credits.expired",
+      source: "system",
+      version: 1,
     });
   }
 
