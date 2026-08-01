@@ -1,12 +1,15 @@
-import { and, count, eq, gte, lt, sum } from "drizzle-orm";
+import { and, count, eq, gte, inArray, lt, sum } from "drizzle-orm";
 
+import { findPlanByPriceId, paymentConfig } from "@/config/payment";
 import { db } from "@/db";
 import { user } from "@/db/schema/auth";
 import { creditsBalance, creditsTransaction } from "@/db/schema/credits";
+import { revenueEvent } from "@/db/schema/payment";
 import { subscription } from "@/db/schema/subscription";
 import { ticket } from "@/db/schema/support";
 
 import { createFunnel, createHealth, createRetention, metric } from "./metrics";
+import { buildRevenueHealth, calculateMrrMinor } from "./revenue";
 import type { OperationsDashboard } from "./types";
 
 export interface OperationsPeriodOptions {
@@ -45,9 +48,10 @@ export async function getOperationsDashboard(
     openTickets,
     creditTotal,
     newUsers,
-    paidUsers,
     creditConsumption,
     supportTickets,
+    activeSubscriptionRows,
+    revenueRows,
   ] = await Promise.all([
     db.select({ value: count() }).from(user),
     db
@@ -68,16 +72,6 @@ export async function getOperationsDashboard(
         and(gte(user.createdAt, period.start), lt(user.createdAt, period.end))
       ),
     db
-      .select({ value: count() })
-      .from(subscription)
-      .where(
-        and(
-          eq(subscription.status, "active"),
-          gte(subscription.createdAt, period.start),
-          lt(subscription.createdAt, period.end)
-        )
-      ),
-    db
       .select({ value: sum(creditsTransaction.amount) })
       .from(creditsTransaction)
       .where(
@@ -96,13 +90,55 @@ export async function getOperationsDashboard(
           lt(ticket.createdAt, period.end)
         )
       ),
+    db
+      .select({ priceId: subscription.priceId })
+      .from(subscription)
+      .where(inArray(subscription.status, ["active", "trialing"])),
+    db
+      .select({
+        amountMinor: revenueEvent.amountMinor,
+        currency: revenueEvent.currency,
+        kind: revenueEvent.kind,
+        userId: revenueEvent.userId,
+      })
+      .from(revenueEvent)
+      .where(
+        and(
+          gte(revenueEvent.occurredAt, period.start),
+          lt(revenueEvent.occurredAt, period.end)
+        )
+      ),
   ]);
+
+  const activeMrrMinor = activeSubscriptionRows.reduce((total, item) => {
+    const price = findPlanByPriceId(item.priceId).price;
+    return price
+      ? total +
+          calculateMrrMinor({ amount: price.amount, interval: price.interval })
+      : total;
+  }, 0);
+  const succeededRevenue = revenueRows.filter(
+    (event) => event.kind === "payment_succeeded"
+  );
+  const paidUsers = new Set(
+    succeededRevenue.flatMap((event) => (event.userId ? [event.userId] : []))
+  ).size;
+  const confirmedRevenueMinor = succeededRevenue.reduce(
+    (total, event) => total + event.amountMinor,
+    0
+  );
+  const refunds = revenueRows.filter((event) => event.kind === "refund");
+  const refundsMinor = refunds.reduce(
+    (total, event) => total + event.amountMinor,
+    0
+  );
+  const currency = revenueRows[0]?.currency ?? paymentConfig.currency;
 
   const generatedAt = new Date().toISOString();
   const source = "database:auth-subscription-credits-support";
   const dashboard: OperationsDashboard = {
     funnel: createFunnel({
-      paidUsers: Number(paidUsers[0]?.value ?? 0),
+      paidUsers,
       registeredUsers: Number(newUsers[0]?.value ?? 0),
     }),
     generatedAt,
@@ -134,6 +170,22 @@ export async function getOperationsDashboard(
       start: period.start.toISOString(),
       timezone: period.timezone,
     },
+    revenue: buildRevenueHealth({
+      activeMrrMinor,
+      confirmedRevenueEvents: succeededRevenue.length,
+      confirmedRevenueMinor,
+      currency,
+      churnedSubscriptions: revenueRows.filter(
+        (event) => event.kind === "subscription_canceled"
+      ).length,
+      paidUsers,
+      paymentFailures: revenueRows.filter(
+        (event) => event.kind === "payment_failed"
+      ).length,
+      refundsMinor,
+      refundEvents: refunds.length,
+      registeredUsers: Number(newUsers[0]?.value ?? 0),
+    }),
     retention: createRetention(),
     usage: {
       creditConsumption: metric(

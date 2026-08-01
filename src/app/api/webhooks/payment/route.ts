@@ -22,7 +22,11 @@ import {
   CREDITS_EXPIRY_DAYS,
   grantCredits,
 } from "@/features/credits";
-import { isStaleSubscriptionEvent, PlanInterval } from "@/features/payment";
+import {
+  isStaleSubscriptionEvent,
+  PlanInterval,
+  recordRevenueEvent,
+} from "@/features/payment";
 import { withApiLogging } from "@/lib/api-logger";
 import { logError, logEvent, logWarn } from "@/lib/logger";
 import { paymentService } from "@/services/payment";
@@ -105,24 +109,40 @@ async function handlePaymentEvent(event: PaymentWebhookEvent): Promise<void> {
   switch (event.type) {
     case "checkout.completed":
       if (event.checkout) {
-        await handleCheckoutCompleted(event.checkout, event.id);
+        await handleCheckoutCompleted(
+          event.checkout,
+          event.id,
+          event.createdAt
+        );
       }
       return;
     case "subscription.active":
       if (event.subscription) {
-        await handleSubscriptionActive(event.subscription);
+        await handleSubscriptionActive(
+          event.subscription,
+          event.id,
+          event.createdAt
+        );
       }
       return;
     case "subscription.paid":
     case "subscription.renewed":
       if (event.subscription) {
-        await handleSubscriptionRenewed(event.subscription);
+        await handleSubscriptionRenewed(
+          event.subscription,
+          event.id,
+          event.createdAt
+        );
       }
       return;
     case "subscription.canceled":
     case "subscription.expired":
       if (event.subscription) {
-        await handleSubscriptionCanceled(event.subscription);
+        await handleSubscriptionCanceled(
+          event.subscription,
+          event.id,
+          event.createdAt
+        );
       }
       return;
     case "subscription.past_due":
@@ -135,12 +155,53 @@ async function handlePaymentEvent(event: PaymentWebhookEvent): Promise<void> {
         await updateSubscriptionState(event.subscription, "paused");
       }
       return;
+    case "payment.failed":
+      await recordRevenueEvent({
+        externalEventId: event.id,
+        kind: "payment_failed",
+        occurredAt: event.createdAt,
+        provider: paymentService.provider,
+        ...(event.payment?.amountMinor !== undefined
+          ? { amountMinor: event.payment.amountMinor }
+          : {}),
+        ...(event.payment?.currency
+          ? { currency: event.payment.currency }
+          : {}),
+        ...(event.payment?.subscriptionId
+          ? { subscriptionId: event.payment.subscriptionId }
+          : {}),
+        ...((event.payment?.userId ?? event.payment?.metadata.userId)
+          ? { userId: event.payment?.userId ?? event.payment?.metadata.userId }
+          : {}),
+      });
+      return;
+    case "payment.refunded":
+      await recordRevenueEvent({
+        externalEventId: event.id,
+        kind: "refund",
+        occurredAt: event.createdAt,
+        provider: paymentService.provider,
+        ...(event.payment?.amountMinor !== undefined
+          ? { amountMinor: event.payment.amountMinor }
+          : {}),
+        ...(event.payment?.currency
+          ? { currency: event.payment.currency }
+          : {}),
+        ...(event.payment?.subscriptionId
+          ? { subscriptionId: event.payment.subscriptionId }
+          : {}),
+        ...((event.payment?.userId ?? event.payment?.metadata.userId)
+          ? { userId: event.payment?.userId ?? event.payment?.metadata.userId }
+          : {}),
+      });
+      return;
   }
 }
 
 async function handleCheckoutCompleted(
   data: PaymentCheckout,
-  eventId: string
+  eventId: string,
+  occurredAt: Date
 ): Promise<void> {
   const userId = data.metadata.userId;
   if (!userId) {
@@ -166,6 +227,26 @@ async function handleCheckoutCompleted(
   } else if (data.mode === "one-time") {
     await handleOneTimeCheckoutCompleted(data, eventId);
   }
+
+  const configuredAmount = getConfiguredCheckoutAmount(data);
+  await recordRevenueEvent({
+    externalEventId: data.subscription
+      ? subscriptionRevenueEventId(data.subscription, eventId)
+      : eventId,
+    kind: "payment_succeeded",
+    occurredAt,
+    priceId: data.productId,
+    provider: paymentService.provider,
+    ...(configuredAmount !== undefined
+      ? { amountMajor: configuredAmount }
+      : {}),
+    ...(data.amountMinor !== undefined
+      ? { amountMinor: data.amountMinor }
+      : {}),
+    ...(data.currency ? { currency: data.currency } : {}),
+    ...(data.subscription ? { subscriptionId: data.subscription.id } : {}),
+    userId,
+  });
 
   logEvent("payment.checkout.completed", {
     userId,
@@ -299,7 +380,9 @@ async function upsertLifetimeSubscription(
 }
 
 async function handleSubscriptionActive(
-  externalSubscription: PaymentSubscription
+  externalSubscription: PaymentSubscription,
+  eventId: string,
+  occurredAt: Date
 ): Promise<void> {
   const metadataUserId = externalSubscription.metadata.userId;
   const userId =
@@ -323,6 +406,15 @@ async function handleSubscriptionActive(
       "subscription_create"
     );
   }
+  await recordRevenueEvent({
+    externalEventId: subscriptionRevenueEventId(externalSubscription, eventId),
+    kind: "payment_succeeded",
+    occurredAt,
+    priceId: externalSubscription.productId,
+    provider: paymentService.provider,
+    subscriptionId: externalSubscription.id,
+    userId,
+  });
   logEvent("payment.subscription.created", {
     userId,
     subscriptionId: externalSubscription.id,
@@ -345,7 +437,9 @@ async function handleSubscriptionActive(
 }
 
 async function handleSubscriptionRenewed(
-  externalSubscription: PaymentSubscription
+  externalSubscription: PaymentSubscription,
+  eventId: string,
+  occurredAt: Date
 ): Promise<void> {
   const userId =
     externalSubscription.metadata.userId ??
@@ -368,10 +462,21 @@ async function handleSubscriptionRenewed(
       "subscription_cycle"
     );
   }
+  await recordRevenueEvent({
+    externalEventId: subscriptionRevenueEventId(externalSubscription, eventId),
+    kind: "payment_succeeded",
+    occurredAt,
+    priceId: externalSubscription.productId,
+    provider: paymentService.provider,
+    subscriptionId: externalSubscription.id,
+    userId,
+  });
 }
 
 async function handleSubscriptionCanceled(
-  externalSubscription: PaymentSubscription
+  externalSubscription: PaymentSubscription,
+  eventId: string,
+  occurredAt: Date
 ): Promise<void> {
   const periodEnd = externalSubscription.currentPeriodEnd;
   const isStillInPeriod = periodEnd !== null && periodEnd > new Date();
@@ -387,6 +492,15 @@ async function handleSubscriptionCanceled(
     .where(eq(subscription.subscriptionId, externalSubscription.id));
 
   const userId = await findSubscriptionUserId(externalSubscription.id);
+  await recordRevenueEvent({
+    externalEventId: eventId,
+    kind: "subscription_canceled",
+    occurredAt,
+    priceId: externalSubscription.productId,
+    provider: paymentService.provider,
+    subscriptionId: externalSubscription.id,
+    ...(userId ? { userId } : {}),
+  });
   logEvent("payment.subscription.canceled", {
     userId,
     subscriptionId: externalSubscription.id,
@@ -406,6 +520,24 @@ async function handleSubscriptionCanceled(
     source: "server",
     version: 1,
   });
+}
+
+function subscriptionRevenueEventId(
+  subscriptionData: PaymentSubscription,
+  fallbackEventId: string
+): string {
+  return subscriptionData.currentPeriodStart
+    ? `${subscriptionData.id}:${subscriptionData.currentPeriodStart.toISOString()}`
+    : fallbackEventId;
+}
+
+function getConfiguredCheckoutAmount(
+  data: PaymentCheckout
+): number | undefined {
+  const planPrice = findPlanByPriceId(data.productId).price?.amount;
+  if (planPrice !== undefined) return planPrice;
+  const packageId = data.metadata.packageId;
+  return CREDIT_PACKAGES.find((item) => item.id === packageId)?.price;
 }
 
 async function updateSubscriptionState(

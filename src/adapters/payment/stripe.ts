@@ -6,6 +6,7 @@ import {
   type PaymentCheckout,
   type PaymentStatus,
   type PaymentSubscription,
+  type PaymentTransaction,
   type PaymentWebhookType,
 } from "@/core/services";
 import { getRuntimeEnv } from "@/lib/runtime-config";
@@ -29,8 +30,10 @@ interface StripeSubscription {
 }
 
 interface StripeCheckout {
+  amount_total?: number | null;
   customer: string | { id: string } | null;
   customer_details?: { email?: string; name?: string };
+  currency?: string | null;
   id: string;
   metadata?: Record<string, string>;
   mode: "payment" | "setup" | "subscription";
@@ -41,9 +44,31 @@ interface StripeCheckout {
 
 interface StripeWebhookEvent {
   created: number;
-  data: { object: StripeCheckout | StripeSubscription };
+  data: {
+    object:
+      | StripeCheckout
+      | StripeSubscription
+      | StripePaymentIntent
+      | StripeCharge;
+  };
   id: string;
   type: string;
+}
+
+interface StripePaymentIntent {
+  amount: number;
+  currency: string;
+  customer?: string | null;
+  metadata?: Record<string, string>;
+  subscription?: string | null;
+}
+
+interface StripeCharge {
+  amount: number;
+  currency: string;
+  customer?: string | null;
+  metadata?: Record<string, string>;
+  subscription?: string | null;
 }
 
 function formBody(values: Record<string, string | undefined>): string {
@@ -70,6 +95,18 @@ function mapSubscription(value: StripeSubscription): PaymentSubscription {
   };
 }
 
+function mapPayment(
+  value: StripePaymentIntent | StripeCharge
+): PaymentTransaction {
+  return {
+    amountMinor: value.amount,
+    currency: value.currency.toUpperCase(),
+    ...(value.customer ? { customerId: value.customer } : {}),
+    metadata: value.metadata ?? {},
+    ...(value.subscription ? { subscriptionId: value.subscription } : {}),
+  };
+}
+
 function mapCheckout(value: StripeCheckout): PaymentCheckout {
   const subscription =
     value.subscription && typeof value.subscription !== "string"
@@ -81,7 +118,11 @@ function mapCheckout(value: StripeCheckout): PaymentCheckout {
       : (value.customer?.id ?? subscription?.customerId ?? "");
 
   return {
+    ...(typeof value.amount_total === "number"
+      ? { amountMinor: value.amount_total }
+      : {}),
     id: value.id,
+    ...(value.currency ? { currency: value.currency } : {}),
     mode: value.mode === "payment" ? "one-time" : "subscription",
     productId: subscription?.productId ?? value.metadata?.productId ?? "",
     customer: {
@@ -103,6 +144,10 @@ function mapWebhookType(event: StripeWebhookEvent): PaymentWebhookType {
   switch (event.type) {
     case "checkout.session.completed":
       return "checkout.completed";
+    case "payment_intent.payment_failed":
+      return "payment.failed";
+    case "charge.refunded":
+      return "payment.refunded";
     case "customer.subscription.created":
       return "subscription.active";
     case "customer.subscription.deleted":
@@ -293,8 +338,14 @@ export function createStripePaymentAdapter(
         type === "checkout.completed"
           ? mapCheckout(event.data.object as StripeCheckout)
           : null;
+      const payment =
+        type === "payment.failed"
+          ? mapPayment(event.data.object as unknown as StripePaymentIntent)
+          : type === "payment.refunded"
+            ? mapPayment(event.data.object as unknown as StripeCharge)
+            : null;
       const subscription =
-        type === "checkout.completed"
+        type === "checkout.completed" || payment
           ? (checkout?.subscription ?? null)
           : mapSubscription(event.data.object as StripeSubscription);
       return {
@@ -302,6 +353,7 @@ export function createStripePaymentAdapter(
         type,
         createdAt: new Date(event.created * 1000),
         checkout,
+        payment,
         subscription,
         rawMetadata: event as unknown as JsonObject,
       };

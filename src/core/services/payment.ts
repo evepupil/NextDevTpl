@@ -11,6 +11,8 @@ export type PaymentStatus =
   | "unpaid";
 export type PaymentWebhookType =
   | "checkout.completed"
+  | "payment.failed"
+  | "payment.refunded"
   | "subscription.active"
   | "subscription.canceled"
   | "subscription.expired"
@@ -44,6 +46,8 @@ export interface PaymentSubscription {
 }
 
 export interface PaymentCheckout {
+  amountMinor?: number;
+  currency?: string;
   id: string;
   mode: "one-time" | "subscription";
   productId: string;
@@ -51,6 +55,16 @@ export interface PaymentCheckout {
   status: string;
   subscription: PaymentSubscription | null;
   metadata: Readonly<Record<string, string>>;
+}
+
+export interface PaymentTransaction {
+  amountMinor: number;
+  currency?: string;
+  customerId?: string;
+  metadata: Readonly<Record<string, string>>;
+  productId?: string;
+  subscriptionId?: string;
+  userId?: string;
 }
 
 export interface CreateCheckoutInput {
@@ -79,6 +93,7 @@ export interface PaymentWebhookEvent {
   type: PaymentWebhookType;
   createdAt: Date;
   checkout: PaymentCheckout | null;
+  payment: PaymentTransaction | null;
   subscription: PaymentSubscription | null;
   rawMetadata: JsonObject;
 }

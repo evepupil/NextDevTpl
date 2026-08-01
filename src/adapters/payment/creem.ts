@@ -76,7 +76,9 @@ interface CreemSubscription {
 }
 
 interface CreemCheckout {
+  amount?: number;
   customer: CreemCustomer;
+  currency?: string;
   id: string;
   metadata?: Record<string, string>;
   mode?: "live" | "test";
@@ -95,6 +97,15 @@ interface CreemWebhookEvent {
   eventType: PaymentWebhookEvent["type"];
   id: string;
   object: CreemCheckout | CreemSubscription;
+}
+
+interface CreemPayment {
+  amount?: number;
+  currency?: string;
+  customer?: CreemCustomer | string;
+  metadata?: Record<string, string>;
+  product?: CreemProduct | string;
+  subscription?: CreemSubscription | string;
 }
 
 function productId(product: CreemProduct | string): string {
@@ -126,7 +137,11 @@ function normalizeCheckout(checkout: CreemCheckout): PaymentCheckout {
     : null;
 
   return {
+    ...(typeof checkout.amount === "number"
+      ? { amountMinor: checkout.amount }
+      : {}),
     id: checkout.id,
+    ...(checkout.currency ? { currency: checkout.currency } : {}),
     mode:
       checkout.order?.type === "onetime" ||
       checkout.product?.billing_type === "onetime"
@@ -141,6 +156,21 @@ function normalizeCheckout(checkout: CreemCheckout): PaymentCheckout {
     status: checkout.status,
     subscription,
     metadata: checkout.metadata ?? {},
+  };
+}
+
+function normalizePayment(payment: CreemPayment) {
+  return {
+    amountMinor: typeof payment.amount === "number" ? payment.amount : 0,
+    ...(payment.currency ? { currency: payment.currency } : {}),
+    ...(payment.customer ? { customerId: customerId(payment.customer) } : {}),
+    metadata: payment.metadata ?? {},
+    ...(payment.product ? { productId: productId(payment.product) } : {}),
+    ...(typeof payment.subscription === "string"
+      ? { subscriptionId: payment.subscription }
+      : payment.subscription
+        ? { subscriptionId: payment.subscription.id }
+        : {}),
   };
 }
 
@@ -281,8 +311,13 @@ export function createCreemPaymentAdapter(
         event.eventType === "checkout.completed"
           ? normalizeCheckout(event.object as CreemCheckout)
           : null;
+      const payment =
+        event.eventType === "payment.failed" ||
+        event.eventType === "payment.refunded"
+          ? normalizePayment(event.object as CreemPayment)
+          : null;
       const subscription =
-        event.eventType === "checkout.completed"
+        event.eventType === "checkout.completed" || payment
           ? (checkout?.subscription ?? null)
           : normalizeSubscription(event.object as CreemSubscription);
 
@@ -291,6 +326,7 @@ export function createCreemPaymentAdapter(
         type: event.eventType,
         createdAt: new Date(event.created_at),
         checkout,
+        payment,
         subscription,
         rawMetadata: event as unknown as JsonObject,
       };

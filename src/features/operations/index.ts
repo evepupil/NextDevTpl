@@ -13,6 +13,12 @@ export {
   type OperationsPeriodOptions,
 } from "./repository";
 export {
+  amountMetric,
+  buildRevenueHealth,
+  calculateMrrMinor,
+  countMetric,
+} from "./revenue";
+export {
   createOperationsDailySnapshot,
   getLatestOperationsSnapshot,
   saveOperationsDailySnapshot,

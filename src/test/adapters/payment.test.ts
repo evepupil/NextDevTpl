@@ -182,4 +182,43 @@ describe("Stripe payment adapter", () => {
       },
     });
   });
+
+  it("normalizes failed payments and refunds without exposing payload content", async () => {
+    const secret = "whsec_test";
+    const timestamp = Math.floor(Date.now() / 1000);
+    const payload = JSON.stringify({
+      id: "evt_failed_1",
+      type: "payment_intent.payment_failed",
+      created: timestamp,
+      data: {
+        object: {
+          amount: 900,
+          currency: "usd",
+          customer: "cus_1",
+          metadata: { userId: "user_1" },
+          subscription: "sub_1",
+        },
+      },
+    });
+    const signature = createHmac("sha256", secret)
+      .update(`${timestamp}.${payload}`)
+      .digest("hex");
+    const adapter = createStripePaymentAdapter({ webhookSecret: secret });
+
+    await expect(
+      adapter.verifyWebhook({
+        payload,
+        signature: `t=${timestamp},v1=${signature}`,
+      })
+    ).resolves.toMatchObject({
+      id: "evt_failed_1",
+      payment: {
+        amountMinor: 900,
+        currency: "USD",
+        metadata: { userId: "user_1" },
+        subscriptionId: "sub_1",
+      },
+      type: "payment.failed",
+    });
+  });
 });

@@ -45,12 +45,23 @@ export interface OperationsHealth {
   webhookSuccessRate: MetricState<number>;
 }
 
+export interface RevenueHealth {
+  confirmedRevenueMinor: MetricState<number>;
+  currency: string;
+  churnedSubscriptions: MetricState<number>;
+  mrrMinor: MetricState<number>;
+  paidConversionRate: MetricState<number>;
+  paymentFailures: MetricState<number>;
+  refundsMinor: MetricState<number>;
+}
+
 export interface OperationsDashboard {
   funnel: OperationsFunnel;
   generatedAt: string;
   health: OperationsHealth;
   overview: OperationsOverview;
   period: { end: string; start: string; timezone: string };
+  revenue: RevenueHealth;
   retention: OperationsRetention;
   usage: OperationsUsage;
 }

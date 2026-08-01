@@ -1,4 +1,4 @@
-import { Activity, CreditCard, Ticket, Users } from "lucide-react";
+import { Activity, CreditCard, DollarSign, Ticket, Users } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -47,6 +47,53 @@ export default async function OperationsPage() {
           metric={dashboard.usage.creditConsumption}
         />
       </div>
+
+      <Card className="shadow-none">
+        <CardHeader>
+          <CardTitle className="text-base">收入与订阅健康</CardTitle>
+          <p className="text-xs text-muted-foreground">
+            金额单位：{dashboard.revenue.currency} · 数据来源：服务端支付事件
+          </p>
+        </CardHeader>
+        <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <RevenueMetricRow
+            icon={DollarSign}
+            label="周期确认收入"
+            metric={dashboard.revenue.confirmedRevenueMinor}
+            format={(value) => formatMinor(value, dashboard.revenue.currency)}
+          />
+          <RevenueMetricRow
+            icon={DollarSign}
+            label="当前 MRR"
+            metric={dashboard.revenue.mrrMinor}
+            format={(value) => formatMinor(value, dashboard.revenue.currency)}
+          />
+          <RevenueMetricRow
+            icon={Activity}
+            label="付费转化率"
+            metric={dashboard.revenue.paidConversionRate}
+            format={(value) => `${value.toFixed(2)}%`}
+          />
+          <RevenueMetricRow
+            icon={Activity}
+            label="周期退款"
+            metric={dashboard.revenue.refundsMinor}
+            format={(value) => formatMinor(value, dashboard.revenue.currency)}
+          />
+          <RevenueMetricRow
+            icon={CreditCard}
+            label="支付失败次数"
+            metric={dashboard.revenue.paymentFailures}
+            format={(value) => value.toLocaleString()}
+          />
+          <RevenueMetricRow
+            icon={CreditCard}
+            label="周期流失订阅"
+            metric={dashboard.revenue.churnedSubscriptions}
+            format={(value) => value.toLocaleString()}
+          />
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 lg:grid-cols-3">
         <MetricList
@@ -159,8 +206,42 @@ function MetricRow({
   );
 }
 
+function RevenueMetricRow({
+  format,
+  icon: Icon,
+  label,
+  metric,
+}: {
+  format: (value: number) => string;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  metric: MetricState<number>;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 border-b pb-2 last:border-0 last:pb-0">
+      <span className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Icon className="h-4 w-4" />
+        {label}
+      </span>
+      <span className="flex items-center gap-2 text-sm font-medium">
+        {metric.value === null ? "--" : format(metric.value)}
+        <StatusBadge status={metric.status} />
+      </span>
+    </div>
+  );
+}
+
 function MetricValue({ metric }: { metric: MetricState<number> }) {
   return metric.value === null ? "--" : metric.value.toLocaleString();
+}
+
+function formatMinor(value: number, currency: string): string {
+  return new Intl.NumberFormat("zh-CN", {
+    currency,
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
+    style: "currency",
+  }).format(value / 100);
 }
 
 function StatusBadge({ status }: { status: MetricState<number>["status"] }) {

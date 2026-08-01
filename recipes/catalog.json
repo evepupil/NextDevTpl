@@ -118,7 +118,7 @@
     },
     "operations": {
       "kind": "optional",
-      "dependencies": ["admin"],
+      "dependencies": ["admin", "payment"],
       "routes": [
         "src/app/[locale]/(admin)/admin/operations/page.tsx",
         "src/app/api/jobs/operations/snapshot/route.ts"

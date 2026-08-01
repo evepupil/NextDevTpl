@@ -5,7 +5,7 @@ export const operationsModule = defineModule({
   name: "Operations",
   description: "运营驾驶舱、指标聚合和每日快照",
   kind: "optional",
-  dependencies: ["admin"],
+  dependencies: ["admin", "payment"],
   routes: [
     {
       path: "/admin/operations",
