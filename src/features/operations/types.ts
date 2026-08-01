@@ -45,6 +45,27 @@ export interface OperationsHealth {
   webhookSuccessRate: MetricState<number>;
 }
 
+export interface AIUsageBreakdown {
+  costMinor: number;
+  key: string;
+  requests: number;
+  totalTokens: number;
+}
+
+export interface AIHealth {
+  byFeature: AIUsageBreakdown[];
+  byModel: AIUsageBreakdown[];
+  byUser: AIUsageBreakdown[];
+  costMinor: MetricState<number>;
+  currency: string;
+  grossMarginMinor: MetricState<number>;
+  grossMarginRate: MetricState<number>;
+  latencyMs: MetricState<number>;
+  requests: MetricState<number>;
+  successRate: MetricState<number>;
+  tokenUsageCoverage: MetricState<number>;
+}
+
 export interface RevenueHealth {
   confirmedRevenueMinor: MetricState<number>;
   currency: string;
@@ -56,6 +77,7 @@ export interface RevenueHealth {
 }
 
 export interface OperationsDashboard {
+  ai: AIHealth;
   funnel: OperationsFunnel;
   generatedAt: string;
   health: OperationsHealth;

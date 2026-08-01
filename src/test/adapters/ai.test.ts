@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { createAnthropicAdapter } from "@/adapters/ai";
+import {
+  createAnthropicAdapter,
+  createOpenAICompatibleAdapter,
+} from "@/adapters/ai";
 
 describe("Anthropic adapter", () => {
   it("separates system prompts and normalizes text responses", async () => {
@@ -29,7 +32,17 @@ describe("Anthropic adapter", () => {
         ],
         maxTokens: 100,
       })
-    ).resolves.toEqual({ content: "Hello world", model: "claude-test" });
+    ).resolves.toMatchObject({
+      content: "Hello world",
+      model: "claude-test",
+      provider: "anthropic",
+      usage: {
+        inputTokens: null,
+        outputTokens: null,
+        status: "unavailable",
+        totalTokens: null,
+      },
+    });
     expect(requestBody).toMatchObject({
       system: "Be concise.",
       max_tokens: 100,
@@ -46,5 +59,41 @@ describe("Anthropic adapter", () => {
     await expect(
       adapter.complete({ messages: [], jsonMode: true })
     ).rejects.toMatchObject({ code: "unsupported", provider: "anthropic" });
+  });
+});
+
+describe("OpenAI-compatible AI adapter", () => {
+  it("normalizes provider usage and latency", async () => {
+    const adapter = createOpenAICompatibleAdapter({
+      apiKey: "openai-key",
+      model: "gpt-4o-mini",
+      baseURL: "https://ai.example/v1",
+    });
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = async () =>
+      Response.json({
+        choices: [{ message: { content: "Hello" } }],
+        model: "gpt-4o-mini",
+        usage: {
+          completion_tokens: 4,
+          prompt_tokens: 6,
+          total_tokens: 10,
+        },
+      });
+    try {
+      await expect(
+        adapter.complete({ messages: [{ role: "user", content: "Hello" }] })
+      ).resolves.toMatchObject({
+        provider: "openai-compatible",
+        usage: {
+          inputTokens: 6,
+          outputTokens: 4,
+          status: "actual",
+          totalTokens: 10,
+        },
+      });
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
   });
 });

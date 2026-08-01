@@ -1,20 +1,46 @@
 import { and, count, eq, gte, inArray, lt, sum } from "drizzle-orm";
 
 import { findPlanByPriceId, paymentConfig } from "@/config/payment";
+import type { AIUsageStatus } from "@/core/services";
 import { db } from "@/db";
 import { user } from "@/db/schema/auth";
 import { creditsBalance, creditsTransaction } from "@/db/schema/credits";
+import { aiUsageEvent } from "@/db/schema/operations";
 import { revenueEvent } from "@/db/schema/payment";
 import { subscription } from "@/db/schema/subscription";
 import { ticket } from "@/db/schema/support";
 
-import { createFunnel, createHealth, createRetention, metric } from "./metrics";
+import {
+  calculateAIGrossMargin,
+  estimateAICost,
+  usageCoverageStatus,
+} from "./ai-usage";
+import {
+  createFunnel,
+  createHealth,
+  createRetention,
+  metric,
+  ratioMetric,
+} from "./metrics";
 import { buildRevenueHealth, calculateMrrMinor } from "./revenue";
 import type { OperationsDashboard } from "./types";
 
 export interface OperationsPeriodOptions {
   now?: Date;
   timezone?: string;
+}
+
+interface AIUsageRow {
+  feature: string;
+  inputTokens: number | null;
+  latencyMs: number;
+  model: string;
+  outputTokens: number | null;
+  provider: string;
+  status: string;
+  success: boolean;
+  totalTokens: number | null;
+  userId: string | null;
 }
 
 function startOfUtcDay(date: Date): Date {
@@ -52,6 +78,7 @@ export async function getOperationsDashboard(
     supportTickets,
     activeSubscriptionRows,
     revenueRows,
+    aiUsageRows,
   ] = await Promise.all([
     db.select({ value: count() }).from(user),
     db
@@ -108,6 +135,26 @@ export async function getOperationsDashboard(
           lt(revenueEvent.occurredAt, period.end)
         )
       ),
+    db
+      .select({
+        feature: aiUsageEvent.feature,
+        inputTokens: aiUsageEvent.inputTokens,
+        latencyMs: aiUsageEvent.latencyMs,
+        model: aiUsageEvent.model,
+        outputTokens: aiUsageEvent.outputTokens,
+        provider: aiUsageEvent.provider,
+        status: aiUsageEvent.usageStatus,
+        success: aiUsageEvent.success,
+        totalTokens: aiUsageEvent.totalTokens,
+        userId: aiUsageEvent.userId,
+      })
+      .from(aiUsageEvent)
+      .where(
+        and(
+          gte(aiUsageEvent.occurredAt, period.start),
+          lt(aiUsageEvent.occurredAt, period.end)
+        )
+      ),
   ]);
 
   const activeMrrMinor = activeSubscriptionRows.reduce((total, item) => {
@@ -133,10 +180,108 @@ export async function getOperationsDashboard(
     0
   );
   const currency = revenueRows[0]?.currency ?? paymentConfig.currency;
+  const aiCosts = aiUsageRows.map((event) =>
+    estimateAICost({
+      model: event.model,
+      occurredAt: period.end,
+      provider: event.provider,
+      usage: {
+        inputTokens: event.inputTokens,
+        outputTokens: event.outputTokens,
+        status: isAIUsageStatus(event.status) ? event.status : "unavailable",
+        totalTokens: event.totalTokens,
+      },
+    })
+  );
+  const estimatedAICostMinor = aiCosts.reduce(
+    (total, cost) => total + (cost.amountMinor ?? 0),
+    0
+  );
+  const aiMargin = calculateAIGrossMargin({
+    costMinor: estimatedAICostMinor,
+    revenueMinor: confirmedRevenueMinor,
+  });
+  const aiSource = "database:ai-usage-event";
+  const aiRequests = aiUsageRows.length;
+  const aiBreakdowns = {
+    feature: buildAIBreakdown(aiUsageRows, aiCosts, (event) => event.feature),
+    model: buildAIBreakdown(
+      aiUsageRows,
+      aiCosts,
+      (event) => `${event.provider}/${event.model}`
+    ),
+    user: buildAIBreakdown(
+      aiUsageRows,
+      aiCosts,
+      (event) => event.userId ?? "anonymous"
+    ),
+  };
+  const ai: OperationsDashboard["ai"] = {
+    byFeature: aiBreakdowns.feature,
+    byModel: aiBreakdowns.model,
+    byUser: aiBreakdowns.user,
+    costMinor: metric(
+      estimatedAICostMinor,
+      aiRequests === 0
+        ? "zero-data"
+        : aiCosts.some((cost) => cost.amountMinor !== null)
+          ? "ready"
+          : "not-configured",
+      aiSource,
+      aiCosts.some((cost) => cost.amountMinor === null)
+        ? "部分请求缺少可用价格或 Token，成本为估算值"
+        : undefined
+    ),
+    currency: aiCosts[0]?.currency ?? paymentConfig.currency,
+    grossMarginMinor: metric(
+      aiRequests === 0 || confirmedRevenueMinor === 0
+        ? null
+        : aiMargin.marginMinor,
+      aiMargin.rate === null ? "zero-data" : "ready",
+      "database:revenue-event+ai-usage-event"
+    ),
+    grossMarginRate: metric(
+      aiMargin.rate,
+      aiMargin.rate === null ? "zero-data" : "ready",
+      "database:revenue-event+ai-usage-event"
+    ),
+    latencyMs: metric(
+      aiRequests === 0
+        ? null
+        : Math.round(
+            aiUsageRows.reduce((total, event) => total + event.latencyMs, 0) /
+              aiRequests
+          ),
+      aiRequests === 0 ? "zero-data" : "ready",
+      aiSource
+    ),
+    requests: metric(
+      aiRequests,
+      aiRequests > 0 ? "ready" : "zero-data",
+      aiSource
+    ),
+    successRate: ratioMetric(
+      aiUsageRows.filter((event) => event.success).length,
+      aiRequests,
+      aiSource
+    ),
+    tokenUsageCoverage: metric(
+      aiRequests === 0
+        ? null
+        : usageCoverageStatus(
+            aiUsageRows.map((event) =>
+              isAIUsageStatus(event.status) ? event.status : "unavailable"
+            )
+          ),
+      aiRequests === 0 ? "zero-data" : "ready",
+      aiSource
+    ),
+  };
 
   const generatedAt = new Date().toISOString();
   const source = "database:auth-subscription-credits-support";
   const dashboard: OperationsDashboard = {
+    ai,
     funnel: createFunnel({
       paidUsers,
       registeredUsers: Number(newUsers[0]?.value ?? 0),
@@ -207,4 +352,34 @@ export async function getOperationsDashboard(
   };
 
   return dashboard;
+}
+
+function isAIUsageStatus(value: string): value is AIUsageStatus {
+  return value === "actual" || value === "estimated" || value === "unavailable";
+}
+
+function buildAIBreakdown(
+  rows: readonly AIUsageRow[],
+  costs: ReadonlyArray<{ amountMinor: number | null }>,
+  keyFor: (row: AIUsageRow) => string
+) {
+  const groups = new Map<
+    string,
+    { costMinor: number; requests: number; totalTokens: number }
+  >();
+  rows.forEach((row, index) => {
+    const key = keyFor(row);
+    const existing = groups.get(key) ?? {
+      costMinor: 0,
+      requests: 0,
+      totalTokens: 0,
+    };
+    existing.costMinor += costs[index]?.amountMinor ?? 0;
+    existing.requests += 1;
+    existing.totalTokens += row.totalTokens ?? 0;
+    groups.set(key, existing);
+  });
+  return [...groups.entries()]
+    .map(([key, value]) => ({ key, ...value }))
+    .sort((left, right) => right.requests - left.requests);
 }

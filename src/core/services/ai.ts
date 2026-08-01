@@ -14,15 +14,30 @@ export interface AIMessage {
 }
 
 export interface AICompletionInput {
+  creditsConsumed?: number;
+  feature?: string;
   jsonMode?: boolean;
   maxTokens?: number;
   messages: readonly AIMessage[];
   temperature?: number;
+  userId?: string;
+}
+
+export type AIUsageStatus = "actual" | "estimated" | "unavailable";
+
+export interface AIUsage {
+  inputTokens: number | null;
+  outputTokens: number | null;
+  status: AIUsageStatus;
+  totalTokens: number | null;
 }
 
 export interface AICompletionResult {
   content: string;
   model: string;
+  latencyMs: number;
+  provider: AIProviderName;
+  usage: AIUsage;
 }
 
 export interface AIAdapter

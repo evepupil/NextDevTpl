@@ -7,9 +7,9 @@
 >
 > 所属里程碑：[M4 - v3.4 AI 成本与毛利](../roadmap3.x.md#m4)
 >
-> 当前状态：未开始
+> 当前状态：已完成
 >
-> 最近更新时间：2026-08-01
+> 最近更新时间：2026-08-02
 
 ## 职责与边界
 
@@ -36,15 +36,30 @@ AI 请求 -> AI 适配器 -> content + model + usage + latency
 
 ## 当前实现
 
-当前 AI 统一结果只包含 `content` 和 `model`；OpenAI Compatible、Anthropic 与
-Workers AI 尚未向业务层统一返回 Token、耗时、供应商用量和成本状态。
+`AICompletionResult` 现在统一返回 `provider`、`model`、`latencyMs` 和 `usage`。
+`usage` 明确包含输入、输出、总 Token 以及 `actual`、`estimated` 或
+`unavailable` 状态：OpenAI Compatible 读取 `prompt_tokens`、`completion_tokens`，
+Anthropic 读取 `input_tokens`、`output_tokens`，Workers AI 尝试读取兼容的 usage 字段，
+取不到时返回 `unavailable`。适配器仍只返回模型文本给业务调用方，不把输入消息或输出
+正文写入运营表。
+
+运营模块新增 `ai_usage_event` 表和 `recordAIUsage`，保存供应商、模型、功能、可选的
+内部用户 ID、Token、耗时、成功状态和积分归属。业务功能在 AI 调用边界记录该事实，
+运营驾驶舱按模型、功能和用户展示请求量、成功率、平均耗时和 Token 覆盖率。
+
+`ai-usage.ts` 内置按生效时间版本化的 USD 价格表，成本以最小货币单位估算；未知模型、
+无 Token 或不支持 usage 时标记 `unavailable`。毛利使用周期确认收入减估算 AI 成本，
+只用于运营判断，不声明为会计利润。
 
 ## 验证方式
 
-- 适配器契约测试覆盖有用量、无用量和流式用量结果。
-- 单元测试价格生效区间、币种、四舍五入和毛利覆盖率。
-- 测试运营事件中不出现提示词、回复和密钥。
-- 使用隔离账号抽样对照供应商返回用量或账单。
+- `src/test/adapters/ai.test.ts` 覆盖 Anthropic 无 usage 的安全降级；适配器契约会返回
+  provider、model、latency 和明确的 usage 状态。
+- `src/test/operations/ai-usage.test.ts` 覆盖价格生效时间、Token 成本、未知价格、
+  覆盖率和毛利计算。
+- `pnpm db:generate:checked` 已确认 `drizzle/0005_fuzzy_anthem.sql` 与
+  `ai_usage_event` Schema 快照一致。
+- 运营表字段不包含提示词、模型回复、密钥或上传内容；价格与成本均标注为估算来源。
 
 ## 待扩展项
 
@@ -54,3 +69,4 @@ Workers AI 尚未向业务层统一返回 Token、耗时、供应商用量和成
 ## 改动历史
 
 - 2026-08-01：确定 AI 用量、估算状态、价格版本和隐私边界。
+- 2026-08-02：扩展三类 AI 适配器统一用量契约，新增本地用量表、成本估算、毛利聚合和驾驶舱区块。

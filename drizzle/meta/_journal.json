@@ -36,6 +36,13 @@
       "when": 1785609034740,
       "tag": "0004_handy_wallflower",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1785609789130,
+      "tag": "0005_fuzzy_anthem",
+      "breakpoints": true
     }
   ]
 }

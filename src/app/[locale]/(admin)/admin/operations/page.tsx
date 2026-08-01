@@ -1,4 +1,11 @@
-import { Activity, CreditCard, DollarSign, Ticket, Users } from "lucide-react";
+import {
+  Activity,
+  CreditCard,
+  DollarSign,
+  Sparkles,
+  Ticket,
+  Users,
+} from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -92,6 +99,63 @@ export default async function OperationsPage() {
             metric={dashboard.revenue.churnedSubscriptions}
             format={(value) => value.toLocaleString()}
           />
+        </CardContent>
+      </Card>
+
+      <Card className="shadow-none">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Sparkles className="h-4 w-4" />
+            AI 成本与毛利
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            仅保存用量、耗时和内部归属，不保存提示词或模型回复
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <MetricRow label="请求数" metric={dashboard.ai.requests} />
+            <MetricRow
+              label="成功率"
+              metric={dashboard.ai.successRate}
+              format={(value) => `${value.toFixed(2)}%`}
+            />
+            <MetricRow
+              label="平均耗时"
+              metric={dashboard.ai.latencyMs}
+              format={(value) => `${value.toLocaleString()} ms`}
+            />
+            <MetricRow
+              label="Token 覆盖率"
+              metric={dashboard.ai.tokenUsageCoverage}
+              format={(value) => `${value.toFixed(2)}%`}
+            />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <RevenueMetricRow
+              icon={DollarSign}
+              label="估算成本"
+              metric={dashboard.ai.costMinor}
+              format={(value) => formatMinor(value, dashboard.ai.currency)}
+            />
+            <RevenueMetricRow
+              icon={DollarSign}
+              label="运营毛利"
+              metric={dashboard.ai.grossMarginMinor}
+              format={(value) => formatMinor(value, dashboard.ai.currency)}
+            />
+            <RevenueMetricRow
+              icon={Activity}
+              label="毛利率"
+              metric={dashboard.ai.grossMarginRate}
+              format={(value) => `${value.toFixed(2)}%`}
+            />
+          </div>
+          <div className="grid gap-4 lg:grid-cols-3">
+            <BreakdownList title="按模型" items={dashboard.ai.byModel} />
+            <BreakdownList title="按功能" items={dashboard.ai.byFeature} />
+            <BreakdownList title="按用户" items={dashboard.ai.byUser} />
+          </div>
         </CardContent>
       </Card>
 
@@ -189,9 +253,11 @@ function MetricList({
 }
 
 function MetricRow({
+  format,
   label,
   metric,
 }: {
+  format?: ((value: number) => string) | undefined;
   label: string;
   metric: MetricState<number>;
 }) {
@@ -199,7 +265,7 @@ function MetricRow({
     <div className="flex items-center justify-between gap-3 border-b pb-2 last:border-0 last:pb-0">
       <span className="text-sm text-muted-foreground">{label}</span>
       <span className="flex items-center gap-2 text-sm font-medium">
-        <MetricValue metric={metric} />
+        <MetricValue metric={metric} format={format} />
         <StatusBadge status={metric.status} />
       </span>
     </div>
@@ -231,8 +297,53 @@ function RevenueMetricRow({
   );
 }
 
-function MetricValue({ metric }: { metric: MetricState<number> }) {
-  return metric.value === null ? "--" : metric.value.toLocaleString();
+function MetricValue({
+  format,
+  metric,
+}: {
+  format?: ((value: number) => string) | undefined;
+  metric: MetricState<number>;
+}) {
+  return metric.value === null
+    ? "--"
+    : (format?.(metric.value) ?? metric.value.toLocaleString());
+}
+
+function BreakdownList({
+  items,
+  title,
+}: {
+  items: ReadonlyArray<{
+    costMinor: number;
+    key: string;
+    requests: number;
+    totalTokens: number;
+  }>;
+  title: string;
+}) {
+  return (
+    <div className="space-y-2">
+      <p className="text-xs font-medium text-muted-foreground">{title}</p>
+      {items.length === 0 ? (
+        <p className="text-sm text-muted-foreground">暂无数据</p>
+      ) : (
+        items.slice(0, 5).map((item) => (
+          <div
+            className="flex items-center justify-between gap-3 border-b pb-2 text-sm last:border-0"
+            key={item.key}
+          >
+            <span className="truncate" title={item.key}>
+              {item.key}
+            </span>
+            <span className="mono-data shrink-0 text-muted-foreground">
+              {item.requests.toLocaleString()} 次 ·{" "}
+              {item.totalTokens.toLocaleString()} token
+            </span>
+          </div>
+        ))
+      )}
+    </div>
+  );
 }
 
 function formatMinor(value: number, currency: string): string {

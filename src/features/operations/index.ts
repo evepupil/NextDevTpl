@@ -1,3 +1,13 @@
+export {
+  type AICostEstimate,
+  type AIPriceConfig,
+  calculateAIGrossMargin,
+  estimateAICost,
+  findAIPrice,
+  type RecordAIUsageInput,
+  recordAIUsage,
+  usageCoverageStatus,
+} from "./ai-usage";
 export { operationsModule } from "./manifest";
 export {
   createFunnel,

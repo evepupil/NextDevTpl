@@ -2,9 +2,9 @@ import OpenAI from "openai";
 
 import {
   AdapterError,
-  executeAdapterOperation,
   type AIAdapter,
   type AIMessage,
+  executeAdapterOperation,
 } from "@/core/services";
 
 interface OpenAICompatibleConfig {
@@ -59,6 +59,7 @@ export function createOpenAICompatibleAdapter(
     },
 
     async complete(input) {
+      const startedAt = Date.now();
       const response = await executeAdapterOperation({
         provider,
         fallbackMessage: "AI provider request failed",
@@ -82,7 +83,25 @@ export function createOpenAICompatibleAdapter(
           provider,
         });
       }
-      return { content, model: response.model || config.model };
+      const usage = response.usage;
+      const inputTokens = usage?.prompt_tokens ?? null;
+      const outputTokens = usage?.completion_tokens ?? null;
+      const totalTokens = usage?.total_tokens ?? null;
+      return {
+        content,
+        latencyMs: Date.now() - startedAt,
+        model: response.model || config.model,
+        provider,
+        usage: {
+          inputTokens,
+          outputTokens,
+          status:
+            inputTokens !== null || outputTokens !== null
+              ? "actual"
+              : "unavailable",
+          totalTokens,
+        },
+      };
     },
   };
 }

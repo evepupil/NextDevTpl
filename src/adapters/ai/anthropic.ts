@@ -1,8 +1,8 @@
 import {
   AdapterError,
-  executeAdapterOperation,
   type AIAdapter,
   type AIMessage,
+  executeAdapterOperation,
 } from "@/core/services";
 
 interface AnthropicConfig {
@@ -14,6 +14,7 @@ interface AnthropicConfig {
 interface AnthropicResponse {
   content?: Array<{ text?: string; type: string }>;
   model?: string;
+  usage?: { input_tokens?: number; output_tokens?: number };
 }
 
 function buildAnthropicMessages(messages: readonly AIMessage[]) {
@@ -41,6 +42,7 @@ export function createAnthropicAdapter(config: AnthropicConfig): AIAdapter {
     },
 
     async complete(input) {
+      const startedAt = Date.now();
       if (!config.apiKey) {
         throw new AdapterError({
           code: "configuration",
@@ -107,7 +109,26 @@ export function createAnthropicAdapter(config: AnthropicConfig): AIAdapter {
           provider,
         });
       }
-      return { content, model: result.model ?? config.model };
+      const inputTokens = result.usage?.input_tokens ?? null;
+      const outputTokens = result.usage?.output_tokens ?? null;
+      return {
+        content,
+        latencyMs: Date.now() - startedAt,
+        model: result.model ?? config.model,
+        provider,
+        usage: {
+          inputTokens,
+          outputTokens,
+          status:
+            inputTokens !== null || outputTokens !== null
+              ? "actual"
+              : "unavailable",
+          totalTokens:
+            inputTokens === null && outputTokens === null
+              ? null
+              : (inputTokens ?? 0) + (outputTokens ?? 0),
+        },
+      };
     },
   };
 }
