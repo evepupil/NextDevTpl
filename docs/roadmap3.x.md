@@ -124,7 +124,7 @@ landing.viewed
 | AI 毛利率 |（确认收入 - AI 估算成本）/ 确认收入 | 支付数据 + AI 用量 |
 | 系统健康 | API、Action、Webhook、任务的成功率与延迟 | 日志、监控和任务结果 |
 
-## 计划中的仓库结构
+## 当前仓库结构
 
 ```text
 src/core/services/telemetry.ts     事件与分析适配器契约

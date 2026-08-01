@@ -2,7 +2,7 @@
 
 > 模块定位：记录 AI 用量与估算成本，计算功能和用户维度的运营毛利
 >
-> 对应代码：计划调整 `src/core/services/ai.ts`、`src/adapters/ai/`、
+> 对应代码：`src/core/services/ai.ts`、`src/adapters/ai/`、
 > `src/features/credits/`、`src/features/operations/`
 >
 > 所属里程碑：[M4 - v3.4 AI 成本与毛利](../roadmap3.x.md#m4)
