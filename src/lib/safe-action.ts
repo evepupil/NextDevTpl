@@ -7,6 +7,7 @@ import { redirectWithLocale } from "@/lib/locale-redirect";
 import { logError, logger } from "@/lib/logger";
 import { captureError } from "@/lib/monitoring";
 import { redactValue } from "@/lib/redaction";
+import { trackActionFailure } from "@/lib/telemetry/failures";
 
 const actionMetadataSchema = z
   .object({
@@ -47,26 +48,47 @@ const baseActionClient = createSafeActionClient({
 export const actionClient = baseActionClient.use(
   async ({ metadata, ctx, next }) => {
     const startTime = Date.now();
-    const result = await next();
-    const duration = Date.now() - startTime;
+    const action = metadata?.action ?? "server-action";
     const userId = (ctx as { userId?: string }).userId;
-    const error =
-      !result.success && "serverError" in result
-        ? (result as { serverError?: unknown }).serverError
-        : undefined;
 
-    logger.info(
-      {
-        action: metadata?.action ?? "server-action",
-        success: result.success,
-        duration,
-        ...(userId ? { userId } : {}),
-        ...(error ? { error: redactValue(error) } : {}),
-      },
-      "Server action"
-    );
+    try {
+      const result = await next();
+      const duration = Date.now() - startTime;
+      const error =
+        !result.success && "serverError" in result
+          ? (result as { serverError?: unknown }).serverError
+          : undefined;
 
-    return result;
+      if (!result.success) {
+        trackActionFailure({
+          ...(userId ? { context: { identity: { userId } } } : {}),
+          durationMs: duration,
+          failureClass: error ? "exception" : "validation",
+          action,
+        });
+      }
+
+      logger.info(
+        {
+          action,
+          success: result.success,
+          duration,
+          ...(userId ? { userId } : {}),
+          ...(error ? { error: redactValue(error) } : {}),
+        },
+        "Server action"
+      );
+
+      return result;
+    } catch (error) {
+      trackActionFailure({
+        ...(userId ? { context: { identity: { userId } } } : {}),
+        durationMs: Date.now() - startTime,
+        failureClass: "exception",
+        action,
+      });
+      throw error;
+    }
   }
 );
 

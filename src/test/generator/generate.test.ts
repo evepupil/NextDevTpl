@@ -75,6 +75,12 @@ describe("project generation", () => {
         "utf8"
       )
     ).toContain("initializeTelemetryIdentity");
+    expect(
+      await readFile(join(target, "src/lib/telemetry/failures.ts"), "utf8")
+    ).toContain('name: "api.request.failed"');
+    expect(
+      await readFile(join(target, "src/lib/api-logger.ts"), "utf8")
+    ).toContain("trackApiFailure");
     expect(await exists(join(target, "src/adapters/analytics/logger.ts"))).toBe(
       false
     );
@@ -147,6 +153,12 @@ describe("project generation", () => {
     expect(packageJson.scripts.postinstall).toBe("fumadocs-mdx");
     expect(await exists(join(target, "src/features/analytics"))).toBe(false);
     expect(await exists(join(target, "src/features/blog"))).toBe(false);
+    expect(
+      await readFile(
+        join(target, "src/adapters/jobs/inngest/functions.ts"),
+        "utf8"
+      )
+    ).toContain("trackJobFailure");
     expect(await exists(join(target, "vercel.json"))).toBe(true);
     expect(await exists(join(target, "Dockerfile"))).toBe(false);
   });

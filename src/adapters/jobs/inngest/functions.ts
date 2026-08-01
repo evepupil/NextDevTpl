@@ -1,10 +1,22 @@
 import { logger } from "@/lib/logger";
 import { redactText } from "@/lib/redaction";
+import { trackJobFailure } from "@/lib/telemetry/failures";
 
 import { inngest } from "./client";
 
 export const helloWorld = inngest.createFunction(
-  { id: "hello-world", retries: 3 },
+  {
+    id: "hello-world",
+    onFailure: async () => {
+      trackJobFailure({
+        failureClass: "exception",
+        jobName: "hello-world",
+        phase: "execution",
+        provider: "inngest",
+      });
+    },
+    retries: 3,
+  },
   { event: "app/hello-world" },
   async ({ event, step }) =>
     step.run("process-message", async () => {
