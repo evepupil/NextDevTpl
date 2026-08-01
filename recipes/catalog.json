@@ -116,6 +116,17 @@
       ],
       "env": []
     },
+    "operations": {
+      "kind": "optional",
+      "dependencies": ["admin"],
+      "routes": [
+        "src/app/[locale]/(admin)/admin/operations/page.tsx",
+        "src/app/api/jobs/operations/snapshot/route.ts"
+      ],
+      "schema": ["operations"],
+      "translations": [],
+      "env": []
+    },
     "payment": {
       "kind": "optional",
       "dependencies": ["subscription"],

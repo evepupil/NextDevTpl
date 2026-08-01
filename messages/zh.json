@@ -840,7 +840,8 @@
       "controlPanel": "管理中心",
       "dashboard": "控制面板",
       "userManagement": "用户管理",
-      "ticketManagement": "工单管理"
+      "ticketManagement": "工单管理",
+      "operations": "运营驾驶舱"
     }
   },
   "Footer": {

@@ -844,7 +844,8 @@
       "controlPanel": "Control Panel",
       "dashboard": "Dashboard",
       "userManagement": "User Management",
-      "ticketManagement": "Ticket Management"
+      "ticketManagement": "Ticket Management",
+      "operations": "Operations"
     }
   },
   "Footer": {

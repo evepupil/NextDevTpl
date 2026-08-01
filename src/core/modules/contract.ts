@@ -7,6 +7,7 @@ export const MODULE_IDS = [
   "dashboard",
   "mail",
   "marketing",
+  "operations",
   "payment",
   "pseo",
   "settings",
@@ -20,6 +21,7 @@ export type ModuleId = (typeof MODULE_IDS)[number];
 export type ModuleKind = "core" | "optional";
 export type ModuleNavigationArea = "dashboard" | "admin";
 export type ModuleNavigationIcon =
+  | "activity"
   | "coins"
   | "dashboard"
   | "headset"
@@ -30,6 +32,7 @@ export type ModuleSchemaGroup =
   | "auth"
   | "credits"
   | "mail"
+  | "operations"
   | "payment"
   | "subscription"
   | "support";

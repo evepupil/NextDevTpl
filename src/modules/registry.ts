@@ -7,6 +7,7 @@ import { creditsModule } from "@/features/credits/manifest";
 import { dashboardModule } from "@/features/dashboard/manifest";
 import { mailModule } from "@/features/mail/manifest";
 import { marketingModule } from "@/features/marketing/manifest";
+import { operationsModule } from "@/features/operations/manifest";
 import { paymentModule } from "@/features/payment/manifest";
 import { pseoModule } from "@/features/pseo/manifest";
 import { settingsModule } from "@/features/settings/manifest";
@@ -27,6 +28,7 @@ export const moduleRegistry = createModuleRegistry([
   settingsModule,
   supportModule,
   adminModule,
+  operationsModule,
   analyticsModule,
   blogModule,
   marketingModule,

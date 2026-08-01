@@ -174,6 +174,7 @@ export const footerNav = {
 };
 
 const moduleNavigationIcons: Record<ModuleNavigationIcon, LucideIcon> = {
+  activity: Activity,
   coins: Coins,
   dashboard: LayoutDashboard,
   headset: Headset,

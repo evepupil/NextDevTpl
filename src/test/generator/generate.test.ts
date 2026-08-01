@@ -370,6 +370,37 @@ describe("project generation", () => {
     );
   });
 
+  it("generates the operations module with its schema and snapshot route", async () => {
+    const target = join(root, "operations");
+    const { manifest } = await generateProject({
+      targetDirectory: target,
+      preset: "custom",
+      modules: ["auth", "operations"],
+      target: "server",
+      adapterOverrides: {
+        mail: "mail:disabled",
+        payment: "payment:creem",
+        storage: "storage:s3-compatible",
+        "rate-limit": "rate-limit:noop",
+      },
+      install: false,
+    });
+
+    expect(manifest.modules).toContain("operations");
+    expect(
+      await exists(join(target, "src/features/operations/repository.ts"))
+    ).toBe(true);
+    expect(await exists(join(target, "src/db/schema/operations.ts"))).toBe(
+      true
+    );
+    expect(
+      await exists(
+        join(target, "src/app/api/jobs/operations/snapshot/route.ts")
+      )
+    ).toBe(true);
+    expect(await exists(join(target, "src/features/blog"))).toBe(false);
+  });
+
   it("keeps telemetry imports usable when analytics is disabled", async () => {
     const target = join(root, "analytics-none");
     const { manifest } = await generateProject({

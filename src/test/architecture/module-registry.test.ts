@@ -1,13 +1,12 @@
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, resolve, sep } from "node:path";
 import { describe, expect, it } from "vitest";
-
+import { adminNav, dashboardNav } from "@/config/nav";
 import {
   MODULE_IDS,
   type ModuleId,
   resolveModuleClosure,
 } from "@/core/modules";
-import { adminNav, dashboardNav } from "@/config/nav";
 import {
   createPresetSelection,
   modulePresets,
@@ -93,7 +92,12 @@ describe("module registry", () => {
     ]);
     expect(
       adminNav.flatMap((group) => group.items.map((item) => item.href))
-    ).toEqual(["/admin", "/admin/users", "/admin/tickets"]);
+    ).toEqual([
+      "/admin",
+      "/admin/operations",
+      "/admin/users",
+      "/admin/tickets",
+    ]);
   });
 
   it("registers every top-level translation namespace in both locales", () => {
