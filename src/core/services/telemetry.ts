@@ -4,7 +4,7 @@ import { redactValue } from "@/lib/redaction";
 
 import type { AdapterDescriptor, JsonObject, JsonValue } from "./common";
 
-export type TelemetryProvider = "logger" | "noop";
+export type TelemetryProvider = "ga4" | "logger" | "noop" | "posthog" | "umami";
 export type TelemetrySource = "client" | "server" | "system";
 export type TelemetryEnvironment =
   | "development"

@@ -1,7 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  createGa4TelemetryAdapter,
   createLoggerTelemetryAdapter,
+  createPostHogTelemetryAdapter,
+  createUmamiTelemetryAdapter,
   noopTelemetryAdapter,
 } from "@/adapters/analytics";
 import {
@@ -152,5 +155,88 @@ describe("telemetry adapters", () => {
       error,
       expect.objectContaining({ name: "signup.completed" })
     );
+  });
+
+  it("sends a redacted event to PostHog and links the anonymous identity", async () => {
+    const requests: RequestInit[] = [];
+    const adapter = createPostHogTelemetryAdapter({
+      apiKey: "phc-test",
+      fetch: async (_input, init) => {
+        requests.push(init ?? {});
+        return new Response("ok", { status: 200 });
+      },
+    });
+    const event = createTelemetryEvent(
+      {
+        attributes: { password: "hidden", plan: "pro" },
+        context: { identity: { anonymousId: "anon-1", userId: "user-1" } },
+        name: "subscription.activated",
+        source: "server",
+        version: 1,
+      },
+      eventOptions
+    );
+
+    await adapter.track(event);
+
+    expect(requests).toHaveLength(1);
+    const body = JSON.parse(String(requests[0]?.body)) as {
+      distinct_id: string;
+      properties: Record<string, unknown>;
+    };
+    expect(body.distinct_id).toBe("user-1");
+    expect(body.properties.$anon_distinct_id).toBe("anon-1");
+    expect(body.properties.password).toBeUndefined();
+  });
+
+  it("uses the GA4 Measurement Protocol contract", async () => {
+    const requests: Array<{ input: string; init: RequestInit }> = [];
+    const adapter = createGa4TelemetryAdapter({
+      apiSecret: "secret",
+      fetch: async (input, init) => {
+        requests.push({ input: String(input), init: init ?? {} });
+        return new Response(null, { status: 204 });
+      },
+      measurementId: "G-TEST",
+    });
+
+    await adapter.track(
+      createTelemetryEvent(
+        { name: "landing.viewed", source: "client", version: 1 },
+        eventOptions
+      )
+    );
+
+    expect(requests[0]?.input).toContain("measurement_id=G-TEST");
+    expect(requests[0]?.input).toContain("api_secret=secret");
+    const body = JSON.parse(String(requests[0]?.init.body)) as {
+      events: Array<{ name: string }>;
+    };
+    expect(body.events[0]?.name).toBe("landing_viewed");
+  });
+
+  it("sends Umami events without exposing the API key in the payload", async () => {
+    const requests: RequestInit[] = [];
+    const adapter = createUmamiTelemetryAdapter({
+      apiKey: "umami-secret",
+      fetch: async (_input, init) => {
+        requests.push(init ?? {});
+        return new Response(null, { status: 200 });
+      },
+      websiteId: "website-1",
+    });
+
+    await adapter.track(
+      createTelemetryEvent(
+        { name: "core_action.completed", source: "server", version: 1 },
+        eventOptions
+      )
+    );
+
+    expect(requests).toHaveLength(1);
+    expect(requests[0]?.headers).toMatchObject({
+      "x-umami-api-key": "umami-secret",
+    });
+    expect(String(requests[0]?.body)).not.toContain("umami-secret");
   });
 });

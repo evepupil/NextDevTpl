@@ -20,6 +20,12 @@ export const adapterExports: Readonly<Record<string, string>> = {
   "analytics:noop": 'export { noopTelemetryAdapter } from "./noop";\n',
   "analytics:logger":
     'export { createLoggerTelemetryAdapter, type TelemetryLogSink } from "./logger";\n',
+  "analytics:posthog":
+    'export { createPostHogTelemetryAdapter, type PostHogConfig } from "./posthog";\n',
+  "analytics:ga4":
+    'export { createGa4TelemetryAdapter, type Ga4Config } from "./ga4";\n',
+  "analytics:umami":
+    'export { createUmamiTelemetryAdapter, type UmamiConfig } from "./umami";\n',
   "jobs:inngest": 'export { createInngestJobAdapter } from "./inngest";\n',
   "jobs:cloudflare-workflows":
     'export { createCloudflareWorkflowsAdapter, type WorkflowBindingPort } from "./cloudflare-workflows";\n',
@@ -205,6 +211,146 @@ export const telemetryService = createTelemetryService(
         eventId: event.eventId,
         eventName: event.name,
         provider: "logger",
+        source: "telemetry-adapter",
+      });
+    },
+  }
+);
+
+export function trackServerEvent(input: TelemetryEventInput): void {
+  void telemetryService.track(input).catch(() => {
+    // 埋点失败不能影响原始业务请求。
+  });
+}
+`,
+  "analytics:posthog": `import {
+  createTelemetryService,
+  type TelemetryEnvironment,
+  type TelemetryEventInput,
+} from "@/core/services";
+import { createPostHogTelemetryAdapter } from "@/adapters/analytics";
+import { logError } from "@/lib/logger";
+import { getRuntimeEnv } from "@/lib/runtime-config";
+
+function getTelemetryEnvironment(): TelemetryEnvironment {
+  switch (getRuntimeEnv("NODE_ENV")) {
+    case "production": return "production";
+    case "test": return "test";
+    case "preview": return "preview";
+    default: return "development";
+  }
+}
+
+const apiKey = getRuntimeEnv("POSTHOG_API_KEY");
+const host = getRuntimeEnv("POSTHOG_HOST");
+const release = getRuntimeEnv("APP_VERSION");
+export const telemetryService = createTelemetryService(
+  createPostHogTelemetryAdapter({
+    ...(apiKey ? { apiKey } : {}),
+    ...(host ? { host } : {}),
+  }),
+  {
+    environment: getTelemetryEnvironment(),
+    ...(release ? { release } : {}),
+    onAdapterError(error, event) {
+      logError(error, {
+        eventId: event.eventId,
+        eventName: event.name,
+        provider: "posthog",
+        source: "telemetry-adapter",
+      });
+    },
+  }
+);
+
+export function trackServerEvent(input: TelemetryEventInput): void {
+  void telemetryService.track(input).catch(() => {
+    // 埋点失败不能影响原始业务请求。
+  });
+}
+`,
+  "analytics:ga4": `import {
+  createTelemetryService,
+  type TelemetryEnvironment,
+  type TelemetryEventInput,
+} from "@/core/services";
+import { createGa4TelemetryAdapter } from "@/adapters/analytics";
+import { logError } from "@/lib/logger";
+import { getRuntimeEnv } from "@/lib/runtime-config";
+
+function getTelemetryEnvironment(): TelemetryEnvironment {
+  switch (getRuntimeEnv("NODE_ENV")) {
+    case "production": return "production";
+    case "test": return "test";
+    case "preview": return "preview";
+    default: return "development";
+  }
+}
+
+const measurementId = getRuntimeEnv("GA4_MEASUREMENT_ID");
+const apiSecret = getRuntimeEnv("GA4_API_SECRET");
+const release = getRuntimeEnv("APP_VERSION");
+export const telemetryService = createTelemetryService(
+  createGa4TelemetryAdapter({
+    ...(measurementId ? { measurementId } : {}),
+    ...(apiSecret ? { apiSecret } : {}),
+  }),
+  {
+    environment: getTelemetryEnvironment(),
+    ...(release ? { release } : {}),
+    onAdapterError(error, event) {
+      logError(error, {
+        eventId: event.eventId,
+        eventName: event.name,
+        provider: "ga4",
+        source: "telemetry-adapter",
+      });
+    },
+  }
+);
+
+export function trackServerEvent(input: TelemetryEventInput): void {
+  void telemetryService.track(input).catch(() => {
+    // 埋点失败不能影响原始业务请求。
+  });
+}
+`,
+  "analytics:umami": `import {
+  createTelemetryService,
+  type TelemetryEnvironment,
+  type TelemetryEventInput,
+} from "@/core/services";
+import { createUmamiTelemetryAdapter } from "@/adapters/analytics";
+import { logError } from "@/lib/logger";
+import { getRuntimeEnv } from "@/lib/runtime-config";
+
+function getTelemetryEnvironment(): TelemetryEnvironment {
+  switch (getRuntimeEnv("NODE_ENV")) {
+    case "production": return "production";
+    case "test": return "test";
+    case "preview": return "preview";
+    default: return "development";
+  }
+}
+
+const websiteId = getRuntimeEnv("UMAMI_WEBSITE_ID");
+const apiKey = getRuntimeEnv("UMAMI_API_KEY");
+const host = getRuntimeEnv("UMAMI_HOST");
+const release = getRuntimeEnv("APP_VERSION");
+export const telemetryService = createTelemetryService(
+  createUmamiTelemetryAdapter({
+    ...(websiteId ? { websiteId } : {}),
+    ...(apiKey ? { apiKey } : {}),
+    ...(host ? { host } : {}),
+  }),
+  {
+    environment: getTelemetryEnvironment(),
+    ...(release ? { release } : {}),
+    onAdapterError(error, event) {
+      logError(error, {
+        eventId: event.eventId,
+        eventName: event.name,
+        provider: "umami",
         source: "telemetry-adapter",
       });
     },

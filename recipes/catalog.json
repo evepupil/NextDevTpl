@@ -15,11 +15,18 @@
     "analytics": {
       "kind": "optional",
       "dependencies": [],
-      "routes": [],
+      "routes": ["src/app/api/telemetry/route.ts"],
       "schema": [],
       "translations": [],
       "env": [
         "NEXT_PUBLIC_GA_ID",
+        "POSTHOG_API_KEY",
+        "POSTHOG_HOST",
+        "GA4_MEASUREMENT_ID",
+        "GA4_API_SECRET",
+        "UMAMI_WEBSITE_ID",
+        "UMAMI_API_KEY",
+        "UMAMI_HOST",
         "NEXT_PUBLIC_SENTRY_DSN",
         "SENTRY_AUTH_TOKEN"
       ]
@@ -308,6 +315,30 @@
       "source": "src/adapters/analytics/logger.ts",
       "packages": [],
       "env": [],
+      "bindings": [],
+      "runtime": "universal"
+    },
+    "analytics:posthog": {
+      "service": "analytics",
+      "source": "src/adapters/analytics/posthog.ts",
+      "packages": [],
+      "env": ["POSTHOG_API_KEY", "POSTHOG_HOST"],
+      "bindings": [],
+      "runtime": "universal"
+    },
+    "analytics:ga4": {
+      "service": "analytics",
+      "source": "src/adapters/analytics/ga4.ts",
+      "packages": [],
+      "env": ["GA4_MEASUREMENT_ID", "GA4_API_SECRET", "NEXT_PUBLIC_GA_ID"],
+      "bindings": [],
+      "runtime": "universal"
+    },
+    "analytics:umami": {
+      "service": "analytics",
+      "source": "src/adapters/analytics/umami.ts",
+      "packages": [],
+      "env": ["UMAMI_WEBSITE_ID", "UMAMI_API_KEY", "UMAMI_HOST"],
       "bindings": [],
       "runtime": "universal"
     },

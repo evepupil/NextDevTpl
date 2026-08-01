@@ -2,12 +2,13 @@
 
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { useEffect, useState } from "react";
-
+import { usePathname } from "@/i18n/routing";
 import {
   COOKIE_CONSENT_CHANGE_EVENT,
   COOKIE_CONSENT_KEY,
   COOKIE_PREFERENCES_KEY,
 } from "@/lib/cookie-consent";
+import { trackPageView } from "@/lib/telemetry/client";
 
 function hasAnalyticsConsent(): boolean {
   if (localStorage.getItem(COOKIE_CONSENT_KEY) !== "all") {
@@ -74,6 +75,7 @@ function clearGoogleAnalytics(gaId: string | undefined): void {
 export function Analytics() {
   const [hasConsent, setHasConsent] = useState(false);
   const gaId = process.env.NEXT_PUBLIC_GA_ID;
+  const pathname = usePathname();
 
   useEffect(() => {
     // 检查初始同意状态
@@ -118,6 +120,10 @@ export function Analytics() {
 
     clearGoogleAnalytics(gaId);
   }, [gaId, hasConsent]);
+
+  useEffect(() => {
+    if (hasConsent) trackPageView(pathname);
+  }, [hasConsent, pathname]);
 
   // 未配置 GA ID 或未同意时不渲染
   if (!gaId || !hasConsent) {

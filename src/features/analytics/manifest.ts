@@ -6,7 +6,12 @@ export const analyticsModule = defineModule({
   description: "页面分析与可选监控脚本",
   kind: "optional",
   dependencies: [],
-  routes: [],
+  routes: [
+    {
+      path: "/api/telemetry",
+      source: "src/app/api/telemetry/route.ts",
+    },
+  ],
   navigation: [],
   translations: [],
   schema: [],
