@@ -30,6 +30,7 @@ export type ModuleSchemaGroup =
   | "auth"
   | "credits"
   | "mail"
+  | "payment"
   | "subscription"
   | "support";
 

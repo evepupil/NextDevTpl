@@ -1,8 +1,8 @@
 import { Github, Twitter } from "lucide-react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 
 import { footerNav, siteConfig } from "@/config";
+import { Link } from "@/i18n/routing";
 
 export function Footer() {
   const t = useTranslations("Footer");

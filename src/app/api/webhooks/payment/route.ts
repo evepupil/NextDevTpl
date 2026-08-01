@@ -1,8 +1,11 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, lt } from "drizzle-orm";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
-import { SUBSCRIPTION_MONTHLY_CREDITS } from "@/config/payment";
+import {
+  findPlanByPriceId,
+  SUBSCRIPTION_MONTHLY_CREDITS,
+} from "@/config/payment";
 import { getPlanFromPriceId } from "@/config/subscription-plan";
 import type {
   PaymentCheckout,
@@ -12,8 +15,14 @@ import type {
 import { db } from "@/db";
 import { user } from "@/db/schema/auth";
 import { creditsBatch } from "@/db/schema/credits";
+import { paymentWebhookEvent } from "@/db/schema/payment";
 import { subscription } from "@/db/schema/subscription";
-import { CREDITS_EXPIRY_DAYS, grantCredits } from "@/features/credits";
+import {
+  CREDIT_PACKAGES,
+  CREDITS_EXPIRY_DAYS,
+  grantCredits,
+} from "@/features/credits";
+import { isStaleSubscriptionEvent, PlanInterval } from "@/features/payment";
 import { withApiLogging } from "@/lib/api-logger";
 import { logError, logEvent, logWarn } from "@/lib/logger";
 import { paymentService } from "@/services/payment";
@@ -42,9 +51,25 @@ export const POST = withApiLogging(async (request: Request) => {
   }
 
   try {
+    const claimed = await claimWebhookEvent(event);
+    if (!claimed) {
+      return NextResponse.json({ received: true, duplicate: true });
+    }
     await handlePaymentEvent(event);
+    await db
+      .update(paymentWebhookEvent)
+      .set({
+        status: "processed",
+        processedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(paymentWebhookEvent.id, event.id));
     return NextResponse.json({ received: true });
   } catch (error) {
+    await db
+      .delete(paymentWebhookEvent)
+      .where(eq(paymentWebhookEvent.id, event.id))
+      .catch(() => undefined);
     logError(error, { source: "payment-webhook", stage: "handler" });
     return NextResponse.json(
       { error: "Webhook handler failed" },
@@ -53,11 +78,34 @@ export const POST = withApiLogging(async (request: Request) => {
   }
 });
 
+async function claimWebhookEvent(event: PaymentWebhookEvent): Promise<boolean> {
+  const [inserted] = await db
+    .insert(paymentWebhookEvent)
+    .values({ id: event.id, type: event.type })
+    .onConflictDoNothing()
+    .returning({ id: paymentWebhookEvent.id });
+  if (inserted) return true;
+
+  const staleBefore = new Date(Date.now() - 10 * 60 * 1000);
+  const [reclaimed] = await db
+    .update(paymentWebhookEvent)
+    .set({ status: "processing", updatedAt: new Date() })
+    .where(
+      and(
+        eq(paymentWebhookEvent.id, event.id),
+        eq(paymentWebhookEvent.status, "processing"),
+        lt(paymentWebhookEvent.updatedAt, staleBefore)
+      )
+    )
+    .returning({ id: paymentWebhookEvent.id });
+  return Boolean(reclaimed);
+}
+
 async function handlePaymentEvent(event: PaymentWebhookEvent): Promise<void> {
   switch (event.type) {
     case "checkout.completed":
       if (event.checkout) {
-        await handleCheckoutCompleted(event.checkout);
+        await handleCheckoutCompleted(event.checkout, event.id);
       }
       return;
     case "subscription.active":
@@ -90,20 +138,33 @@ async function handlePaymentEvent(event: PaymentWebhookEvent): Promise<void> {
   }
 }
 
-async function handleCheckoutCompleted(data: PaymentCheckout): Promise<void> {
+async function handleCheckoutCompleted(
+  data: PaymentCheckout,
+  eventId: string
+): Promise<void> {
   const userId = data.metadata.userId;
   if (!userId) {
-    logError("Missing userId in checkout metadata");
-    return;
+    throw new Error("Missing userId in checkout metadata");
   }
 
-  await db
-    .update(user)
-    .set({ customerId: data.customer.id })
-    .where(eq(user.id, userId));
+  if (data.customer.id) {
+    await db
+      .update(user)
+      .set({ customerId: data.customer.id })
+      .where(eq(user.id, userId));
+  }
 
   if (data.subscription) {
-    await createOrUpdateSubscription(userId, data.subscription);
+    const applied = await createOrUpdateSubscription(userId, data.subscription);
+    if (applied && ["active", "trialing"].includes(data.subscription.status)) {
+      await grantSubscriptionCredits(
+        userId,
+        data.subscription,
+        "subscription_create"
+      );
+    }
+  } else if (data.mode === "one-time") {
+    await handleOneTimeCheckoutCompleted(data, eventId);
   }
 
   logEvent("payment.checkout.completed", {
@@ -131,6 +192,112 @@ async function handleCheckoutCompleted(data: PaymentCheckout): Promise<void> {
   });
 }
 
+async function handleOneTimeCheckoutCompleted(
+  data: PaymentCheckout,
+  eventId: string
+): Promise<void> {
+  const { metadata } = data;
+  const userId = metadata.userId;
+  if (!userId) {
+    throw new Error("Missing userId in one-time checkout metadata");
+  }
+  if (metadata.type === "credit_purchase") {
+    const packageId = metadata.packageId;
+    const creditPackage = CREDIT_PACKAGES.find((item) => item.id === packageId);
+    const declaredCredits = Number(metadata.credits);
+
+    if (
+      !creditPackage ||
+      data.productId !== `credits_${packageId}` ||
+      declaredCredits !== creditPackage.credits
+    ) {
+      throw new Error("Invalid credit purchase metadata");
+    }
+
+    const result = await grantCredits({
+      userId,
+      amount: creditPackage.credits,
+      sourceType: "purchase",
+      debitAccount: `PAYMENT:${data.id}`,
+      transactionType: "purchase",
+      expiresAt: CREDITS_EXPIRY_DAYS
+        ? new Date(Date.now() + CREDITS_EXPIRY_DAYS * 24 * 60 * 60 * 1000)
+        : null,
+      sourceRef: `checkout:${data.id}`,
+      description: `购买 ${creditPackage.credits} 积分 (${creditPackage.id})`,
+      metadata: {
+        checkoutId: data.id,
+        eventId,
+        packageId: creditPackage.id,
+        productId: data.productId,
+      },
+    });
+
+    logEvent("credits.purchased", {
+      amount: creditPackage.credits,
+      granted: result.granted,
+      packageId: creditPackage.id,
+      provider: paymentService.provider,
+      userId,
+    });
+    trackServerEvent({
+      attributes: {
+        amount: creditPackage.credits,
+        granted: result.granted,
+        packageId: creditPackage.id,
+        provider: paymentService.provider,
+        productId: data.productId,
+      },
+      context: { identity: { userId } },
+      name: "credits.purchased",
+      source: "server",
+      version: 1,
+    });
+    return;
+  }
+
+  const { plan, price } = findPlanByPriceId(data.productId);
+  if (plan?.isLifetime && price?.type === "one-time") {
+    await upsertLifetimeSubscription(userId, data);
+    return;
+  }
+
+  throw new Error(`Unsupported one-time checkout product ${data.productId}`);
+}
+
+async function upsertLifetimeSubscription(
+  userId: string,
+  checkout: PaymentCheckout
+): Promise<void> {
+  const [existing] = await db
+    .select({ id: subscription.id })
+    .from(subscription)
+    .where(eq(subscription.userId, userId))
+    .limit(1);
+  const values = {
+    priceId: checkout.productId,
+    status: "lifetime",
+    subscriptionId: `lifetime_${checkout.id}`,
+    currentPeriodStart: new Date(),
+    currentPeriodEnd: null,
+    cancelAtPeriodEnd: false,
+    updatedAt: new Date(),
+  };
+
+  if (existing) {
+    await db
+      .update(subscription)
+      .set(values)
+      .where(eq(subscription.userId, userId));
+  } else {
+    await db.insert(subscription).values({
+      id: crypto.randomUUID(),
+      userId,
+      ...values,
+    });
+  }
+}
+
 async function handleSubscriptionActive(
   externalSubscription: PaymentSubscription
 ): Promise<void> {
@@ -139,23 +306,23 @@ async function handleSubscriptionActive(
     metadataUserId ?? (await findSubscriptionUserId(externalSubscription.id));
 
   if (!userId) {
-    logError("Cannot find userId for subscription", {
-      subscriptionId: externalSubscription.id,
-    });
-    return;
+    throw new Error(
+      `Cannot find userId for subscription ${externalSubscription.id}`
+    );
   }
 
-  if (metadataUserId) {
-    await createOrUpdateSubscription(userId, externalSubscription);
-  } else {
-    await updateSubscription(externalSubscription);
-  }
-
-  await grantSubscriptionCredits(
+  const applied = await createOrUpdateSubscription(
     userId,
-    externalSubscription,
-    "subscription_create"
+    externalSubscription
   );
+
+  if (applied) {
+    await grantSubscriptionCredits(
+      userId,
+      externalSubscription,
+      "subscription_create"
+    );
+  }
   logEvent("payment.subscription.created", {
     userId,
     subscriptionId: externalSubscription.id,
@@ -180,21 +347,27 @@ async function handleSubscriptionActive(
 async function handleSubscriptionRenewed(
   externalSubscription: PaymentSubscription
 ): Promise<void> {
-  await updateSubscription(externalSubscription);
-  const userId = await findSubscriptionUserId(externalSubscription.id);
+  const userId =
+    externalSubscription.metadata.userId ??
+    (await findSubscriptionUserId(externalSubscription.id));
 
   if (!userId) {
-    logError("Subscription not found for renewal", {
-      subscriptionId: externalSubscription.id,
-    });
-    return;
+    throw new Error(
+      `Subscription user not found for renewal ${externalSubscription.id}`
+    );
   }
 
-  await grantSubscriptionCredits(
+  const applied = await createOrUpdateSubscription(
     userId,
-    externalSubscription,
-    "subscription_cycle"
+    externalSubscription
   );
+  if (applied) {
+    await grantSubscriptionCredits(
+      userId,
+      externalSubscription,
+      "subscription_cycle"
+    );
+  }
 }
 
 async function handleSubscriptionCanceled(
@@ -274,15 +447,32 @@ async function findSubscriptionUserId(
 async function createOrUpdateSubscription(
   userId: string,
   externalSubscription: PaymentSubscription
-): Promise<void> {
+): Promise<boolean> {
   const [existing] = await db
-    .select({ id: subscription.id })
+    .select({
+      currentPeriodStart: subscription.currentPeriodStart,
+      id: subscription.id,
+    })
     .from(subscription)
     .where(eq(subscription.userId, userId))
     .limit(1);
   const data = subscriptionValues(externalSubscription);
 
   if (existing) {
+    if (
+      isStaleSubscriptionEvent(
+        existing.currentPeriodStart,
+        externalSubscription.currentPeriodStart
+      )
+    ) {
+      logWarn("Ignoring stale subscription event", {
+        incomingPeriodStart:
+          externalSubscription.currentPeriodStart?.toISOString(),
+        subscriptionId: externalSubscription.id,
+        storedPeriodStart: existing.currentPeriodStart?.toISOString(),
+      });
+      return false;
+    }
     await db
       .update(subscription)
       .set(data)
@@ -309,6 +499,7 @@ async function createOrUpdateSubscription(
     source: "server",
     version: 1,
   });
+  return true;
 }
 
 function subscriptionValues(externalSubscription: PaymentSubscription) {
@@ -323,15 +514,6 @@ function subscriptionValues(externalSubscription: PaymentSubscription) {
   };
 }
 
-async function updateSubscription(
-  externalSubscription: PaymentSubscription
-): Promise<void> {
-  await db
-    .update(subscription)
-    .set(subscriptionValues(externalSubscription))
-    .where(eq(subscription.subscriptionId, externalSubscription.id));
-}
-
 async function grantSubscriptionCredits(
   userId: string,
   externalSubscription: PaymentSubscription,
@@ -340,14 +522,12 @@ async function grantSubscriptionCredits(
   const { currentPeriodStart, currentPeriodEnd, productId, id } =
     externalSubscription;
   if (!currentPeriodStart || !currentPeriodEnd) {
-    logWarn("Subscription period is incomplete", { subscriptionId: id });
-    return;
+    throw new Error(`Subscription period is incomplete for ${id}`);
   }
 
   const planType = getPlanFromPriceId(productId);
   if (!planType) {
-    logError("Unknown priceId", { priceId: productId });
-    return;
+    throw new Error(`Unknown priceId ${productId}`);
   }
 
   const periodKey = `${id}:${currentPeriodStart.toISOString()}`;
@@ -379,64 +559,58 @@ async function grantSubscriptionCredits(
       planType as keyof typeof SUBSCRIPTION_MONTHLY_CREDITS
     ];
   if (!monthlyCredits) {
-    logWarn("No monthly credits configured for plan", { planType });
-    return;
+    throw new Error(`No monthly credits configured for plan ${planType}`);
   }
 
-  const periodDays = Math.round(
-    (currentPeriodEnd.getTime() - currentPeriodStart.getTime()) /
-      (1000 * 60 * 60 * 24)
-  );
-  const isYearly = periodDays > 60;
+  const { price } = findPlanByPriceId(productId);
+  if (!price) {
+    throw new Error(`Unknown registered price ${productId}`);
+  }
+  const isYearly = price.interval === PlanInterval.YEAR;
   const amount = isYearly ? monthlyCredits * 12 : monthlyCredits;
   const expiresAt = CREDITS_EXPIRY_DAYS
     ? new Date(Date.now() + CREDITS_EXPIRY_DAYS * 24 * 60 * 60 * 1000)
     : null;
 
-  try {
-    const result = await grantCredits({
-      userId,
-      amount,
-      sourceType: "subscription",
-      debitAccount: `SUBSCRIPTION:${id}`,
-      transactionType: "monthly_grant",
-      expiresAt,
-      sourceRef: periodKey,
-      description: isYearly
-        ? `${planType} 年度订阅积分 (${monthlyCredits} × 12)`
-        : `${planType} 月度订阅积分`,
-      metadata: {
-        subscriptionId: id,
-        priceId: productId,
-        planType,
-        billingReason,
-        interval: isYearly ? "year" : "month",
-        periodStart: currentPeriodStart.toISOString(),
-        periodEnd: currentPeriodEnd.toISOString(),
-      },
-    });
-
-    logEvent("payment.credits.grant_success", {
-      userId,
-      credits: amount,
+  const result = await grantCredits({
+    userId,
+    amount,
+    sourceType: "subscription",
+    debitAccount: `SUBSCRIPTION:${id}`,
+    transactionType: "monthly_grant",
+    expiresAt,
+    sourceRef: periodKey,
+    description: isYearly
+      ? `${planType} 年度订阅积分 (${monthlyCredits} × 12)`
+      : `${planType} 月度订阅积分`,
+    metadata: {
+      subscriptionId: id,
+      priceId: productId,
       planType,
+      billingReason,
+      interval: isYearly ? "year" : "month",
+      periodStart: currentPeriodStart.toISOString(),
+      periodEnd: currentPeriodEnd.toISOString(),
+    },
+  });
+
+  logEvent("payment.credits.grant_success", {
+    userId,
+    credits: amount,
+    granted: result.granted,
+    planType,
+    batchId: result.batchId,
+  });
+  trackServerEvent({
+    attributes: {
       batchId: result.batchId,
-    });
-    trackServerEvent({
-      attributes: {
-        batchId: result.batchId,
-        credits: amount,
-        planType,
-      },
-      context: { identity: { userId } },
-      name: "payment.credits.grant_success",
-      source: "server",
-      version: 1,
-    });
-  } catch (error) {
-    logError("Failed to grant subscription credits", {
-      error: String(error),
-      userId,
-    });
-  }
+      credits: amount,
+      granted: result.granted,
+      planType,
+    },
+    context: { identity: { userId } },
+    name: "payment.credits.grant_success",
+    source: "server",
+    version: 1,
+  });
 }

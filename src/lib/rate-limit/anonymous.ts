@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 
 import type { UsageQuotaInput } from "@/core/services";
+import { logError } from "@/lib/logger";
 import { anonymousQuotaService } from "@/services/rate-limit";
 
 const ANONYMOUS_QUOTA = {
@@ -62,7 +63,7 @@ export async function checkAnonymousQuota(): Promise<{
       ...(result.reset === null ? {} : { resetAt: new Date(result.reset) }),
     };
   } catch (error) {
-    console.error("Error checking quota:", error);
+    logError(error, { source: "anonymous-quota", operation: "check" });
     return { allowed: true, remaining: ANONYMOUS_QUOTA.maxGenerations };
   }
 }
@@ -71,7 +72,7 @@ export async function incrementAnonymousUsage(): Promise<number> {
   try {
     return await anonymousQuotaService.increment(await quotaInput());
   } catch (error) {
-    console.error("Error incrementing usage:", error);
+    logError(error, { source: "anonymous-quota", operation: "increment" });
     return 0;
   }
 }

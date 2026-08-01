@@ -1,8 +1,7 @@
 "use client";
 
 import { ArrowLeft, Loader2 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -22,6 +21,7 @@ import {
   ticketCategories,
   ticketPriorities,
 } from "@/features/support";
+import { Link, useRouter } from "@/i18n/routing";
 
 /**
  * 新建工单页面
@@ -30,6 +30,7 @@ import {
  */
 export default function NewTicketPage() {
   const router = useRouter();
+  const t = useTranslations("Support");
   const [isLoading, setIsLoading] = useState(false);
 
   // 表单状态
@@ -59,13 +60,13 @@ export default function NewTicketPage() {
       });
 
       if (result?.data) {
-        toast.success("工单创建成功");
+        toast.success(t("pages.createSuccess"));
         router.push(`/dashboard/support/${result.data.ticketId}`);
       } else if (result?.serverError) {
         toast.error(result.serverError);
       }
     } catch (error) {
-      toast.error("创建工单失败，请重试");
+      toast.error(t("pages.createFailed"));
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -82,26 +83,26 @@ export default function NewTicketPage() {
           </Button>
         </Link>
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">新建工单</h2>
-          <p className="text-muted-foreground">
-            描述您遇到的问题，我们会尽快回复
-          </p>
+          <h2 className="text-2xl font-bold tracking-tight">
+            {t("pages.newTitle")}
+          </h2>
+          <p className="text-muted-foreground">{t("pages.newDescription")}</p>
         </div>
       </div>
 
       {/* 工单表单 */}
       <Card>
         <CardHeader>
-          <CardTitle>工单信息</CardTitle>
+          <CardTitle>{t("pages.ticketInfo")}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* 主题 */}
             <div className="space-y-2">
-              <Label htmlFor="subject">主题 *</Label>
+              <Label htmlFor="subject">{t("pages.subject")}</Label>
               <Input
                 id="subject"
-                placeholder="简要描述您的问题"
+                placeholder={t("pages.subjectPlaceholder")}
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 required
@@ -113,15 +114,15 @@ export default function NewTicketPage() {
             {/* 类别和优先级 */}
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="category">类别</Label>
+                <Label htmlFor="category">{t("pages.category")}</Label>
                 <Select value={category} onValueChange={setCategory}>
                   <SelectTrigger id="category">
-                    <SelectValue placeholder="选择类别" />
+                    <SelectValue placeholder={t("pages.categoryPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
                     {ticketCategories.map((cat) => (
                       <SelectItem key={cat.value} value={cat.value}>
-                        {cat.label}
+                        {t(cat.label)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -129,15 +130,15 @@ export default function NewTicketPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="priority">优先级</Label>
+                <Label htmlFor="priority">{t("pages.priority")}</Label>
                 <Select value={priority} onValueChange={setPriority}>
                   <SelectTrigger id="priority">
-                    <SelectValue placeholder="选择优先级" />
+                    <SelectValue placeholder={t("pages.priorityPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
                     {ticketPriorities.map((pri) => (
                       <SelectItem key={pri.value} value={pri.value}>
-                        {pri.label}
+                        {t(pri.label)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -147,10 +148,10 @@ export default function NewTicketPage() {
 
             {/* 详细描述 */}
             <div className="space-y-2">
-              <Label htmlFor="message">详细描述 *</Label>
+              <Label htmlFor="message">{t("pages.message")}</Label>
               <Textarea
                 id="message"
-                placeholder="请详细描述您遇到的问题，包括：&#10;- 问题发生的时间&#10;- 具体的错误信息&#10;- 您已尝试的解决方法"
+                placeholder={t("pages.messagePlaceholder")}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 required
@@ -159,7 +160,7 @@ export default function NewTicketPage() {
                 rows={8}
               />
               <p className="text-xs text-muted-foreground">
-                {message.length}/5000 字符
+                {t("pages.characterCount", { count: message.length })}
               </p>
             </div>
 
@@ -167,12 +168,12 @@ export default function NewTicketPage() {
             <div className="flex justify-end gap-4">
               <Link href="/dashboard/support">
                 <Button type="button" variant="outline">
-                  取消
+                  {t("pages.cancel")}
                 </Button>
               </Link>
               <Button type="submit" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                提交工单
+                {t("pages.submit")}
               </Button>
             </div>
           </form>

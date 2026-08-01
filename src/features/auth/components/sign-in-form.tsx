@@ -1,7 +1,6 @@
 "use client";
 
 import { Eye, EyeOff } from "lucide-react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -11,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { GoogleIcon } from "@/features/shared";
+import { Link, useRouter } from "@/i18n/routing";
 import {
   resendVerificationEmail,
   signInWithEmail,
@@ -30,6 +30,7 @@ import { AuthLogo } from "./auth-logo";
 export function SignInForm() {
   const t = useTranslations("Auth.signIn");
   const tCommon = useTranslations("Auth.common");
+  const router = useRouter();
 
   // 表单状态
   const [email, setEmail] = useState("");
@@ -108,7 +109,7 @@ export function SignInForm() {
 
       // 登录成功，提示并跳转
       toast.success(t("success"));
-      window.location.href = "/dashboard";
+      router.replace("/dashboard");
     } catch {
       setError(t("errors.invalidCredentials"));
       setIsLoading(false);

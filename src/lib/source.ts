@@ -67,6 +67,27 @@ export function getBlogPost(slug: string, locale: string) {
 }
 
 /**
+ * 获取指定文章实际存在的语言版本，供 alternate 元数据使用。
+ */
+export function getBlogPostLocales(slug: string): string[] {
+  return [
+    ...new Set(
+      blog
+        .filter((post) => {
+          const pathParts = post.info.path.split("/");
+          const locale = pathParts[0];
+          const fileName = pathParts[pathParts.length - 1] ?? "";
+          return (
+            locale !== undefined && fileName.replace(/\.mdx$/, "") === slug
+          );
+        })
+        .map((post) => post.info.path.split("/")[0])
+        .filter((locale): locale is string => Boolean(locale))
+    ),
+  ];
+}
+
+/**
  * 获取所有博客文章的 slug 列表（用于 generateStaticParams）
  */
 export function getAllBlogSlugs() {

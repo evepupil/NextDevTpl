@@ -1,5 +1,10 @@
-import { redirect } from "next/navigation";
+import { redirect } from "@/i18n/routing";
 
-export default function CreditsPage() {
-  redirect("/dashboard/settings?tab=usage");
+export default async function CreditsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  redirect({ href: "/dashboard/settings?tab=usage", locale });
 }

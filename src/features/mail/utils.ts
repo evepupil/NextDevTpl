@@ -2,6 +2,8 @@ import { render, toPlainText } from "@react-email/render";
 import type { ReactElement } from "react";
 
 import type { MailAddress } from "@/core/services";
+import { logError } from "@/lib/logger";
+import { redactText } from "@/lib/redaction";
 import { mailService } from "@/services/mail";
 
 export const DEFAULT_FROM_EMAIL =
@@ -90,22 +92,22 @@ function logEmailPreview(params: SendEmailParams): void {
   console.log(`\n${"=".repeat(60)}`);
   console.log("📧 EMAIL PREVIEW (Development Mode)");
   console.log("=".repeat(60));
-  console.log(`To:      ${recipients}`);
-  console.log(`From:    ${params.from ?? DEFAULT_FROM_EMAIL}`);
-  console.log(`Subject: ${params.subject}`);
+  console.log(`To:      ${redactText(recipients)}`);
+  console.log(`From:    ${redactText(params.from ?? DEFAULT_FROM_EMAIL)}`);
+  console.log(`Subject: ${redactText(params.subject)}`);
   if (params.cc) {
     console.log(
-      `CC:      ${Array.isArray(params.cc) ? params.cc.join(", ") : params.cc}`
+      `CC:      ${redactText(Array.isArray(params.cc) ? params.cc.join(", ") : params.cc)}`
     );
   }
   if (params.bcc) {
     console.log(
-      `BCC:     ${Array.isArray(params.bcc) ? params.bcc.join(", ") : params.bcc}`
+      `BCC:     ${redactText(Array.isArray(params.bcc) ? params.bcc.join(", ") : params.bcc)}`
     );
   }
   if (params.replyTo) {
     console.log(
-      `Reply:   ${Array.isArray(params.replyTo) ? params.replyTo.join(", ") : params.replyTo}`
+      `Reply:   ${redactText(Array.isArray(params.replyTo) ? params.replyTo.join(", ") : params.replyTo)}`
     );
   }
   console.log("-".repeat(60));
@@ -180,8 +182,8 @@ export async function sendEmail(
     };
   } catch (error) {
     const errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
-    console.error("Email sending error:", errorMessage);
+      error instanceof Error ? redactText(error.message) : "Unknown error";
+    logError(error, { source: "mail-send" });
     return {
       success: false,
       error: errorMessage,

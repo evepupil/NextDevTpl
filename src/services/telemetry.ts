@@ -4,6 +4,7 @@ import {
   type TelemetryEnvironment,
   type TelemetryEventInput,
 } from "@/core/services";
+import { logError } from "@/lib/logger";
 import { getRuntimeEnv } from "@/lib/runtime-config";
 
 function getTelemetryEnvironment(): TelemetryEnvironment {
@@ -26,6 +27,14 @@ export const telemetryService = createTelemetryService(
   {
     environment: getTelemetryEnvironment(),
     ...(release ? { release } : {}),
+    onAdapterError(error, event) {
+      logError(error, {
+        eventId: event.eventId,
+        eventName: event.name,
+        provider: "logger",
+        source: "telemetry-adapter",
+      });
+    },
   }
 );
 

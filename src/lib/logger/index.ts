@@ -12,6 +12,13 @@
 
 import pino from "pino";
 
+import {
+  redactError,
+  redactRecord,
+  redactText,
+  redactValue,
+} from "@/lib/redaction";
+
 // ============================================
 // 配置检查
 // ============================================
@@ -103,7 +110,7 @@ export const logger = createLogger();
 export function createContextLogger(
   context: Record<string, unknown>
 ): pino.Logger {
-  return logger.child(context);
+  return logger.child(redactRecord(context));
 }
 
 /**
@@ -118,12 +125,14 @@ export function createContextLogger(
 export function createRequestLogger(request: Request): pino.Logger {
   const url = new URL(request.url);
 
-  return logger.child({
-    requestId: crypto.randomUUID(),
-    method: request.method,
-    path: url.pathname,
-    userAgent: request.headers.get("user-agent")?.slice(0, 100),
-  });
+  return logger.child(
+    redactRecord({
+      requestId: crypto.randomUUID(),
+      method: request.method,
+      path: url.pathname,
+      userAgent: request.headers.get("user-agent")?.slice(0, 100),
+    })
+  );
 }
 
 // ============================================
@@ -171,7 +180,7 @@ export function logEvent(
   event: BusinessEvent,
   data?: Record<string, unknown>
 ): void {
-  logger.info({ event, ...data }, `Event: ${event}`);
+  logger.info({ event, ...redactRecord(data ?? {}) }, `Event: ${event}`);
 }
 
 /**
@@ -193,17 +202,16 @@ export function logError(
   if (error instanceof Error) {
     logger.error(
       {
-        err: {
-          name: error.name,
-          message: error.message,
-          stack: error.stack,
-        },
-        ...context,
+        ...redactRecord(context ?? {}),
+        err: redactError(error),
       },
-      error.message
+      redactText(error.message)
     );
   } else {
-    logger.error({ err: error, ...context }, "Unknown error");
+    logger.error(
+      { ...redactRecord(context ?? {}), err: redactValue(error) },
+      "Unknown error"
+    );
   }
 }
 
@@ -211,7 +219,7 @@ export function logError(
  * 记录警告
  */
 export function logWarn(message: string, data?: Record<string, unknown>): void {
-  logger.warn(data, message);
+  logger.warn(data ? redactRecord(data) : undefined, redactText(message));
 }
 
 /**
@@ -221,7 +229,7 @@ export function logDebug(
   message: string,
   data?: Record<string, unknown>
 ): void {
-  logger.debug(data, message);
+  logger.debug(data ? redactRecord(data) : undefined, redactText(message));
 }
 
 // ============================================

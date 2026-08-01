@@ -7,7 +7,7 @@
  * 3. 更新余额
  */
 
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 import { db, withDbTransaction } from "@/db";
 import {
@@ -17,12 +17,18 @@ import {
 } from "@/db/schema/credits";
 
 import { AccountFrozenError } from "./errors";
-import type { GrantCreditsParams } from "./types";
+import type { GrantCreditsParams, GrantCreditsResult } from "./types";
+
+type RegistrationBonusResult =
+  | { granted: false; reason: string }
+  | (GrantCreditsResult & { granted: true });
 
 /**
  * 发放积分
  */
-export async function grantCredits(params: GrantCreditsParams) {
+export async function grantCredits(
+  params: GrantCreditsParams
+): Promise<GrantCreditsResult> {
   const {
     userId,
     amount,
@@ -44,12 +50,13 @@ export async function grantCredits(params: GrantCreditsParams) {
       .select()
       .from(creditsBalance)
       .where(eq(creditsBalance.userId, userId))
+      .for("update")
       .limit(1);
 
     let currentBalance = balanceRecord;
 
     if (!currentBalance) {
-      const [newBalance] = await tx
+      await tx
         .insert(creditsBalance)
         .values({
           id: crypto.randomUUID(),
@@ -59,7 +66,14 @@ export async function grantCredits(params: GrantCreditsParams) {
           totalSpent: 0,
           status: "active",
         })
-        .returning();
+        .onConflictDoNothing({ target: creditsBalance.userId });
+
+      const [newBalance] = await tx
+        .select()
+        .from(creditsBalance)
+        .where(eq(creditsBalance.userId, userId))
+        .for("update")
+        .limit(1);
 
       if (!newBalance) {
         throw new Error("创建积分账户失败");
@@ -72,18 +86,52 @@ export async function grantCredits(params: GrantCreditsParams) {
       throw new AccountFrozenError(userId);
     }
 
-    const batchId = crypto.randomUUID();
-    await tx.insert(creditsBatch).values({
-      id: batchId,
+    const batchValues = {
+      id: crypto.randomUUID(),
       userId,
       amount,
       remaining: amount,
       issuedAt: new Date(),
       expiresAt,
-      status: "active",
+      status: "active" as const,
       sourceType,
       sourceRef,
-    });
+    };
+    const [insertedBatch] = await tx
+      .insert(creditsBatch)
+      .values(batchValues)
+      .onConflictDoNothing()
+      .returning();
+
+    if (!insertedBatch && sourceRef) {
+      const [existingBatch] = await tx
+        .select({ id: creditsBatch.id })
+        .from(creditsBatch)
+        .where(
+          and(
+            eq(creditsBatch.userId, userId),
+            eq(creditsBatch.sourceType, sourceType),
+            eq(creditsBatch.sourceRef, sourceRef)
+          )
+        )
+        .limit(1);
+
+      if (existingBatch) {
+        return {
+          batchId: existingBatch.id,
+          transactionId: "",
+          amount: 0,
+          newBalance: currentBalance.balance,
+          granted: false,
+        };
+      }
+    }
+
+    if (!insertedBatch) {
+      throw new Error("创建积分批次失败");
+    }
+
+    const batchId = insertedBatch.id;
 
     const transactionId = crypto.randomUUID();
     const creditAccount = `WALLET:${userId}`;
@@ -103,20 +151,22 @@ export async function grantCredits(params: GrantCreditsParams) {
       },
     });
 
-    await tx
+    const [updatedBalance] = await tx
       .update(creditsBalance)
       .set({
         balance: sql`${creditsBalance.balance} + ${amount}`,
         totalEarned: sql`${creditsBalance.totalEarned} + ${amount}`,
         updatedAt: new Date(),
       })
-      .where(eq(creditsBalance.userId, userId));
+      .where(eq(creditsBalance.userId, userId))
+      .returning({ balance: creditsBalance.balance });
 
     return {
       batchId,
       transactionId,
       amount,
-      newBalance: currentBalance.balance + amount,
+      newBalance: updatedBalance?.balance ?? currentBalance.balance + amount,
+      granted: true,
     };
   });
 }
@@ -132,7 +182,7 @@ export async function ensureRegistrationBonus(
   userId: string,
   bonusAmount: number,
   expiryDays: number | null
-) {
+): Promise<RegistrationBonusResult> {
   const [existingTransaction] = await db
     .select({ id: creditsTransaction.id })
     .from(creditsTransaction)
@@ -154,6 +204,7 @@ export async function ensureRegistrationBonus(
     debitAccount: "SYSTEM:registration_bonus",
     transactionType: "registration_bonus",
     expiresAt,
+    sourceRef: `registration:${userId}`,
     description: "新用户注册奖励",
     metadata: {
       bonusType: "registration",
@@ -161,8 +212,9 @@ export async function ensureRegistrationBonus(
     },
   });
 
-  return {
-    granted: true,
-    ...result,
-  };
+  if (!result.granted) {
+    return { granted: false, reason: "User already has transactions" };
+  }
+
+  return { ...result, granted: true };
 }

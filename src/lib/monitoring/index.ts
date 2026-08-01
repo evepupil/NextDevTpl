@@ -11,6 +11,13 @@
 
 import * as Sentry from "@sentry/nextjs";
 
+import {
+  redactError,
+  redactRecord,
+  redactText,
+  redactValue,
+} from "@/lib/redaction";
+
 // ============================================
 // 配置检查
 // ============================================
@@ -66,12 +73,7 @@ export function initSentryServer(): void {
 
     // 过滤敏感数据
     beforeSend(event) {
-      // 过滤掉敏感信息
-      if (event.request?.headers) {
-        delete event.request.headers.authorization;
-        delete event.request.headers.cookie;
-      }
-      return event;
+      return redactValue(event) as typeof event;
     },
   });
 }
@@ -130,16 +132,18 @@ export function captureError(
   error: unknown,
   context?: Record<string, unknown>
 ): void {
+  const safeError = redactError(error);
+  const safeContext = context ? redactRecord(context) : undefined;
   if (!isSentryEnabled()) {
     // 未配置时打印到 console
-    console.error("[Error]", error, context);
+    console.error("[Error]", safeError, safeContext);
     return;
   }
 
-  if (context) {
-    Sentry.captureException(error, { extra: context });
+  if (safeContext) {
+    Sentry.captureException(safeError, { extra: safeContext });
   } else {
-    Sentry.captureException(error);
+    Sentry.captureException(safeError);
   }
 }
 
@@ -156,6 +160,8 @@ export function captureMessage(
   level: Sentry.SeverityLevel = "info",
   context?: Record<string, unknown>
 ): void {
+  const safeMessage = redactText(message);
+  const safeContext = context ? redactRecord(context) : undefined;
   if (!isSentryEnabled()) {
     const logFn =
       level === "error"
@@ -163,14 +169,14 @@ export function captureMessage(
         : level === "warning"
           ? console.warn
           : console.log;
-    logFn(`[${level}]`, message, context);
+    logFn(`[${level}]`, safeMessage, safeContext);
     return;
   }
 
-  if (context) {
-    Sentry.captureMessage(message, { level, extra: context });
+  if (safeContext) {
+    Sentry.captureMessage(safeMessage, { level, extra: safeContext });
   } else {
-    Sentry.captureMessage(message, level);
+    Sentry.captureMessage(safeMessage, level);
   }
 }
 
@@ -197,7 +203,7 @@ export function setUser(
     return;
   }
 
-  Sentry.setUser(user);
+  Sentry.setUser(redactValue(user) as typeof user);
 }
 
 /**
@@ -228,7 +234,7 @@ export function setTag(key: string, value: string): void {
     return;
   }
 
-  Sentry.setTag(key, value);
+  Sentry.setTag(redactText(key), redactText(value));
 }
 
 /**
@@ -247,7 +253,7 @@ export function setContext(
     return;
   }
 
-  Sentry.setContext(name, context);
+  Sentry.setContext(redactText(name), redactRecord(context));
 }
 
 // ============================================
@@ -328,7 +334,10 @@ export function withSentryAction<TInput, TOutput>(
     try {
       return await action(input);
     } catch (error) {
-      captureError(error, { action: action.name, input });
+      captureError(error, {
+        action: action.name,
+        input: redactValue(input),
+      });
       throw error;
     }
   };

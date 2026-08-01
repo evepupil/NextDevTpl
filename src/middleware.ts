@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 
 import { routing } from "@/i18n/routing";
+import { authRoutes } from "@/lib/auth/edge";
 import {
   checkRateLimit,
   createRateLimitResponse,
@@ -105,9 +106,6 @@ export async function middleware(request: NextRequest) {
   // 定义需要保护的路由
   const protectedRoutes = ["/dashboard"];
 
-  // 定义认证页面路由 (已登录用户不应访问)
-  const authRoutes = ["/sign-in", "/sign-up"];
-
   // 检查当前路径是否是受保护的路由
   const isProtectedRoute = protectedRoutes.some(
     (route) =>
@@ -117,7 +115,9 @@ export async function middleware(request: NextRequest) {
 
   // 检查当前路径是否是认证页面
   const isAuthRoute = authRoutes.some(
-    (route) => pathnameWithoutLocale === route
+    (route) =>
+      pathnameWithoutLocale === route ||
+      pathnameWithoutLocale.startsWith(`${route}/`)
   );
 
   // 获取当前语言前缀 (用于重定向)

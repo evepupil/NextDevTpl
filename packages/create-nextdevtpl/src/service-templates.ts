@@ -182,6 +182,7 @@ export function trackServerEvent(input: TelemetryEventInput): void {
   type TelemetryEventInput,
 } from "@/core/services";
 import { createLoggerTelemetryAdapter } from "@/adapters/analytics";
+import { logError } from "@/lib/logger";
 import { getRuntimeEnv } from "@/lib/runtime-config";
 
 function getTelemetryEnvironment(): TelemetryEnvironment {
@@ -199,6 +200,14 @@ export const telemetryService = createTelemetryService(
   {
     environment: getTelemetryEnvironment(),
     ...(release ? { release } : {}),
+    onAdapterError(error, event) {
+      logError(error, {
+        eventId: event.eventId,
+        eventName: event.name,
+        provider: "logger",
+        source: "telemetry-adapter",
+      });
+    },
   }
 );
 
@@ -214,6 +223,7 @@ export function trackServerEvent(input: TelemetryEventInput): void {
   type TelemetryEnvironment,
   type TelemetryEventInput,
 } from "@/core/services";
+import { logError } from "@/lib/logger";
 import { getRuntimeEnv } from "@/lib/runtime-config";
 
 function getTelemetryEnvironment(): TelemetryEnvironment {
@@ -244,6 +254,14 @@ export const telemetryService = createTelemetryService(
   {
     environment: getTelemetryEnvironment(),
     ...(release ? { release } : {}),
+    onAdapterError(error, event) {
+      logError(error, {
+        eventId: event.eventId,
+        eventName: event.name,
+        provider: "noop",
+        source: "telemetry-adapter",
+      });
+    },
   }
 );
 

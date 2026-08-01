@@ -26,6 +26,11 @@ export default defineConfig({
     sequence: {
       concurrent: false,
     },
+    server: {
+      deps: {
+        inline: ["next-intl"],
+      },
+    },
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
@@ -46,6 +51,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": resolve(__dirname, "./src"),
+      "next/navigation": "next/navigation.js",
     },
   },
 });

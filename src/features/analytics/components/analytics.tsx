@@ -6,7 +6,62 @@ import { useEffect, useState } from "react";
 import {
   COOKIE_CONSENT_CHANGE_EVENT,
   COOKIE_CONSENT_KEY,
+  COOKIE_PREFERENCES_KEY,
 } from "@/lib/cookie-consent";
+
+function hasAnalyticsConsent(): boolean {
+  if (localStorage.getItem(COOKIE_CONSENT_KEY) !== "all") {
+    return false;
+  }
+
+  const rawPreferences = localStorage.getItem(COOKIE_PREFERENCES_KEY);
+  if (!rawPreferences) {
+    return true;
+  }
+
+  try {
+    const preferences = JSON.parse(rawPreferences) as {
+      analytics?: unknown;
+    };
+    return preferences.analytics !== false;
+  } catch {
+    return false;
+  }
+}
+
+function clearGoogleAnalytics(gaId: string | undefined): void {
+  if (gaId) {
+    const windowWithAnalytics = window as Window & Record<string, unknown>;
+    windowWithAnalytics[`ga-disable-${gaId}`] = true;
+  }
+
+  document
+    .querySelectorAll<HTMLScriptElement>("#_next-ga, #_next-ga-init")
+    .forEach((script) => {
+      script.remove();
+    });
+
+  const dataLayer = window as Window & { dataLayer?: unknown[] };
+  if (dataLayer.dataLayer) {
+    dataLayer.dataLayer.length = 0;
+  }
+  delete (window as Window & { gtag?: unknown }).gtag;
+
+  for (const cookie of document.cookie.split(";")) {
+    const name = cookie.split("=", 1)[0]?.trim();
+    if (!name || !/^_(?:ga|gid|gat)/.test(name)) {
+      continue;
+    }
+    // biome-ignore lint/suspicious/noDocumentCookie: 需要清理 GA 已写入的浏览器 Cookie。
+    document.cookie = `${name}=; Max-Age=0; path=/`;
+    if (location.hostname.includes(".")) {
+      // biome-ignore lint/suspicious/noDocumentCookie: 需要覆盖当前域名下的 GA Cookie。
+      document.cookie = `${name}=; Max-Age=0; path=/; domain=${location.hostname}`;
+      // biome-ignore lint/suspicious/noDocumentCookie: 需要覆盖父域名下的 GA Cookie。
+      document.cookie = `${name}=; Max-Age=0; path=/; domain=.${location.hostname}`;
+    }
+  }
+}
 
 /**
  * Analytics 组件
@@ -23,8 +78,7 @@ export function Analytics() {
   useEffect(() => {
     // 检查初始同意状态
     const checkConsent = () => {
-      const consent = localStorage.getItem(COOKIE_CONSENT_KEY);
-      setHasConsent(consent === "all");
+      setHasConsent(hasAnalyticsConsent());
     };
 
     checkConsent();
@@ -52,6 +106,18 @@ export function Analytics() {
       );
     };
   }, []);
+
+  useEffect(() => {
+    if (hasConsent) {
+      if (gaId) {
+        const windowWithAnalytics = window as Window & Record<string, unknown>;
+        windowWithAnalytics[`ga-disable-${gaId}`] = false;
+      }
+      return;
+    }
+
+    clearGoogleAnalytics(gaId);
+  }, [gaId, hasConsent]);
 
   // 未配置 GA ID 或未同意时不渲染
   if (!gaId || !hasConsent) {

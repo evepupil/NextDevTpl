@@ -249,6 +249,24 @@
         "backToSignIn": "返回登录"
       }
     },
+    "resetPassword": {
+      "title": "设置新密码",
+      "subtitle": "请输入至少 8 个字符的新密码。",
+      "passwordLabel": "新密码",
+      "confirmPasswordLabel": "确认密码",
+      "loading": "正在重置密码...",
+      "submit": "重置密码",
+      "successTitle": "密码重置成功",
+      "successDescription": "密码已更新，现在可以使用新密码登录。",
+      "backToSignIn": "返回登录",
+      "requestNewLink": "重新申请重置链接",
+      "showPassword": "显示密码",
+      "hidePassword": "隐藏密码",
+      "invalidLink": "密码重置链接无效或已过期。",
+      "passwordTooShort": "密码至少需要 8 个字符。",
+      "passwordMismatch": "两次输入的密码不一致。",
+      "error": "密码重置失败，请重新申请链接。"
+    },
     "footer": {
       "copyright": "© {year} {name}。保留所有权利。",
       "privacy": "隐私政策",
@@ -721,6 +739,77 @@
     }
   },
   "Support": {
+    "categories": {
+      "billing": "账单问题",
+      "technical": "技术支持",
+      "bug": "Bug 报告",
+      "feature": "功能建议",
+      "other": "其他"
+    },
+    "priorities": {
+      "low": "低",
+      "medium": "中",
+      "high": "高"
+    },
+    "statuses": {
+      "open": "待处理",
+      "in_progress": "处理中",
+      "resolved": "已解决",
+      "closed": "已关闭"
+    },
+    "pages": {
+      "title": "支持中心",
+      "description": "查看和管理您的支持工单",
+      "newTicket": "新建工单",
+      "emptyTitle": "暂无工单",
+      "emptyDescription": "您还没有提交过任何支持工单",
+      "createFirst": "创建第一个工单",
+      "newTitle": "新建工单",
+      "newDescription": "描述您遇到的问题，我们会尽快回复",
+      "ticketInfo": "工单信息",
+      "subject": "主题 *",
+      "subjectPlaceholder": "简要描述您的问题",
+      "category": "类别",
+      "categoryPlaceholder": "选择类别",
+      "priority": "优先级",
+      "priorityPlaceholder": "选择优先级",
+      "message": "详细描述 *",
+      "messagePlaceholder": "请详细描述您遇到的问题，包括发生时间、错误信息和您尝试过的解决方法",
+      "characterCount": "{count}/5000 字符",
+      "cancel": "取消",
+      "submit": "提交工单",
+      "createSuccess": "工单创建成功",
+      "createFailed": "创建工单失败，请重试",
+      "createdAt": "创建于",
+      "conversation": "对话记录",
+      "userFallback": "用户",
+      "userInitial": "U",
+      "supportStaff": "客服",
+      "closedNotice": "此工单已关闭，无法添加新消息"
+    },
+    "admin": {
+      "title": "工单管理",
+      "description": "查看和处理用户提交的支持工单",
+      "stats": {
+        "open": "待处理",
+        "inProgress": "处理中",
+        "resolved": "已解决",
+        "total": "总工单"
+      },
+      "listTitle": "工单列表",
+      "empty": "暂无工单",
+      "unknownUser": "未知用户",
+      "userInfo": "用户信息",
+      "ticketStatus": "工单状态",
+      "columns": {
+        "subject": "工单主题",
+        "user": "用户",
+        "category": "类别",
+        "priority": "优先级",
+        "status": "状态",
+        "createdAt": "创建时间"
+      }
+    },
     "enterMessage": "请输入消息内容",
     "messageSent": "消息发送成功",
     "sendFailed": "发送失败，请重试",
@@ -739,8 +828,8 @@
     "updating": "更新中...",
     "selectNewStatus": "选择新状态",
     "roleUpdateFailed": "角色更新失败",
-    "admin": "管理员",
-    "user": "普通用户"
+    "adminRole": "管理员",
+    "userRole": "普通用户"
   },
   "AdminSidebar": {
     "badge": "管理",

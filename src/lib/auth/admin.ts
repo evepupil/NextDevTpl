@@ -1,6 +1,7 @@
-import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
 
 import { getServerSession } from "@/lib/auth/server";
+import { redirectWithLocale } from "@/lib/locale-redirect";
 
 /**
  * Admin 权限检查
@@ -22,15 +23,18 @@ import { getServerSession } from "@/lib/auth/server";
  */
 export async function checkAdmin() {
   const session = await getServerSession();
+  const locale = (await getLocale()) as "en" | "zh";
 
   // 检查用户是否登录
   if (!session || !session.user) {
-    redirect("/sign-in");
+    await redirectWithLocale("/sign-in", locale);
+    throw new Error("未登录");
   }
 
   // 检查用户是否是管理员
   if (session.user.role !== "admin") {
-    redirect("/");
+    await redirectWithLocale("/", locale);
+    throw new Error("需要管理员权限");
   }
 
   return session;

@@ -6,18 +6,18 @@
  * 提供积分系统的前端调用接口
  */
 
+import { getLocale } from "next-intl/server";
 import { z } from "zod";
 
-import { getBaseUrl } from "@/config/payment";
+import { getSafePaymentCallbackUrl, paymentConfig } from "@/config/payment";
 import { logEvent } from "@/lib/logger";
-import { actionClient, protectedAction } from "@/lib/safe-action";
+import { protectedAction } from "@/lib/safe-action";
 import { paymentService } from "@/services/payment";
 import { trackServerEvent } from "@/services/telemetry";
 
 import {
   CREDIT_PACKAGES,
   CREDITS_EXPIRY_DAYS,
-  MONTHLY_SUBSCRIPTION_CREDITS,
   REGISTRATION_BONUS_CREDITS,
 } from "./config";
 import {
@@ -28,56 +28,11 @@ import {
   getUserActiveBatches,
   getUserTransactions,
   getUserTransactionsCount,
-  grantCredits,
   InsufficientCreditsError,
 } from "./core";
 
-const withPublicCreditsAction = (name: string) =>
-  actionClient.metadata({ action: `credits.${name}` });
 const withProtectedCreditsAction = (name: string) =>
   protectedAction.metadata({ action: `credits.${name}` });
-
-// ============================================
-// 公开 Actions
-// ============================================
-
-/**
- * 注册奖励积分
- *
- * 新用户注册时调用，赠送初始积分
- */
-export const grantRegistrationBonus = withPublicCreditsAction(
-  "grantRegistrationBonus"
-)
-  .schema(
-    z.object({
-      userId: z.string().min(1),
-    })
-  )
-  .action(async ({ parsedInput }) => {
-    const { userId } = parsedInput;
-    const expiresAt = CREDITS_EXPIRY_DAYS
-      ? new Date(Date.now() + CREDITS_EXPIRY_DAYS * 24 * 60 * 60 * 1000)
-      : null;
-
-    const result = await grantCredits({
-      userId,
-      amount: REGISTRATION_BONUS_CREDITS,
-      sourceType: "bonus",
-      debitAccount: "SYSTEM:registration_bonus",
-      transactionType: "registration_bonus",
-      expiresAt,
-      description: "新用户注册奖励",
-      metadata: {
-        bonusType: "registration",
-      },
-    });
-
-    return {
-      success: true,
-      ...result,
-    };
-  });
 
 // ============================================
 // 受保护 Actions（需要登录）
@@ -265,108 +220,6 @@ export const checkCreditsAvailable = withProtectedCreditsAction(
   });
 
 // ============================================
-// 订阅相关积分 Actions
-// ============================================
-
-/**
- * 发放月度订阅积分
- *
- * 在订阅续费时调用
- */
-export const grantMonthlySubscriptionCredits = withPublicCreditsAction(
-  "grantMonthlySubscriptionCredits"
-)
-  .schema(
-    z.object({
-      userId: z.string().min(1),
-      subscriptionId: z.string().min(1),
-    })
-  )
-  .action(async ({ parsedInput }) => {
-    const { userId, subscriptionId } = parsedInput;
-    // 月度积分，下个月过期
-    const expiresAt = new Date();
-    expiresAt.setMonth(expiresAt.getMonth() + 1);
-
-    const result = await grantCredits({
-      userId,
-      amount: MONTHLY_SUBSCRIPTION_CREDITS,
-      sourceType: "subscription",
-      debitAccount: `SUBSCRIPTION:${subscriptionId}`,
-      transactionType: "monthly_grant",
-      expiresAt,
-      sourceRef: subscriptionId,
-      description: "月度订阅积分",
-      metadata: {
-        subscriptionId,
-        grantType: "monthly",
-      },
-    });
-
-    return {
-      success: true,
-      ...result,
-    };
-  });
-
-/**
- * 购买积分 (内部函数)
- *
- * 由支付 Webhook 调用，在支付成功后发放积分
- * 注意: 这个函数不应该直接被前端调用
- */
-export const purchaseCredits = withProtectedCreditsAction("purchaseCredits")
-  .schema(
-    z.object({
-      amount: z.number().min(1),
-      paymentId: z.string().min(1),
-      expiresInDays: z.number().optional(),
-    })
-  )
-  .action(async ({ parsedInput, ctx }) => {
-    const { userId } = ctx;
-    const { amount, paymentId, expiresInDays } = parsedInput;
-
-    const expiresAt = expiresInDays
-      ? new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000)
-      : null;
-
-    const result = await grantCredits({
-      userId,
-      amount,
-      sourceType: "purchase",
-      debitAccount: `PAYMENT:${paymentId}`,
-      transactionType: "purchase",
-      expiresAt,
-      sourceRef: paymentId,
-      description: `购买 ${amount} 积分`,
-      metadata: {
-        paymentId,
-        purchaseType: "direct",
-      },
-    });
-
-    logEvent("credits.purchased", {
-      userId,
-      amount,
-      paymentId,
-      provider: paymentService.provider,
-    });
-    trackServerEvent({
-      attributes: { amount, paymentId, provider: paymentService.provider },
-      context: { identity: { userId } },
-      name: "credits.purchased",
-      source: "server",
-      version: 1,
-    });
-
-    return {
-      success: true,
-      ...result,
-    };
-  });
-
-// ============================================
 // 积分购买 Checkout
 // ============================================
 
@@ -388,16 +241,15 @@ export const createCreditsPurchaseCheckout = withProtectedCreditsAction(
     })
   )
   .action(async ({ parsedInput, ctx }) => {
-    const { packageId, successUrl } = parsedInput;
+    const { cancelUrl, packageId, successUrl } = parsedInput;
     const { userId } = ctx;
+    const locale = (await getLocale()) as "en" | "zh";
 
     // 查找套餐配置
     const pkg = CREDIT_PACKAGES.find((p) => p.id === packageId);
     if (!pkg) {
       throw new Error("无效的积分套餐");
     }
-
-    const baseUrl = getBaseUrl();
 
     logEvent("payment.checkout.started", {
       userId,
@@ -422,15 +274,21 @@ export const createCreditsPurchaseCheckout = withProtectedCreditsAction(
     const checkout = await paymentService.createCheckout({
       productId: `credits_${packageId}`,
       mode: "one-time",
-      successUrl:
-        successUrl ??
-        `${baseUrl}/dashboard/settings?tab=usage&success=true&credits=${pkg.credits}`,
+      successUrl: getSafePaymentCallbackUrl(
+        successUrl,
+        `/${locale}/dashboard/settings?tab=usage&success=true&credits=${pkg.credits}`
+      ),
+      cancelUrl: getSafePaymentCallbackUrl(
+        cancelUrl,
+        `/${locale}${paymentConfig.redirectAfterCancel}`
+      ),
       requestId: `credit_purchase_${userId}_${Date.now()}`,
       metadata: {
         userId,
         type: "credit_purchase",
         credits: String(pkg.credits),
         packageId: pkg.id,
+        productId: `credits_${pkg.id}`,
       },
     });
 

@@ -253,6 +253,24 @@
         "backToSignIn": "Back to sign in"
       }
     },
+    "resetPassword": {
+      "title": "Set a new password",
+      "subtitle": "Choose a new password with at least 8 characters.",
+      "passwordLabel": "New password",
+      "confirmPasswordLabel": "Confirm password",
+      "loading": "Resetting password...",
+      "submit": "Reset password",
+      "successTitle": "Password reset complete",
+      "successDescription": "Your password has been updated. You can sign in with your new password.",
+      "backToSignIn": "Back to sign in",
+      "requestNewLink": "Request a new reset link",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "invalidLink": "This password reset link is invalid or has expired.",
+      "passwordTooShort": "Password must be at least 8 characters.",
+      "passwordMismatch": "Passwords do not match.",
+      "error": "Failed to reset your password. Please request a new link."
+    },
     "footer": {
       "copyright": "\u00a9 {year} {name}. All rights reserved.",
       "privacy": "Privacy Policy",
@@ -725,6 +743,77 @@
     }
   },
   "Support": {
+    "categories": {
+      "billing": "Billing",
+      "technical": "Technical support",
+      "bug": "Bug report",
+      "feature": "Feature request",
+      "other": "Other"
+    },
+    "priorities": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "statuses": {
+      "open": "Open",
+      "in_progress": "In progress",
+      "resolved": "Resolved",
+      "closed": "Closed"
+    },
+    "pages": {
+      "title": "Support center",
+      "description": "View and manage your support tickets",
+      "newTicket": "New ticket",
+      "emptyTitle": "No tickets yet",
+      "emptyDescription": "You have not submitted any support tickets",
+      "createFirst": "Create your first ticket",
+      "newTitle": "New support ticket",
+      "newDescription": "Describe your issue and we will reply as soon as possible",
+      "ticketInfo": "Ticket information",
+      "subject": "Subject *",
+      "subjectPlaceholder": "Briefly describe your issue",
+      "category": "Category",
+      "categoryPlaceholder": "Select a category",
+      "priority": "Priority",
+      "priorityPlaceholder": "Select a priority",
+      "message": "Details *",
+      "messagePlaceholder": "Please describe the issue, including when it happened, any error message, and what you have tried",
+      "characterCount": "{count}/5000 characters",
+      "cancel": "Cancel",
+      "submit": "Submit ticket",
+      "createSuccess": "Ticket created",
+      "createFailed": "Failed to create ticket, please retry",
+      "createdAt": "created",
+      "conversation": "Conversation",
+      "userFallback": "User",
+      "userInitial": "U",
+      "supportStaff": "Support",
+      "closedNotice": "This ticket is closed and cannot receive new messages"
+    },
+    "admin": {
+      "title": "Ticket management",
+      "description": "Review and handle support tickets submitted by users",
+      "stats": {
+        "open": "Open",
+        "inProgress": "In progress",
+        "resolved": "Resolved",
+        "total": "Total tickets"
+      },
+      "listTitle": "Ticket list",
+      "empty": "No tickets yet",
+      "unknownUser": "Unknown user",
+      "userInfo": "User information",
+      "ticketStatus": "Ticket status",
+      "columns": {
+        "subject": "Subject",
+        "user": "User",
+        "category": "Category",
+        "priority": "Priority",
+        "status": "Status",
+        "createdAt": "Created"
+      }
+    },
     "enterMessage": "Please enter a message",
     "messageSent": "Message sent",
     "sendFailed": "Failed to send, please retry",
@@ -743,8 +832,8 @@
     "updating": "Updating...",
     "selectNewStatus": "Select new status",
     "roleUpdateFailed": "Role update failed",
-    "admin": "Admin",
-    "user": "User"
+    "adminRole": "Admin",
+    "userRole": "User"
   },
   "AdminSidebar": {
     "badge": "ADMIN",

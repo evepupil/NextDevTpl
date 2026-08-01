@@ -13,6 +13,8 @@ export const routing = defineRouting({
   defaultLocale: "en",
 });
 
+export type Locale = (typeof routing.locales)[number];
+
 /**
  * 导出国际化导航组件和钩子
  *

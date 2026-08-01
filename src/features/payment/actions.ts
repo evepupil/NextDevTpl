@@ -1,9 +1,14 @@
 "use server";
 
 import { eq } from "drizzle-orm";
+import { getLocale } from "next-intl/server";
 import { z } from "zod";
 
-import { findPlanByPriceId, getBaseUrl, paymentConfig } from "@/config/payment";
+import {
+  findPlanByPriceId,
+  getSafePaymentCallbackUrl,
+  paymentConfig,
+} from "@/config/payment";
 import { db } from "@/db";
 import { subscription } from "@/db/schema/subscription";
 import { logEvent } from "@/lib/logger";
@@ -31,6 +36,16 @@ export const createCheckoutSession = protectedAction
   .action(async ({ parsedInput, ctx }) => {
     const { cancelUrl, priceId, successUrl, type } = parsedInput;
     const { userId } = ctx;
+    const locale = (await getLocale()) as "en" | "zh";
+
+    const { plan, price } = findPlanByPriceId(priceId);
+    if (!plan || !price) {
+      throw new Error("未登记的价格 ID");
+    }
+    const paymentType = type ?? price.type;
+    if (paymentType !== price.type) {
+      throw new Error("支付类型与价格配置不匹配");
+    }
 
     // 检查是否已有活跃订阅
     const [existingSub] = await db
@@ -46,11 +61,6 @@ export const createCheckoutSession = protectedAction
       throw new Error("您已有活跃订阅，请先取消当前订阅后再订阅新计划");
     }
 
-    // 查找计划和价格信息
-    const { plan } = findPlanByPriceId(priceId);
-
-    const baseUrl = getBaseUrl();
-
     logEvent("payment.checkout.started", {
       userId,
       priceId,
@@ -60,7 +70,7 @@ export const createCheckoutSession = protectedAction
     trackServerEvent({
       attributes: {
         checkoutType:
-          type === PaymentType.ONE_TIME ? "one-time" : "subscription",
+          paymentType === PaymentType.ONE_TIME ? "one-time" : "subscription",
         planId: plan?.id ?? "unknown",
         priceId,
         provider: paymentService.provider,
@@ -73,13 +83,19 @@ export const createCheckoutSession = protectedAction
 
     const checkout = await paymentService.createCheckout({
       productId: priceId,
-      mode: type === PaymentType.ONE_TIME ? "one-time" : "subscription",
-      successUrl:
-        successUrl ??
-        `${baseUrl}${paymentConfig.redirectAfterCheckout}?success=true`,
-      cancelUrl: cancelUrl ?? `${baseUrl}${paymentConfig.redirectAfterCancel}`,
-      requestId: `${userId}_${Date.now()}`,
+      mode: paymentType === PaymentType.ONE_TIME ? "one-time" : "subscription",
+      successUrl: getSafePaymentCallbackUrl(
+        successUrl,
+        `/${locale}${paymentConfig.redirectAfterCheckout}?success=true`
+      ),
+      cancelUrl: getSafePaymentCallbackUrl(
+        cancelUrl,
+        `/${locale}${paymentConfig.redirectAfterCancel}`
+      ),
+      requestId: `${userId}_${priceId}_${Date.now()}`,
       metadata: {
+        productId: priceId,
+        type: paymentType,
         userId,
         planId: plan?.id ?? "unknown",
       },
@@ -160,7 +176,9 @@ export const getUserSubscription = protectedAction
     }
 
     // 检查订阅是否有效
-    const isActive = ["active", "trialing"].includes(userSubscription.status);
+    const isActive = ["active", "trialing", "lifetime"].includes(
+      userSubscription.status
+    );
     const isTrialing = userSubscription.status === "trialing";
 
     return {

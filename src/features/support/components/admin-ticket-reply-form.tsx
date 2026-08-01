@@ -1,7 +1,6 @@
 "use client";
 
 import { Loader2, Send } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -9,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { adminReplyTicketAction } from "@/features/support/actions";
+import { useRouter } from "@/i18n/routing";
 
 interface AdminTicketReplyFormProps {
   /** 工单 ID */

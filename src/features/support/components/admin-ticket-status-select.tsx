@@ -1,7 +1,6 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -15,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { updateTicketStatusAction } from "@/features/support/actions";
 import { ticketStatuses } from "@/features/support/schemas";
+import { useRouter } from "@/i18n/routing";
 
 interface AdminTicketStatusSelectProps {
   /** 工单 ID */
@@ -52,7 +52,7 @@ export function AdminTicketStatusSelect({
    */
   const getStatusLabel = (s: string) => {
     const statusConfig = ticketStatuses.find((item) => item.value === s);
-    return statusConfig?.label || s;
+    return statusConfig ? t(statusConfig.label) : s;
   };
 
   /**
@@ -108,7 +108,7 @@ export function AdminTicketStatusSelect({
           {ticketStatuses.map((s) => (
             <SelectItem key={s.value} value={s.value}>
               <Badge className={colorMap[s.value]} variant="secondary">
-                {s.label}
+                {t(s.label)}
               </Badge>
             </SelectItem>
           ))}

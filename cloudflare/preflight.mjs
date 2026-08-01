@@ -1,5 +1,5 @@
-import { readFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
+import { readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -158,10 +158,10 @@ async function main() {
       process.exitCode = 1;
       return;
     }
-    const missingRemote = config.required.filter(
+    const missingRemote = (config.remoteRequired ?? config.required).filter(
       (name) => !remoteNames.has(name)
     );
-    const missingRemoteGroups = config.groups
+    const missingRemoteGroups = (config.remoteGroups ?? config.groups)
       .filter((group) => !group.names.some((name) => remoteNames.has(name)))
       .map((group) => group.label);
     printList("Missing remote secrets", missingRemote);

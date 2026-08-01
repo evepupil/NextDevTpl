@@ -22,6 +22,14 @@ export interface GrantCreditsParams {
   metadata?: Record<string, unknown>;
 }
 
+export interface GrantCreditsResult {
+  batchId: string;
+  transactionId: string;
+  amount: number;
+  newBalance: number;
+  granted: boolean;
+}
+
 /**
  * 消费积分参数
  */

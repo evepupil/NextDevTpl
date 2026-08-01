@@ -1,4 +1,5 @@
 import { logger } from "@/lib/logger";
+import { redactText } from "@/lib/redaction";
 
 import { inngest } from "./client";
 
@@ -9,7 +10,7 @@ export const helloWorld = inngest.createFunction(
     step.run("process-message", async () => {
       const message =
         typeof event.data.message === "string" ? event.data.message : "";
-      logger.info({ message }, "处理 hello-world 事件");
+      logger.info({ message: redactText(message) }, "处理 hello-world 事件");
       return { processed: true, message };
     })
 );

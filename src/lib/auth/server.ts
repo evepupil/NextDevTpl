@@ -1,4 +1,8 @@
+import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
+
+import { db } from "@/db";
+import { user as userTable } from "@/db/schema/auth";
 
 import { auth } from "./index";
 
@@ -19,10 +23,38 @@ import { auth } from "./index";
  * }
  * ```
  */
-export async function getServerSession() {
-  return auth.api.getSession({
-    headers: await headers(),
+export async function getServerSession(requestHeaders?: Headers) {
+  const session = await auth.api.getSession({
+    headers: requestHeaders ?? (await headers()),
   });
+
+  if (!session?.user) {
+    return null;
+  }
+
+  // Better Auth 的会话缓存可能短暂保留旧用户字段。每次服务端授权前
+  // 重新读取封禁状态，确保旧会话也会立即失效。
+  const [currentUser] = await db
+    .select({
+      role: userTable.role,
+      banned: userTable.banned,
+      bannedReason: userTable.bannedReason,
+    })
+    .from(userTable)
+    .where(eq(userTable.id, session.user.id))
+    .limit(1);
+
+  if (!currentUser || currentUser.banned) {
+    return null;
+  }
+
+  return {
+    ...session,
+    user: {
+      ...session.user,
+      ...currentUser,
+    },
+  };
 }
 
 /**

@@ -289,59 +289,71 @@ function cloudflarePreflightConfig(
   target: string,
   selection: ProjectSelection
 ): Record<string, unknown> {
-  const required = new Set([
-    "DATABASE_URL",
-    "BETTER_AUTH_SECRET",
-    "BETTER_AUTH_URL",
-    "NEXT_PUBLIC_APP_URL",
-  ]);
+  const required = new Set(["NEXT_PUBLIC_APP_URL"]);
+  const remoteRequired = new Set<string>();
   const groups: { label: string; names: string[] }[] = [];
+  const remoteGroups: { label: string; names: string[] }[] = [];
   const addRequired = (...names: string[]) => {
     for (const name of names) required.add(name);
+  };
+  const addRemoteRequired = (...names: string[]) => {
+    for (const name of names) {
+      required.add(name);
+      remoteRequired.add(name);
+    }
   };
   const addGroup = (label: string, ...names: string[]) => {
     groups.push({ label, names });
   };
+  const addRemoteGroup = (label: string, ...names: string[]) => {
+    addGroup(label, ...names);
+    remoteGroups.push({ label, names });
+  };
+
+  const needsDatabase = [
+    "auth",
+    "credits",
+    "payment",
+    "subscription",
+    "support",
+  ].some((module) => selection.modules.includes(module));
+  if (needsDatabase) addRemoteRequired("DATABASE_URL");
+  if (selection.modules.includes("auth")) {
+    addRequired("BETTER_AUTH_SECRET", "BETTER_AUTH_URL");
+    remoteRequired.add("BETTER_AUTH_SECRET");
+  }
 
   if (selection.modules.includes("storage")) {
     addRequired("STORAGE_BUCKET_NAME", "NEXT_PUBLIC_AVATARS_BUCKET_NAME");
   }
-  if (selection.modules.includes("credits")) addRequired("CRON_SECRET");
+  if (selection.modules.includes("credits")) addRemoteRequired("CRON_SECRET");
 
   for (const adapter of Object.values(selection.adapters)) {
     switch (adapter) {
       case "payment:creem":
-        addRequired("CREEM_API_KEY", "CREEM_WEBHOOK_SECRET");
+        addRemoteRequired("CREEM_API_KEY", "CREEM_WEBHOOK_SECRET");
         break;
       case "payment:stripe":
-        addRequired("STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET");
+        addRemoteRequired("STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET");
         break;
       case "storage:s3-compatible":
-        addRequired(
-          "STORAGE_ACCESS_KEY_ID",
-          "STORAGE_SECRET_ACCESS_KEY",
-          "STORAGE_ENDPOINT",
-          "STORAGE_REGION"
-        );
+        addRemoteRequired("STORAGE_ACCESS_KEY_ID", "STORAGE_SECRET_ACCESS_KEY");
+        addRequired("STORAGE_ENDPOINT", "STORAGE_REGION");
         break;
       case "mail:resend":
-        addRequired("RESEND_API_KEY", "EMAIL_FROM");
+        addRemoteRequired("RESEND_API_KEY");
+        addRequired("EMAIL_FROM");
         break;
       case "mail:smtp":
-        addRequired(
-          "SMTP_HOST",
-          "SMTP_PORT",
-          "SMTP_SECURE",
-          "SMTP_USER",
-          "SMTP_PASS"
-        );
+        addRequired("SMTP_HOST", "SMTP_PORT", "SMTP_SECURE");
+        addRemoteRequired("SMTP_USER", "SMTP_PASS");
         break;
       case "mail:cloudflare-email":
         addRequired("EMAIL_FROM");
         break;
       case "ai:openai-compatible":
         addRequired("AI_PROVIDER");
-        addGroup(
+        addRemoteGroup(
           "OpenAI-compatible provider key",
           "OPENAI_API_KEY",
           "DEEPSEEK_API_KEY",
@@ -349,16 +361,17 @@ function cloudflarePreflightConfig(
         );
         break;
       case "ai:anthropic":
-        addRequired("ANTHROPIC_API_KEY");
+        addRemoteRequired("ANTHROPIC_API_KEY");
         break;
       case "ai:workers-ai":
         addRequired("WORKERS_AI_MODEL");
         break;
       case "jobs:inngest":
-        addRequired("INNGEST_EVENT_KEY", "INNGEST_SIGNING_KEY");
+        addRemoteRequired("INNGEST_EVENT_KEY", "INNGEST_SIGNING_KEY");
         break;
       case "rate-limit:upstash":
-        addRequired("UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN");
+        addRequired("UPSTASH_REDIS_REST_URL");
+        addRemoteRequired("UPSTASH_REDIS_REST_TOKEN");
         break;
       default:
         break;
@@ -368,6 +381,8 @@ function cloudflarePreflightConfig(
   return {
     required: [...required].sort(),
     groups,
+    remoteRequired: [...remoteRequired].sort(),
+    remoteGroups,
     optionalPairs: [
       ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"],
       ["GITHUB_CLIENT_ID", "GITHUB_CLIENT_SECRET"],
@@ -746,9 +761,11 @@ async function rewriteTranslations(
 }
 
 function localeLayout(selection: ProjectSelection): string {
-  const analyticsImport = hasModule(selection, "analytics")
-    ? 'import { Analytics } from "@/features/analytics";\n'
-    : "";
+  const analyticsImport =
+    hasModule(selection, "analytics") &&
+    selection.adapters.analytics !== "analytics:noop"
+      ? 'import { Analytics } from "@/features/analytics";\n'
+      : "";
   const marketingImport = hasModule(selection, "marketing")
     ? 'import { CookieConsent } from "@/features/marketing";\n'
     : "";
@@ -782,7 +799,7 @@ export default async function LocaleLayout({ children, params }: { children: Rea
         {children}
         ${hasModule(selection, "marketing") ? "<CookieConsent />" : ""}
         <Toaster richColors position="top-right" />
-        ${hasModule(selection, "analytics") ? "<Analytics />" : ""}
+        ${analyticsImport ? "<Analytics />" : ""}
         <TelemetryIdentityProvider />
       </Providers>
     </NextIntlClientProvider>
@@ -815,13 +832,15 @@ function dashboardLayout(selection: ProjectSelection): string {
   ]
     .filter(Boolean)
     .join(" ");
-  return `import { redirect } from "next/navigation";
+  return `import { getLocale } from "next-intl/server";
 ${creditsImport}import { DashboardMainWrapper, DashboardSidebar, SidebarProvider } from "@/features/dashboard";
 ${subscriptionImport}import { getServerSession } from "@/lib/auth/server";
+import { redirect } from "@/i18n/routing";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const locale = (await getLocale()) as "en" | "zh";
   const session = await getServerSession();
-  if (!session?.user) redirect("/sign-in");
+  if (!session?.user) redirect({ href: "/sign-in", locale });
   return (
     <SidebarProvider>
       <div className="min-h-screen bg-muted/40">
@@ -1213,7 +1232,9 @@ export async function generateProject(
       options.templateManifestPath ?? discovered.templateManifestPath,
     templateRoot: options.templateRoot ?? discovered.templateRoot,
   };
-  const catalog = await loadCatalog(assets.catalogPath);
+  const catalog = await loadCatalog(assets.catalogPath, {
+    templateRoot: assets.templateRoot,
+  });
   const selection = createProjectSelection(catalog, options);
   const target = await prepareTarget(options.targetDirectory);
 

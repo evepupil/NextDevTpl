@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,16 +12,16 @@ import { ticket, ticketMessage } from "@/db/schema/support";
 import {
   AdminTicketReplyForm,
   AdminTicketStatusSelect,
-} from "@/features/support";
-import {
   ticketCategories,
   ticketPriorities,
   ticketStatuses,
 } from "@/features/support";
+import { Link } from "@/i18n/routing";
 
 interface AdminTicketDetailPageProps {
   params: Promise<{
     id: string;
+    locale: string;
   }>;
 }
 
@@ -33,7 +33,8 @@ interface AdminTicketDetailPageProps {
 export default async function AdminTicketDetailPage({
   params,
 }: AdminTicketDetailPageProps) {
-  const { id } = await params;
+  const { id, locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Support" });
 
   // 获取工单信息（包含用户信息）
   const ticketResult = await db
@@ -93,7 +94,7 @@ export default async function AdminTicketDetailPage({
         className={colorMap[status] || colorMap.closed}
         variant="secondary"
       >
-        {statusConfig?.label || status}
+        {statusConfig ? t(statusConfig.label) : status}
       </Badge>
     );
   };
@@ -113,7 +114,7 @@ export default async function AdminTicketDetailPage({
         className={colorMap[priority] || colorMap.medium}
         variant="secondary"
       >
-        {priorityConfig?.label || priority}
+        {priorityConfig ? t(priorityConfig.label) : priority}
       </Badge>
     );
   };
@@ -123,7 +124,7 @@ export default async function AdminTicketDetailPage({
    */
   const getCategoryLabel = (category: string) => {
     const categoryConfig = ticketCategories.find((c) => c.value === category);
-    return categoryConfig?.label || category;
+    return categoryConfig ? t(categoryConfig.label) : category;
   };
 
   /**
@@ -152,8 +153,8 @@ export default async function AdminTicketDetailPage({
             {ticketData.subject}
           </h2>
           <p className="text-muted-foreground">
-            {getCategoryLabel(ticketData.category)} · 创建于{" "}
-            {new Date(ticketData.createdAt).toLocaleDateString("zh-CN")}
+            {getCategoryLabel(ticketData.category)} · {t("pages.createdAt")}{" "}
+            {new Date(ticketData.createdAt).toLocaleDateString(locale)}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -166,21 +167,23 @@ export default async function AdminTicketDetailPage({
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>用户信息</CardTitle>
+            <CardTitle>{t("admin.userInfo")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4">
               <Avatar className="h-12 w-12">
                 <AvatarImage
                   src={ticketUser?.image || undefined}
-                  alt={ticketUser?.name || "用户"}
+                  alt={ticketUser?.name || t("pages.userFallback")}
                 />
                 <AvatarFallback className="bg-primary text-primary-foreground">
                   {ticketUser?.name ? getInitials(ticketUser.name) : "U"}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-medium">{ticketUser?.name || "未知用户"}</p>
+                <p className="font-medium">
+                  {ticketUser?.name || t("admin.unknownUser")}
+                </p>
                 <p className="text-sm text-muted-foreground">
                   {ticketUser?.email}
                 </p>
@@ -191,7 +194,7 @@ export default async function AdminTicketDetailPage({
 
         <Card>
           <CardHeader>
-            <CardTitle>工单状态</CardTitle>
+            <CardTitle>{t("admin.ticketStatus")}</CardTitle>
           </CardHeader>
           <CardContent>
             <AdminTicketStatusSelect
@@ -205,7 +208,7 @@ export default async function AdminTicketDetailPage({
       {/* 消息列表 */}
       <Card>
         <CardHeader>
-          <CardTitle>对话记录</CardTitle>
+          <CardTitle>{t("pages.conversation")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {messages.map((msg) => (
@@ -218,7 +221,7 @@ export default async function AdminTicketDetailPage({
               <Avatar className="h-10 w-10">
                 <AvatarImage
                   src={msg.user?.image || undefined}
-                  alt={msg.user?.name || "用户"}
+                  alt={msg.user?.name || t("pages.userFallback")}
                 />
                 <AvatarFallback
                   className={
@@ -233,15 +236,15 @@ export default async function AdminTicketDetailPage({
               <div className="flex-1 space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">
-                    {msg.user?.name || "用户"}
+                    {msg.user?.name || t("pages.userFallback")}
                   </span>
                   {msg.isAdminResponse && (
                     <Badge variant="secondary" className="text-xs">
-                      客服
+                      {t("pages.supportStaff")}
                     </Badge>
                   )}
                   <span className="text-xs text-muted-foreground">
-                    {new Date(msg.createdAt).toLocaleString("zh-CN")}
+                    {new Date(msg.createdAt).toLocaleString(locale)}
                   </span>
                 </div>
                 <p className="text-sm whitespace-pre-wrap">{msg.content}</p>

@@ -83,7 +83,7 @@ function mapCheckout(value: StripeCheckout): PaymentCheckout {
   return {
     id: value.id,
     mode: value.mode === "payment" ? "one-time" : "subscription",
-    productId: subscription?.productId ?? "",
+    productId: subscription?.productId ?? value.metadata?.productId ?? "",
     customer: {
       id: customerId,
       ...(value.customer_details?.email
@@ -207,6 +207,12 @@ export function createStripePaymentAdapter(
           value,
         ])
       );
+      const subscriptionMetadata = Object.fromEntries(
+        Object.entries(input.metadata ?? {}).map(([key, value]) => [
+          `subscription_data[metadata][${key}]`,
+          value,
+        ])
+      );
       const result = await stripeRequest<StripeCheckout>("/checkout/sessions", {
         method: "POST",
         body: formBody({
@@ -217,6 +223,7 @@ export function createStripePaymentAdapter(
           cancel_url: input.cancelUrl ?? input.successUrl,
           client_reference_id: input.requestId,
           ...metadata,
+          ...(input.mode === "subscription" ? subscriptionMetadata : {}),
         }),
       });
       if (!result.url) {

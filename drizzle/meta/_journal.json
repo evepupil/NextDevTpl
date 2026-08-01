@@ -15,6 +15,13 @@
       "when": 1775563974164,
       "tag": "0001_creem_schema_sync",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1785595004224,
+      "tag": "0002_review_hardening",
+      "breakpoints": true
     }
   ]
 }

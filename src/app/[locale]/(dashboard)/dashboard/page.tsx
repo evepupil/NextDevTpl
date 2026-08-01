@@ -7,8 +7,6 @@ import {
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import { Button } from "@/components/ui/button";
@@ -17,8 +15,8 @@ import { db } from "@/db";
 import { creditsBalance } from "@/db/schema/credits";
 import { getUserTransactions } from "@/features/credits";
 import { getUserPlan } from "@/features/subscription";
-import { Link } from "@/i18n/routing";
-import { auth } from "@/lib/auth";
+import { Link, redirect } from "@/i18n/routing";
+import { getServerSession } from "@/lib/auth/server";
 
 /**
  * 积分"进账"类型（用于最近动态里判断 +/- 方向与配色）
@@ -43,9 +41,10 @@ export default async function DashboardPage({
     namespace: "DashboardPages.dashboard",
   });
 
-  const session = await auth.api.getSession({ headers: await headers() });
+  const session = await getServerSession();
   if (!session?.user) {
-    redirect("/sign-in");
+    redirect({ href: "/sign-in", locale });
+    return null;
   }
 
   const userId = session.user.id;

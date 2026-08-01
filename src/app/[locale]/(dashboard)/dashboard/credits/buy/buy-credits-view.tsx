@@ -7,7 +7,7 @@
  */
 
 import { Check, Coins, Loader2, Sparkles } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
 import { toast } from "sonner";
@@ -25,6 +25,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { createCreditsPurchaseCheckout } from "@/features/credits/actions";
 import { CREDIT_PACKAGES } from "@/features/credits/config";
+import { useRouter } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
 /**

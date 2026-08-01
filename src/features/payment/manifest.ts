@@ -14,5 +14,5 @@ export const paymentModule = defineModule({
   ],
   navigation: [],
   translations: [],
-  schema: [],
+  schema: ["payment"],
 });

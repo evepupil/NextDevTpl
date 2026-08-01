@@ -247,7 +247,9 @@ export function findPlanByPriceId(priceId: string): {
 
   for (const plan of plans) {
     if (plan.prices) {
-      const price = plan.prices.find((p) => p.priceId === priceId);
+      const price = plan.prices.find(
+        (p) => p.priceId.length > 0 && p.priceId === priceId
+      );
       if (price) {
         return { plan, price };
       }
@@ -279,4 +281,37 @@ export function getBaseUrl(): string {
     return `https://${process.env.VERCEL_URL}`;
   }
   return "http://localhost:3000";
+}
+
+/**
+ * 只允许支付完成后回到本站，避免客户端把 Checkout 变成外部跳转器。
+ */
+export function getSafePaymentCallbackUrl(
+  value: string | undefined,
+  fallbackPath: string
+): string {
+  const baseUrl = getBaseUrl();
+  const base = new URL(baseUrl);
+  const fallback = new URL(fallbackPath, base);
+  if (value === undefined) {
+    return fallback.toString();
+  }
+
+  let candidate: URL;
+  try {
+    candidate = new URL(value, base);
+  } catch {
+    throw new Error("支付回调 URL 无效");
+  }
+
+  if (
+    !["http:", "https:"].includes(candidate.protocol) ||
+    candidate.origin !== base.origin ||
+    candidate.username.length > 0 ||
+    candidate.password.length > 0
+  ) {
+    throw new Error("支付回调 URL 必须指向本站");
+  }
+
+  return candidate.toString();
 }

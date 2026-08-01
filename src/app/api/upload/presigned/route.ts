@@ -2,8 +2,12 @@ import { nanoid } from "nanoid";
 import { type NextRequest, NextResponse } from "next/server";
 import { DEFAULT_SIGNED_URL_EXPIRES } from "@/features/storage/types";
 import { withApiLogging } from "@/lib/api-logger";
-import { auth } from "@/lib/auth";
-import { getFileTypeFromName } from "@/lib/file-utils";
+import { getServerSession } from "@/lib/auth/server";
+import {
+  DOCUMENT_UPLOAD_EXTENSIONS,
+  validateDocumentUploadRequest,
+} from "@/lib/file-utils";
+import { logError } from "@/lib/logger";
 import { getRuntimeEnv } from "@/lib/runtime-config";
 import { storageService } from "@/services/storage";
 
@@ -13,9 +17,6 @@ const BUCKET_NAME =
 /**
  * 允许的文件类型和大小限制
  */
-const ALLOWED_EXTENSIONS = [".pdf", ".docx", ".doc", ".md", ".txt"];
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-
 /**
  * 获取预签名上传 URL
  *
@@ -25,49 +26,32 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 export const POST = withApiLogging(async (request: NextRequest) => {
   try {
     // 验证用户登录
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+    const session = await getServerSession(request.headers);
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { filename, contentType, fileSize } = body as {
-      filename: string;
-      contentType: string;
-      fileSize: number;
-    };
-
-    // 验证文件名
-    if (!filename) {
-      return NextResponse.json(
-        { error: "Filename is required" },
-        { status: 400 }
-      );
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
 
-    // 验证文件类型
-    const fileType = getFileTypeFromName(filename);
-    if (!fileType) {
+    const parsedBody = validateDocumentUploadRequest(body);
+    if (!parsedBody.success) {
       return NextResponse.json(
         {
-          error: `Unsupported file type. Allowed: ${ALLOWED_EXTENSIONS.join(", ")}`,
+          error:
+            parsedBody.reason === "unsupported_type"
+              ? `Unsupported file type or MIME type. Allowed: ${DOCUMENT_UPLOAD_EXTENSIONS.join(", ")}`
+              : "Invalid upload request",
         },
         { status: 400 }
       );
     }
-
-    // 验证文件大小
-    if (fileSize > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        {
-          error: `File too large. Maximum size: ${MAX_FILE_SIZE / 1024 / 1024}MB`,
-        },
-        { status: 400 }
-      );
-    }
+    const { filename, contentType, fileSize } = parsedBody.data;
 
     // 生成唯一的文件 key
     const fileExtension = filename.match(/\.[^.]+$/)?.[0] || "";
@@ -77,6 +61,7 @@ export const POST = withApiLogging(async (request: NextRequest) => {
       bucket: BUCKET_NAME,
       key: fileKey,
       contentType,
+      contentLength: fileSize,
       expiresIn: DEFAULT_SIGNED_URL_EXPIRES,
     });
     const fileUrl = new URL(
@@ -91,7 +76,7 @@ export const POST = withApiLogging(async (request: NextRequest) => {
       expiresIn: DEFAULT_SIGNED_URL_EXPIRES,
     });
   } catch (error) {
-    console.error("Error creating presigned URL:", error);
+    logError(error, { source: "upload-presigned" });
     return NextResponse.json(
       { error: "Failed to create upload URL" },
       { status: 500 }

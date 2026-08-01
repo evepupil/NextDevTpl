@@ -412,9 +412,17 @@ describe("project generation", () => {
       join(target, "src/db/schema/index.ts"),
       "utf8"
     );
+    const preflight = JSON.parse(
+      await readFile(
+        join(target, "cloudflare", "preflight-config.json"),
+        "utf8"
+      )
+    ) as { remoteRequired: string[]; required: string[] };
     expect(schemaIndex).toBe("export {};\n");
     expect(await exists(join(target, "wrangler.jsonc"))).toBe(true);
     expect(await exists(join(target, "cloudflare/templates"))).toBe(false);
+    expect(preflight.required).toEqual(["NEXT_PUBLIC_APP_URL"]);
+    expect(preflight.remoteRequired).toEqual([]);
   });
 
   it("allows Creem on Cloudflare with a Worker-safe implementation", async () => {

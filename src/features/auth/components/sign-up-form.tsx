@@ -1,7 +1,6 @@
 "use client";
 
 import { Eye, EyeOff, Mail } from "lucide-react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -11,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { GoogleIcon } from "@/features/shared";
+import { Link, useRouter } from "@/i18n/routing";
 import {
   resendVerificationEmail,
   signInWithGoogle,
@@ -31,6 +31,7 @@ import { AuthLogo } from "./auth-logo";
 export function SignUpForm() {
   const t = useTranslations("Auth.signUp");
   const tCommon = useTranslations("Auth.common");
+  const router = useRouter();
 
   // 表单状态
   const [name, setName] = useState("");
@@ -123,7 +124,7 @@ export function SignUpForm() {
       // 注册成功，显示验证邮件提示
       if (result.data?.token) {
         toast.success(tCommon("success"));
-        window.location.href = "/dashboard";
+        router.replace("/dashboard");
         return;
       }
 

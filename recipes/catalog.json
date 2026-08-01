@@ -31,6 +31,7 @@
         "src/app/[locale]/(auth)/sign-in/page.tsx",
         "src/app/[locale]/(auth)/sign-up/page.tsx",
         "src/app/[locale]/(auth)/forgot-password/page.tsx",
+        "src/app/[locale]/(auth)/reset-password/page.tsx",
         "src/app/api/auth/[...all]/route.ts"
       ],
       "schema": ["auth"],
@@ -112,7 +113,7 @@
       "kind": "optional",
       "dependencies": ["subscription"],
       "routes": ["src/app/api/webhooks/payment/route.ts"],
-      "schema": [],
+      "schema": ["payment"],
       "translations": [],
       "env": [
         "NEXT_PUBLIC_PRICE_STARTER_MONTHLY",

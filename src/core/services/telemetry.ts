@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { redactValue } from "@/lib/redaction";
+
 import type { AdapterDescriptor, JsonObject, JsonValue } from "./common";
 
 export type TelemetryProvider = "logger" | "noop";
@@ -176,51 +178,10 @@ export function parseTelemetryEventInput(input: unknown): TelemetryEventInput {
   };
 }
 
-const sensitiveKeyPattern =
-  /(?:password|passcode|secret|authorization|cookie|apikey|email|prompt|content|uploadcontent|filecontent|filename)/i;
-
-function isSensitiveKey(key: string): boolean {
-  const normalized = key.replace(/[^a-zA-Z0-9]/g, "");
-
-  return sensitiveKeyPattern.test(normalized) || normalized.endsWith("token");
-}
-
-function sanitizeValue(value: JsonValue, depth: number): JsonValue | undefined {
-  if (depth > 5) {
-    return undefined;
-  }
-
-  if (Array.isArray(value)) {
-    return value.flatMap((item) => {
-      const sanitized = sanitizeValue(item, depth + 1);
-      return sanitized === undefined ? [] : [sanitized];
-    });
-  }
-
-  if (value !== null && typeof value === "object") {
-    const sanitized: Record<string, JsonValue> = {};
-
-    for (const [key, nestedValue] of Object.entries(value)) {
-      if (isSensitiveKey(key)) {
-        continue;
-      }
-
-      const nested = sanitizeValue(nestedValue, depth + 1);
-      if (nested !== undefined) {
-        sanitized[key] = nested;
-      }
-    }
-
-    return sanitized;
-  }
-
-  return value;
-}
-
 export function sanitizeTelemetryAttributes(
   attributes: JsonObject
 ): JsonObject {
-  return sanitizeValue(attributes, 0) as JsonObject;
+  return redactValue(attributes) as JsonObject;
 }
 
 export function createTelemetryEvent(

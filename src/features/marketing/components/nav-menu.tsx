@@ -2,7 +2,6 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
-import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 
@@ -13,7 +12,7 @@ import {
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
 import { mainNav, productsNav } from "@/config";
-import { Link } from "@/i18n/routing";
+import { Link, usePathname } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
 /**

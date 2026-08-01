@@ -27,6 +27,7 @@ describe("Creem payment adapter", () => {
     const result = await adapter.createCheckout({
       productId: "price_1",
       successUrl: "https://app.example/success",
+      cancelUrl: "https://app.example/cancel",
       requestId: "request_1",
       metadata: { userId: "user_1" },
     });
@@ -42,6 +43,8 @@ describe("Creem payment adapter", () => {
     );
     expect(JSON.parse(String(requestInit?.body))).toMatchObject({
       product_id: "price_1",
+      success_url: "https://app.example/success",
+      cancel_url: "https://app.example/cancel",
       request_id: "request_1",
       metadata: { userId: "user_1" },
     });

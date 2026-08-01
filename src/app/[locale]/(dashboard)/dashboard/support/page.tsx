@@ -1,7 +1,6 @@
 import { desc, eq } from "drizzle-orm";
 import { Plus, Ticket } from "lucide-react";
-import Link from "next/link";
-import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +11,7 @@ import {
   ticketPriorities,
   ticketStatuses,
 } from "@/features/support";
+import { Link, redirect } from "@/i18n/routing";
 import { getServerSession } from "@/lib/auth/server";
 
 /**
@@ -19,11 +19,18 @@ import { getServerSession } from "@/lib/auth/server";
  *
  * 展示用户提交的所有支持工单
  */
-export default async function SupportPage() {
+export default async function SupportPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Support" });
   // 获取当前用户会话
   const session = await getServerSession();
   if (!session?.user) {
-    redirect("/sign-in");
+    redirect({ href: "/sign-in", locale });
+    return null;
   }
 
   // 获取用户的工单列表
@@ -49,7 +56,7 @@ export default async function SupportPage() {
         className={colorMap[status] || colorMap.closed}
         variant="secondary"
       >
-        {statusConfig?.label || status}
+        {statusConfig ? t(statusConfig.label) : status}
       </Badge>
     );
   };
@@ -69,7 +76,7 @@ export default async function SupportPage() {
         className={colorMap[priority] || colorMap.medium}
         variant="secondary"
       >
-        {priorityConfig?.label || priority}
+        {priorityConfig ? t(priorityConfig.label) : priority}
       </Badge>
     );
   };
@@ -79,7 +86,7 @@ export default async function SupportPage() {
    */
   const getCategoryLabel = (category: string) => {
     const categoryConfig = ticketCategories.find((c) => c.value === category);
-    return categoryConfig?.label || category;
+    return categoryConfig ? t(categoryConfig.label) : category;
   };
 
   return (
@@ -87,13 +94,15 @@ export default async function SupportPage() {
       {/* 页面标题 */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">支持中心</h2>
-          <p className="text-muted-foreground">查看和管理您的支持工单</p>
+          <h2 className="text-2xl font-bold tracking-tight">
+            {t("pages.title")}
+          </h2>
+          <p className="text-muted-foreground">{t("pages.description")}</p>
         </div>
         <Link href="/dashboard/support/new">
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            新建工单
+            {t("pages.newTicket")}
           </Button>
         </Link>
       </div>
@@ -103,14 +112,14 @@ export default async function SupportPage() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Ticket className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium">暂无工单</h3>
+            <h3 className="text-lg font-medium">{t("pages.emptyTitle")}</h3>
             <p className="text-muted-foreground mb-4">
-              您还没有提交过任何支持工单
+              {t("pages.emptyDescription")}
             </p>
             <Link href="/dashboard/support/new">
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                创建第一个工单
+                {t("pages.createFirst")}
               </Button>
             </Link>
           </CardContent>
@@ -126,7 +135,7 @@ export default async function SupportPage() {
                       <CardTitle className="text-base">{t.subject}</CardTitle>
                       <p className="text-sm text-muted-foreground">
                         {getCategoryLabel(t.category)} ·{" "}
-                        {new Date(t.createdAt).toLocaleDateString("zh-CN")}
+                        {new Date(t.createdAt).toLocaleDateString(locale)}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">

@@ -20,4 +20,5 @@ export type {
   ConsumeCreditsParams,
   ConsumeCreditsResult,
   GrantCreditsParams,
+  GrantCreditsResult,
 } from "./types";

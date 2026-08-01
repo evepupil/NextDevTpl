@@ -20,6 +20,10 @@ export const authModule = defineModule({
       source: "src/app/[locale]/(auth)/forgot-password/page.tsx",
     },
     {
+      path: "/reset-password",
+      source: "src/app/[locale]/(auth)/reset-password/page.tsx",
+    },
+    {
       path: "/api/auth/[...all]",
       source: "src/app/api/auth/[...all]/route.ts",
     },

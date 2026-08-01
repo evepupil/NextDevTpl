@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
 import { SettingsProfileView } from "@/features/settings";
+import { type Locale, redirect } from "@/i18n/routing";
 import { getServerSession } from "@/lib/auth/server";
 
 /**
@@ -16,13 +16,19 @@ export const metadata = {
  * Server Component - 在服务端获取用户数据
  * 将数据传递给客户端 SettingsProfileView 组件
  */
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   // 获取当前用户会话
   const session = await getServerSession();
 
   // 如果用户未登录，重定向到登录页
   if (!session?.user) {
-    redirect("/sign-in");
+    redirect({ href: "/sign-in", locale: locale as Locale });
+    return null;
   }
 
   return (

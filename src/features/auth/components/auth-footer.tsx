@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 
 import { siteConfig } from "@/config";
 import { CookieSettingsDialog } from "@/features/shared";
+import { Link } from "@/i18n/routing";
 
 /**
  * Auth 页面底部组件

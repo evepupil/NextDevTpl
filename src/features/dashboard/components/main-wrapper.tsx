@@ -1,10 +1,9 @@
 "use client";
 
 import { Menu, PanelLeft, PanelLeftClose } from "lucide-react";
-import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-
 import { useSidebar } from "@/features/dashboard/context";
+import { usePathname } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
 /**

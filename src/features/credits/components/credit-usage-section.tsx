@@ -13,7 +13,6 @@
  */
 
 import { Clock, Coins } from "lucide-react";
-import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
@@ -24,6 +23,7 @@ import {
   getMyActiveBatches,
   getMyCreditsBalance,
 } from "@/features/credits/actions";
+import { Link } from "@/i18n/routing";
 
 import { TransactionHistory } from "./transaction-history";
 

@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import type { NextRequest } from "next/server";
 
 import type { RateLimitDecision } from "@/core/services";
@@ -32,16 +33,24 @@ export async function checkRateLimit(
   });
 }
 
-export function getClientIp(request: NextRequest): string {
-  const forwardedFor = request.headers.get("x-forwarded-for");
+function getClientIpFromHeaders(headerList: Headers): string {
+  const forwardedFor = headerList.get("x-forwarded-for");
   if (forwardedFor) {
     return forwardedFor.split(",")[0]?.trim() ?? "unknown";
   }
   return (
-    request.headers.get("x-real-ip") ??
-    request.headers.get("cf-connecting-ip") ??
+    headerList.get("x-real-ip") ??
+    headerList.get("cf-connecting-ip") ??
     "unknown"
   );
+}
+
+export function getClientIp(request: NextRequest): string {
+  return getClientIpFromHeaders(request.headers);
+}
+
+export async function getServerActionIdentifier(): Promise<string> {
+  return getClientIpFromHeaders(await headers());
 }
 
 export function getRateLimitHeaders(result: RateLimitResult): HeadersInit {

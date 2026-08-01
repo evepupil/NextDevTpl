@@ -1,11 +1,12 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
 import { createSafeActionClient } from "next-safe-action";
 import { z } from "zod";
 
-import { auth } from "@/lib/auth/index";
+import { getServerSession } from "@/lib/auth/server";
+import { redirectWithLocale } from "@/lib/locale-redirect";
 import { logError, logger } from "@/lib/logger";
 import { captureError } from "@/lib/monitoring";
+import { redactValue } from "@/lib/redaction";
 
 const actionMetadataSchema = z
   .object({
@@ -60,7 +61,7 @@ export const actionClient = baseActionClient.use(
         success: result.success,
         duration,
         ...(userId ? { userId } : {}),
-        ...(error ? { error } : {}),
+        ...(error ? { error: redactValue(error) } : {}),
       },
       "Server action"
     );
@@ -80,13 +81,13 @@ export const protectedAction = actionClient.use(async ({ next }) => {
    * 获取当前用户会话
    * 使用 Better Auth 的 getSession 方法
    */
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await getServerSession();
 
   // 如果没有会话或用户信息，重定向到登录页
   if (!session || !session.user) {
-    redirect("/sign-in");
+    const locale = (await getLocale()) as "en" | "zh";
+    await redirectWithLocale("/sign-in", locale);
+    throw new Error("未登录");
   }
 
   // 设置用户上下文到日志

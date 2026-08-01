@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   integer,
   json,
@@ -5,6 +6,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 import { user } from "./auth";
@@ -48,21 +50,29 @@ export const creditsBalance = pgTable("credits_balance", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const creditsBatch = pgTable("credits_batch", {
-  id: text("id").primaryKey(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  amount: integer("amount").notNull(),
-  remaining: integer("remaining").notNull(),
-  issuedAt: timestamp("issued_at").notNull().defaultNow(),
-  expiresAt: timestamp("expires_at"),
-  status: creditsBatchStatusEnum("status").notNull().default("active"),
-  sourceType: creditsBatchSourceEnum("source_type").notNull(),
-  sourceRef: text("source_ref"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+export const creditsBatch = pgTable(
+  "credits_batch",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    amount: integer("amount").notNull(),
+    remaining: integer("remaining").notNull(),
+    issuedAt: timestamp("issued_at").notNull().defaultNow(),
+    expiresAt: timestamp("expires_at"),
+    status: creditsBatchStatusEnum("status").notNull().default("active"),
+    sourceType: creditsBatchSourceEnum("source_type").notNull(),
+    sourceRef: text("source_ref"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("credits_batch_source_unique")
+      .on(table.userId, table.sourceType, table.sourceRef)
+      .where(sql`${table.sourceRef} IS NOT NULL`),
+  ]
+);
 
 export const creditsTransaction = pgTable("credits_transaction", {
   id: text("id").primaryKey(),

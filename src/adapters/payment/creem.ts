@@ -228,6 +228,7 @@ export function createCreemPaymentAdapter(
         body: JSON.stringify({
           product_id: input.productId,
           success_url: input.successUrl,
+          cancel_url: input.cancelUrl ?? input.successUrl,
           ...(input.requestId ? { request_id: input.requestId } : {}),
           ...(input.metadata ? { metadata: input.metadata } : {}),
         }),

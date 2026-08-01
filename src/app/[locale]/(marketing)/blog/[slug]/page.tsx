@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ArticleJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { siteConfig } from "@/config";
 import { Link } from "@/i18n/routing";
-import { getAllBlogSlugs, getBlogPost } from "@/lib/source";
+import { getAllBlogSlugs, getBlogPost, getBlogPostLocales } from "@/lib/source";
 
 /**
  * 生成静态参数
@@ -33,6 +33,12 @@ export async function generateMetadata({
     typeof post.date === "string" ? post.date : post.date.toISOString();
 
   const url = `${siteConfig.url}/${locale}/blog/${slug}`;
+  const languages = Object.fromEntries(
+    getBlogPostLocales(slug).map((postLocale) => [
+      postLocale,
+      `${siteConfig.url}/${postLocale}/blog/${slug}`,
+    ])
+  );
 
   return {
     title: post.title,
@@ -63,10 +69,7 @@ export async function generateMetadata({
     },
     alternates: {
       canonical: url,
-      languages: {
-        en: `${siteConfig.url}/en/blog/${slug}`,
-        zh: `${siteConfig.url}/zh/blog/${slug}`,
-      },
+      languages,
     },
   };
 }

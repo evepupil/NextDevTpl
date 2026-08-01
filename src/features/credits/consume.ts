@@ -34,6 +34,7 @@ export async function consumeCredits(
       .select()
       .from(creditsBalance)
       .where(eq(creditsBalance.userId, userId))
+      .for("update")
       .limit(1);
 
     if (!balanceRecord) {
@@ -49,7 +50,7 @@ export async function consumeCredits(
     }
 
     const now = new Date();
-    const activeBatches = await tx
+    const lockedBatches = await tx
       .select()
       .from(creditsBatch)
       .where(
@@ -60,7 +61,8 @@ export async function consumeCredits(
           or(isNull(creditsBatch.expiresAt), gt(creditsBatch.expiresAt, now))
         )
       )
-      .orderBy(asc(creditsBatch.expiresAt), asc(creditsBatch.issuedAt));
+      .orderBy(asc(creditsBatch.expiresAt), asc(creditsBatch.issuedAt))
+      .for("update");
 
     let remainingToConsume = amount;
     const consumedBatches: Array<{
@@ -68,7 +70,7 @@ export async function consumeCredits(
       consumedFromBatch: number;
     }> = [];
 
-    for (const batch of activeBatches) {
+    for (const batch of lockedBatches) {
       if (remainingToConsume <= 0) {
         break;
       }
@@ -119,15 +121,17 @@ export async function consumeCredits(
       },
     });
 
-    const newBalance = balanceRecord.balance - amount;
-    await tx
+    const [updatedBalance] = await tx
       .update(creditsBalance)
       .set({
-        balance: newBalance,
+        balance: sql`${creditsBalance.balance} - ${amount}`,
         totalSpent: sql`${creditsBalance.totalSpent} + ${amount}`,
         updatedAt: new Date(),
       })
-      .where(eq(creditsBalance.userId, userId));
+      .where(eq(creditsBalance.userId, userId))
+      .returning({ balance: creditsBalance.balance });
+    const newBalance =
+      updatedBalance?.balance ?? balanceRecord.balance - amount;
 
     return {
       success: true,

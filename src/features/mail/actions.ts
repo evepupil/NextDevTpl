@@ -11,6 +11,7 @@ import { z } from "zod";
 
 import { db } from "@/db";
 import { newsletterSubscriber } from "@/db/schema/mail";
+import { checkRateLimit, getServerActionIdentifier } from "@/lib/rate-limit";
 import { actionClient } from "@/lib/safe-action";
 
 const withMailAction = (name: string) =>
@@ -33,6 +34,14 @@ export const subscribeNewsletter = withMailAction("subscribeNewsletter")
     })
   )
   .action(async ({ parsedInput }) => {
+    const rateLimit = await checkRateLimit(
+      await getServerActionIdentifier(),
+      "strict"
+    );
+    if (!rateLimit.success) {
+      throw new Error("请求过于频繁，请稍后重试");
+    }
+
     const { email } = parsedInput;
     const normalizedEmail = email.toLowerCase().trim();
 

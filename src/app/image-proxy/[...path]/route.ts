@@ -10,6 +10,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import { DEFAULT_SIGNED_URL_EXPIRES } from "@/features/storage/types";
+import { logError, logWarn } from "@/lib/logger";
 import { getRuntimeEnv } from "@/lib/runtime-config";
 import { storageService } from "@/services/storage";
 
@@ -76,7 +77,7 @@ export async function GET(
     // 安全检查：验证存储桶在白名单中
     const allowedBuckets = getAllowedBuckets();
     if (!bucket || !allowedBuckets.includes(bucket)) {
-      console.warn(`[Image Proxy] 拒绝访问未授权的存储桶: ${bucket}`);
+      logWarn("Image proxy rejected an unauthorized bucket", { bucket });
       return NextResponse.json(
         { error: "Bucket not allowed" },
         { status: 403 }
@@ -109,7 +110,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("[Image Proxy] 错误:", error);
+    logError(error, { source: "image-proxy" });
 
     // 返回错误响应
     return NextResponse.json(

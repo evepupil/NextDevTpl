@@ -1,7 +1,6 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -14,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { updateUserRoleAction } from "@/features/support/actions";
+import { useRouter } from "@/i18n/routing";
 
 interface UserRoleSelectProps {
   /** 用户 ID */
@@ -66,12 +66,14 @@ export function UserRoleSelect({ userId, currentRole }: UserRoleSelectProps) {
   const getRoleBadge = (r: string) => {
     if (r === "admin") {
       return (
-        <Badge className="bg-destructive/15 text-destructive">管理员</Badge>
+        <Badge className="bg-destructive/15 text-destructive">
+          {t("adminRole")}
+        </Badge>
       );
     }
     return (
       <Badge variant="secondary" className="bg-muted text-muted-foreground">
-        普通用户
+        {t("userRole")}
       </Badge>
     );
   };
@@ -93,12 +95,12 @@ export function UserRoleSelect({ userId, currentRole }: UserRoleSelectProps) {
       <SelectContent>
         <SelectItem value="user">
           <Badge variant="secondary" className="bg-muted text-muted-foreground">
-            {t("user")}
+            {t("userRole")}
           </Badge>
         </SelectItem>
         <SelectItem value="admin">
           <Badge className="bg-destructive/15 text-destructive">
-            {t("admin")}
+            {t("adminRole")}
           </Badge>
         </SelectItem>
       </SelectContent>

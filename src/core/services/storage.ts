@@ -30,6 +30,7 @@ export interface StorageUrlInput {
 
 export interface StorageUploadUrlInput extends StorageUrlInput {
   contentType: string;
+  contentLength?: number;
 }
 
 export interface StorageAdapter
