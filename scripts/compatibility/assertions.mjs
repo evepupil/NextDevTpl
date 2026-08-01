@@ -21,6 +21,16 @@ export async function assertGeneratedProject(target, matrixCase, manifest) {
     );
   }
 
+  for (const [service, adapter] of Object.entries(
+    matrixCase.adapters ?? {}
+  )) {
+    if (manifest.adapters?.[service] !== adapter) {
+      throw new Error(
+        `${matrixCase.id} selected ${service} adapter does not match ${adapter}`
+      );
+    }
+  }
+
   for (const path of matrixCase.requiredPaths) {
     if (!(await exists(join(target, path)))) {
       throw new Error(`${matrixCase.id} is missing required path: ${path}`);
@@ -29,6 +39,25 @@ export async function assertGeneratedProject(target, matrixCase, manifest) {
   for (const path of matrixCase.forbiddenPaths) {
     if (await exists(join(target, path))) {
       throw new Error(`${matrixCase.id} retained forbidden path: ${path}`);
+    }
+  }
+
+  if (matrixCase.requiredEnv || matrixCase.forbiddenEnv) {
+    const environment = await readFile(join(target, ".env.example"), "utf8");
+    const names = new Set(
+      [...environment.matchAll(/^([A-Z][A-Z0-9_]*)=/gmu)].map(
+        (match) => match[1]
+      )
+    );
+    for (const name of matrixCase.requiredEnv ?? []) {
+      if (!names.has(name)) {
+        throw new Error(`${matrixCase.id} is missing environment variable: ${name}`);
+      }
+    }
+    for (const name of matrixCase.forbiddenEnv ?? []) {
+      if (names.has(name)) {
+        throw new Error(`${matrixCase.id} retained forbidden environment variable: ${name}`);
+      }
     }
   }
 

@@ -99,6 +99,10 @@ try {
         const result = await generateProject({
           targetDirectory: target,
           preset: matrixCase.preset,
+          ...(matrixCase.modules ? { modules: matrixCase.modules } : {}),
+          ...(matrixCase.adapterOverrides
+            ? { adapterOverrides: matrixCase.adapterOverrides }
+            : {}),
           target: matrixCase.target,
           install: false,
         });

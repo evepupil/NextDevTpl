@@ -32,6 +32,7 @@ const SERVICE_KINDS: readonly ServiceKind[] = [
   "storage",
   "mail",
   "ai",
+  "alerts",
   "analytics",
   "jobs",
   "rate-limit",
@@ -585,6 +586,10 @@ export default withNextIntl(nextConfig);
   if (!selection.adapters.ai) {
     await removePath(join(target, "src", "lib", "ai"));
   }
+  if (!hasModule(selection, "operations")) {
+    await removePath(join(target, "src", "adapters", "alerts"));
+    await removePath(join(target, "src", "services", "alerts.ts"));
+  }
 
   if (!hasModule(selection, "payment")) {
     await removePath(join(target, "src", "config", "payment.ts"));
@@ -611,6 +616,12 @@ async function rewriteAdapters(
     [...selectedIds].map((id) => catalog.adapters[id]?.source)
   );
   selectedSources.add("src/adapters/rate-limit/noop.ts");
+  if (
+    selection.adapters.alerts &&
+    selection.adapters.alerts !== "alerts:noop"
+  ) {
+    selectedSources.add("src/adapters/alerts/noop.ts");
+  }
 
   for (const adapter of Object.values(catalog.adapters)) {
     if (!selectedSources.has(adapter.source)) {
@@ -811,6 +822,20 @@ export default async function LocaleLayout({ children, params }: { children: Rea
 function dashboardLayout(selection: ProjectSelection): string {
   if (!hasModule(selection, "auth")) {
     return `export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return <main className="min-h-screen bg-muted/40 p-6">{children}</main>;
+}
+`;
+  }
+
+  if (!hasModule(selection, "dashboard")) {
+    return `import { getLocale } from "next-intl/server";
+import { getServerSession } from "@/lib/auth/server";
+import { redirect } from "@/i18n/routing";
+
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const locale = (await getLocale()) as "en" | "zh";
+  const session = await getServerSession();
+  if (!session?.user) redirect({ href: "/sign-in", locale });
   return <main className="min-h-screen bg-muted/40 p-6">{children}</main>;
 }
 `;

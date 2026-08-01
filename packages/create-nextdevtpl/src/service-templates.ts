@@ -17,6 +17,11 @@ export const adapterExports: Readonly<Record<string, string>> = {
   "ai:anthropic": 'export { createAnthropicAdapter } from "./anthropic";\n',
   "ai:workers-ai":
     'export { createWorkersAIAdapter, type WorkersAIBindingPort } from "./workers-ai";\n',
+  "alerts:noop": 'export { noopAlertAdapter } from "./noop";\n',
+  "alerts:email":
+    'export { createEmailAlertAdapter, type EmailAlertConfig } from "./email";\nexport { noopAlertAdapter } from "./noop";\n',
+  "alerts:webhook":
+    'export { createWebhookAlertAdapter, type WebhookAlertConfig } from "./webhook";\nexport { noopAlertAdapter } from "./noop";\n',
   "analytics:noop": 'export { noopTelemetryAdapter } from "./noop";\n',
   "analytics:logger":
     'export { createLoggerTelemetryAdapter, type TelemetryLogSink } from "./logger";\n',
@@ -152,6 +157,47 @@ export const aiService = createWorkersAIAdapter({
   model: getAIModel(),
   binding: createLazyCloudflareBinding<WorkersAIBindingPort>("AI"),
 });
+`,
+  "alerts:noop": `import { noopAlertAdapter } from "@/adapters/alerts";
+import { createAlertService } from "@/core/services";
+
+export const alertService = createAlertService(noopAlertAdapter);
+`,
+  "alerts:email": `import {
+  createEmailAlertAdapter,
+  noopAlertAdapter,
+} from "@/adapters/alerts";
+import { createAlertService } from "@/core/services";
+import { getRuntimeEnv } from "@/lib/runtime-config";
+import { mailService } from "./mail";
+
+const from = getRuntimeEnv("EMAIL_FROM");
+const to = getRuntimeEnv("ALERT_EMAIL_TO")
+  ?.split(",")
+  .map((value) => value.trim())
+  .filter(Boolean);
+
+export const alertService = createAlertService(
+  from && to?.length
+    ? createEmailAlertAdapter({ from, mail: mailService, to })
+    : noopAlertAdapter
+);
+`,
+  "alerts:webhook": `import {
+  createWebhookAlertAdapter,
+  noopAlertAdapter,
+} from "@/adapters/alerts";
+import { createAlertService } from "@/core/services";
+import { getRuntimeEnv } from "@/lib/runtime-config";
+
+const url = getRuntimeEnv("ALERT_WEBHOOK_URL");
+const secret = getRuntimeEnv("ALERT_WEBHOOK_SECRET");
+
+export const alertService = createAlertService(
+  url
+    ? createWebhookAlertAdapter({ ...(secret ? { secret } : {}), url })
+    : noopAlertAdapter
+);
 `,
   "analytics:noop": `import {
   createTelemetryService,
@@ -463,6 +509,7 @@ export const anonymousQuotaService = noopUsageQuotaAdapter;
 
 export const serviceExportNames: Readonly<Record<ServiceKind, string>> = {
   ai: 'export { aiService, getAIModel, getAIProvider } from "./ai";\n',
+  alerts: 'export { alertService } from "./alerts";\n',
   analytics:
     'export { telemetryService, trackServerEvent } from "./telemetry";\nexport { trackCoreActionCompleted, trackFirstValueCompleted } from "@/lib/telemetry/events";\n',
   jobs: 'export { jobService } from "./jobs";\n',

@@ -11,12 +11,14 @@ const SERVICE_KINDS: readonly ServiceKind[] = [
   "storage",
   "mail",
   "ai",
+  "alerts",
   "analytics",
   "jobs",
   "rate-limit",
 ];
 
 const CUSTOM_DEFAULTS: Readonly<Partial<Record<ServiceKind, string>>> = {
+  alerts: "alerts:noop",
   analytics: "analytics:noop",
   mail: "mail:disabled",
   "rate-limit": "rate-limit:noop",
@@ -113,6 +115,12 @@ export function createProjectSelection(
     else if (id) adapters[kind] = id;
   }
 
+  if (!moduleSet.has("operations")) {
+    delete adapters.alerts;
+  } else if (!adapters.alerts) {
+    adapters.alerts = "alerts:noop";
+  }
+
   for (const kind of SERVICE_KINDS) {
     const id = adapters[kind];
     if (!id) continue;
@@ -127,6 +135,9 @@ export function createProjectSelection(
     if (moduleSet.has(required) && !adapters[required]) {
       throw new Error(`Module ${required} requires a ${required} adapter`);
     }
+  }
+  if (moduleSet.has("operations") && !adapters.alerts) {
+    throw new Error("Module operations requires an alerts adapter");
   }
   if (!adapters["rate-limit"]) {
     throw new Error(

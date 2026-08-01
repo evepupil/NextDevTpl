@@ -121,6 +121,33 @@ const manifests = [
     bindings: ["Ai"],
   }),
   defineServiceAdapter({
+    id: "alerts:noop",
+    service: "alerts",
+    source: "src/adapters/alerts/noop.ts",
+    runtime: "universal",
+    packages: [],
+    env: [],
+    bindings: [],
+  }),
+  defineServiceAdapter({
+    id: "alerts:email",
+    service: "alerts",
+    source: "src/adapters/alerts/email.ts",
+    runtime: "universal",
+    packages: [],
+    env: ["ALERT_EMAIL_TO", "EMAIL_FROM"],
+    bindings: [],
+  }),
+  defineServiceAdapter({
+    id: "alerts:webhook",
+    service: "alerts",
+    source: "src/adapters/alerts/webhook.ts",
+    runtime: "universal",
+    packages: [],
+    env: ["ALERT_WEBHOOK_URL", "ALERT_WEBHOOK_SECRET"],
+    bindings: [],
+  }),
+  defineServiceAdapter({
     id: "analytics:noop",
     service: "analytics",
     source: "src/adapters/analytics/noop.ts",
@@ -226,6 +253,7 @@ type ServiceAdapterIdFor<Kind extends ServiceKind> = Extract<
 >["id"];
 
 export const defaultServiceAdapters = {
+  alerts: "alerts:noop",
   payment: "payment:creem",
   storage: "storage:s3-compatible",
   mail: "mail:resend",

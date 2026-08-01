@@ -84,6 +84,8 @@ describe("project generation", () => {
     expect(await exists(join(target, "src/adapters/analytics/logger.ts"))).toBe(
       false
     );
+    expect(await exists(join(target, "src/adapters/alerts"))).toBe(false);
+    expect(await exists(join(target, "src/services/alerts.ts"))).toBe(false);
     expect(await exists(join(target, "src/features/credits"))).toBe(false);
     expect(await exists(join(target, "src/app/api/inngest"))).toBe(false);
     expect(await exists(join(target, "src/lib/ai"))).toBe(false);
@@ -387,6 +389,7 @@ describe("project generation", () => {
     });
 
     expect(manifest.modules).toContain("operations");
+    expect(manifest.adapters.alerts).toBe("alerts:noop");
     expect(
       await exists(join(target, "src/features/operations/repository.ts"))
     ).toBe(true);
@@ -398,7 +401,52 @@ describe("project generation", () => {
         join(target, "src/app/api/jobs/operations/snapshot/route.ts")
       )
     ).toBe(true);
+    expect(
+      await exists(join(target, "src/app/api/jobs/operations/alerts/route.ts"))
+    ).toBe(true);
+    expect(await exists(join(target, "src/adapters/alerts"))).toBe(true);
+    expect(await exists(join(target, "src/services/alerts.ts"))).toBe(true);
+    expect(await exists(join(target, "src/adapters/alerts/noop.ts"))).toBe(
+      true
+    );
+    expect(await exists(join(target, "src/adapters/alerts/email.ts"))).toBe(
+      false
+    );
+    expect(await exists(join(target, "src/adapters/alerts/webhook.ts"))).toBe(
+      false
+    );
     expect(await exists(join(target, "src/features/blog"))).toBe(false);
+  });
+
+  it("prunes unselected alert providers from generated operations projects", async () => {
+    const target = join(root, "operations-webhook");
+    await generateProject({
+      targetDirectory: target,
+      preset: "custom",
+      modules: ["auth", "operations"],
+      target: "server",
+      adapterOverrides: {
+        alerts: "alerts:webhook",
+        mail: "mail:disabled",
+        payment: "payment:creem",
+        storage: "storage:s3-compatible",
+        "rate-limit": "rate-limit:noop",
+      },
+      install: false,
+    });
+
+    expect(await exists(join(target, "src/adapters/alerts/webhook.ts"))).toBe(
+      true
+    );
+    expect(await exists(join(target, "src/adapters/alerts/noop.ts"))).toBe(
+      true
+    );
+    expect(await exists(join(target, "src/adapters/alerts/email.ts"))).toBe(
+      false
+    );
+    expect(
+      await readFile(join(target, "src/services/alerts.ts"), "utf8")
+    ).toContain("createWebhookAlertAdapter");
   });
 
   it("keeps telemetry imports usable when analytics is disabled", async () => {

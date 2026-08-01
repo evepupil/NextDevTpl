@@ -12,7 +12,9 @@
         "Dockerfile",
         "compose.yaml",
         "vercel.json",
-        "wrangler.jsonc"
+        "wrangler.jsonc",
+        "src/adapters/alerts",
+        "src/services/alerts.ts"
       ]
     },
     {
@@ -30,7 +32,9 @@
         "deploy/server",
         "deploy/vercel",
         "vercel.json",
-        "wrangler.jsonc"
+        "wrangler.jsonc",
+        "src/adapters/alerts",
+        "src/services/alerts.ts"
       ]
     },
     {
@@ -44,7 +48,9 @@
         "Dockerfile",
         "compose.yaml",
         "deploy/server",
-        "wrangler.jsonc"
+        "wrangler.jsonc",
+        "src/adapters/alerts",
+        "src/services/alerts.ts"
       ]
     },
     {
@@ -58,7 +64,166 @@
         "open-next.config.ts",
         "wrangler.jsonc"
       ],
-      "forbiddenPaths": ["Dockerfile", "compose.yaml", "deploy", "vercel.json"]
+      "forbiddenPaths": [
+        "Dockerfile",
+        "compose.yaml",
+        "deploy",
+        "vercel.json",
+        "src/adapters/alerts",
+        "src/services/alerts.ts"
+      ]
+    },
+    {
+      "id": "operations-server",
+      "preset": "custom",
+      "modules": ["auth", "operations"],
+      "adapterOverrides": {
+        "alerts": "alerts:noop",
+        "analytics": "analytics:noop",
+        "mail": "mail:disabled",
+        "payment": "payment:creem",
+        "rate-limit": "rate-limit:noop"
+      },
+      "target": "server",
+      "buildScript": "build",
+      "healthCheck": true,
+      "adapters": {
+        "alerts": "alerts:noop",
+        "payment": "payment:creem"
+      },
+      "requiredEnv": ["CRON_SECRET", "ALERT_COOLDOWN_MINUTES"],
+      "forbiddenEnv": ["ALERT_EMAIL_TO", "ALERT_WEBHOOK_URL"],
+      "requiredPaths": [
+        "deploy/server/build.sh",
+        "src/db/schema/operations.ts",
+        "src/app/api/jobs/operations/alerts/route.ts",
+        "src/adapters/alerts/noop.ts"
+      ],
+      "forbiddenPaths": [
+        "Dockerfile",
+        "compose.yaml",
+        "vercel.json",
+        "wrangler.jsonc",
+        "src/adapters/alerts/email.ts",
+        "src/adapters/alerts/webhook.ts"
+      ]
+    },
+    {
+      "id": "operations-docker",
+      "preset": "custom",
+      "modules": ["auth", "operations"],
+      "adapterOverrides": {
+        "alerts": "alerts:webhook",
+        "analytics": "analytics:noop",
+        "mail": "mail:disabled",
+        "payment": "payment:creem",
+        "rate-limit": "rate-limit:noop"
+      },
+      "target": "docker",
+      "buildScript": "build",
+      "healthCheck": true,
+      "adapters": {
+        "alerts": "alerts:webhook",
+        "payment": "payment:creem"
+      },
+      "requiredEnv": [
+        "CRON_SECRET",
+        "ALERT_WEBHOOK_URL",
+        "ALERT_WEBHOOK_SECRET"
+      ],
+      "forbiddenEnv": ["ALERT_EMAIL_TO"],
+      "requiredPaths": [
+        "Dockerfile",
+        "compose.yaml",
+        "src/db/schema/operations.ts",
+        "src/adapters/alerts/webhook.ts",
+        "src/adapters/alerts/noop.ts"
+      ],
+      "forbiddenPaths": [
+        "deploy/server",
+        "deploy/vercel",
+        "vercel.json",
+        "wrangler.jsonc",
+        "src/adapters/alerts/email.ts"
+      ]
+    },
+    {
+      "id": "operations-vercel",
+      "preset": "custom",
+      "modules": ["auth", "operations"],
+      "adapterOverrides": {
+        "alerts": "alerts:email",
+        "analytics": "analytics:noop",
+        "mail": "mail:disabled",
+        "payment": "payment:creem",
+        "rate-limit": "rate-limit:noop"
+      },
+      "target": "vercel",
+      "buildScript": "build",
+      "healthCheck": true,
+      "adapters": {
+        "alerts": "alerts:email",
+        "payment": "payment:creem"
+      },
+      "requiredEnv": ["CRON_SECRET", "ALERT_EMAIL_TO", "EMAIL_FROM"],
+      "forbiddenEnv": ["ALERT_WEBHOOK_URL"],
+      "requiredPaths": [
+        "vercel.json",
+        "src/db/schema/operations.ts",
+        "src/adapters/alerts/email.ts",
+        "src/adapters/alerts/noop.ts"
+      ],
+      "forbiddenPaths": [
+        "Dockerfile",
+        "compose.yaml",
+        "deploy/server",
+        "wrangler.jsonc",
+        "src/adapters/alerts/webhook.ts"
+      ]
+    },
+    {
+      "id": "operations-cloudflare",
+      "preset": "custom",
+      "modules": ["auth", "operations"],
+      "adapterOverrides": {
+        "alerts": "alerts:webhook",
+        "analytics": "analytics:umami",
+        "mail": "mail:cloudflare-email",
+        "payment": "payment:stripe",
+        "rate-limit": "rate-limit:cloudflare-rate-limit"
+      },
+      "target": "cloudflare",
+      "buildScript": "cf:build",
+      "healthCheck": false,
+      "adapters": {
+        "alerts": "alerts:webhook",
+        "analytics": "analytics:umami",
+        "mail": "mail:cloudflare-email",
+        "payment": "payment:stripe"
+      },
+      "requiredEnv": [
+        "CRON_SECRET",
+        "ALERT_WEBHOOK_URL",
+        "ALERT_WEBHOOK_SECRET",
+        "UMAMI_WEBSITE_ID",
+        "EMAIL_FROM"
+      ],
+      "forbiddenEnv": ["ALERT_EMAIL_TO"],
+      "requiredPaths": [
+        "cloudflare/worker.mjs",
+        "open-next.config.ts",
+        "wrangler.jsonc",
+        "src/db/schema/operations.ts",
+        "src/adapters/alerts/webhook.ts",
+        "src/adapters/alerts/noop.ts"
+      ],
+      "forbiddenPaths": [
+        "Dockerfile",
+        "compose.yaml",
+        "deploy",
+        "vercel.json",
+        "src/adapters/alerts/email.ts"
+      ]
     }
   ]
 }

@@ -128,10 +128,6 @@
       "translations": [],
       "env": [
         "CRON_SECRET",
-        "ALERT_PROVIDER",
-        "ALERT_EMAIL_TO",
-        "ALERT_WEBHOOK_URL",
-        "ALERT_WEBHOOK_SECRET",
         "ALERT_COOLDOWN_MINUTES",
         "ALERT_PAYMENT_FAILURE_RATE_THRESHOLD",
         "ALERT_AI_COST_THRESHOLD_MINOR"
@@ -322,6 +318,30 @@
       "env": ["WORKERS_AI_MODEL"],
       "bindings": ["Ai"],
       "runtime": "worker"
+    },
+    "alerts:noop": {
+      "service": "alerts",
+      "source": "src/adapters/alerts/noop.ts",
+      "packages": [],
+      "env": [],
+      "bindings": [],
+      "runtime": "universal"
+    },
+    "alerts:email": {
+      "service": "alerts",
+      "source": "src/adapters/alerts/email.ts",
+      "packages": [],
+      "env": ["ALERT_EMAIL_TO", "EMAIL_FROM"],
+      "bindings": [],
+      "runtime": "universal"
+    },
+    "alerts:webhook": {
+      "service": "alerts",
+      "source": "src/adapters/alerts/webhook.ts",
+      "packages": [],
+      "env": ["ALERT_WEBHOOK_URL", "ALERT_WEBHOOK_SECRET"],
+      "bindings": [],
+      "runtime": "universal"
     },
     "analytics:noop": {
       "service": "analytics",

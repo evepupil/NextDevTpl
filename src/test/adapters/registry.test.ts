@@ -12,7 +12,15 @@ import {
   createWorkersAIAdapter,
 } from "@/adapters/ai";
 import {
+  createEmailAlertAdapter,
+  createWebhookAlertAdapter,
+  noopAlertAdapter,
+} from "@/adapters/alerts";
+import {
+  createGa4TelemetryAdapter,
   createLoggerTelemetryAdapter,
+  createPostHogTelemetryAdapter,
+  createUmamiTelemetryAdapter,
   noopTelemetryAdapter,
 } from "@/adapters/analytics";
 import {
@@ -90,12 +98,39 @@ describe("service adapter registry", () => {
           binding: { async run() {} },
         }),
       },
+      { id: "alerts:noop", adapter: noopAlertAdapter },
+      {
+        id: "alerts:email",
+        adapter: createEmailAlertAdapter({
+          from: "ops@example.com",
+          mail: disabledMailAdapter,
+          to: ["owner@example.com"],
+        }),
+      },
+      {
+        id: "alerts:webhook",
+        adapter: createWebhookAlertAdapter({
+          url: "https://example.com/alerts",
+        }),
+      },
       { id: "analytics:noop", adapter: noopTelemetryAdapter },
       {
         id: "analytics:logger",
         adapter: createLoggerTelemetryAdapter({
           info() {},
         }),
+      },
+      {
+        id: "analytics:posthog",
+        adapter: createPostHogTelemetryAdapter({}),
+      },
+      {
+        id: "analytics:ga4",
+        adapter: createGa4TelemetryAdapter({}),
+      },
+      {
+        id: "analytics:umami",
+        adapter: createUmamiTelemetryAdapter({}),
       },
       { id: "jobs:inngest", adapter: createInngestJobAdapter() },
       {
@@ -134,7 +169,7 @@ describe("service adapter registry", () => {
   it("resolves the complete default adapter selection", () => {
     const selection = createServiceAdapterSelection(defaultServiceAdapters);
 
-    expect(selection.manifests).toHaveLength(7);
+    expect(selection.manifests).toHaveLength(8);
     expect(selection.packages).toEqual(
       expect.arrayContaining([
         "@aws-sdk/client-s3",
@@ -153,6 +188,7 @@ describe("service adapter registry", () => {
       storage: "storage:r2-binding",
       mail: "mail:cloudflare-email",
       ai: "ai:workers-ai",
+      alerts: "alerts:noop",
       analytics: "analytics:noop",
       jobs: "jobs:cloudflare-workflows",
       "rate-limit": "rate-limit:cloudflare-rate-limit",

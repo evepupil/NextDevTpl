@@ -12,6 +12,7 @@ import type {
 
 const SERVICE_KINDS = new Set([
   "ai",
+  "alerts",
   "analytics",
   "jobs",
   "mail",
