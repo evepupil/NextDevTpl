@@ -41,6 +41,10 @@ export function buildRevenueHealth(input: {
   registeredUsers: number;
 }): RevenueHealth {
   return {
+    confirmedRevenueEvents: countMetric(
+      input.confirmedRevenueEvents,
+      "database:revenue-event"
+    ),
     confirmedRevenueMinor: amountMetric(
       input.confirmedRevenueMinor,
       input.confirmedRevenueEvents,

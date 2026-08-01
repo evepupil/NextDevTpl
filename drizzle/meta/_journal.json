@@ -43,6 +43,13 @@
       "when": 1785609789130,
       "tag": "0005_fuzzy_anthem",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1785610668963,
+      "tag": "0006_charming_grim_reaper",
+      "breakpoints": true
     }
   ]
 }

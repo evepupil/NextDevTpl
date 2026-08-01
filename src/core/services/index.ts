@@ -1,4 +1,5 @@
 export * from "./ai";
+export * from "./alerts";
 export * from "./common";
 export * from "./jobs";
 export * from "./mail";

@@ -8,6 +8,14 @@ export {
   recordAIUsage,
   usageCoverageStatus,
 } from "./ai-usage";
+export {
+  evaluateAlertState,
+  evaluateOperationsAlerts,
+  getOperationsAlertRules,
+  getRecentOperationsAlerts,
+  isRuleBreached,
+  isRuleRecovered,
+} from "./alerts";
 export { operationsModule } from "./manifest";
 export {
   createFunnel,

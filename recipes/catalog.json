@@ -121,11 +121,21 @@
       "dependencies": ["admin", "payment"],
       "routes": [
         "src/app/[locale]/(admin)/admin/operations/page.tsx",
-        "src/app/api/jobs/operations/snapshot/route.ts"
+        "src/app/api/jobs/operations/snapshot/route.ts",
+        "src/app/api/jobs/operations/alerts/route.ts"
       ],
       "schema": ["operations"],
       "translations": [],
-      "env": []
+      "env": [
+        "CRON_SECRET",
+        "ALERT_PROVIDER",
+        "ALERT_EMAIL_TO",
+        "ALERT_WEBHOOK_URL",
+        "ALERT_WEBHOOK_SECRET",
+        "ALERT_COOLDOWN_MINUTES",
+        "ALERT_PAYMENT_FAILURE_RATE_THRESHOLD",
+        "ALERT_AI_COST_THRESHOLD_MINOR"
+      ]
     },
     "payment": {
       "kind": "optional",

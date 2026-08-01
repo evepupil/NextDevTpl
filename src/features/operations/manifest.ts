@@ -15,6 +15,10 @@ export const operationsModule = defineModule({
       path: "/api/jobs/operations/snapshot",
       source: "src/app/api/jobs/operations/snapshot/route.ts",
     },
+    {
+      path: "/api/jobs/operations/alerts",
+      source: "src/app/api/jobs/operations/alerts/route.ts",
+    },
   ],
   navigation: [
     {

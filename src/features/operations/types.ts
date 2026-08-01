@@ -67,6 +67,7 @@ export interface AIHealth {
 }
 
 export interface RevenueHealth {
+  confirmedRevenueEvents: MetricState<number>;
   confirmedRevenueMinor: MetricState<number>;
   currency: string;
   churnedSubscriptions: MetricState<number>;

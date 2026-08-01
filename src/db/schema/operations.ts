@@ -46,9 +46,51 @@ export const aiUsageEvent = pgTable("ai_usage_event", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const operationsAlert = pgTable(
+  "operations_alert",
+  {
+    id: text("id").primaryKey(),
+    ruleKey: text("rule_key").notNull(),
+    dedupeKey: text("dedupe_key").notNull(),
+    status: text("status").notNull(),
+    severity: text("severity").notNull(),
+    title: text("title").notNull(),
+    message: text("message").notNull(),
+    source: text("source").notNull(),
+    value: integer("value").notNull(),
+    threshold: integer("threshold").notNull(),
+    consecutiveCount: integer("consecutive_count").notNull().default(0),
+    firstSeenAt: timestamp("first_seen_at").notNull(),
+    lastSeenAt: timestamp("last_seen_at").notNull(),
+    resolvedAt: timestamp("resolved_at"),
+    cooldownUntil: timestamp("cooldown_until"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex("operations_alert_dedupe_unique").on(table.dedupeKey)]
+);
+
+export const operationsAlertDelivery = pgTable("operations_alert_delivery", {
+  id: text("id").primaryKey(),
+  alertId: text("alert_id")
+    .notNull()
+    .references(() => operationsAlert.id, { onDelete: "cascade" }),
+  provider: text("provider").notNull(),
+  status: text("status").notNull(),
+  error: text("error"),
+  sentAt: timestamp("sent_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export type OperationsDailySnapshot =
   typeof operationsDailySnapshot.$inferSelect;
 export type NewOperationsDailySnapshot =
   typeof operationsDailySnapshot.$inferInsert;
 export type AIUsageEvent = typeof aiUsageEvent.$inferSelect;
 export type NewAIUsageEvent = typeof aiUsageEvent.$inferInsert;
+export type OperationsAlert = typeof operationsAlert.$inferSelect;
+export type NewOperationsAlert = typeof operationsAlert.$inferInsert;
+export type OperationsAlertDelivery =
+  typeof operationsAlertDelivery.$inferSelect;
+export type NewOperationsAlertDelivery =
+  typeof operationsAlertDelivery.$inferInsert;
