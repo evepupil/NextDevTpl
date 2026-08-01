@@ -25,6 +25,14 @@ leave most product flows unchanged.
 | AI | `openai-compatible` | Universal | OpenAI, DeepSeek, or MiMo key and model |
 | AI | `anthropic` | Universal | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` |
 | AI | `workers-ai` | Worker | `AI` binding and `WORKERS_AI_MODEL` |
+| Alerts | `noop` | Universal | None; records state without sending |
+| Alerts | `email` | Universal | `ALERT_EMAIL_TO`, `EMAIL_FROM`, selected mail adapter |
+| Alerts | `webhook` | Universal | `ALERT_WEBHOOK_URL`, optional HMAC secret |
+| Analytics | `noop` | Universal | No external request |
+| Analytics | `logger` | Universal | Structured server-side events |
+| Analytics | `posthog` | Universal | `POSTHOG_API_KEY`, optional host |
+| Analytics | `ga4` | Universal | Measurement ID, API secret, optional browser ID |
+| Analytics | `umami` | Universal | Website ID, API key, optional host |
 | Jobs | `inngest` | Universal | `INNGEST_EVENT_KEY`, `INNGEST_SIGNING_KEY` |
 | Jobs | `cloudflare-workflows` | Worker | `NEXTDEVTPL_WORKFLOW` binding |
 | Rate limit | `noop` | Universal | None; suitable for local or trusted networks |
@@ -34,6 +42,11 @@ leave most product flows unchanged.
 The generator keeps only the selected implementation, packages, and variables.
 For Cloudflare it writes required bindings to `wrangler.jsonc`; create remote
 resources such as R2 buckets and then replace generated placeholders as needed.
+
+Analytics adapters capture the typed event envelope; the local `operations`
+read model remains authoritative for revenue and AI cost metrics. Alert
+selection is fixed at generation time. Missing provider configuration falls
+back to the no-op adapter and is shown as an explicit operational state.
 
 ## Call a service
 

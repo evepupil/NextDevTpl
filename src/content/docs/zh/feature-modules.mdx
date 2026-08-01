@@ -25,7 +25,8 @@ description: 了解可选模块、自动依赖和生成后的功能入口。
 | `mail` | 认证邮件和产品邮件入口 | 无 |
 | `blog` | 双语 MDX 博客 | `marketing` |
 | `pseo` | 程序化 SEO 列表和详情页 | `marketing` |
-| `analytics` | Google Analytics 与 Sentry 页面接入 | 无 |
+| `analytics` | 类型化、同意感知的产品埋点与可选供应商采集 | 无 |
+| `operations` | 管理员指标驾驶舱、收入健康、AI 用量、快照与告警 | `admin`、`payment` |
 | `shared` | Theme、语言、Provider 和通用 UI | 无 |
 
 依赖会递归加入。例如选择 `support` 会补齐积分、支付、订阅、邮件、认证和共享
@@ -57,4 +58,9 @@ pnpm build
 依赖稳定内核和 `src/services`，避免直接导入另一个业务模块的内部文件。数据库表
 放入独立 Schema 分组，导航和翻译命名空间写进模块声明。
 
-当前 2.x 生成器负责新项目创建，尚未提供在已有项目内自动安装或卸载模块的命令。
+选择 `operations` 会增加 `/admin/operations` 以及受保护的快照、告警 cron
+接口。它依赖支付适配器，因为收入健康指标来自服务端支付事件。告警适配器使用
+`--alerts noop|email|webhook`，埋点采集使用
+`--analytics noop|logger|posthog|ga4|umami|none`。
+
+当前生成器负责新项目创建，尚未提供在已有项目内自动安装或卸载模块的命令。

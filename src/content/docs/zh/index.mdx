@@ -1,13 +1,16 @@
 ---
 title: 介绍
-description: 了解 NextDevTpl 2.x 的生成方式、内置能力和推荐使用路径。
+description: 了解 NextDevTpl 3.x 的生成方式、内置能力和运营工具包。
 ---
 
 # NextDevTpl 文档
 
-NextDevTpl 2.x 是可组合的 Next.js SaaS 模板。你可以选择产品模块、外部服务实现
+NextDevTpl 3.x 是可组合的 Next.js SaaS 模板。你可以选择产品模块、外部服务实现
 和部署平台，生成器只把选中的源码、依赖、环境变量、数据库表和部署文件放进
 新项目。生成后的代码归项目自己维护。
+
+可选的运营工具包提供类型化事件契约、遵循同意状态的来源归因、管理员指标驾驶舱、
+收入与 AI 成本读模型、每日快照和安全通知，不依赖 NextDevTpl 托管分析服务。
 
 ## 先确认项目包含什么
 
@@ -24,7 +27,7 @@ NextDevTpl 2.x 是可组合的 Next.js SaaS 模板。你可以选择产品模块
 
 先看这份文件，再阅读对应功能文档。未选能力已经从生成结果删除，无需配置。
 
-## 2.x 能力
+## 3.x 能力
 
 | 类别 | 已支持内容 |
 | --- | --- |
@@ -37,7 +40,7 @@ NextDevTpl 2.x 是可组合的 Next.js SaaS 模板。你可以选择产品模块
 | 后台任务 | Inngest 或 Cloudflare Workflows，另有受保护 cron |
 | 限流 | No-op、Upstash Redis 或 Cloudflare Rate Limiting Binding |
 | 平台 | Server、Docker Compose、Vercel、Cloudflare Workers |
-| 运维 | 健康检查、结构化日志、Sentry、Axiom、组合兼容性门禁 |
+| 运维 | 类型化埋点、产品/收入/AI 指标、快照、告警、健康检查、结构化日志、Sentry、Axiom、组合兼容性门禁 |
 
 ## 推荐路径
 
@@ -47,6 +50,7 @@ NextDevTpl 2.x 是可组合的 Next.js SaaS 模板。你可以选择产品模块
 2. [生成器与预设](/zh/docs/generator)
 3. [功能模块](/zh/docs/feature-modules)
 4. [配置说明](/zh/docs/configuration)
+5. [运营说明](/zh/docs/operations)
 
 接入外部服务：
 

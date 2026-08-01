@@ -24,6 +24,14 @@ description: 选择和使用支付、存储、邮件、AI、任务与限流实�
 | AI | `openai-compatible` | 通用 | OpenAI、DeepSeek 或 MiMo Key 与模型 |
 | AI | `anthropic` | 通用 | `ANTHROPIC_API_KEY`、`ANTHROPIC_MODEL` |
 | AI | `workers-ai` | Worker | `AI` Binding、`WORKERS_AI_MODEL` |
+| 告警 | `noop` | 通用 | 无，只保存状态，不发送通知 |
+| 告警 | `email` | 通用 | `ALERT_EMAIL_TO`、`EMAIL_FROM` 和已选邮件适配器 |
+| 告警 | `webhook` | 通用 | `ALERT_WEBHOOK_URL`，可选 HMAC 密钥 |
+| 分析 | `noop` | 通用 | 不产生外部请求 |
+| 分析 | `logger` | 通用 | 服务端结构化事件 |
+| 分析 | `posthog` | 通用 | `POSTHOG_API_KEY`，可选 Host |
+| 分析 | `ga4` | 通用 | Measurement ID、API Secret，可选浏览器 ID |
+| 分析 | `umami` | 通用 | Website ID、API Key，可选 Host |
 | 任务 | `inngest` | 通用 | `INNGEST_EVENT_KEY`、`INNGEST_SIGNING_KEY` |
 | 任务 | `cloudflare-workflows` | Worker | `NEXTDEVTPL_WORKFLOW` Binding |
 | 限流 | `noop` | 通用 | 无，适合本地或可信内网 |
@@ -32,6 +40,10 @@ description: 选择和使用支付、存储、邮件、AI、任务与限流实�
 
 生成器只保留选中的实现、依赖和环境变量。Cloudflare 目标会把所需 Binding 写入
 `wrangler.jsonc`；创建远端 R2 bucket 等资源后，还需要把生成的占位配置补完整。
+
+分析适配器负责采集类型化事件，收入和 AI 成本指标仍以本地
+`operations` 读模型为准。告警适配器在生成时固定；供应商配置缺失时会降级到
+noop，并在运营指标中保留明确状态。
 
 ## 业务代码怎么调用
 

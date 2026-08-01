@@ -34,6 +34,19 @@ Credit expiry uses `/api/jobs/credits/expire`, protected by `CRON_SECRET`.
 The Vercel target emits cron configuration when the module is selected; use the
 platform scheduler to call the same endpoint elsewhere.
 
+When `operations` is selected, schedule these protected endpoints with the same
+`Authorization: Bearer <CRON_SECRET>` header:
+
+| Endpoint | Purpose | Suggested cadence |
+| --- | --- | --- |
+| `/api/jobs/operations/snapshot` | Persist the current dashboard as a daily snapshot | Once per day |
+| `/api/jobs/operations/alerts` | Evaluate rules and send de-duplicated notifications | Every 5-15 minutes |
+
+The operations endpoints are safe to run more than once for the same period.
+They report query or delivery failures without making the original product
+request fail. The Vercel config currently emits the credit-expiry cron only, so
+add operations schedules explicitly in the platform dashboard.
+
 ## Job rules
 
 - Keep work idempotent so duplicate events do not double-charge, grant, or notify.

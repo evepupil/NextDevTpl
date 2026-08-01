@@ -19,7 +19,8 @@ Options:
   --storage s3-compatible|r2-binding|none
   --mail disabled|resend|smtp|cloudflare-email
   --ai openai-compatible|anthropic|workers-ai|none
-  --analytics noop|logger|none
+  --alerts noop|email|webhook
+  --analytics noop|logger|posthog|ga4|umami|none
   --jobs inngest|cloudflare-workflows|none
   --rate-limit noop|upstash|cloudflare-rate-limit
   --yes                 Accept defaults without prompts
@@ -32,6 +33,7 @@ const SERVICE_FLAGS: Readonly<Record<string, ServiceKind>> = {
   "--storage": "storage",
   "--mail": "mail",
   "--ai": "ai",
+  "--alerts": "alerts",
   "--analytics": "analytics",
   "--jobs": "jobs",
   "--rate-limit": "rate-limit",

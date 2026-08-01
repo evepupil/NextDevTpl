@@ -27,7 +27,9 @@ entries that remain.
 | Google OAuth | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
 | Plan prices | Six `NEXT_PUBLIC_PRICE_*` IDs |
 | Credit expiry cron | `CRON_SECRET` |
-| Analytics | `NEXT_PUBLIC_GA_ID` |
+| Analytics browser consent | `NEXT_PUBLIC_GA_ID` only for the GA4 page script |
+| Product analytics | `POSTHOG_API_KEY`, `POSTHOG_HOST`; or `GA4_MEASUREMENT_ID`, `GA4_API_SECRET`; or `UMAMI_WEBSITE_ID`, `UMAMI_API_KEY`, `UMAMI_HOST` |
+| Operations alerts | `CRON_SECRET`, thresholds, and the selected alert adapter variables |
 | Sentry | `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_AUTH_TOKEN` |
 | Axiom | `AXIOM_TOKEN`, `AXIOM_DATASET` |
 
@@ -53,6 +55,15 @@ domain.
 | Workflows | `NEXTDEVTPL_WORKFLOW` |
 | Upstash | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` |
 | Cloudflare rate limits | Six bindings including `RATE_LIMIT_GLOBAL` |
+| Alert email | `ALERT_EMAIL_TO`, `EMAIL_FROM` |
+| Alert webhook | `ALERT_WEBHOOK_URL`, optional `ALERT_WEBHOOK_SECRET` |
+
+Operations thresholds are optional and apply to the generated alert rules:
+`ALERT_COOLDOWN_MINUTES`, `ALERT_PAYMENT_FAILURE_RATE_THRESHOLD`, and
+`ALERT_AI_COST_THRESHOLD_MINOR`. Amount thresholds use the smallest unit of the
+configured currency. The generated alert adapter is selected with `--alerts`;
+`ALERT_PROVIDER` is only used by the full template source, not by a generated
+project whose adapter is already fixed.
 
 Cloudflare bindings live in `wrangler.jsonc`. Configure secrets through
 `wrangler secret put` or the platform secret manager, never in source control.
@@ -63,6 +74,8 @@ Cloudflare bindings live in `wrangler.jsonc`. Configure secrets through
 - Missing credentials for a selected service produce an explicit error when called.
 - Disabled mail and no-op rate limiting are useful locally but provide no delivery or abuse protection.
 - Local logs and console errors remain available without Axiom or Sentry.
+- Analytics capture is consent-aware on the client and drops redacted fields;
+  missing credentials do not block the business request.
 
 ## Common edit points
 

@@ -26,7 +26,8 @@ generated project to see its effective module set.
 | `mail` | Authentication and product mail entry points | None |
 | `blog` | Localized MDX blog | `marketing` |
 | `pseo` | Programmatic SEO index and detail pages | `marketing` |
-| `analytics` | Google Analytics and Sentry page integration | None |
+| `analytics` | Typed, consent-aware product telemetry and optional provider capture | None |
+| `operations` | Admin metrics dashboard, revenue health, AI usage, snapshots, and alerts | `admin`, `payment` |
 | `shared` | Theme, locale, providers, and shared UI | None |
 
 Dependencies are recursive. Selecting `support`, for example, also brings in
@@ -61,5 +62,11 @@ Place a new module's UI, actions, hooks, and manifest under
 tables in a separate schema group and declare navigation and translation
 namespaces in the module manifest.
 
-The 2.x generator creates new projects; it does not yet install or uninstall a
+The `operations` module adds `/admin/operations` and protected snapshot and
+alert cron routes. It requires a payment adapter because revenue health is
+calculated from server-side payment events. Choose an alert adapter with
+`--alerts noop|email|webhook`; choose telemetry capture with
+`--analytics noop|logger|posthog|ga4|umami|none`.
+
+The generator creates new projects; it does not yet install or uninstall a
 module inside an existing customized project.

@@ -47,6 +47,14 @@ describe("create-nextdevtpl CLI", () => {
     );
   });
 
+  it("supports selecting an operations alert adapter", () => {
+    expect(parseCliArguments(["my-app", "--alerts", "webhook"])).toEqual(
+      expect.objectContaining({
+        adapterOverrides: { alerts: "alerts:webhook" },
+      })
+    );
+  });
+
   it("shows help without requiring a target", () => {
     expect(parseCliArguments(["--help"])).toBeNull();
   });

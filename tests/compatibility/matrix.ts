@@ -1,6 +1,7 @@
 import type {
   DeploymentTarget,
   PresetName,
+  ServiceKind,
 } from "../../packages/create-nextdevtpl/src/types";
 import exemptionsDocument from "./exemptions.json";
 import matrixDocument from "./matrix.json";
@@ -21,12 +22,17 @@ export const COMPATIBILITY_STAGES = [
 export type CompatibilityStage = (typeof COMPATIBILITY_STAGES)[number];
 
 export interface CompatibilityCase {
+  adapterOverrides?: Readonly<Partial<Record<ServiceKind, string>>>;
+  adapters?: Readonly<Partial<Record<ServiceKind, string>>>;
   buildScript: "build" | "cf:build";
   forbiddenPaths: readonly string[];
+  forbiddenEnv?: readonly string[];
   healthCheck: boolean;
   id: string;
-  preset: Exclude<PresetName, "custom">;
+  modules?: readonly string[];
+  preset: PresetName;
   requiredPaths: readonly string[];
+  requiredEnv?: readonly string[];
   target: DeploymentTarget;
 }
 
@@ -44,7 +50,7 @@ const deploymentTargets = new Set<DeploymentTarget>([
   "server",
   "vercel",
 ]);
-const presets = new Set<PresetName>(["ai-saas", "minimal", "saas"]);
+const presets = new Set<PresetName>(["ai-saas", "custom", "minimal", "saas"]);
 const stages = new Set<string>(COMPATIBILITY_STAGES);
 
 function assertStringArray(
@@ -86,6 +92,14 @@ export function loadCompatibilityMatrix(): readonly CompatibilityCase[] {
     assertStringArray(entry.requiredPaths, `${entry.id}.requiredPaths`);
     if (!Array.isArray(entry.forbiddenPaths)) {
       throw new Error(`${entry.id}.forbiddenPaths must be an array`);
+    }
+    if (entry.modules !== undefined) {
+      assertStringArray(entry.modules, `${entry.id}.modules`);
+    }
+    for (const field of ["requiredEnv", "forbiddenEnv"] as const) {
+      if (entry[field] !== undefined) {
+        assertStringArray(entry[field], `${entry.id}.${field}`);
+      }
     }
     return entry as CompatibilityCase;
   });

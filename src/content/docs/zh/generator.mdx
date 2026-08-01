@@ -49,10 +49,11 @@ pnpm dlx create-nextdevtpl@latest my-app \
 ```bash
 pnpm dlx create-nextdevtpl@latest my-app \
   --preset custom \
-  --modules auth,dashboard,marketing,blog \
+  --modules auth,analytics,operations \
   --target docker \
   --payment stripe \
-  --mail smtp \
+  --alerts webhook \
+  --analytics posthog \
   --rate-limit noop
 ```
 
@@ -71,6 +72,8 @@ Worker 专用适配器时必须使用 `cloudflare` 目标，Node 专用适配器
 | `--storage` | `s3-compatible`、`r2-binding`、`none` |
 | `--mail` | `disabled`、`resend`、`smtp`、`cloudflare-email` |
 | `--ai` | `openai-compatible`、`anthropic`、`workers-ai`、`none` |
+| `--alerts` | `noop`、`email`、`webhook`（选择 `operations` 时使用） |
+| `--analytics` | `noop`、`logger`、`posthog`、`ga4`、`umami`、`none` |
 | `--jobs` | `inngest`、`cloudflare-workflows`、`none` |
 | `--rate-limit` | `noop`、`upstash`、`cloudflare-rate-limit` |
 | `--no-install` | 只生成文件，跳过依赖安装 |

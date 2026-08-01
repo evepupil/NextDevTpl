@@ -15,10 +15,15 @@
   </p>
 </p>
 
-NextDevTpl 2.x creates a standalone application containing only the modules,
+NextDevTpl 3.x creates a standalone application containing only the modules,
 service adapters, dependencies, environment variables, database schema, and
 deployment files you select. Generated source belongs to your project and has
 no runtime dependency on the generator.
+
+The 3.x operations kit adds typed, consent-aware telemetry, an optional admin
+dashboard for product, revenue, AI cost, and system-health metrics, plus
+de-duplicated email or signed-webhook alerts. It stores the operational read
+model in the generated project's own database.
 
 ## Create an app
 
@@ -57,12 +62,17 @@ UI, and the required database schema.
 ```bash
 pnpm dlx create-nextdevtpl@latest my-app \
   --preset custom \
-  --modules auth,dashboard,marketing,blog \
+  --modules auth,analytics,operations \
   --target docker \
   --payment stripe \
-  --mail smtp \
+  --alerts webhook \
+  --analytics posthog \
   --rate-limit noop
 ```
+
+`operations` automatically includes the admin and payment dependencies. Keep
+the generated `nextdevtpl.generated.json` as the source of truth, then fill the
+retained analytics and alert variables in `.env.example`.
 
 After generation, `nextdevtpl.generated.json` is the source of truth for the
 selected preset, modules, adapters, and deployment target.
@@ -82,7 +92,7 @@ selected preset, modules, adapters, and deployment target.
 | Jobs | Inngest or Cloudflare Workflows behind one job interface, plus protected cron endpoints |
 | Rate limiting | Upstash Redis, Cloudflare Rate Limiting bindings, or a no-op local adapter |
 | Product UI | Localized marketing site, docs, blog, PSEO, dashboard, settings, admin and support tickets |
-| Operations | Health checks, structured logs, optional Axiom and Sentry, compatibility matrix and deployment smoke checks |
+| Operations | Health checks, structured logs, optional Axiom and Sentry, typed telemetry, operations dashboard, AI cost estimates, daily snapshots, alerts, compatibility matrix and deployment smoke checks |
 
 ## Service adapters
 
@@ -97,10 +107,30 @@ the `cloudflare` target; Node-only adapters cannot be used on that target.
 | AI | `openai-compatible`, `anthropic`, `workers-ai`, `none` |
 | Jobs | `inngest`, `cloudflare-workflows`, `none` |
 | Rate limit | `noop`, `upstash`, `cloudflare-rate-limit` |
+| Alerts | `noop`, `email`, `webhook` (when `operations` is selected) |
+| Analytics | `noop`, `logger`, `posthog`, `ga4`, `umami`, `none` |
 
 Business code imports stable services from `src/services`. Provider-specific
 SDKs and bindings stay under `src/adapters`, which keeps later replacements
 small and reviewable.
+
+## Operations kit
+
+Select the `operations` module for an admin page at `/admin/operations`,
+server-side revenue and subscription health, AI usage and estimated cost,
+daily snapshots, and protected alert evaluation at
+`/api/jobs/operations/alerts`. The module does not automatically refund,
+disable users, change plans, or shut down a service.
+
+The built-in event contract includes `landing.viewed`, `signup.completed`,
+`first_value.completed`, `subscription.activated`, `core_action.completed`,
+`api.request.failed`, `action.failed`, and `job.failed`. Define the product's
+first-value and core-action meanings in the generated project; the template
+does not guess them.
+
+See the generated [operations guide](src/content/docs/en/operations.mdx) for
+the metric dictionary, privacy boundary, provider setup, cron calls, and
+troubleshooting steps.
 
 ## Deployment targets
 
@@ -148,6 +178,7 @@ and `/zh/docs`. The source pages in this repository cover:
 - [Feature modules](src/content/docs/en/feature-modules.mdx)
 - [Service adapters](src/content/docs/en/service-adapters.mdx)
 - [Configuration](src/content/docs/en/configuration.mdx)
+- [Operations](src/content/docs/en/operations.mdx)
 - [Deployment](src/content/docs/en/deployment.mdx)
 - [Upgrade and compatibility](src/content/docs/en/upgrade.mdx)
 
@@ -181,7 +212,7 @@ pnpm release:check
 
 ## Upgrade model
 
-Generated projects are independently owned source trees. NextDevTpl 2.x does
+Generated projects are independently owned source trees. NextDevTpl 3.x does
 not overwrite them. To upgrade, generate a temporary comparison project with
 the same `nextdevtpl.generated.json` selection, review the diff, merge changes
 in small groups, run migrations in a test database, and pass the full quality

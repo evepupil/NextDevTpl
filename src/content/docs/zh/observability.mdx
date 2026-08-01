@@ -1,9 +1,20 @@
 ---
-title: 可观测性与限流
-description: 配置日志、Sentry、Axiom、健康检查和三种限流方式。
+title: 可观测性、埋点与限流
+description: 配置类型化埋点、日志、Sentry、Axiom、健康检查和限流方式。
 ---
 
-# 可观测性与限流
+# 可观测性、埋点与限流
+
+## 类型化埋点
+
+可选的 `analytics` 模块通过 `src/services/telemetry` 提供带版本的事件契约，
+内置 `noop`、`logger`、`posthog`、`ga4` 和 `umami` 适配器。浏览器事件只会在
+用户同意分析后发送；服务端业务事件沿用同一契约，供应商不可用时降级到日志或
+noop，不会阻塞业务请求。
+
+默认上下文包含受长度限制的匿名 ID、可选登录用户 ID、会话和请求 ID、语言、首次/最近
+来源及 UTM 字段。不会包含密码、Cookie、Authorization、邮箱、提示词、模型回复或上传
+内容。事件字典和指标公式见[运营说明](/zh/docs/operations)。
 
 ## 日志
 
@@ -16,7 +27,7 @@ Cookie、Authorization header 和完整用户内容。
 
 ## Sentry
 
-选择 `analytics` 模块时，使用：
+选择 Sentry 时，使用：
 
 ```bash
 NEXT_PUBLIC_SENTRY_DSN="https://..."
@@ -24,7 +35,8 @@ SENTRY_AUTH_TOKEN="sntrys_..."
 ```
 
 DSN 用于运行时上报，Auth Token 只供构建或发布上传 sourcemap。Cloudflare Free
-组合为了包体和运行时兼容会使用 console 监控替代实现。
+组合为了包体和运行时兼容会使用 console 监控替代实现。Sentry 负责错误监控，
+与上面的产品事件适配器相互独立。
 
 ## 限流适配器
 
@@ -47,6 +59,12 @@ pnpm deploy:check -- https://your-domain.example/api/health
 
 HTTP 200 且 `status` 为 `healthy` 表示基础运行条件就绪。支付、邮件、存储、AI 和
 任务仍需分别做真实冒烟验证。
+
+## 隐私与失败行为
+
+第一方匿名 ID 最多在 Cookie 或本地存储中保留一年，用户可以清理。用户可以在 Cookie
+设置中撤回分析同意。供应商错误会先脱敏再写日志，不会让注册、支付、积分或核心产品
+请求失败。
 
 ## 上线检查
 

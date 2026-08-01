@@ -26,7 +26,9 @@ description: 按生成清单配置基础环境、服务适配器和 Cloudflare B
 | Google OAuth | `GOOGLE_CLIENT_ID`、`GOOGLE_CLIENT_SECRET` |
 | 套餐价格 | `NEXT_PUBLIC_PRICE_*` 六个价格 ID |
 | 积分过期 cron | `CRON_SECRET` |
-| Analytics | `NEXT_PUBLIC_GA_ID` |
+| Analytics 浏览器同意 | 只有 GA4 页面脚本使用 `NEXT_PUBLIC_GA_ID` |
+| 产品分析 | `POSTHOG_API_KEY`、`POSTHOG_HOST`；或 `GA4_MEASUREMENT_ID`、`GA4_API_SECRET`；或 `UMAMI_WEBSITE_ID`、`UMAMI_API_KEY`、`UMAMI_HOST` |
+| 运营告警 | `CRON_SECRET`、阈值和已选告警适配器变量 |
 | Sentry | `NEXT_PUBLIC_SENTRY_DSN`、`SENTRY_AUTH_TOKEN` |
 | Axiom | `AXIOM_TOKEN`、`AXIOM_DATASET` |
 
@@ -51,6 +53,14 @@ OAuth 回调分别是 `/api/auth/callback/github` 和
 | Workflows | `NEXTDEVTPL_WORKFLOW` |
 | Upstash | `UPSTASH_REDIS_REST_URL`、`UPSTASH_REDIS_REST_TOKEN` |
 | Cloudflare 限流 | `RATE_LIMIT_GLOBAL` 等六个 Binding |
+| 告警邮件 | `ALERT_EMAIL_TO`、`EMAIL_FROM` |
+| 告警 Webhook | `ALERT_WEBHOOK_URL`、可选 `ALERT_WEBHOOK_SECRET` |
+
+运营阈值为可选配置，对应生成项目的告警规则：
+`ALERT_COOLDOWN_MINUTES`、`ALERT_PAYMENT_FAILURE_RATE_THRESHOLD`、
+`ALERT_AI_COST_THRESHOLD_MINOR`。金额阈值使用当前货币的最小单位。告警适配器在
+生成时通过 `--alerts` 固定；`ALERT_PROVIDER` 只供完整模板源码使用，生成项目的
+适配器已经固定后不再读取它。
 
 Cloudflare Binding 配在 `wrangler.jsonc`，密钥用 `wrangler secret put` 或平台密钥
 管理配置。不要把真实值写进仓库。
@@ -61,6 +71,7 @@ Cloudflare Binding 配在 `wrangler.jsonc`，密钥用 `wrangler secret put` 或
 - 选中服务的凭证缺失时，对应操作返回明确配置错误。
 - `disabled` 邮件和 `noop` 限流适合本地开发，它们不会提供真实投递或防滥用。
 - Axiom 和 Sentry 未配置时，本地日志与 console 错误仍可使用。
+- 浏览器分析采集会遵循同意状态并移除敏感字段；凭证缺失不能阻塞核心业务请求。
 
 ## 常改入口
 

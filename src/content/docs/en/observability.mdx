@@ -1,9 +1,23 @@
 ---
-title: Observability and Rate Limits
-description: Configure logs, Sentry, Axiom, health checks, and three rate-limit modes.
+title: Observability, Telemetry, and Rate Limits
+description: Configure typed telemetry, logs, Sentry, Axiom, health checks, and rate-limit modes.
 ---
 
-# Observability and Rate Limits
+# Observability, Telemetry, and Rate Limits
+
+## Typed telemetry
+
+The optional `analytics` module exposes a versioned event envelope through
+`src/services/telemetry`. The built-in adapters are `noop`, `logger`, `posthog`,
+`ga4`, and `umami`. Events are sent only after analytics consent on the client;
+server-side business events use the same contract and degrade to logs or no-op
+when a provider is unavailable.
+
+The default context contains a bounded anonymous ID, optional authenticated user
+ID, session and request IDs, locale, first/latest source, and UTM fields. It does
+not include passwords, cookies, authorization headers, email addresses, prompts,
+model output, or upload contents. Use [Operations](/en/docs/operations) for the
+event dictionary and metric formulas.
 
 ## Logging
 
@@ -18,7 +32,7 @@ headers, and complete user content.
 
 ## Sentry
 
-When the `analytics` module is selected, use:
+When Sentry is selected, use:
 
 ```bash
 NEXT_PUBLIC_SENTRY_DSN="https://..."
@@ -27,7 +41,8 @@ SENTRY_AUTH_TOKEN="sntrys_..."
 
 The DSN is used at runtime. Keep the auth token in the build or release system
 for source-map upload. The Cloudflare Free combination uses a console monitoring
-replacement for bundle size and runtime compatibility.
+replacement for bundle size and runtime compatibility. Sentry is error
+monitoring; it is separate from the product-event adapters above.
 
 ## Rate-limit adapters
 
@@ -52,6 +67,13 @@ pnpm deploy:check -- https://your-domain.example/api/health
 
 HTTP 200 with `status: healthy` confirms the base runtime. Payment, mail,
 storage, AI, and jobs still need separate real smoke tests.
+
+## Privacy and failure behavior
+
+The first-party anonymous ID is stored for at most one year in a cookie or local
+storage and can be cleared by the user. Analytics consent can be withdrawn from
+the cookie settings UI. Provider errors are logged after redaction and never
+reject registration, payment, credit, or core product requests.
 
 ## Production checks
 

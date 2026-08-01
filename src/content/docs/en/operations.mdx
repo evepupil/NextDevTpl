@@ -1,0 +1,136 @@
+---
+title: Operations Kit
+description: Configure typed telemetry, operational metrics, AI cost estimates, snapshots, and alerts.
+---
+
+# Operations Kit
+
+The optional `operations` module is a local read model for an independent SaaS.
+It reads the generated project's database and business events; it does not send
+data to a NextDevTpl-hosted service. It requires `auth`, `admin`, and `payment`
+through automatic module dependencies.
+
+## Enable it
+
+```bash
+pnpm dlx create-nextdevtpl@latest my-ops \
+  --preset custom \
+  --modules auth,analytics,operations \
+  --payment stripe \
+  --alerts webhook \
+  --analytics posthog
+```
+
+After generation, configure only the variables retained in `.env.example`, run
+the migration, and sign in with an admin account. Open `/admin/operations` to
+see the current UTC 30-day period. A metric displays `--` with a status when its
+source is unavailable; an old snapshot is never presented as current data.
+
+## Event dictionary
+
+The telemetry contract uses a dotted name, positive version, source, and JSON
+attributes. Product code should call the server helpers after the business
+transaction succeeds:
+
+| Event | Source | Required meaning |
+| --- | --- | --- |
+| `landing.viewed` | Client | A public landing page view after analytics consent |
+| `signup.completed` | Server | Account creation completed |
+| `first_value.completed` | Server | The product-specific first useful result; define the action in your app |
+| `subscription.activated` | Server | A verified active subscription state |
+| `core_action.completed` | Server | The product's repeated value action; define the action in your app |
+| `api.request.failed` | Server | A handled API failure with method, path, status, and class |
+| `action.failed` | Server | A failed Server Action with action name and class |
+| `job.failed` | System | A failed background dispatch or execution |
+
+`first_value.completed` and `core_action.completed` are extension points. The
+template does not infer them from page views or arbitrary button clicks.
+
+## Metric dictionary
+
+The dashboard period is the previous 30 UTC days. Amounts are stored in the
+smallest currency unit, usually cents. Every metric includes a source and one
+of `ready`, `zero-data`, `not-configured`, `partial`, `unauthorized`, or
+`query-failed`.
+
+| Metric | Formula or source | Caveat |
+| --- | --- | --- |
+| Total users | Count of `user` rows | All-time total |
+| Active subscriptions | Active rows in `subscription` | Current state, not period count |
+| New users | Users created in the period | Database source |
+| Credit consumption | Sum of consumption transactions in the period | Database source |
+| Confirmed revenue | Sum of `payment_succeeded` `revenue_event` rows | Server-side payment data only |
+| MRR | Active plan prices, with annual price divided by 12 | Requires a matching local price configuration |
+| Paid conversion | Unique paid users / registered users in the period | No browser checkout event is used as revenue proof |
+| Refunds | Sum and count of `refund` revenue events | Provider webhook must be processed |
+| Payment failures | Count of `payment_failed` revenue events | Used by the alert rule |
+| AI cost | Token usage multiplied by the effective model price | `estimated` when provider usage is available; `unavailable` otherwise |
+| Token coverage | Requests with `actual` token usage / AI requests | Does not claim provider billing reconciliation |
+| AI gross margin | Confirmed revenue - estimated AI cost | This is an operating estimate, not accounting profit |
+| Success and latency | AI success ratio and average `latencyMs` | Uses recorded AI usage events |
+| Funnel and retention | Registered/paid are database-backed; landing, activation, D1/D7/D30 are explicit `not-configured` until a query source is added | Do not treat missing data as zero |
+| System health | API, job, and webhook success ratios | Explicitly unavailable until log aggregation is connected |
+
+Use `recordAIUsage` after each completion when the `operations` module is
+selected. Never pass prompts, model output, or uploaded content to the usage
+record.
+
+## Alerts
+
+Select one adapter at generation time:
+
+| Adapter | Variables | Behavior |
+| --- | --- | --- |
+| `noop` | None | Persists alert state without sending |
+| `email` | `ALERT_EMAIL_TO`, `EMAIL_FROM`, selected mail adapter | Sends text and escaped HTML |
+| `webhook` | `ALERT_WEBHOOK_URL`, optional `ALERT_WEBHOOK_SECRET` | Sends JSON and an optional HMAC-SHA256 `X-NextDevTpl-Signature` header |
+
+The initial rules are payment failure rate (20%, two consecutive breaches), AI
+cost (smallest-unit threshold, one breach), and paid conversion (2%, two
+consecutive breaches). Each rule has a 30-minute cooldown by default. Recovery
+uses a separate threshold to prevent flapping. Alert delivery failures are
+stored and do not fail the product request.
+
+Schedule the protected endpoints with `CRON_SECRET`:
+
+```bash
+curl -X POST https://your-domain.example/api/jobs/operations/snapshot \
+  -H "Authorization: Bearer $CRON_SECRET"
+curl -X POST https://your-domain.example/api/jobs/operations/alerts \
+  -H "Authorization: Bearer $CRON_SECRET"
+```
+
+Run snapshots daily and alert evaluation every 5-15 minutes. The generated
+Vercel file currently schedules credit expiry only; add these operations jobs in
+the platform scheduler yourself.
+
+## Privacy boundary
+
+Client capture waits for analytics consent. The first-party anonymous ID is
+bounded and retained for at most one year in a cookie or local storage. The
+context may contain anonymous/user/session/request IDs, locale, source, and UTM
+values. Redaction removes password, token, cookie, authorization, email, prompt,
+content, upload, and filename fields. Server payment and AI read models retain
+business facts, usage counts, identifiers needed for aggregation, and alert
+history; they do not retain prompts or model responses.
+
+Document the selected external provider, retention period, legal basis, and
+deletion process in the generated project's privacy and cookie policies. A
+configured provider is not proof that a production data-processing agreement or
+regional transfer requirement has been completed.
+
+## Troubleshooting
+
+| Symptom | Check |
+| --- | --- |
+| Dashboard returns 500 | Database migration, `operations` schema, `payment` dependency, and server logs |
+| Metric is `zero-data` | The period has no matching rows; create a real business event before changing the formula |
+| Metric is `not-configured` | The source is intentionally not wired, such as retention or log health |
+| Alert does not send | `CRON_SECRET`, selected adapter variables, mail adapter, cooldown, and alert delivery history |
+| Webhook rejected | Verify URL, JSON consumer, optional HMAC secret, and `X-NextDevTpl-Signature` validation |
+| Client events missing | Analytics consent, browser network request to `/api/telemetry`, provider key/host, and redaction logs |
+| Cloudflare build fails on Windows | Build the generated project in a Linux-native directory or Linux CI; OpenNext may hit Windows symlink permissions |
+
+The operations module intentionally does not provide cohort query editing,
+automatic refunds, user bans, plan changes, service shutdowns, accounting-grade
+profit reports, or provider-specific dashboards.

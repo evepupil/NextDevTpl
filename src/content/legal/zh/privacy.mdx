@@ -36,6 +36,11 @@ NextjsTpl（“NextjsTpl”、“我们”或“我们的”）运营 NextjsTpl 
 - 访问页面、操作记录与停留时间
 - 诊断日志与性能数据
 
+启用可选运营工具包后，产品事件还可能包含受长度限制的第一方匿名 ID、登录后的可选
+账户 ID、会话和请求 ID、语言、来源和 UTM 活动字段。事件契约会排除密码、Cookie、
+Authorization、邮箱、提示词、模型回复和上传内容。AI 用量只记录供应商/模型、可用的
+Token 数、耗时、成功状态、功能和可选内部用户引用，不记录提示词或回复。
+
 ### 1.4 支付信息
 
 如您购买订阅或积分，支付由 Creem 处理。我们不会在服务器上保存完整的银行卡号，Creem 可能会收集必要的账单信息。
@@ -43,6 +48,9 @@ NextjsTpl（“NextjsTpl”、“我们”或“我们的”）运营 NextjsTpl 
 ### 1.5 Cookie 与类似技术
 
 我们使用 Cookie 与类似技术来运行服务并记住您的偏好设置。详情见 [Cookie 政策](/legal/cookie-policy)。
+
+可选分析采集只在用户同意后发送，可以在 Cookie 设置中撤回。匿名 ID 是第一方标识，
+最长保留一年。清理 Cookie 或本地存储后，后续访问可能会开始新的匿名旅程。
 
 ## 2. 我们如何使用信息
 
@@ -102,7 +110,7 @@ NextjsTpl（“NextjsTpl”、“我们”或“我们的”）运营 NextjsTpl 
 - **支付处理**（Creem）
 - **邮件服务**（Resend）
 - **存储服务**（AWS S3 / Cloudflare R2）
-- **分析与监控**（如 Vercel Analytics、Sentry、Axiom）
+- **分析与监控**（如已选择的 PostHog、GA4、Umami、Sentry、Axiom）
 - **认证服务**（Google、GitHub）
 
 这些服务提供商仅在提供服务所需范围内处理您的信息。

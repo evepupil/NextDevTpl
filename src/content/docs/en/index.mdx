@@ -1,14 +1,19 @@
 ---
 title: Introduction
-description: Learn how NextDevTpl 2.x generates apps, what it includes, and where to start.
+description: Learn how NextDevTpl 3.x generates apps and adds an optional operations kit.
 ---
 
 # NextDevTpl Documentation
 
-NextDevTpl 2.x is a composable Next.js SaaS starter. Select product modules,
+NextDevTpl 3.x is a composable Next.js SaaS starter. Select product modules,
 external service implementations, and a deployment platform; the generator
 keeps only the chosen source, packages, environment variables, database schema,
 and deployment files. Your project owns the generated code.
+
+The optional operations kit gives independent SaaS projects a typed event
+contract, consent-aware attribution, an admin metrics dashboard, revenue and AI
+cost read models, daily snapshots, and safe notifications without a hosted
+NextDevTpl analytics service.
 
 ## Confirm what your project contains
 
@@ -27,7 +32,7 @@ selection:
 Read this file first, then follow the matching feature pages. Unselected
 capabilities have already been removed and require no configuration.
 
-## 2.x capabilities
+## 3.x capabilities
 
 | Area | Supported capabilities |
 | --- | --- |
@@ -40,7 +45,7 @@ capabilities have already been removed and require no configuration.
 | Jobs | Inngest or Cloudflare Workflows plus protected cron handlers |
 | Rate limiting | No-op, Upstash Redis, or Cloudflare Rate Limiting bindings |
 | Platforms | Server, Docker Compose, Vercel, and Cloudflare Workers |
-| Operations | Health checks, structured logs, Sentry, Axiom, and combination compatibility gates |
+| Operations | Typed telemetry, product/revenue/AI metrics, snapshots, alerts, health checks, structured logs, Sentry, Axiom, and compatibility gates |
 
 ## Recommended path
 
@@ -50,6 +55,7 @@ For a first project:
 2. [Generator and Presets](/en/docs/generator)
 3. [Feature Modules](/en/docs/feature-modules)
 4. [Configuration](/en/docs/configuration)
+5. [Operations](/en/docs/operations)
 
 For external services:
 

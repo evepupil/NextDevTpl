@@ -1,0 +1,123 @@
+---
+title: 运营工具包
+description: 配置类型化埋点、运营指标、AI 成本估算、每日快照和告警。
+---
+
+# 运营工具包
+
+可选的 `operations` 模块为独立 SaaS 提供本地运营读模型。它读取生成项目自己的
+数据库和服务端业务事件，不向 NextDevTpl 托管服务发送数据。模块会自动补齐
+`auth`、`admin` 和 `payment` 依赖。
+
+## 启用模块
+
+```bash
+pnpm dlx create-nextdevtpl@latest my-ops \
+  --preset custom \
+  --modules auth,analytics,operations \
+  --payment stripe \
+  --alerts webhook \
+  --analytics posthog
+```
+
+生成后只填写 `.env.example` 中保留下来的变量，执行迁移，再用管理员账号登录。
+打开 `/admin/operations` 查看最近 30 个 UTC 日的指标。指标来源不可用时会显示 `--`
+和状态；旧快照不会冒充当前数据。
+
+## 事件字典
+
+埋点契约包含点号命名、正整数版本、来源和 JSON 属性。业务事务成功后，使用服务端
+辅助函数记录事件：
+
+| 事件 | 来源 | 必须定义的含义 |
+| --- | --- | --- |
+| `landing.viewed` | 浏览器 | 用户同意分析后的公开落地页浏览 |
+| `signup.completed` | 服务端 | 账号创建完成 |
+| `first_value.completed` | 服务端 | 产品第一次产生有效结果的动作，由项目定义 |
+| `subscription.activated` | 服务端 | 已验证的有效订阅状态 |
+| `core_action.completed` | 服务端 | 用户持续获得价值的核心动作，由项目定义 |
+| `api.request.failed` | 服务端 | 带方法、路径、状态和分类的 API 失败 |
+| `action.failed` | 服务端 | 带 Action 名称和分类的 Server Action 失败 |
+| `job.failed` | 系统 | 后台任务派发或执行失败 |
+
+模板不会根据页面浏览或任意按钮点击猜测 `first_value.completed` 和
+`core_action.completed`，需要在生成项目内明确接入点。
+
+## 指标字典
+
+驾驶舱默认查询最近 30 个 UTC 日。金额使用当前货币的最小单位（通常是分）。每个
+指标都带来源和以下状态之一：`ready`、`zero-data`、`not-configured`、`partial`、
+`unauthorized`、`query-failed`。
+
+| 指标 | 公式或来源 | 注意事项 |
+| --- | --- | --- |
+| 用户总数 | `user` 表行数 | 全量累计值 |
+| 活跃订阅 | `subscription` 中的 active 行数 | 当前状态，不是周期新增 |
+| 周期新增用户 | 周期内创建的用户数 | 数据库来源 |
+| 积分消费 | 周期内 consumption 交易总和 | 数据库来源 |
+| 确认收入 | 周期内 `payment_succeeded` 收入事件金额总和 | 只使用服务端支付数据 |
+| MRR | 活跃套餐价格；年付价格除以 12 | 必须能匹配本地价格配置 |
+| 付费转化率 | 周期内去重付费用户 / 注册用户 | 浏览器 checkout 事件不作为收入依据 |
+| 退款 | `refund` 收入事件金额和次数 | 依赖支付 Webhook 已处理 |
+| 支付失败 | `payment_failed` 收入事件次数 | 用于告警规则 |
+| AI 成本 | Token 用量乘以生效中的模型价格 | 有用量时为估算，无价格或 Token 时为不可用 |
+| Token 覆盖率 | `actual` Token 请求数 / AI 请求数 | 不代表供应商账单已对账 |
+| AI 毛利 | 确认收入 - 估算 AI 成本 | 运营估算，不是会计利润 |
+| 成功率与耗时 | AI 成功比例和平均 `latencyMs` | 来自 AI 用量事件 |
+| 漏斗与留存 | 注册/付费有数据库来源；访问、激活、D1/D7/D30 默认未配置 | 缺失数据不能当成 0 |
+| 系统健康 | API、任务、Webhook 成功率 | 接入日志聚合前明确显示不可用 |
+
+选择 `operations` 后，每次 AI 完成应调用 `recordAIUsage`。不要把提示词、模型回复或
+上传内容传给用量记录函数。
+
+## 告警
+
+告警适配器在生成时固定：
+
+| 适配器 | 变量 | 行为 |
+| --- | --- | --- |
+| `noop` | 无 | 保存状态，不发送消息 |
+| `email` | `ALERT_EMAIL_TO`、`EMAIL_FROM` 和已选邮件适配器 | 发送纯文本和转义后的 HTML |
+| `webhook` | `ALERT_WEBHOOK_URL`、可选 `ALERT_WEBHOOK_SECRET` | 发送 JSON，可带 HMAC-SHA256 `X-NextDevTpl-Signature` |
+
+首批规则包括支付失败率（20%，连续两次）、AI 成本（超过最小货币单位阈值一次）和
+付费转化率（低于 2%，连续两次）。默认冷却时间为 30 分钟，恢复阈值独立设置，避免
+阈值附近反复通知。通知失败会保存历史，不会让产品请求失败。
+
+使用 `CRON_SECRET` 调用受保护接口：
+
+```bash
+curl -X POST https://your-domain.example/api/jobs/operations/snapshot \
+  -H "Authorization: Bearer $CRON_SECRET"
+curl -X POST https://your-domain.example/api/jobs/operations/alerts \
+  -H "Authorization: Bearer $CRON_SECRET"
+```
+
+建议每天生成快照，每 5-15 分钟评估告警。当前生成的 Vercel 配置只自动安排积分过期
+任务，operations 任务需要在平台调度器中手动添加。
+
+## 隐私边界
+
+浏览器采集遵循分析同意状态。第一方匿名 ID 有长度限制，最多在 Cookie 或本地存储中
+保留一年。上下文可能包含匿名/用户/会话/请求 ID、语言、来源和 UTM；脱敏逻辑会移除
+密码、Token、Cookie、Authorization、邮箱、提示词、内容、上传字段和文件名。服务端
+支付和 AI 读模型只保留业务事实、用量、聚合所需标识和告警历史，不保留提示词或模型
+回复。
+
+请在生成项目的隐私政策和 Cookie 政策中写明已选供应商、保留期限、处理依据和删除流程。
+配置了供应商不代表已经完成数据处理协议或跨境传输评估。
+
+## 故障排查
+
+| 现象 | 检查项 |
+| --- | --- |
+| 驾驶舱返回 500 | 数据库迁移、`operations` Schema、`payment` 依赖和服务端日志 |
+| 指标为 `zero-data` | 周期内没有匹配行；先产生真实业务事件，再考虑改公式 |
+| 指标为 `not-configured` | 来源还未接入，例如留存或日志健康 |
+| 告警没有发送 | `CRON_SECRET`、已选适配器变量、邮件适配器、冷却时间和发送历史 |
+| Webhook 被拒绝 | URL、JSON 接收端、HMAC 密钥和 `X-NextDevTpl-Signature` 校验 |
+| 浏览器事件缺失 | 分析同意、`/api/telemetry` 网络请求、供应商 Key/Host 和脱敏日志 |
+| Windows 上 Cloudflare 构建失败 | 把生成项目放到 Linux 原生目录或 Linux CI；OpenNext 可能遇到 Windows 符号链接权限问题 |
+
+运营模块暂不提供可编辑的用户分群查询、自动退款、封禁用户、修改套餐、关闭服务、
+会计级利润报表或供应商专属分析后台。

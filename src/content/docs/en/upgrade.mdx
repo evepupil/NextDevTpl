@@ -5,7 +5,7 @@ description: Merge a newer NextDevTpl release safely and diagnose combination ch
 
 # Upgrade and Compatibility
 
-A generated app is an independent source tree. NextDevTpl 2.x does not
+A generated app is an independent source tree. NextDevTpl 3.x does not
 overwrite existing projects. Upgrades recreate the same selection in a
 comparison directory, review its diff, and merge changes in small groups.
 
@@ -25,8 +25,8 @@ pnpm dlx create-nextdevtpl@<target-version> ../nextdevtpl-upgrade \
 5. Create forward-only database migrations and test them on a non-production DB.
 6. Pass lint, type checking, tests, build, and a Preview health check before release.
 
-Repository maintainers can use the upstream
-[2.x upgrade guide](https://github.com/evepupil/NextDevTpl/blob/master/docs/%E5%8D%87%E7%BA%A7%E6%8C%87%E5%8D%97.md).
+Repository maintainers can use the repository's
+[upgrade guide](https://github.com/evepupil/NextDevTpl/blob/master/docs/%E5%8D%87%E7%BA%A7%E6%8C%87%E5%8D%97.md).
 
 ## Combination checks
 

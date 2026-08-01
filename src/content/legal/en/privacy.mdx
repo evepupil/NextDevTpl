@@ -36,6 +36,15 @@ We may collect usage information such as:
 - Pages viewed, actions taken, and time spent
 - Diagnostic logs and performance data
 
+When the optional operations kit is enabled, product events may also include a
+bounded first-party anonymous ID, an optional account ID after authentication,
+session and request IDs, locale, referring source, and UTM campaign fields.
+The event contract is designed to exclude passwords, cookies, authorization
+headers, email addresses, prompts, model output, and upload contents. AI usage
+records contain provider/model names, token counts when available, latency,
+success state, feature, and an optional internal user reference; they do not
+contain prompts or responses.
+
 ### 1.4 Payment Information
 
 If you purchase a subscription or credits, payments are processed by Creem. We do not store full payment card numbers on our servers. Creem may collect billing details as part of payment processing.
@@ -43,6 +52,10 @@ If you purchase a subscription or credits, payments are processed by Creem. We d
 ### 1.5 Cookies and Similar Technologies
 
 We use cookies and similar technologies to operate the Service and remember your preferences. See our [Cookie Policy](/legal/cookie-policy) for details.
+
+Optional analytics capture is sent only after consent and can be withdrawn from
+the cookie settings UI. The anonymous ID is first-party and has a maximum age of
+one year. Clearing cookies or local storage may start a new anonymous journey.
 
 ## 2. How We Use Information
 
@@ -102,7 +115,7 @@ We use trusted service providers to operate the Service, which may include:
 - **Payment processing** (Creem)
 - **Email delivery** (Resend)
 - **Storage providers** (AWS S3 / Cloudflare R2)
-- **Analytics and monitoring** (e.g., Vercel Analytics, Sentry, Axiom)
+- **Analytics and monitoring** (e.g., PostHog, GA4, Umami, Sentry, Axiom, when selected)
 - **Authentication providers** (Google, GitHub)
 
 These providers are authorized to process personal information only as needed to provide their services to us.

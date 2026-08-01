@@ -115,10 +115,20 @@ describe("Cloudflare service bindings", () => {
         messages: [{ role: "user", content: "Hello" }],
         temperature: 0.2,
       })
-    ).resolves.toEqual({
-      content: "generated text",
-      model: "@cf/test/model",
-    });
+    ).resolves.toEqual(
+      expect.objectContaining({
+        content: "generated text",
+        latencyMs: expect.any(Number),
+        model: "@cf/test/model",
+        provider: "workers-ai",
+        usage: {
+          inputTokens: null,
+          outputTokens: null,
+          status: "unavailable",
+          totalTokens: null,
+        },
+      })
+    );
     expect(request).toMatchObject({
       model: "@cf/test/model",
       input: { temperature: 0.2 },

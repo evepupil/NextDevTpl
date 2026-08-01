@@ -17,12 +17,20 @@ describe("official compatibility matrix", () => {
       "saas-docker",
       "saas-vercel",
       "ai-saas-cloudflare",
+      "operations-server",
+      "operations-docker",
+      "operations-vercel",
+      "operations-cloudflare",
     ]);
-    expect(matrix.map(({ target }) => target).sort()).toEqual([
-      "cloudflare",
-      "docker",
+    expect(matrix.map(({ target }) => target)).toEqual([
       "server",
+      "docker",
       "vercel",
+      "cloudflare",
+      "server",
+      "docker",
+      "vercel",
+      "cloudflare",
     ]);
   });
 
@@ -32,6 +40,10 @@ describe("official compatibility matrix", () => {
     for (const matrixCase of loadCompatibilityMatrix()) {
       const selection = createProjectSelection(catalog, {
         preset: matrixCase.preset,
+        ...(matrixCase.modules ? { modules: matrixCase.modules } : {}),
+        ...(matrixCase.adapterOverrides
+          ? { adapterOverrides: matrixCase.adapterOverrides }
+          : {}),
         target: matrixCase.target,
       });
 

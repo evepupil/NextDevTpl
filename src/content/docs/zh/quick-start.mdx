@@ -28,6 +28,17 @@ cd my-app
 pnpm dlx create-nextdevtpl@latest my-app --preset minimal
 ```
 
+需要运营工具包时：
+
+```bash
+pnpm dlx create-nextdevtpl@latest my-ops \
+  --preset custom \
+  --modules auth,analytics,operations \
+  --payment stripe \
+  --alerts webhook \
+  --analytics posthog
+```
+
 三个官方预设和自定义参数见[生成器与预设](/zh/docs/generator)。
 
 ## 查看生成清单
@@ -89,6 +100,7 @@ pnpm db:migrate
 | 文档 | 带 `marketing` 时 `/en/docs` 和 `/zh/docs` 可访问 |
 | 健康检查 | `/api/health` 返回 HTTP 200 和 `healthy` |
 | 可选服务 | 只验证 `nextdevtpl.generated.json` 中选中的适配器 |
+| 运营模块 | 选择后用管理员账号打开 `/admin/operations`，再使用 `CRON_SECRET` 调用快照和告警接口 |
 
 提交前运行：
 

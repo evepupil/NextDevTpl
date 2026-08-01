@@ -32,6 +32,18 @@ Cloudflare 目标通过 `NEXTDEVTPL_WORKFLOW` Binding 调用 Workflow。生成�
 积分过期接口位于 `/api/jobs/credits/expire`，由 `CRON_SECRET` 保护。Vercel 目标
 会按选中模块生成 cron 配置；其他平台使用自己的 scheduler 调用该端点。
 
+选择 `operations` 后，使用相同的
+`Authorization: Bearer <CRON_SECRET>` 请求头配置以下受保护接口：
+
+| 接口 | 作用 | 建议频率 |
+| --- | --- | --- |
+| `/api/jobs/operations/snapshot` | 保存当天运营驾驶舱快照 | 每天一次 |
+| `/api/jobs/operations/alerts` | 评估规则并发送去重通知 | 每 5-15 分钟 |
+
+同一周期重复调用 operations 接口是幂等的。查询或通知失败会被记录，不能让原始
+产品请求失败。当前 Vercel 配置只自动生成积分过期 cron，operations 任务需要在
+平台控制台单独添加。
+
 ## 编写任务
 
 - 任务需要幂等，重复事件不会重复收费、发积分或发送关键邮件。

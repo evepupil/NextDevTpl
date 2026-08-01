@@ -28,6 +28,17 @@ For auth and a dashboard only:
 pnpm dlx create-nextdevtpl@latest my-app --preset minimal
 ```
 
+For the operations kit:
+
+```bash
+pnpm dlx create-nextdevtpl@latest my-ops \
+  --preset custom \
+  --modules auth,analytics,operations \
+  --payment stripe \
+  --alerts webhook \
+  --analytics posthog
+```
+
 See [Generator and Presets](/en/docs/generator) for all three official presets
 and custom flags.
 
@@ -93,6 +104,7 @@ Review generated SQL before committing migration files.
 | Docs | `/en/docs` and `/zh/docs` work when `marketing` is selected |
 | Health | `/api/health` returns HTTP 200 and `healthy` |
 | Optional services | Verify only adapters listed in `nextdevtpl.generated.json` |
+| Operations | When selected, sign in as an admin, open `/admin/operations`, then call the snapshot and alert cron routes with `CRON_SECRET` |
 
 Before committing:
 

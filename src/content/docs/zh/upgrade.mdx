@@ -5,7 +5,7 @@ description: 安全合并 NextDevTpl 新版本并排查组合门禁问题。
 
 # 升级与兼容性
 
-生成项目是独立源码，2.x 没有覆盖已有项目的升级命令。升级采用“还原相同选择、
+生成项目是独立源码，3.x 没有覆盖已有项目的升级命令。升级采用“还原相同选择、
 生成对照项目、审查差异、分批合并”的方式。
 
 ## 升级步骤
@@ -24,8 +24,8 @@ pnpm dlx create-nextdevtpl@<目标版本> ../nextdevtpl-upgrade \
 5. 数据库变更生成新的向前迁移，先在测试库执行。
 6. 跑 lint、类型检查、测试、构建和 Preview 健康检查后再发布。
 
-完整仓库维护说明见上游仓库的
-[2.x 升级指南](https://github.com/evepupil/NextDevTpl/blob/master/docs/%E5%8D%87%E7%BA%A7%E6%8C%87%E5%8D%97.md)。
+完整仓库维护说明见仓库的
+[升级指南](https://github.com/evepupil/NextDevTpl/blob/master/docs/%E5%8D%87%E7%BA%A7%E6%8C%87%E5%8D%97.md)。
 
 ## 组合验证
 
