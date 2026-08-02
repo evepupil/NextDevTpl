@@ -467,6 +467,13 @@
     "currentPlan": "Current Plan",
     "alreadySubscribed": "Already Subscribed",
     "manageSubscription": "Manage Subscription",
+    "changePlan": "Change Plan",
+    "changePending": "Pending Change",
+    "changeFailed": "Unable to change your plan",
+    "changeSuccess": {
+      "upgraded": "Your plan was upgraded",
+      "downgraded": "Your plan will change at the next billing cycle"
+    },
     "booksNote": "≈ {count} units of usage",
     "cardsNote": "≈ {count} operations",
     "plans": {
@@ -667,6 +674,11 @@
         "perYear": "year",
         "cancelSubscription": "Cancel Subscription",
         "cancelPending": "Cancels on {date}",
+        "pendingChange": "Changes to {plan} on {date}",
+        "resumeSubscription": "Resume Subscription",
+        "cancelSuccess": "Subscription cancellation scheduled",
+        "resumeSuccess": "Subscription resumed",
+        "actionFailed": "Unable to update your subscription",
         "cancelDialog": {
           "title": "Cancel Subscription?",
           "description": "Your subscription will remain active until the end of your current billing period ({date}). After that, your plan will revert to Free.",
@@ -684,14 +696,27 @@
       },
       "history": {
         "title": "Billing History",
-        "description": "View and download your past invoices.",
+        "description": "Review changes to your subscription.",
         "date": "Date",
         "historyDescription": "Description",
         "amount": "Amount",
         "status": "Status",
         "invoice": "Invoice",
-        "noHistory": "No billing history",
-        "noHistoryHint": "Your invoices will appear here after your first purchase"
+        "noHistory": "No subscription history",
+        "noHistoryHint": "Your subscription changes will appear here",
+        "planChange": "{from} to {to}",
+        "unknownPlan": "Unknown plan",
+        "effective": "Effective {date}",
+        "events": {
+          "created": "Subscription started",
+          "upgraded": "Plan upgraded",
+          "downgraded": "Plan downgrade scheduled",
+          "cancellation_requested": "Cancellation scheduled",
+          "cancellation_resumed": "Cancellation reversed",
+          "canceled": "Subscription canceled",
+          "renewed": "Subscription renewed",
+          "changed": "Subscription changed"
+        }
       }
     },
     "usage": {

@@ -82,6 +82,22 @@ export interface CreateCheckoutResult {
   url: string;
 }
 
+export type SubscriptionUpdateBehavior =
+  | "proration-charge-immediately"
+  | "proration-charge"
+  | "proration-none";
+
+export interface UpdateSubscriptionInput {
+  productId: string;
+  updateBehavior: SubscriptionUpdateBehavior;
+}
+
+export type SubscriptionCancellationMode = "immediate" | "scheduled";
+
+export interface CancelSubscriptionInput {
+  mode?: SubscriptionCancellationMode;
+}
+
 export interface VerifyPaymentWebhookInput {
   payload: string;
   signature: string;
@@ -102,6 +118,14 @@ export interface PaymentAdapter
   extends AdapterDescriptor<PaymentProvider, PaymentCapabilities> {
   createCheckout(input: CreateCheckoutInput): Promise<CreateCheckoutResult>;
   getSubscription(id: string): Promise<PaymentSubscription>;
-  cancelSubscription(id: string): Promise<PaymentSubscription>;
+  updateSubscription(
+    id: string,
+    input: UpdateSubscriptionInput
+  ): Promise<PaymentSubscription>;
+  cancelSubscription(
+    id: string,
+    input?: CancelSubscriptionInput
+  ): Promise<PaymentSubscription>;
+  resumeSubscription(id: string): Promise<PaymentSubscription>;
   verifyWebhook(input: VerifyPaymentWebhookInput): Promise<PaymentWebhookEvent>;
 }

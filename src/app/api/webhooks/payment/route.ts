@@ -16,7 +16,7 @@ import { db } from "@/db";
 import { user } from "@/db/schema/auth";
 import { creditsBatch } from "@/db/schema/credits";
 import { paymentWebhookEvent } from "@/db/schema/payment";
-import { subscription } from "@/db/schema/subscription";
+import { subscription, subscriptionCheckout } from "@/db/schema/subscription";
 import {
   CREDIT_PACKAGES,
   CREDITS_EXPIRY_DAYS,
@@ -26,6 +26,8 @@ import {
   isStaleSubscriptionEvent,
   PlanInterval,
   recordRevenueEvent,
+  recordSubscriptionHistory,
+  resolveIncomingSubscriptionPrice,
 } from "@/features/payment";
 import { withApiLogging } from "@/lib/api-logger";
 import { logError, logEvent, logWarn } from "@/lib/logger";
@@ -216,16 +218,27 @@ async function handleCheckoutCompleted(
   }
 
   if (data.subscription) {
-    const applied = await createOrUpdateSubscription(userId, data.subscription);
-    if (applied && ["active", "trialing"].includes(data.subscription.status)) {
+    const applied = await createOrUpdateSubscription(
+      userId,
+      data.subscription,
+      eventId
+    );
+    if (
+      applied.applied &&
+      ["active", "trialing"].includes(data.subscription.status)
+    ) {
       await grantSubscriptionCredits(
         userId,
-        data.subscription,
+        { ...data.subscription, productId: applied.priceId },
         "subscription_create"
       );
     }
   } else if (data.mode === "one-time") {
     await handleOneTimeCheckoutCompleted(data, eventId);
+  }
+
+  if (data.subscription) {
+    await markSubscriptionCheckoutCompleted(data.id);
   }
 
   const configuredAmount = getConfiguredCheckoutAmount(data);
@@ -271,6 +284,19 @@ async function handleCheckoutCompleted(
     source: "server",
     version: 1,
   });
+}
+
+async function markSubscriptionCheckoutCompleted(
+  checkoutId: string
+): Promise<void> {
+  await db
+    .update(subscriptionCheckout)
+    .set({
+      expiresAt: new Date(0),
+      status: "completed",
+      updatedAt: new Date(),
+    })
+    .where(eq(subscriptionCheckout.checkoutId, checkoutId));
 }
 
 async function handleOneTimeCheckoutCompleted(
@@ -350,33 +376,55 @@ async function upsertLifetimeSubscription(
   userId: string,
   checkout: PaymentCheckout
 ): Promise<void> {
-  const [existing] = await db
-    .select({ id: subscription.id })
-    .from(subscription)
-    .where(eq(subscription.userId, userId))
-    .limit(1);
-  const values = {
-    priceId: checkout.productId,
-    status: "lifetime",
-    subscriptionId: `lifetime_${checkout.id}`,
-    currentPeriodStart: new Date(),
-    currentPeriodEnd: null,
-    cancelAtPeriodEnd: false,
-    updatedAt: new Date(),
-  };
+  await db.transaction(async (tx) => {
+    const [existing] = await tx
+      .select()
+      .from(subscription)
+      .where(eq(subscription.userId, userId))
+      .for("update");
+    const values = {
+      priceId: checkout.productId,
+      status: "lifetime",
+      subscriptionId: `lifetime_${checkout.id}`,
+      currentPeriodStart: new Date(),
+      currentPeriodEnd: null,
+      cancelAtPeriodEnd: false,
+      pendingPriceEffectiveAt: null,
+      pendingPriceId: null,
+      updatedAt: new Date(),
+    };
 
-  if (existing) {
-    await db
-      .update(subscription)
-      .set(values)
-      .where(eq(subscription.userId, userId));
-  } else {
-    await db.insert(subscription).values({
+    if (existing) {
+      await tx
+        .update(subscription)
+        .set(values)
+        .where(eq(subscription.id, existing.id));
+      await recordSubscriptionHistory(tx, {
+        effectiveAt: values.currentPeriodStart,
+        eventType: "changed",
+        fromPriceId: existing.priceId,
+        sourceEventId: `checkout:${checkout.id}`,
+        subscriptionId: values.subscriptionId,
+        toPriceId: values.priceId,
+        userId,
+      });
+      return;
+    }
+
+    await tx.insert(subscription).values({
       id: crypto.randomUUID(),
       userId,
       ...values,
     });
-  }
+    await recordSubscriptionHistory(tx, {
+      effectiveAt: values.currentPeriodStart,
+      eventType: "created",
+      sourceEventId: `checkout:${checkout.id}`,
+      subscriptionId: values.subscriptionId,
+      toPriceId: values.priceId,
+      userId,
+    });
+  });
 }
 
 async function handleSubscriptionActive(
@@ -396,13 +444,14 @@ async function handleSubscriptionActive(
 
   const applied = await createOrUpdateSubscription(
     userId,
-    externalSubscription
+    externalSubscription,
+    eventId
   );
 
-  if (applied) {
+  if (applied.applied) {
     await grantSubscriptionCredits(
       userId,
-      externalSubscription,
+      { ...externalSubscription, productId: applied.priceId },
       "subscription_create"
     );
   }
@@ -453,12 +502,13 @@ async function handleSubscriptionRenewed(
 
   const applied = await createOrUpdateSubscription(
     userId,
-    externalSubscription
+    externalSubscription,
+    eventId
   );
-  if (applied) {
+  if (applied.applied) {
     await grantSubscriptionCredits(
       userId,
-      externalSubscription,
+      { ...externalSubscription, productId: applied.priceId },
       "subscription_cycle"
     );
   }
@@ -481,17 +531,39 @@ async function handleSubscriptionCanceled(
   const periodEnd = externalSubscription.currentPeriodEnd;
   const isStillInPeriod = periodEnd !== null && periodEnd > new Date();
 
-  await db
-    .update(subscription)
-    .set({
-      status: isStillInPeriod ? "active" : "canceled",
-      cancelAtPeriodEnd: isStillInPeriod,
-      ...(periodEnd ? { currentPeriodEnd: periodEnd } : {}),
-      updatedAt: new Date(),
-    })
-    .where(eq(subscription.subscriptionId, externalSubscription.id));
+  let userId: string | undefined;
+  await db.transaction(async (tx) => {
+    const [current] = await tx
+      .select()
+      .from(subscription)
+      .where(eq(subscription.subscriptionId, externalSubscription.id))
+      .for("update");
 
-  const userId = await findSubscriptionUserId(externalSubscription.id);
+    if (!current) return;
+    userId = current.userId;
+    await tx
+      .update(subscription)
+      .set({
+        status: isStillInPeriod ? "active" : "canceled",
+        cancelAtPeriodEnd: isStillInPeriod,
+        ...(periodEnd ? { currentPeriodEnd: periodEnd } : {}),
+        ...(isStillInPeriod
+          ? {}
+          : { pendingPriceEffectiveAt: null, pendingPriceId: null }),
+        updatedAt: new Date(),
+      })
+      .where(eq(subscription.id, current.id));
+
+    await recordSubscriptionHistory(tx, {
+      effectiveAt: periodEnd ?? occurredAt,
+      eventType: isStillInPeriod ? "cancellation_requested" : "canceled",
+      fromPriceId: current.priceId,
+      sourceEventId: eventId,
+      subscriptionId: current.subscriptionId,
+      userId: current.userId,
+    });
+  });
+
   await recordRevenueEvent({
     externalEventId: eventId,
     kind: "subscription_canceled",
@@ -578,20 +650,18 @@ async function findSubscriptionUserId(
 
 async function createOrUpdateSubscription(
   userId: string,
-  externalSubscription: PaymentSubscription
-): Promise<boolean> {
-  const [existing] = await db
-    .select({
-      currentPeriodStart: subscription.currentPeriodStart,
-      id: subscription.id,
-    })
-    .from(subscription)
-    .where(eq(subscription.userId, userId))
-    .limit(1);
-  const data = subscriptionValues(externalSubscription);
+  externalSubscription: PaymentSubscription,
+  eventId: string
+): Promise<{ applied: boolean; priceId: string }> {
+  return db.transaction(async (tx) => {
+    const [existing] = await tx
+      .select()
+      .from(subscription)
+      .where(eq(subscription.userId, userId))
+      .for("update");
 
-  if (existing) {
     if (
+      existing &&
       isStaleSubscriptionEvent(
         existing.currentPeriodStart,
         externalSubscription.currentPeriodStart
@@ -603,47 +673,98 @@ async function createOrUpdateSubscription(
         subscriptionId: externalSubscription.id,
         storedPeriodStart: existing.currentPeriodStart?.toISOString(),
       });
-      return false;
+      return { applied: false, priceId: existing.priceId };
     }
-    await db
-      .update(subscription)
-      .set(data)
-      .where(eq(subscription.userId, userId));
-  } else {
-    await db.insert(subscription).values({
-      id: crypto.randomUUID(),
-      userId,
-      ...data,
+
+    if (!existing) {
+      await tx.insert(subscription).values({
+        id: crypto.randomUUID(),
+        userId,
+        subscriptionId: externalSubscription.id,
+        priceId: externalSubscription.productId,
+        status: externalSubscription.status,
+        currentPeriodStart: externalSubscription.currentPeriodStart,
+        currentPeriodEnd: externalSubscription.currentPeriodEnd,
+        cancelAtPeriodEnd: externalSubscription.cancelAtPeriodEnd,
+        updatedAt: new Date(),
+      });
+      await recordSubscriptionHistory(tx, {
+        effectiveAt: externalSubscription.currentPeriodStart ?? new Date(),
+        eventType: "created",
+        sourceEventId: eventId,
+        subscriptionId: externalSubscription.id,
+        toPriceId: externalSubscription.productId,
+        userId,
+      });
+      return { applied: true, priceId: externalSubscription.productId };
+    }
+
+    const resolved = resolveIncomingSubscriptionPrice({
+      currentPeriodEnd: existing.currentPeriodEnd,
+      currentPeriodStart: existing.currentPeriodStart,
+      currentPriceId: existing.priceId,
+      incomingPeriodStart: externalSubscription.currentPeriodStart,
+      incomingPriceId: externalSubscription.productId,
+      pendingPriceEffectiveAt: existing.pendingPriceEffectiveAt,
+      pendingPriceId: existing.pendingPriceId,
     });
-  }
 
-  logEvent("payment.subscription.upserted", {
-    userId,
-    provider: paymentService.provider,
-  });
-  trackServerEvent({
-    attributes: {
+    await tx
+      .update(subscription)
+      .set({
+        cancelAtPeriodEnd: externalSubscription.cancelAtPeriodEnd,
+        currentPeriodEnd: externalSubscription.currentPeriodEnd,
+        currentPeriodStart: externalSubscription.currentPeriodStart,
+        pendingPriceEffectiveAt: resolved.pendingPriceEffectiveAt,
+        pendingPriceId: resolved.pendingPriceId,
+        priceId: resolved.priceId,
+        status: externalSubscription.status,
+        subscriptionId: externalSubscription.id,
+        updatedAt: new Date(),
+      })
+      .where(eq(subscription.id, existing.id));
+
+    if (existing.priceId !== resolved.priceId) {
+      await recordSubscriptionHistory(tx, {
+        effectiveAt: externalSubscription.currentPeriodStart ?? new Date(),
+        eventType: resolved.appliedPendingPrice ? "downgraded" : "changed",
+        fromPriceId: existing.priceId,
+        sourceEventId: eventId,
+        subscriptionId: externalSubscription.id,
+        toPriceId: resolved.priceId,
+        userId,
+      });
+    } else if (
+      existing.currentPeriodStart &&
+      externalSubscription.currentPeriodStart &&
+      externalSubscription.currentPeriodStart > existing.currentPeriodStart
+    ) {
+      await recordSubscriptionHistory(tx, {
+        effectiveAt: externalSubscription.currentPeriodStart,
+        eventType: "renewed",
+        sourceEventId: eventId,
+        subscriptionId: externalSubscription.id,
+        toPriceId: resolved.priceId,
+        userId,
+      });
+    }
+
+    logEvent("payment.subscription.upserted", {
+      userId,
       provider: paymentService.provider,
-      subscriptionId: externalSubscription.id,
-    },
-    context: { identity: { userId } },
-    name: "payment.subscription.upserted",
-    source: "server",
-    version: 1,
+    });
+    trackServerEvent({
+      attributes: {
+        provider: paymentService.provider,
+        subscriptionId: externalSubscription.id,
+      },
+      context: { identity: { userId } },
+      name: "payment.subscription.upserted",
+      source: "server",
+      version: 1,
+    });
+    return { applied: true, priceId: resolved.priceId };
   });
-  return true;
-}
-
-function subscriptionValues(externalSubscription: PaymentSubscription) {
-  return {
-    subscriptionId: externalSubscription.id,
-    priceId: externalSubscription.productId,
-    status: externalSubscription.status,
-    currentPeriodStart: externalSubscription.currentPeriodStart,
-    currentPeriodEnd: externalSubscription.currentPeriodEnd,
-    cancelAtPeriodEnd: externalSubscription.cancelAtPeriodEnd,
-    updatedAt: new Date(),
-  };
 }
 
 async function grantSubscriptionCredits(

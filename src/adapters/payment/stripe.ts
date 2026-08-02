@@ -1,5 +1,6 @@
 import {
   AdapterError,
+  type CancelSubscriptionInput,
   executeAdapterOperation,
   type JsonObject,
   type PaymentAdapter,
@@ -8,6 +9,7 @@ import {
   type PaymentSubscription,
   type PaymentTransaction,
   type PaymentWebhookType,
+  type UpdateSubscriptionInput,
 } from "@/core/services";
 import { getRuntimeEnv } from "@/lib/runtime-config";
 
@@ -24,7 +26,7 @@ interface StripeSubscription {
   current_period_start: number;
   customer: string | { id: string };
   id: string;
-  items: { data: Array<{ price: { id: string } }> };
+  items: { data: Array<{ id: string; price: { id: string } }> };
   metadata?: Record<string, string>;
   status: PaymentStatus;
 }
@@ -289,11 +291,73 @@ export function createStripePaymentAdapter(
       );
     },
 
-    async cancelSubscription(id) {
+    async updateSubscription(id, input: UpdateSubscriptionInput) {
+      const current = await stripeRequest<StripeSubscription>(
+        `/subscriptions/${encodeURIComponent(id)}`
+      );
+      const itemId = current.items.data[0]?.id;
+      if (!itemId) {
+        throw new AdapterError({
+          code: "remote_failure",
+          message: "Stripe subscription has no subscription item",
+          provider,
+        });
+      }
+
+      const prorationBehavior =
+        input.updateBehavior === "proration-charge-immediately"
+          ? "always_invoice"
+          : input.updateBehavior === "proration-none"
+            ? "none"
+            : "create_prorations";
+
       return mapSubscription(
         await stripeRequest<StripeSubscription>(
           `/subscriptions/${encodeURIComponent(id)}`,
-          { method: "DELETE" }
+          {
+            body: formBody({
+              "items[0][id]": itemId,
+              "items[0][price]": input.productId,
+              proration_behavior: prorationBehavior,
+            }),
+            method: "POST",
+          }
+        )
+      );
+    },
+
+    async cancelSubscription(
+      id,
+      input: CancelSubscriptionInput = { mode: "scheduled" }
+    ) {
+      if (input.mode === "immediate") {
+        return mapSubscription(
+          await stripeRequest<StripeSubscription>(
+            `/subscriptions/${encodeURIComponent(id)}`,
+            { method: "DELETE" }
+          )
+        );
+      }
+
+      return mapSubscription(
+        await stripeRequest<StripeSubscription>(
+          `/subscriptions/${encodeURIComponent(id)}`,
+          {
+            body: formBody({ cancel_at_period_end: "true" }),
+            method: "POST",
+          }
+        )
+      );
+    },
+
+    async resumeSubscription(id) {
+      return mapSubscription(
+        await stripeRequest<StripeSubscription>(
+          `/subscriptions/${encodeURIComponent(id)}`,
+          {
+            body: formBody({ cancel_at_period_end: "false" }),
+            method: "POST",
+          }
         )
       );
     },

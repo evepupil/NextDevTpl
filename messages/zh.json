@@ -420,6 +420,13 @@
     "currentPlan": "当前套餐",
     "alreadySubscribed": "已订阅",
     "manageSubscription": "管理订阅",
+    "changePlan": "变更套餐",
+    "changePending": "待生效变更",
+    "changeFailed": "套餐变更失败，请重试",
+    "changeSuccess": {
+      "upgraded": "套餐已升级",
+      "downgraded": "套餐将在下个计费周期切换"
+    },
     "booksNote": "≈ {count} 万次 API 调用",
     "cardsNote": "≈ {count} 积分",
     "plans": {
@@ -663,6 +670,11 @@
         "perYear": "年",
         "cancelSubscription": "取消订阅",
         "cancelPending": "将于 {date} 到期取消",
+        "pendingChange": "将于 {date} 切换到 {plan}",
+        "resumeSubscription": "恢复订阅",
+        "cancelSuccess": "已安排在周期结束时取消订阅",
+        "resumeSuccess": "订阅已恢复",
+        "actionFailed": "订阅更新失败，请重试",
         "cancelDialog": {
           "title": "确认取消订阅？",
           "description": "订阅将在当前计费周期结束时（{date}）自动取消，届时套餐将恢复为免费版。",
@@ -680,14 +692,27 @@
       },
       "history": {
         "title": "账单历史",
-        "description": "查看和下载您的历史发票。",
+        "description": "查看订阅套餐的变更记录。",
         "date": "日期",
         "historyDescription": "描述",
         "amount": "金额",
         "status": "状态",
         "invoice": "发票",
-        "noHistory": "暂无账单记录",
-        "noHistoryHint": "首次购买后，发票将显示在此处"
+        "noHistory": "暂无订阅记录",
+        "noHistoryHint": "订阅发生变更后，记录会显示在此处",
+        "planChange": "{from} 切换到 {to}",
+        "unknownPlan": "未知套餐",
+        "effective": "生效于 {date}",
+        "events": {
+          "created": "开始订阅",
+          "upgraded": "套餐已升级",
+          "downgraded": "已安排套餐降级",
+          "cancellation_requested": "已安排取消订阅",
+          "cancellation_resumed": "已恢复取消操作",
+          "canceled": "订阅已取消",
+          "renewed": "订阅已续费",
+          "changed": "订阅已变更"
+        }
       }
     },
     "usage": {

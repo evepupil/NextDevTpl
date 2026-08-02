@@ -30,7 +30,8 @@ export const deleteAccountAction = protectedAction
       )
     ) {
       await paymentService.cancelSubscription(
-        activeSubscription.subscriptionId
+        activeSubscription.subscriptionId,
+        { mode: "immediate" }
       );
     }
 

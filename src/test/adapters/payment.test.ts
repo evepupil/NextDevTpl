@@ -100,6 +100,47 @@ describe("Creem payment adapter", () => {
     });
     expect(event.createdAt).toEqual(new Date(createdAt));
   });
+
+  it("updates, schedules cancellation, and resumes a subscription", async () => {
+    const requests: Array<{ url: string; init: RequestInit | undefined }> = [];
+    const request: typeof globalThis.fetch = async (input, init) => {
+      requests.push({ url: String(input), init });
+      return Response.json({
+        cancel_at_period_end: false,
+        current_period_end_date: "2026-09-01T00:00:00.000Z",
+        current_period_start_date: "2026-08-01T00:00:00.000Z",
+        customer: "customer_1",
+        id: "subscription_1",
+        product: "price_2",
+        status: "active",
+      });
+    };
+    const adapter = createCreemPaymentAdapter({
+      apiKey: "creem_test_key",
+      fetch: request,
+    });
+
+    await adapter.updateSubscription("subscription_1", {
+      productId: "price_2",
+      updateBehavior: "proration-none",
+    });
+    await adapter.cancelSubscription("subscription_1", { mode: "scheduled" });
+    await adapter.resumeSubscription("subscription_1");
+
+    expect(requests.map((item) => item.url)).toEqual([
+      "https://test-api.creem.io/v1/subscriptions/subscription_1/upgrade",
+      "https://test-api.creem.io/v1/subscriptions/subscription_1/cancel",
+      "https://test-api.creem.io/v1/subscriptions/subscription_1/resume",
+    ]);
+    expect(JSON.parse(String(requests[0]?.init?.body))).toEqual({
+      product_id: "price_2",
+      update_behavior: "proration-none",
+    });
+    expect(JSON.parse(String(requests[1]?.init?.body))).toEqual({
+      mode: "scheduled",
+      onExecute: "cancel",
+    });
+  });
 });
 
 describe("Stripe payment adapter", () => {
@@ -156,7 +197,7 @@ describe("Stripe payment adapter", () => {
           current_period_start: timestamp - 3600,
           current_period_end: timestamp + 3600,
           cancel_at_period_end: false,
-          items: { data: [{ price: { id: "price_1" } }] },
+          items: { data: [{ id: "si_1", price: { id: "price_1" } }] },
           metadata: { userId: "user_1" },
         },
       },
@@ -181,6 +222,55 @@ describe("Stripe payment adapter", () => {
         status: "past_due",
       },
     });
+  });
+
+  it("updates a subscription item and supports scheduled cancel and resume", async () => {
+    const requests: Array<{ url: string; init: RequestInit | undefined }> = [];
+    const subscription = {
+      cancel_at_period_end: false,
+      current_period_end: 1_700_086_400,
+      current_period_start: 1_700_000_000,
+      customer: "cus_1",
+      id: "sub_1",
+      items: { data: [{ id: "si_1", price: { id: "price_2" } }] },
+      status: "active" as const,
+    };
+    const request: typeof globalThis.fetch = async (input, init) => {
+      requests.push({ url: String(input), init });
+      return Response.json(subscription);
+    };
+    const adapter = createStripePaymentAdapter({
+      apiKey: "sk_test_key",
+      fetch: request,
+    });
+
+    await adapter.updateSubscription("sub_1", {
+      productId: "price_2",
+      updateBehavior: "proration-charge-immediately",
+    });
+    await adapter.cancelSubscription("sub_1", { mode: "scheduled" });
+    await adapter.resumeSubscription("sub_1");
+
+    expect(requests.map((item) => item.url)).toEqual([
+      "https://api.stripe.com/v1/subscriptions/sub_1",
+      "https://api.stripe.com/v1/subscriptions/sub_1",
+      "https://api.stripe.com/v1/subscriptions/sub_1",
+      "https://api.stripe.com/v1/subscriptions/sub_1",
+    ]);
+    const updateForm = new URLSearchParams(String(requests[1]?.init?.body));
+    expect(updateForm.get("items[0][id]")).toBe("si_1");
+    expect(updateForm.get("items[0][price]")).toBe("price_2");
+    expect(updateForm.get("proration_behavior")).toBe("always_invoice");
+    expect(
+      new URLSearchParams(String(requests[2]?.init?.body)).get(
+        "cancel_at_period_end"
+      )
+    ).toBe("true");
+    expect(
+      new URLSearchParams(String(requests[3]?.init?.body)).get(
+        "cancel_at_period_end"
+      )
+    ).toBe("false");
   });
 
   it("normalizes failed payments and refunds without exposing payload content", async () => {

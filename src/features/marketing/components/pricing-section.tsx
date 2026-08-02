@@ -3,6 +3,7 @@
 import { BookOpen, Check, Coins, Layers, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useTransition } from "react";
+import { toast } from "sonner";
 import { Reveal } from "@/components/motion/reveal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { getPlanPrice, paymentConfig } from "@/config/payment";
 import {
+  changeSubscriptionPlan,
   createCheckoutSession,
   getUserSubscription,
 } from "@/features/payment/actions";
@@ -95,16 +97,16 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
   const [activePriceId, setActivePriceId] = useState<string | null>(
     currentPriceId ?? null
   );
+  const [pendingPriceId, setPendingPriceId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!session?.user || currentPriceId) return;
     getUserSubscription().then((result) => {
-      if (
-        result?.data?.subscription?.isActive &&
-        result.data.subscription.priceId
-      ) {
-        setActivePriceId(result.data.subscription.priceId);
-      }
+      const userSubscription = result?.data?.subscription;
+      setActivePriceId(
+        userSubscription?.isActive ? userSubscription.priceId : null
+      );
+      setPendingPriceId(userSubscription?.pendingPriceId ?? null);
     });
   }, [session?.user, currentPriceId]);
 
@@ -157,6 +159,13 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
     return config.prices.some((p) => p.priceId === activePriceId);
   };
 
+  const isPendingPlan = (planId: string) => {
+    if (!pendingPriceId) return false;
+    const config = getPlanConfig(planId);
+    if (!config || !("prices" in config) || !config.prices) return false;
+    return config.prices.some((p) => p.priceId === pendingPriceId);
+  };
+
   /**
    * 检查用户是否有活跃订阅（任意计划）
    */
@@ -191,15 +200,38 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
 
     startTransition(async () => {
       try {
-        const result = await createCheckoutSession({
-          priceId: price.priceId,
-          type: price.type,
-        });
-        if (result?.data?.url) {
-          window.location.href = result.data.url;
+        if (hasSubscription) {
+          const result = await changeSubscriptionPlan({
+            priceId: price.priceId,
+          });
+          if (!result?.data?.success) {
+            toast.error(t("changeFailed"));
+            return;
+          }
+
+          toast.success(
+            result.data.direction === "upgrade"
+              ? t("changeSuccess.upgraded")
+              : t("changeSuccess.downgraded")
+          );
+          const refreshed = await getUserSubscription();
+          const userSubscription = refreshed?.data?.subscription;
+          setActivePriceId(
+            userSubscription?.isActive ? userSubscription.priceId : null
+          );
+          setPendingPriceId(userSubscription?.pendingPriceId ?? null);
+        } else {
+          const result = await createCheckoutSession({
+            priceId: price.priceId,
+            type: price.type,
+          });
+          if (result?.data?.url) {
+            window.location.href = result.data.url;
+          }
         }
       } catch (error) {
         console.error("Failed to create checkout session:", error);
+        toast.error(t("changeFailed"));
       } finally {
         setLoadingPlan(null);
       }
@@ -275,6 +307,7 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
             {PLAN_IDS.map((planId) => {
               const price = getDisplayPrice(planId);
               const isCurrent = isCurrentPlan(planId);
+              const isPlanPending = isPendingPlan(planId);
               const isLoading = loadingPlan === planId;
               const popular = isPopular(planId);
               const featureKeys = PLAN_FEATURE_KEYS[planId] || [];
@@ -296,6 +329,14 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
                   {isCurrent && (
                     <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary">
                       {t("currentPlan")}
+                    </Badge>
+                  )}
+                  {isPlanPending && !isCurrent && (
+                    <Badge
+                      variant="secondary"
+                      className="absolute -top-3 left-1/2 -translate-x-1/2"
+                    >
+                      {t("changePending")}
                     </Badge>
                   )}
                   <CardHeader>
@@ -417,9 +458,25 @@ export function PricingSection({ currentPriceId }: PricingSectionProps) {
                         ) : null}
                         {t("manageSubscription")}
                       </Button>
-                    ) : hasSubscription && planId !== "free" ? (
-                      <Button className="w-full" variant="outline" disabled>
-                        {t("alreadySubscribed")}
+                    ) : hasSubscription ? (
+                      <Button
+                        className="w-full"
+                        variant="outline"
+                        onClick={() =>
+                          planId === "free"
+                            ? handleManageSubscription()
+                            : handleSubscribe(planId)
+                        }
+                        disabled={isLoading || isPending}
+                      >
+                        {isLoading && (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
+                        {planId === "free"
+                          ? t("manageSubscription")
+                          : isPlanPending
+                            ? t("changePending")
+                            : t("changePlan")}
                       </Button>
                     ) : (
                       <Button

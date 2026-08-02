@@ -36,6 +36,8 @@ export interface UserPlanInfo {
   currentPeriodEnd: Date | null;
   /** 价格 ID（用于查找价格信息） */
   priceId: string | null;
+  pendingPriceId: string | null;
+  pendingPriceEffectiveAt: Date | null;
   /** 是否在周期结束时取消 */
   cancelAtPeriodEnd: boolean;
 }
@@ -73,6 +75,8 @@ export async function getUserPlan(userId: string): Promise<UserPlanInfo> {
       status: subscription.status,
       currentPeriodEnd: subscription.currentPeriodEnd,
       cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
+      pendingPriceId: subscription.pendingPriceId,
+      pendingPriceEffectiveAt: subscription.pendingPriceEffectiveAt,
     })
     .from(subscription)
     .where(eq(subscription.userId, userId))
@@ -97,6 +101,8 @@ export async function getUserPlan(userId: string): Promise<UserPlanInfo> {
       subscriptionStatus: userSubscription?.status ?? null,
       currentPeriodEnd: null,
       priceId: null,
+      pendingPriceId: null,
+      pendingPriceEffectiveAt: null,
       cancelAtPeriodEnd: false,
     };
   }
@@ -119,6 +125,8 @@ export async function getUserPlan(userId: string): Promise<UserPlanInfo> {
       subscriptionStatus: userSubscription.status,
       currentPeriodEnd: userSubscription.currentPeriodEnd,
       priceId: userSubscription.priceId,
+      pendingPriceId: userSubscription.pendingPriceId,
+      pendingPriceEffectiveAt: userSubscription.pendingPriceEffectiveAt,
       cancelAtPeriodEnd: effectiveCancelAtPeriodEnd,
     };
   }
@@ -132,6 +140,8 @@ export async function getUserPlan(userId: string): Promise<UserPlanInfo> {
     subscriptionStatus: userSubscription.status,
     currentPeriodEnd: userSubscription.currentPeriodEnd,
     priceId: userSubscription.priceId,
+    pendingPriceId: userSubscription.pendingPriceId,
+    pendingPriceEffectiveAt: userSubscription.pendingPriceEffectiveAt,
     cancelAtPeriodEnd: effectiveCancelAtPeriodEnd,
   };
 }

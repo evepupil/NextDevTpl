@@ -1,5 +1,6 @@
 import {
   AdapterError,
+  type CancelSubscriptionInput,
   executeAdapterOperation,
   type JsonObject,
   type PaymentAdapter,
@@ -7,6 +8,7 @@ import {
   type PaymentStatus,
   type PaymentSubscription,
   type PaymentWebhookEvent,
+  type UpdateSubscriptionInput,
 } from "@/core/services";
 import { getRuntimeEnv } from "@/lib/runtime-config";
 
@@ -65,7 +67,7 @@ interface CreemCustomer {
 }
 
 interface CreemSubscription {
-  cancel_at_period_end: boolean;
+  cancel_at_period_end?: boolean;
   current_period_end_date: string;
   current_period_start_date: string;
   customer: CreemCustomer | string;
@@ -126,7 +128,7 @@ function normalizeSubscription(
     customerId: customerId(subscription.customer),
     currentPeriodStart: new Date(subscription.current_period_start_date),
     currentPeriodEnd: new Date(subscription.current_period_end_date),
-    cancelAtPeriodEnd: subscription.cancel_at_period_end,
+    cancelAtPeriodEnd: subscription.cancel_at_period_end ?? false,
     metadata: subscription.metadata ?? {},
   };
 }
@@ -274,9 +276,40 @@ export function createCreemPaymentAdapter(
       return normalizeSubscription(result);
     },
 
-    async cancelSubscription(id) {
+    async updateSubscription(id, input: UpdateSubscriptionInput) {
+      const result = await requestCreem<CreemSubscription>(
+        `/subscriptions/${encodeURIComponent(id)}/upgrade`,
+        {
+          body: JSON.stringify({
+            product_id: input.productId,
+            update_behavior: input.updateBehavior,
+          }),
+          method: "POST",
+        }
+      );
+      return normalizeSubscription(result);
+    },
+
+    async cancelSubscription(
+      id,
+      input: CancelSubscriptionInput = { mode: "scheduled" }
+    ) {
       const result = await requestCreem<CreemSubscription>(
         `/subscriptions/${encodeURIComponent(id)}/cancel`,
+        {
+          body: JSON.stringify({
+            mode: input.mode ?? "scheduled",
+            onExecute: "cancel",
+          }),
+          method: "POST",
+        }
+      );
+      return normalizeSubscription(result);
+    },
+
+    async resumeSubscription(id) {
+      const result = await requestCreem<CreemSubscription>(
+        `/subscriptions/${encodeURIComponent(id)}/resume`,
         { method: "POST" }
       );
       return normalizeSubscription(result);

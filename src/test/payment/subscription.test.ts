@@ -12,7 +12,7 @@ import { eq } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
 
 import { user } from "@/db/schema/auth";
-import { subscription } from "@/db/schema/subscription";
+import { subscription, subscriptionCheckout } from "@/db/schema/subscription";
 import {
   cleanupTestUsers,
   createTestSubscription,
@@ -546,5 +546,32 @@ describe("Subscription Period Validation", () => {
     // 允许 1 天的误差（由于测试执行时间）
     expect(calculatedDays).toBeGreaterThanOrEqual(daysRemaining - 1);
     expect(calculatedDays).toBeLessThanOrEqual(daysRemaining);
+  });
+});
+
+describe("Subscription checkout constraints", () => {
+  it("should allow only one checkout lock per user", async () => {
+    const testUser = await createTestUser();
+    createdUserIds.push(testUser.id);
+
+    await testDb.insert(subscriptionCheckout).values({
+      id: crypto.randomUUID(),
+      userId: testUser.id,
+      requestId: `checkout_request_${crypto.randomUUID()}`,
+      priceId: "price_monthly_pro",
+      status: "creating",
+      expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+    });
+
+    await expect(
+      testDb.insert(subscriptionCheckout).values({
+        id: crypto.randomUUID(),
+        userId: testUser.id,
+        requestId: `checkout_request_${crypto.randomUUID()}`,
+        priceId: "price_monthly_ultra",
+        status: "creating",
+        expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+      })
+    ).rejects.toThrow();
   });
 });

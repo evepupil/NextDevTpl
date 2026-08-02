@@ -21,6 +21,9 @@ export const getMyPlanAction = protectedAction
       hasActiveSubscription: userPlan.hasActiveSubscription,
       currentPeriodEnd: userPlan.currentPeriodEnd?.toISOString() ?? null,
       priceId: userPlan.priceId,
+      pendingPriceId: userPlan.pendingPriceId,
+      pendingPriceEffectiveAt:
+        userPlan.pendingPriceEffectiveAt?.toISOString() ?? null,
       cancelAtPeriodEnd: userPlan.cancelAtPeriodEnd,
     };
   });

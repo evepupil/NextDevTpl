@@ -82,7 +82,21 @@ SELECT
 		JOIN pg_enum e ON e.enumtypid = t.oid
 		WHERE t.typname = 'credits_transaction_type'
 		  AND e.enumlabel = 'admin_grant'
-	) AS has_admin_grant;
+	) AS has_admin_grant,
+	EXISTS (
+		SELECT 1
+		FROM information_schema.columns
+		WHERE table_name = 'subscription'
+		  AND column_name = 'pending_price_id'
+	) AS has_pending_price_id,
+	to_regclass('public.subscription_history') IS NOT NULL AS has_subscription_history,
+	to_regclass('public.subscription_checkout') IS NOT NULL AS has_subscription_checkout,
+	EXISTS (
+		SELECT 1
+		FROM pg_indexes
+		WHERE schemaname = 'public'
+		  AND indexname = 'subscription_user_id_unique'
+	) AS has_subscription_user_unique;
 `)
   );
 
@@ -92,6 +106,10 @@ SELECT
         has_price_id?: boolean;
         has_customer_id?: boolean;
         has_admin_grant?: boolean;
+        has_pending_price_id?: boolean;
+        has_subscription_history?: boolean;
+        has_subscription_checkout?: boolean;
+        has_subscription_user_unique?: boolean;
       }
     | undefined;
 
@@ -99,7 +117,11 @@ SELECT
     readinessRow?.has_subscription_id &&
     readinessRow.has_price_id &&
     readinessRow.has_customer_id &&
-    readinessRow.has_admin_grant
+    readinessRow.has_admin_grant &&
+    readinessRow.has_pending_price_id &&
+    readinessRow.has_subscription_history &&
+    readinessRow.has_subscription_checkout &&
+    readinessRow.has_subscription_user_unique
   ) {
     legacySchemaSynced = true;
     return;
@@ -199,6 +221,83 @@ BEGIN
 		ALTER COLUMN "stripe_price_id" DROP NOT NULL;
 	END IF;
 END $$;
+`)
+    );
+
+    await tx.execute(
+      sql.raw(`
+ALTER TABLE "subscription"
+ADD COLUMN IF NOT EXISTS "pending_price_id" text;
+ALTER TABLE "subscription"
+ADD COLUMN IF NOT EXISTS "pending_price_effective_at" timestamp;
+WITH ranked_subscriptions AS (
+	SELECT
+		"id",
+		ROW_NUMBER() OVER (
+			PARTITION BY "user_id"
+			ORDER BY
+				CASE
+					WHEN "status" IN ('active', 'trialing', 'lifetime', 'past_due', 'paused', 'unpaid', 'incomplete') THEN 0
+					ELSE 1
+				END,
+				"updated_at" DESC,
+				"created_at" DESC,
+				"id" DESC
+		) AS "row_number"
+	FROM "subscription"
+)
+DELETE FROM "subscription" AS current_subscription
+USING ranked_subscriptions
+WHERE current_subscription."id" = ranked_subscriptions."id"
+	AND ranked_subscriptions."row_number" > 1;
+CREATE UNIQUE INDEX IF NOT EXISTS "subscription_user_id_unique"
+ON "subscription" ("user_id");
+
+CREATE TABLE IF NOT EXISTS "subscription_history" (
+	"id" text PRIMARY KEY NOT NULL,
+	"user_id" text NOT NULL,
+	"subscription_id" text NOT NULL,
+	"event_type" text NOT NULL,
+	"from_price_id" text,
+	"to_price_id" text,
+	"effective_at" timestamp NOT NULL,
+	"source_event_id" text,
+	"metadata" jsonb,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "subscription_history_user_id_user_id_fk"
+		FOREIGN KEY ("user_id") REFERENCES "public"."user"("id")
+		ON DELETE cascade ON UPDATE no action
+);
+CREATE INDEX IF NOT EXISTS "subscription_history_user_created_idx"
+ON "subscription_history" ("user_id", "created_at");
+CREATE INDEX IF NOT EXISTS "subscription_history_subscription_idx"
+ON "subscription_history" ("subscription_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "subscription_history_source_event_unique"
+ON "subscription_history" ("source_event_id");
+
+CREATE TABLE IF NOT EXISTS "subscription_checkout" (
+	"id" text PRIMARY KEY NOT NULL,
+	"user_id" text NOT NULL,
+	"request_id" text NOT NULL,
+	"price_id" text NOT NULL,
+	"status" text DEFAULT 'idle' NOT NULL,
+	"checkout_id" text,
+	"checkout_url" text,
+	"expires_at" timestamp NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "subscription_checkout_user_id_user_id_fk"
+		FOREIGN KEY ("user_id") REFERENCES "public"."user"("id")
+		ON DELETE cascade ON UPDATE no action
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "subscription_checkout_user_unique"
+ON "subscription_checkout" ("user_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "subscription_checkout_request_unique"
+ON "subscription_checkout" ("request_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "subscription_checkout_checkout_unique"
+ON "subscription_checkout" ("checkout_id");
+CREATE INDEX IF NOT EXISTS "subscription_checkout_expires_idx"
+ON "subscription_checkout" ("expires_at");
 `)
     );
   });

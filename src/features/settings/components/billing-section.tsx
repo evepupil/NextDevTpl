@@ -10,10 +10,11 @@
  * - 账单历史
  */
 
-import { Loader2, Receipt, Sparkles } from "lucide-react";
+import { Loader2, Receipt, RotateCcw, Sparkles } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useMemo, useState, useTransition } from "react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,7 +34,11 @@ import {
   PLAN_PRIVILEGES,
   type SubscriptionPlan,
 } from "@/config/subscription-plan";
-import { cancelSubscription } from "@/features/payment/actions";
+import {
+  cancelSubscription,
+  getSubscriptionHistory,
+  resumeSubscription,
+} from "@/features/payment/actions";
 import { getMyPlanAction } from "@/features/subscription/actions";
 import { PlanBadge, type PlanType } from "@/features/subscription/components";
 import { Link } from "@/i18n/routing";
@@ -47,9 +52,16 @@ export function BillingSection() {
 
   // 获取用户订阅计划
   const { execute: fetchPlan, result: planResult } = useAction(getMyPlanAction);
+  const { execute: fetchHistory, result: historyResult } = useAction(
+    getSubscriptionHistory
+  );
   const userPlan = (planResult.data?.plan as PlanType) || "free";
   const planConfig = PLAN_PRIVILEGES[userPlan as SubscriptionPlan];
   const isCancelPending = planResult.data?.cancelAtPeriodEnd ?? false;
+  const pendingPlan = planResult.data?.pendingPriceId
+    ? findPlanByPriceId(planResult.data.pendingPriceId).plan
+    : null;
+  const history = historyResult.data?.history ?? [];
 
   // 取消订阅
   const [isCancelling, startCancelTransition] = useTransition();
@@ -64,6 +76,17 @@ export function BillingSection() {
 
   const formattedRenewalDate = renewalDate
     ? renewalDate.toLocaleDateString(locale === "zh" ? "zh-CN" : "en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : null;
+
+  const pendingDate = planResult.data?.pendingPriceEffectiveAt
+    ? new Date(planResult.data.pendingPriceEffectiveAt)
+    : null;
+  const formattedPendingDate = pendingDate
+    ? pendingDate.toLocaleDateString(locale === "zh" ? "zh-CN" : "en-US", {
         year: "numeric",
         month: "short",
         day: "numeric",
@@ -93,7 +116,13 @@ export function BillingSection() {
   // 组件挂载时获取计划
   useEffect(() => {
     fetchPlan();
-  }, [fetchPlan]);
+    fetchHistory();
+  }, [fetchHistory, fetchPlan]);
+
+  const refreshBilling = () => {
+    fetchPlan();
+    fetchHistory();
+  };
 
   // 处理取消订阅
   const handleCancelSubscription = () => {
@@ -101,9 +130,24 @@ export function BillingSection() {
       try {
         await cancelSubscription();
         setCancelDialogOpen(false);
-        fetchPlan(); // 刷新状态
+        refreshBilling();
+        toast.success(t("currentPlan.cancelSuccess"));
       } catch (error) {
         console.error("Failed to cancel subscription:", error);
+        toast.error(t("currentPlan.actionFailed"));
+      }
+    });
+  };
+
+  const handleResumeSubscription = () => {
+    startCancelTransition(async () => {
+      try {
+        await resumeSubscription();
+        refreshBilling();
+        toast.success(t("currentPlan.resumeSuccess"));
+      } catch (error) {
+        console.error("Failed to resume subscription:", error);
+        toast.error(t("currentPlan.actionFailed"));
       }
     });
   };
@@ -148,11 +192,25 @@ export function BillingSection() {
             {userPlan !== "free" && (
               <div className="flex items-center gap-2">
                 {isCancelPending ? (
-                  <Badge variant="secondary" className="text-warning">
-                    {t("currentPlan.cancelPending", {
-                      date: formattedRenewalDate ?? "",
-                    })}
-                  </Badge>
+                  <>
+                    <Badge variant="secondary" className="text-warning">
+                      {t("currentPlan.cancelPending", {
+                        date: formattedRenewalDate ?? "",
+                      })}
+                    </Badge>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleResumeSubscription}
+                      disabled={isCancelling}
+                    >
+                      {isCancelling && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
+                      {!isCancelling && <RotateCcw className="mr-2 h-4 w-4" />}
+                      {t("currentPlan.resumeSubscription")}
+                    </Button>
+                  </>
                 ) : (
                   <AlertDialog
                     open={cancelDialogOpen}
@@ -209,6 +267,15 @@ export function BillingSection() {
 
           <Separator className="my-4" />
 
+          {pendingPlan && formattedPendingDate && (
+            <p className="mb-4 text-sm text-warning">
+              {t("currentPlan.pendingChange", {
+                date: formattedPendingDate,
+                plan: pendingPlan.name,
+              })}
+            </p>
+          )}
+
           <div className="grid grid-cols-3 gap-4 text-sm">
             <div>
               <p className="text-muted-foreground">
@@ -255,27 +322,67 @@ export function BillingSection() {
           </p>
         </div>
 
-        {/* 表格 */}
         <div className="rounded-lg border">
-          {/* 表头 */}
-          <div className="grid grid-cols-12 gap-4 px-4 py-3 bg-muted/50 text-sm font-medium text-muted-foreground">
-            <div className="col-span-3">{t("history.date")}</div>
-            <div className="col-span-4">{t("history.historyDescription")}</div>
-            <div className="col-span-2 text-right">{t("history.amount")}</div>
-            <div className="col-span-2 text-center">{t("history.status")}</div>
-            <div className="col-span-1 text-center">{t("history.invoice")}</div>
-          </div>
+          {history.length > 0 ? (
+            <div className="divide-y">
+              {history.map((item) => {
+                const fromPlan = item.fromPriceId
+                  ? findPlanByPriceId(item.fromPriceId).plan?.name
+                  : null;
+                const toPlan = item.toPriceId
+                  ? findPlanByPriceId(item.toPriceId).plan?.name
+                  : null;
+                const effectiveAt = new Date(item.effectiveAt);
+                const createdAt = new Date(item.createdAt);
 
-          <Separator />
-
-          {/* 空状态 */}
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Receipt className="h-12 w-12 text-muted-foreground/50 mb-4" />
-            <p className="text-muted-foreground">{t("history.noHistory")}</p>
-            <p className="text-sm text-muted-foreground/70">
-              {t("history.noHistoryHint")}
-            </p>
-          </div>
+                return (
+                  <div
+                    className="grid gap-2 px-4 py-4 sm:grid-cols-[7rem_1fr_auto] sm:items-center"
+                    key={item.id}
+                  >
+                    <time
+                      className="text-sm text-muted-foreground"
+                      dateTime={createdAt.toISOString()}
+                    >
+                      {createdAt.toLocaleDateString(
+                        locale === "zh" ? "zh-CN" : "en-US",
+                        { year: "numeric", month: "short", day: "numeric" }
+                      )}
+                    </time>
+                    <div>
+                      <p className="font-medium">
+                        {t(`history.events.${item.eventType}`)}
+                      </p>
+                      {(fromPlan || toPlan) && (
+                        <p className="text-sm text-muted-foreground">
+                          {t("history.planChange", {
+                            from: fromPlan ?? t("history.unknownPlan"),
+                            to: toPlan ?? t("history.unknownPlan"),
+                          })}
+                        </p>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground sm:text-right">
+                      {t("history.effective", {
+                        date: effectiveAt.toLocaleDateString(
+                          locale === "zh" ? "zh-CN" : "en-US",
+                          { year: "numeric", month: "short", day: "numeric" }
+                        ),
+                      })}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Receipt className="mb-4 h-12 w-12 text-muted-foreground/50" />
+              <p className="text-muted-foreground">{t("history.noHistory")}</p>
+              <p className="text-sm text-muted-foreground/70">
+                {t("history.noHistoryHint")}
+              </p>
+            </div>
+          )}
         </div>
       </section>
     </div>

@@ -1,10 +1,16 @@
 // Payment System
 export * from "./actions";
 export { paymentModule } from "./manifest";
-export * from "./subscription-event";
 export {
-  recordRevenueEvent,
   type RecordRevenueEventInput,
   type RevenueEventKind,
+  recordRevenueEvent,
 } from "./revenue";
+export * from "./subscription-change";
+export * from "./subscription-event";
+export {
+  type RecordSubscriptionHistoryInput,
+  recordSubscriptionHistory,
+  type SubscriptionHistoryEventType,
+} from "./subscription-history";
 export * from "./types";

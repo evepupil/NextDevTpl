@@ -87,7 +87,7 @@ export async function closeDatabase(): Promise<void> {
   database = undefined;
 }
 
-type DatabaseTransaction = Parameters<
+export type DatabaseTransaction = Parameters<
   Parameters<Database["transaction"]>[0]
 >[0];
 
