@@ -22,6 +22,7 @@
     "postcss.config.mjs",
     "public",
     "README.md",
+    "README.en.md",
     "sentry.client.config.ts",
     "sentry.edge.config.ts",
     "sentry.server.config.ts",

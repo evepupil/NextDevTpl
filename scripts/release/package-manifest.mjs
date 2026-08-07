@@ -1,10 +1,12 @@
 const REQUIRED_FILES = [
   "README.md",
+  "README.en.md",
   "catalog.json",
   "dist/cli.js",
   "dist/index.js",
   "package.json",
   "template/manifest.json",
+  "template/README.en.md",
   "template/package.json",
   "template/pnpm-lock.yaml",
   "template/src/middleware.ts",
