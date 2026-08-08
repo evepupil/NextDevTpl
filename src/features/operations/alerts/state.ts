@@ -4,6 +4,7 @@ export interface AlertStateEvaluation {
   cooldownUntil: Date | null;
   nextConsecutiveCount: number;
   shouldNotify: boolean;
+  shouldNotifyRecovery: boolean;
   shouldResolve: boolean;
   status: AlertRecordStatus;
 }
@@ -17,6 +18,7 @@ export function evaluateAlertState(input: {
   previousStatus: AlertRecordStatus | null;
   requiredConsecutive: number;
   cooldownMinutes: number;
+  hasSuccessfulNotification?: boolean;
 }): AlertStateEvaluation {
   const isRecovered = input.isRecovered ?? !input.isBreached;
   if (input.previousStatus === "firing" && !isRecovered) {
@@ -35,6 +37,7 @@ export function evaluateAlertState(input: {
         : input.cooldownUntil,
       nextConsecutiveCount,
       shouldNotify,
+      shouldNotifyRecovery: false,
       shouldResolve: false,
       status: "firing",
     };
@@ -45,6 +48,9 @@ export function evaluateAlertState(input: {
       cooldownUntil: null,
       nextConsecutiveCount: 0,
       shouldNotify: false,
+      shouldNotifyRecovery:
+        input.previousStatus === "firing" &&
+        input.hasSuccessfulNotification === true,
       shouldResolve: input.previousStatus === "firing",
       status: "resolved",
     };
@@ -61,6 +67,7 @@ export function evaluateAlertState(input: {
       : input.cooldownUntil,
     nextConsecutiveCount,
     shouldNotify,
+    shouldNotifyRecovery: false,
     shouldResolve: false,
     status: "firing",
   };

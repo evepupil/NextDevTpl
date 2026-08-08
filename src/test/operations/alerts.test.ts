@@ -70,8 +70,25 @@ describe("operations alert state", () => {
       requiredConsecutive: 2,
     });
     expect(result.shouldResolve).toBe(true);
+    expect(result.shouldNotifyRecovery).toBe(false);
     expect(result.status).toBe("resolved");
     expect(result.cooldownUntil).toBeNull();
+  });
+
+  it("only emits recovery after a firing notification was sent", () => {
+    const result = evaluateAlertState({
+      cooldownMinutes: 30,
+      cooldownUntil: new Date("2026-08-02T00:30:00.000Z"),
+      hasSuccessfulNotification: true,
+      isBreached: false,
+      now: new Date("2026-08-02T00:03:00.000Z"),
+      previousConsecutiveCount: 3,
+      previousStatus: "firing",
+      requiredConsecutive: 2,
+    });
+
+    expect(result.shouldResolve).toBe(true);
+    expect(result.shouldNotifyRecovery).toBe(true);
   });
 
   it("keeps an alert firing until its recovery threshold is reached", () => {

@@ -1,6 +1,6 @@
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, gte } from "drizzle-orm";
 
-import { db } from "@/db";
+import { db, withDbTransaction } from "@/db";
 import {
   operationsAlert,
   operationsAlertDelivery,
@@ -15,6 +15,28 @@ import {
   isRuleRecovered,
 } from "./rules";
 import { evaluateAlertState } from "./state";
+
+type NotificationKind = "firing" | "recovered";
+
+interface AlertNotificationClaim {
+  alertId: string;
+  dedupeKey: string;
+  deliveryId: string;
+  kind: NotificationKind;
+  message: string;
+  occurredAt: Date;
+  ruleKey: string;
+  severity: "critical" | "info" | "warning";
+  source: string;
+  threshold: number;
+  title: string;
+  value: number;
+}
+
+interface PreparedAlert {
+  claim: AlertNotificationClaim | null;
+  status: "firing" | "resolved";
+}
 
 export async function evaluateOperationsAlerts(
   options: { now?: Date; timezone?: string } = {}
@@ -38,104 +60,246 @@ export async function evaluateOperationsAlerts(
   }> = [];
 
   for (const rule of rules) {
-    const value = rule.value(dashboard);
-    if (value === null) {
-      results.push({
-        key: rule.key,
-        notification: "skipped",
-        status: "resolved",
-      });
-      continue;
-    }
+    let status: "firing" | "resolved" = "resolved";
+    try {
+      const value = rule.value(dashboard);
+      if (value === null) {
+        results.push({
+          key: rule.key,
+          notification: "skipped",
+          status: "resolved",
+        });
+        continue;
+      }
 
-    const dedupeKey = `${rule.key}:${dashboard.period.timezone}`;
-    const [existing] = await db
-      .select()
-      .from(operationsAlert)
-      .where(eq(operationsAlert.dedupeKey, dedupeKey))
-      .limit(1);
-    const state = evaluateAlertState({
-      cooldownMinutes: rule.cooldownMinutes,
-      cooldownUntil: existing?.cooldownUntil ?? null,
-      isBreached: isRuleBreached(rule, value),
-      isRecovered: isRuleRecovered(rule, value),
-      now,
-      previousConsecutiveCount: existing?.consecutiveCount ?? 0,
-      previousStatus: isAlertRecordStatus(existing?.status)
-        ? existing.status
-        : null,
-      requiredConsecutive: rule.requiredConsecutive,
-    });
-    const alertId = existing?.id ?? `alert-${crypto.randomUUID()}`;
-    const row = {
-      consecutiveCount: state.nextConsecutiveCount,
-      cooldownUntil: state.cooldownUntil,
-      dedupeKey,
-      firstSeenAt: existing?.firstSeenAt ?? now,
-      id: alertId,
-      lastSeenAt: now,
-      message: rule.message,
-      resolvedAt: state.shouldResolve
-        ? now
-        : state.status === "resolved"
-          ? (existing?.resolvedAt ?? null)
-          : null,
-      ruleKey: rule.key,
-      severity: rule.severity,
-      source: rule.source,
-      status: state.status,
-      threshold: Math.round(rule.threshold),
-      title: rule.title,
-      updatedAt: now,
-      value: Math.round(value),
-    };
-    if (existing) {
-      await db
-        .update(operationsAlert)
-        .set(row)
-        .where(eq(operationsAlert.id, existing.id));
-    } else {
-      await db.insert(operationsAlert).values(row);
-    }
-
-    if (state.shouldNotify || state.shouldResolve) {
-      const delivery = await alertService.notify({
+      const dedupeKey = `${rule.key}:${dashboard.period.timezone}`;
+      const prepared = await prepareAlert({
         dedupeKey,
-        message: state.shouldResolve ? `${rule.title}已恢复。` : rule.message,
-        occurredAt: now,
-        ruleKey: rule.key,
-        severity: state.shouldResolve ? "info" : rule.severity,
-        source: rule.source,
-        threshold: rule.threshold,
-        title: state.shouldResolve ? `${rule.title}已恢复` : rule.title,
+        now,
+        rule,
         value,
       });
-      await db.insert(operationsAlertDelivery).values({
-        alertId,
-        id: `delivery-${crypto.randomUUID()}`,
-        provider: alertService.adapter.provider,
-        ...(delivery.queued
-          ? { sentAt: now, status: state.shouldResolve ? "recovered" : "sent" }
-          : { error: "通知适配器未接受消息", status: "failed" }),
-      });
+      status = prepared.status;
+
+      if (!prepared.claim) {
+        results.push({
+          key: rule.key,
+          notification: "skipped",
+          status: prepared.status,
+        });
+        continue;
+      }
+
+      const delivery = await alertService.notify(prepared.claim);
+      await db
+        .update(operationsAlertDelivery)
+        .set(
+          delivery.queued
+            ? {
+                sentAt: now,
+                status:
+                  prepared.claim.kind === "recovered" ? "recovered" : "sent",
+              }
+            : {
+                error: "通知适配器未接受消息",
+                status: "failed",
+              }
+        )
+        .where(eq(operationsAlertDelivery.id, prepared.claim.deliveryId));
+
       results.push({
         key: rule.key,
-        notification: state.shouldResolve
-          ? "recovered"
-          : delivery.queued
-            ? "sent"
+        notification:
+          delivery.queued
+            ? prepared.claim.kind === "recovered"
+              ? "recovered"
+              : "sent"
             : "failed",
-        status: state.status,
+        status: prepared.status,
       });
-    } else {
+    } catch (error) {
+      console.error("Operations alert evaluation failed", {
+        error,
+        ruleKey: rule.key,
+      });
       results.push({
         key: rule.key,
-        notification: "skipped",
-        status: state.status,
+        notification: "failed",
+        status,
       });
     }
   }
   return results;
+}
+
+async function prepareAlert(input: {
+  dedupeKey: string;
+  now: Date;
+  rule: ReturnType<typeof getOperationsAlertRules>[number];
+  value: number;
+}): Promise<PreparedAlert> {
+  return withDbTransaction(async (tx) => {
+    let existing = (
+      await tx
+        .select()
+        .from(operationsAlert)
+        .where(eq(operationsAlert.dedupeKey, input.dedupeKey))
+        .for("update")
+        .limit(1)
+    )[0];
+
+    for (;;) {
+      const previousStatus = isAlertRecordStatus(existing?.status)
+        ? existing.status
+        : null;
+      const hasSuccessfulNotification = existing
+        ? await hasSuccessfulFiringDelivery(tx, existing)
+        : false;
+      const state = evaluateAlertState({
+        cooldownMinutes: input.rule.cooldownMinutes,
+        cooldownUntil: existing?.cooldownUntil ?? null,
+        hasSuccessfulNotification,
+        isBreached: isRuleBreached(input.rule, input.value),
+        isRecovered: isRuleRecovered(input.rule, input.value),
+        now: input.now,
+        previousConsecutiveCount: existing?.consecutiveCount ?? 0,
+        previousStatus,
+        requiredConsecutive: input.rule.requiredConsecutive,
+      });
+      const alertId = existing?.id ?? `alert-${crypto.randomUUID()}`;
+      const startsNewCycle =
+        state.status === "firing" && previousStatus !== "firing";
+      const firstSeenAt = startsNewCycle
+        ? input.now
+        : (existing?.firstSeenAt ?? input.now);
+      const row = {
+        consecutiveCount: state.nextConsecutiveCount,
+        cooldownUntil: state.cooldownUntil,
+        dedupeKey: input.dedupeKey,
+        firstSeenAt,
+        id: alertId,
+        lastSeenAt: input.now,
+        message: input.rule.message,
+        resolvedAt: state.shouldResolve
+          ? input.now
+          : state.status === "resolved"
+            ? (existing?.resolvedAt ?? null)
+            : null,
+        ruleKey: input.rule.key,
+        severity: input.rule.severity,
+        source: input.rule.source,
+        status: state.status,
+        threshold: Math.round(input.rule.threshold),
+        title: input.rule.title,
+        updatedAt: input.now,
+        value: Math.round(input.value),
+      };
+
+      if (!existing) {
+        const inserted = await tx
+          .insert(operationsAlert)
+          .values(row)
+          .onConflictDoNothing()
+          .returning({ id: operationsAlert.id });
+        if (!inserted[0]) {
+          existing = (
+            await tx
+              .select()
+              .from(operationsAlert)
+              .where(eq(operationsAlert.dedupeKey, input.dedupeKey))
+              .for("update")
+              .limit(1)
+          )[0];
+          if (existing) continue;
+          throw new Error("无法读取刚写入的告警状态");
+        }
+      } else {
+        await tx
+          .update(operationsAlert)
+          .set(row)
+          .where(eq(operationsAlert.id, existing.id));
+      }
+
+      const kind: NotificationKind | null = state.shouldNotify
+        ? "firing"
+        : state.shouldNotifyRecovery
+          ? "recovered"
+          : null;
+      if (!kind) return { claim: null, status: state.status };
+
+      const deliveryId = createDeliveryId(
+        alertId,
+        kind,
+        state.cooldownUntil,
+        input.now
+      );
+      const delivery = await tx
+        .insert(operationsAlertDelivery)
+        .values({
+          alertId,
+          id: deliveryId,
+          provider: alertService.adapter.provider,
+          status: "pending",
+        })
+        .onConflictDoNothing()
+        .returning({ id: operationsAlertDelivery.id });
+      if (!delivery[0]) return { claim: null, status: state.status };
+
+      return {
+        claim: {
+          alertId,
+          dedupeKey: input.dedupeKey,
+          deliveryId,
+          kind,
+          message:
+            kind === "recovered"
+              ? `${input.rule.title}已恢复`
+              : input.rule.message,
+          occurredAt: input.now,
+          ruleKey: input.rule.key,
+          severity: kind === "recovered" ? "info" : input.rule.severity,
+          source: input.rule.source,
+          threshold: input.rule.threshold,
+          title:
+            kind === "recovered"
+              ? `${input.rule.title}已恢复`
+              : input.rule.title,
+          value: input.value,
+        },
+        status: state.status,
+      };
+    }
+  });
+}
+
+async function hasSuccessfulFiringDelivery(
+  tx: Parameters<Parameters<typeof withDbTransaction>[0]>[0],
+  existing: typeof operationsAlert.$inferSelect
+): Promise<boolean> {
+  if (existing.status !== "firing") return false;
+
+  const [delivery] = await tx
+    .select({ id: operationsAlertDelivery.id })
+    .from(operationsAlertDelivery)
+    .where(
+      and(
+        eq(operationsAlertDelivery.alertId, existing.id),
+        eq(operationsAlertDelivery.status, "sent"),
+        gte(operationsAlertDelivery.sentAt, existing.firstSeenAt)
+      )
+    )
+    .limit(1);
+  return Boolean(delivery);
+}
+
+function createDeliveryId(
+  alertId: string,
+  kind: NotificationKind,
+  cooldownUntil: Date | null,
+  now: Date
+): string {
+  const occurrence = (cooldownUntil ?? now).toISOString();
+  return `delivery:${alertId}:${kind}:${occurrence}`;
 }
 
 export async function getRecentOperationsAlerts(limit = 20) {
