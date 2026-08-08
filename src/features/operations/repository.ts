@@ -1,4 +1,4 @@
-import { and, count, eq, gte, inArray, lt, sum } from "drizzle-orm";
+import { and, count, eq, gte, lt, sum } from "drizzle-orm";
 
 import { findPlanByPriceId, paymentConfig } from "@/config/payment";
 import type { AIUsageStatus } from "@/core/services";
@@ -23,7 +23,7 @@ import {
   ratioMetric,
 } from "./metrics";
 import { buildRevenueHealth, calculateMrrMinor } from "./revenue";
-import type { OperationsDashboard } from "./types";
+import type { MetricState, OperationsDashboard } from "./types";
 
 export interface OperationsPeriodOptions {
   now?: Date;
@@ -36,6 +36,7 @@ interface AIUsageRow {
   latencyMs: number;
   model: string;
   outputTokens: number | null;
+  occurredAt: Date;
   provider: string;
   status: string;
   success: boolean;
@@ -43,25 +44,172 @@ interface AIUsageRow {
   userId: string | null;
 }
 
-function startOfUtcDay(date: Date): Date {
-  return new Date(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+interface OperationsDateParts {
+  day: number;
+  month: number;
+  year: number;
+}
+
+function getOperationsDateParts(
+  date: Date,
+  timezone: string
+): OperationsDateParts {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    calendar: "iso8601",
+    day: "2-digit",
+    hour: "2-digit",
+    hourCycle: "h23",
+    minute: "2-digit",
+    month: "2-digit",
+    second: "2-digit",
+    timeZone: timezone,
+    year: "numeric",
+  })
+    .formatToParts(date)
+    .reduce<Record<string, string>>((result, part) => {
+      if (part.type !== "literal") result[part.type] = part.value;
+      return result;
+    }, {});
+
+  return {
+    day: Number(parts.day),
+    month: Number(parts.month),
+    year: Number(parts.year),
+  };
+}
+
+function getOperationsDatePartsWithTime(
+  date: Date,
+  timezone: string
+): OperationsDateParts & { hour: number; minute: number; second: number } {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    calendar: "iso8601",
+    day: "2-digit",
+    hour: "2-digit",
+    hourCycle: "h23",
+    minute: "2-digit",
+    month: "2-digit",
+    second: "2-digit",
+    timeZone: timezone,
+    year: "numeric",
+  })
+    .formatToParts(date)
+    .reduce<Record<string, string>>((result, part) => {
+      if (part.type !== "literal") result[part.type] = part.value;
+      return result;
+    }, {});
+
+  return {
+    day: Number(parts.day),
+    hour: Number(parts.hour),
+    minute: Number(parts.minute),
+    month: Number(parts.month),
+    second: Number(parts.second),
+    year: Number(parts.year),
+  };
+}
+
+function getTimezoneOffset(date: Date, timezone: string): number {
+  const parts = getOperationsDatePartsWithTime(date, timezone);
+  return (
+    Date.UTC(
+      parts.year,
+      parts.month - 1,
+      parts.day,
+      parts.hour,
+      parts.minute,
+      parts.second
+    ) - date.getTime()
   );
 }
 
-function addDays(date: Date, days: number): Date {
-  return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
+function startOfOperationsDay(
+  date: OperationsDateParts,
+  timezone: string
+): Date {
+  const localMidnight = Date.UTC(date.year, date.month - 1, date.day);
+  let instant = localMidnight;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    instant = localMidnight - getTimezoneOffset(new Date(instant), timezone);
+  }
+  return new Date(instant);
+}
+
+function shiftCalendarDate(
+  date: OperationsDateParts,
+  days: number
+): OperationsDateParts {
+  const shifted = new Date(
+    Date.UTC(date.year, date.month - 1, date.day + days)
+  );
+  return {
+    day: shifted.getUTCDate(),
+    month: shifted.getUTCMonth() + 1,
+    year: shifted.getUTCFullYear(),
+  };
+}
+
+export function normalizeOperationsTimezone(timezone?: string): string {
+  const candidate = timezone?.trim() || "UTC";
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: candidate }).format();
+    return candidate;
+  } catch {
+    return "UTC";
+  }
+}
+
+export function formatOperationsDate(date: Date, timezone: string): string {
+  const parts = getOperationsDateParts(
+    date,
+    normalizeOperationsTimezone(timezone)
+  );
+  return `${parts.year.toString().padStart(4, "0")}-${parts.month
+    .toString()
+    .padStart(2, "0")}-${parts.day.toString().padStart(2, "0")}`;
 }
 
 export function getOperationsPeriod(options: OperationsPeriodOptions = {}) {
   const now = options.now ?? new Date();
-  const end = startOfUtcDay(now);
-  const start = addDays(end, -30);
+  const timezone = normalizeOperationsTimezone(options.timezone);
+  const localDate = getOperationsDateParts(now, timezone);
+  const end = startOfOperationsDay(localDate, timezone);
+  const start = startOfOperationsDay(
+    shiftCalendarDate(localDate, -30),
+    timezone
+  );
   return {
     end,
     start,
-    timezone: options.timezone ?? "UTC",
+    timezone,
   };
+}
+
+type QueryState<T> = { ok: true; value: T } | { ok: false };
+
+async function settleQuery<T>(
+  query: () => PromiseLike<T>
+): Promise<QueryState<T>> {
+  try {
+    return { ok: true, value: await query() };
+  } catch {
+    return { ok: false };
+  }
+}
+
+function queryFailedMetric<T>(source: string, message: string): MetricState<T> {
+  return metric<T>(null, "query-failed", source, message);
+}
+
+function countQueryMetric(
+  state: QueryState<unknown>,
+  value: number,
+  source: string,
+  message: string
+): MetricState<number> {
+  return state.ok
+    ? metric(value, value > 0 ? "ready" : "zero-data", source)
+    : queryFailedMetric<number>(source, message);
 }
 
 export async function getOperationsDashboard(
@@ -80,91 +228,135 @@ export async function getOperationsDashboard(
     revenueRows,
     aiUsageRows,
   ] = await Promise.all([
-    db.select({ value: count() }).from(user),
-    db
-      .select({ value: count() })
-      .from(subscription)
-      .where(eq(subscription.status, "active")),
-    db
-      .select({ value: count() })
-      .from(ticket)
-      .where(
-        and(eq(ticket.status, "open"), gte(ticket.createdAt, period.start))
-      ),
-    db.select({ value: sum(creditsBalance.balance) }).from(creditsBalance),
-    db
-      .select({ value: count() })
-      .from(user)
-      .where(
-        and(gte(user.createdAt, period.start), lt(user.createdAt, period.end))
-      ),
-    db
-      .select({ value: sum(creditsTransaction.amount) })
-      .from(creditsTransaction)
-      .where(
-        and(
-          eq(creditsTransaction.type, "consumption"),
-          gte(creditsTransaction.createdAt, period.start),
-          lt(creditsTransaction.createdAt, period.end)
+    settleQuery(() => db.select({ value: count() }).from(user)),
+    settleQuery(() =>
+      db
+        .select({ value: count() })
+        .from(subscription)
+        .where(eq(subscription.status, "active"))
+    ),
+    settleQuery(() =>
+      db
+        .select({ value: count() })
+        .from(ticket)
+        .where(
+          and(eq(ticket.status, "open"), gte(ticket.createdAt, period.start))
         )
-      ),
-    db
-      .select({ value: count() })
-      .from(ticket)
-      .where(
-        and(
-          gte(ticket.createdAt, period.start),
-          lt(ticket.createdAt, period.end)
+    ),
+    settleQuery(() =>
+      db.select({ value: sum(creditsBalance.balance) }).from(creditsBalance)
+    ),
+    settleQuery(() =>
+      db
+        .select({ value: count() })
+        .from(user)
+        .where(
+          and(gte(user.createdAt, period.start), lt(user.createdAt, period.end))
         )
-      ),
-    db
-      .select({ priceId: subscription.priceId })
-      .from(subscription)
-      .where(inArray(subscription.status, ["active", "trialing"])),
-    db
-      .select({
-        amountMinor: revenueEvent.amountMinor,
-        currency: revenueEvent.currency,
-        kind: revenueEvent.kind,
-        userId: revenueEvent.userId,
-      })
-      .from(revenueEvent)
-      .where(
-        and(
-          gte(revenueEvent.occurredAt, period.start),
-          lt(revenueEvent.occurredAt, period.end)
+    ),
+    settleQuery(() =>
+      db
+        .select({ value: sum(creditsTransaction.amount) })
+        .from(creditsTransaction)
+        .where(
+          and(
+            eq(creditsTransaction.type, "consumption"),
+            gte(creditsTransaction.createdAt, period.start),
+            lt(creditsTransaction.createdAt, period.end)
+          )
         )
-      ),
-    db
-      .select({
-        feature: aiUsageEvent.feature,
-        inputTokens: aiUsageEvent.inputTokens,
-        latencyMs: aiUsageEvent.latencyMs,
-        model: aiUsageEvent.model,
-        outputTokens: aiUsageEvent.outputTokens,
-        provider: aiUsageEvent.provider,
-        status: aiUsageEvent.usageStatus,
-        success: aiUsageEvent.success,
-        totalTokens: aiUsageEvent.totalTokens,
-        userId: aiUsageEvent.userId,
-      })
-      .from(aiUsageEvent)
-      .where(
-        and(
-          gte(aiUsageEvent.occurredAt, period.start),
-          lt(aiUsageEvent.occurredAt, period.end)
+    ),
+    settleQuery(() =>
+      db
+        .select({ value: count() })
+        .from(ticket)
+        .where(
+          and(
+            gte(ticket.createdAt, period.start),
+            lt(ticket.createdAt, period.end)
+          )
         )
-      ),
+    ),
+    settleQuery(() =>
+      db
+        .select({ priceId: subscription.priceId })
+        .from(subscription)
+        .where(eq(subscription.status, "active"))
+    ),
+    settleQuery(() =>
+      db
+        .select({
+          amountMinor: revenueEvent.amountMinor,
+          currency: revenueEvent.currency,
+          kind: revenueEvent.kind,
+          userId: revenueEvent.userId,
+        })
+        .from(revenueEvent)
+        .where(
+          and(
+            gte(revenueEvent.occurredAt, period.start),
+            lt(revenueEvent.occurredAt, period.end)
+          )
+        )
+    ),
+    settleQuery(() =>
+      db
+        .select({
+          feature: aiUsageEvent.feature,
+          inputTokens: aiUsageEvent.inputTokens,
+          latencyMs: aiUsageEvent.latencyMs,
+          model: aiUsageEvent.model,
+          occurredAt: aiUsageEvent.occurredAt,
+          outputTokens: aiUsageEvent.outputTokens,
+          provider: aiUsageEvent.provider,
+          status: aiUsageEvent.usageStatus,
+          success: aiUsageEvent.success,
+          totalTokens: aiUsageEvent.totalTokens,
+          userId: aiUsageEvent.userId,
+        })
+        .from(aiUsageEvent)
+        .where(
+          and(
+            gte(aiUsageEvent.occurredAt, period.start),
+            lt(aiUsageEvent.occurredAt, period.end)
+          )
+        )
+    ),
   ]);
 
-  const activeMrrMinor = activeSubscriptionRows.reduce((total, item) => {
+  const totalUsersValue = totalUsers.ok
+    ? Number(totalUsers.value[0]?.value ?? 0)
+    : 0;
+  const activeSubscriptionsValue = activeSubscriptions.ok
+    ? Number(activeSubscriptions.value[0]?.value ?? 0)
+    : 0;
+  const openTicketsValue = openTickets.ok
+    ? Number(openTickets.value[0]?.value ?? 0)
+    : 0;
+  const creditTotalValue = creditTotal.ok
+    ? Number(creditTotal.value[0]?.value ?? 0)
+    : 0;
+  const newUsersValue = newUsers.ok ? Number(newUsers.value[0]?.value ?? 0) : 0;
+  const creditConsumptionValue = creditConsumption.ok
+    ? Number(creditConsumption.value[0]?.value ?? 0)
+    : 0;
+  const supportTicketsValue = supportTickets.ok
+    ? Number(supportTickets.value[0]?.value ?? 0)
+    : 0;
+  const activeSubscriptionRowsValue = activeSubscriptionRows.ok
+    ? activeSubscriptionRows.value
+    : [];
+  const revenueRowsValue = revenueRows.ok ? revenueRows.value : [];
+  const aiUsageRowsValue = aiUsageRows.ok ? aiUsageRows.value : [];
+
+  const activeMrrMinor = activeSubscriptionRowsValue.reduce((total, item) => {
     const price = findPlanByPriceId(item.priceId).price;
     return price
       ? total +
           calculateMrrMinor({ amount: price.amount, interval: price.interval })
       : total;
   }, 0);
-  const succeededRevenue = revenueRows.filter(
+  const succeededRevenue = revenueRowsValue.filter(
     (event) => event.kind === "payment_succeeded"
   );
   const paidUsers = new Set(
@@ -174,16 +366,16 @@ export async function getOperationsDashboard(
     (total, event) => total + event.amountMinor,
     0
   );
-  const refunds = revenueRows.filter((event) => event.kind === "refund");
+  const refunds = revenueRowsValue.filter((event) => event.kind === "refund");
   const refundsMinor = refunds.reduce(
     (total, event) => total + event.amountMinor,
     0
   );
-  const currency = revenueRows[0]?.currency ?? paymentConfig.currency;
-  const aiCosts = aiUsageRows.map((event) =>
+  const currency = revenueRowsValue[0]?.currency ?? paymentConfig.currency;
+  const aiCosts = aiUsageRowsValue.map((event) =>
     estimateAICost({
       model: event.model,
-      occurredAt: period.end,
+      occurredAt: event.occurredAt,
       provider: event.provider,
       usage: {
         inputTokens: event.inputTokens,
@@ -202,16 +394,23 @@ export async function getOperationsDashboard(
     revenueMinor: confirmedRevenueMinor,
   });
   const aiSource = "database:ai-usage-event";
-  const aiRequests = aiUsageRows.length;
+  const aiRevenueSource = "database:revenue-event+ai-usage-event";
+  const aiRequests = aiUsageRowsValue.length;
+  const aiQueryFailed = !aiUsageRows.ok;
+  const revenueQueryFailed = !revenueRows.ok;
   const aiBreakdowns = {
-    feature: buildAIBreakdown(aiUsageRows, aiCosts, (event) => event.feature),
+    feature: buildAIBreakdown(
+      aiUsageRowsValue,
+      aiCosts,
+      (event) => event.feature
+    ),
     model: buildAIBreakdown(
-      aiUsageRows,
+      aiUsageRowsValue,
       aiCosts,
       (event) => `${event.provider}/${event.model}`
     ),
     user: buildAIBreakdown(
-      aiUsageRows,
+      aiUsageRowsValue,
       aiCosts,
       (event) => event.userId ?? "anonymous"
     ),
@@ -220,62 +419,76 @@ export async function getOperationsDashboard(
     byFeature: aiBreakdowns.feature,
     byModel: aiBreakdowns.model,
     byUser: aiBreakdowns.user,
-    costMinor: metric(
-      estimatedAICostMinor,
-      aiRequests === 0
-        ? "zero-data"
-        : aiCosts.some((cost) => cost.amountMinor !== null)
-          ? "ready"
-          : "not-configured",
-      aiSource,
-      aiCosts.some((cost) => cost.amountMinor === null)
-        ? "部分请求缺少可用价格或 Token，成本为估算值"
-        : undefined
-    ),
+    costMinor: aiQueryFailed
+      ? queryFailedMetric<number>(aiSource, "AI 使用数据查询失败")
+      : metric(
+          estimatedAICostMinor,
+          aiRequests === 0
+            ? "zero-data"
+            : aiCosts.some((cost) => cost.amountMinor !== null)
+              ? "ready"
+              : "not-configured",
+          aiSource,
+          aiCosts.some((cost) => cost.amountMinor === null)
+            ? "部分请求缺少可用价格或 Token，成本为估算值"
+            : undefined
+        ),
     currency: aiCosts[0]?.currency ?? paymentConfig.currency,
-    grossMarginMinor: metric(
-      aiRequests === 0 || confirmedRevenueMinor === 0
-        ? null
-        : aiMargin.marginMinor,
-      aiMargin.rate === null ? "zero-data" : "ready",
-      "database:revenue-event+ai-usage-event"
-    ),
-    grossMarginRate: metric(
-      aiMargin.rate,
-      aiMargin.rate === null ? "zero-data" : "ready",
-      "database:revenue-event+ai-usage-event"
-    ),
-    latencyMs: metric(
-      aiRequests === 0
-        ? null
-        : Math.round(
-            aiUsageRows.reduce((total, event) => total + event.latencyMs, 0) /
-              aiRequests
+    grossMarginMinor:
+      aiQueryFailed || revenueQueryFailed
+        ? queryFailedMetric<number>(aiRevenueSource, "毛利依赖的数据查询失败")
+        : metric(
+            aiRequests === 0 || confirmedRevenueMinor === 0
+              ? null
+              : aiMargin.marginMinor,
+            aiMargin.rate === null ? "zero-data" : "ready",
+            aiRevenueSource
           ),
-      aiRequests === 0 ? "zero-data" : "ready",
-      aiSource
-    ),
-    requests: metric(
-      aiRequests,
-      aiRequests > 0 ? "ready" : "zero-data",
-      aiSource
-    ),
-    successRate: ratioMetric(
-      aiUsageRows.filter((event) => event.success).length,
-      aiRequests,
-      aiSource
-    ),
-    tokenUsageCoverage: metric(
-      aiRequests === 0
-        ? null
-        : usageCoverageStatus(
-            aiUsageRows.map((event) =>
-              isAIUsageStatus(event.status) ? event.status : "unavailable"
-            )
+    grossMarginRate:
+      aiQueryFailed || revenueQueryFailed
+        ? queryFailedMetric<number>(aiRevenueSource, "毛利依赖的数据查询失败")
+        : metric(
+            aiMargin.rate,
+            aiMargin.rate === null ? "zero-data" : "ready",
+            aiRevenueSource
           ),
-      aiRequests === 0 ? "zero-data" : "ready",
-      aiSource
-    ),
+    latencyMs: aiQueryFailed
+      ? queryFailedMetric<number>(aiSource, "AI 使用数据查询失败")
+      : metric(
+          aiRequests === 0
+            ? null
+            : Math.round(
+                aiUsageRowsValue.reduce(
+                  (total, event) => total + event.latencyMs,
+                  0
+                ) / aiRequests
+              ),
+          aiRequests === 0 ? "zero-data" : "ready",
+          aiSource
+        ),
+    requests: aiQueryFailed
+      ? queryFailedMetric<number>(aiSource, "AI 使用数据查询失败")
+      : metric(aiRequests, aiRequests > 0 ? "ready" : "zero-data", aiSource),
+    successRate: aiQueryFailed
+      ? queryFailedMetric<number>(aiSource, "AI 使用数据查询失败")
+      : ratioMetric(
+          aiUsageRowsValue.filter((event) => event.success).length,
+          aiRequests,
+          aiSource
+        ),
+    tokenUsageCoverage: aiQueryFailed
+      ? queryFailedMetric<number>(aiSource, "AI 使用数据查询失败")
+      : metric(
+          aiRequests === 0
+            ? null
+            : usageCoverageStatus(
+                aiUsageRowsValue.map((event) =>
+                  isAIUsageStatus(event.status) ? event.status : "unavailable"
+                )
+              ),
+          aiRequests === 0 ? "zero-data" : "ready",
+          aiSource
+        ),
   };
 
   const generatedAt = new Date().toISOString();
@@ -284,30 +497,38 @@ export async function getOperationsDashboard(
     ai,
     funnel: createFunnel({
       paidUsers,
-      registeredUsers: Number(newUsers[0]?.value ?? 0),
+      registeredUsers: newUsersValue,
+      ...(revenueRows.ok ? {} : { paidUsersStatus: "query-failed" as const }),
+      ...(newUsers.ok
+        ? {}
+        : { registeredUsersStatus: "query-failed" as const }),
     }),
     generatedAt,
     health: createHealth(),
     overview: {
-      activeSubscriptions: metric(
-        Number(activeSubscriptions[0]?.value ?? 0),
-        activeSubscriptions[0]?.value ? "ready" : "zero-data",
-        source
+      activeSubscriptions: countQueryMetric(
+        activeSubscriptions,
+        activeSubscriptionsValue,
+        source,
+        "订阅数据查询失败"
       ),
-      creditsBalance: metric(
-        Number(creditTotal[0]?.value ?? 0),
-        creditTotal[0]?.value ? "ready" : "zero-data",
-        source
+      creditsBalance: countQueryMetric(
+        creditTotal,
+        creditTotalValue,
+        source,
+        "积分数据查询失败"
       ),
-      openTickets: metric(
-        Number(openTickets[0]?.value ?? 0),
-        openTickets[0]?.value ? "ready" : "zero-data",
-        source
+      openTickets: countQueryMetric(
+        openTickets,
+        openTicketsValue,
+        source,
+        "工单数据查询失败"
       ),
-      totalUsers: metric(
-        Number(totalUsers[0]?.value ?? 0),
-        totalUsers[0]?.value ? "ready" : "zero-data",
-        source
+      totalUsers: countQueryMetric(
+        totalUsers,
+        totalUsersValue,
+        source,
+        "用户数据查询失败"
       ),
     },
     period: {
@@ -320,33 +541,43 @@ export async function getOperationsDashboard(
       confirmedRevenueEvents: succeededRevenue.length,
       confirmedRevenueMinor,
       currency,
-      churnedSubscriptions: revenueRows.filter(
+      churnedSubscriptions: revenueRowsValue.filter(
         (event) => event.kind === "subscription_canceled"
       ).length,
       paidUsers,
-      paymentFailures: revenueRows.filter(
+      paymentFailures: revenueRowsValue.filter(
         (event) => event.kind === "payment_failed"
       ).length,
       refundsMinor,
       refundEvents: refunds.length,
-      registeredUsers: Number(newUsers[0]?.value ?? 0),
+      registeredUsers: newUsersValue,
+      ...(activeSubscriptionRows.ok
+        ? {}
+        : { activeMrrStatus: "query-failed" as const }),
+      ...(newUsers.ok
+        ? {}
+        : { registeredUsersStatus: "query-failed" as const }),
+      ...(revenueRows.ok ? {} : { revenueStatus: "query-failed" as const }),
     }),
     retention: createRetention(),
     usage: {
-      creditConsumption: metric(
-        Number(creditConsumption[0]?.value ?? 0),
-        creditConsumption[0]?.value ? "ready" : "zero-data",
-        source
+      creditConsumption: countQueryMetric(
+        creditConsumption,
+        creditConsumptionValue,
+        source,
+        "积分消耗数据查询失败"
       ),
-      newUsers: metric(
-        Number(newUsers[0]?.value ?? 0),
-        newUsers[0]?.value ? "ready" : "zero-data",
-        source
+      newUsers: countQueryMetric(
+        newUsers,
+        newUsersValue,
+        source,
+        "用户数据查询失败"
       ),
-      supportTickets: metric(
-        Number(supportTickets[0]?.value ?? 0),
-        supportTickets[0]?.value ? "ready" : "zero-data",
-        source
+      supportTickets: countQueryMetric(
+        supportTickets,
+        supportTicketsValue,
+        source,
+        "工单数据查询失败"
       ),
     },
   };

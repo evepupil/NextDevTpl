@@ -47,4 +47,25 @@ describe("revenue operations metrics", () => {
     expect(empty.mrrMinor.status).toBe("zero-data");
     expect(empty.confirmedRevenueMinor.status).toBe("zero-data");
   });
+
+  it("keeps failed revenue sources explicit", () => {
+    const health = buildRevenueHealth({
+      activeMrrMinor: 1000,
+      activeMrrStatus: "query-failed",
+      confirmedRevenueEvents: 2,
+      confirmedRevenueMinor: 1800,
+      currency: "USD",
+      churnedSubscriptions: 1,
+      paidUsers: 1,
+      paymentFailures: 2,
+      refundsMinor: 300,
+      refundEvents: 1,
+      registeredUsers: 2,
+      revenueStatus: "query-failed",
+    });
+
+    expect(health.mrrMinor.status).toBe("query-failed");
+    expect(health.confirmedRevenueMinor.value).toBeNull();
+    expect(health.paidConversionRate.status).toBe("query-failed");
+  });
 });

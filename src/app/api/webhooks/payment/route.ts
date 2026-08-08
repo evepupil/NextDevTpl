@@ -217,12 +217,14 @@ async function handleCheckoutCompleted(
       .where(eq(user.id, userId));
   }
 
+  let subscriptionApplied = false;
   if (data.subscription) {
     const applied = await createOrUpdateSubscription(
       userId,
       data.subscription,
       eventId
     );
+    subscriptionApplied = applied.applied;
     if (
       applied.applied &&
       ["active", "trialing"].includes(data.subscription.status)
@@ -241,25 +243,27 @@ async function handleCheckoutCompleted(
     await markSubscriptionCheckoutCompleted(data.id);
   }
 
-  const configuredAmount = getConfiguredCheckoutAmount(data);
-  await recordRevenueEvent({
-    externalEventId: data.subscription
-      ? subscriptionRevenueEventId(data.subscription, eventId)
-      : eventId,
-    kind: "payment_succeeded",
-    occurredAt,
-    priceId: data.productId,
-    provider: paymentService.provider,
-    ...(configuredAmount !== undefined
-      ? { amountMajor: configuredAmount }
-      : {}),
-    ...(data.amountMinor !== undefined
-      ? { amountMinor: data.amountMinor }
-      : {}),
-    ...(data.currency ? { currency: data.currency } : {}),
-    ...(data.subscription ? { subscriptionId: data.subscription.id } : {}),
-    userId,
-  });
+  if (!data.subscription || subscriptionApplied) {
+    const configuredAmount = getConfiguredCheckoutAmount(data);
+    await recordRevenueEvent({
+      externalEventId: data.subscription
+        ? subscriptionRevenueEventId(data.subscription, eventId)
+        : eventId,
+      kind: "payment_succeeded",
+      occurredAt,
+      priceId: data.productId,
+      provider: paymentService.provider,
+      ...(configuredAmount !== undefined
+        ? { amountMajor: configuredAmount }
+        : {}),
+      ...(data.amountMinor !== undefined
+        ? { amountMinor: data.amountMinor }
+        : {}),
+      ...(data.currency ? { currency: data.currency } : {}),
+      ...(data.subscription ? { subscriptionId: data.subscription.id } : {}),
+      userId,
+    });
+  }
 
   logEvent("payment.checkout.completed", {
     userId,
@@ -454,16 +458,19 @@ async function handleSubscriptionActive(
       { ...externalSubscription, productId: applied.priceId },
       "subscription_create"
     );
+    await recordRevenueEvent({
+      externalEventId: subscriptionRevenueEventId(
+        externalSubscription,
+        eventId
+      ),
+      kind: "payment_succeeded",
+      occurredAt,
+      priceId: externalSubscription.productId,
+      provider: paymentService.provider,
+      subscriptionId: externalSubscription.id,
+      userId,
+    });
   }
-  await recordRevenueEvent({
-    externalEventId: subscriptionRevenueEventId(externalSubscription, eventId),
-    kind: "payment_succeeded",
-    occurredAt,
-    priceId: externalSubscription.productId,
-    provider: paymentService.provider,
-    subscriptionId: externalSubscription.id,
-    userId,
-  });
   logEvent("payment.subscription.created", {
     userId,
     subscriptionId: externalSubscription.id,
@@ -511,16 +518,19 @@ async function handleSubscriptionRenewed(
       { ...externalSubscription, productId: applied.priceId },
       "subscription_cycle"
     );
+    await recordRevenueEvent({
+      externalEventId: subscriptionRevenueEventId(
+        externalSubscription,
+        eventId
+      ),
+      kind: "payment_succeeded",
+      occurredAt,
+      priceId: externalSubscription.productId,
+      provider: paymentService.provider,
+      subscriptionId: externalSubscription.id,
+      userId,
+    });
   }
-  await recordRevenueEvent({
-    externalEventId: subscriptionRevenueEventId(externalSubscription, eventId),
-    kind: "payment_succeeded",
-    occurredAt,
-    priceId: externalSubscription.productId,
-    provider: paymentService.provider,
-    subscriptionId: externalSubscription.id,
-    userId,
-  });
 }
 
 async function handleSubscriptionCanceled(

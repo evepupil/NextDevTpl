@@ -9,7 +9,7 @@
 >
 > 当前状态：已完成
 >
-> 最近更新时间：2026-08-02
+> 最近更新时间：2026-08-08
 
 ## 职责与边界
 
@@ -48,15 +48,16 @@ Anthropic 读取 `input_tokens`、`output_tokens`，Workers AI 尝试读取兼�
 运营驾驶舱按模型、功能和用户展示请求量、成功率、平均耗时和 Token 覆盖率。
 
 `ai-usage.ts` 内置按生效时间版本化的 USD 价格表，成本以最小货币单位估算；未知模型、
-无 Token 或不支持 usage 时标记 `unavailable`。毛利使用周期确认收入减估算 AI 成本，
-只用于运营判断，不声明为会计利润。
+无 Token 或不支持 usage 时标记 `unavailable`。运营查询保留每条 `ai_usage_event` 的
+`occurredAt`，按请求发生时间选择价格版本后再聚合，避免价格调整影响历史请求。毛利使用
+周期确认收入减估算 AI 成本，只用于运营判断，不声明为会计利润。
 
 ## 验证方式
 
 - `src/test/adapters/ai.test.ts` 覆盖 Anthropic 无 usage 的安全降级；适配器契约会返回
   provider、model、latency 和明确的 usage 状态。
 - `src/test/operations/ai-usage.test.ts` 覆盖价格生效时间、Token 成本、未知价格、
-  覆盖率和毛利计算。
+  覆盖率和毛利计算；历史请求按请求发生时间定价。
 - `pnpm db:generate:checked` 已确认 `drizzle/0005_fuzzy_anthem.sql` 与
   `ai_usage_event` Schema 快照一致。
 - 运营表字段不包含提示词、模型回复、密钥或上传内容；价格与成本均标注为估算来源。
@@ -70,3 +71,4 @@ Anthropic 读取 `input_tokens`、`output_tokens`，Workers AI 尝试读取兼�
 
 - 2026-08-01：确定 AI 用量、估算状态、价格版本和隐私边界。
 - 2026-08-02：扩展三类 AI 适配器统一用量契约，新增本地用量表、成本估算、毛利聚合和驾驶舱区块。
+- 2026-08-08：修复运营聚合使用报告期末价格计算历史请求的问题，改按事件发生时间选择价格版本。

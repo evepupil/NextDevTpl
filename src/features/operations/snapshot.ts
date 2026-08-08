@@ -3,13 +3,20 @@ import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { operationsDailySnapshot } from "@/db/schema/operations";
 
-import { getOperationsDashboard, getOperationsPeriod } from "./repository";
+import {
+  formatOperationsDate,
+  getOperationsDashboard,
+  getOperationsPeriod,
+} from "./repository";
 import type { OperationsDashboard } from "./types";
 
 export async function saveOperationsDailySnapshot(
   dashboard: OperationsDashboard
 ): Promise<void> {
-  const date = dashboard.period.start.slice(0, 10);
+  const date = formatOperationsDate(
+    new Date(dashboard.period.start),
+    dashboard.period.timezone
+  );
   const id = `operations-${date}-${dashboard.period.timezone}`;
   await db
     .insert(operationsDailySnapshot)

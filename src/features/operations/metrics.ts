@@ -43,21 +43,39 @@ export function createUnavailableMetric(
 export function createFunnel(input: {
   paidUsers: number;
   registeredUsers: number;
+  paidUsersStatus?: MetricStatus;
+  registeredUsersStatus?: MetricStatus;
 }): OperationsFunnel {
   const source = "database:user-and-subscription";
   return {
     activatedUsers: createUnavailableMetric("analytics:activation"),
     landingVisitors: createUnavailableMetric("analytics:landing"),
-    paidUsers: metric(
-      input.paidUsers,
-      input.paidUsers > 0 ? "ready" : "zero-data",
-      source
-    ),
-    registeredUsers: metric(
-      input.registeredUsers,
-      input.registeredUsers > 0 ? "ready" : "zero-data",
-      source
-    ),
+    paidUsers:
+      input.paidUsersStatus === "query-failed"
+        ? metric<number>(
+            null,
+            "query-failed",
+            source,
+            "浠樿垂鏁版嵁鏌ヨ澶辫触"
+          )
+        : metric(
+            input.paidUsers,
+            input.paidUsers > 0 ? "ready" : "zero-data",
+            source
+          ),
+    registeredUsers:
+      input.registeredUsersStatus === "query-failed"
+        ? metric<number>(
+            null,
+            "query-failed",
+            source,
+            "娉ㄥ唽鏁版嵁鏌ヨ澶辫触"
+          )
+        : metric(
+            input.registeredUsers,
+            input.registeredUsers > 0 ? "ready" : "zero-data",
+            source
+          ),
   };
 }
 

@@ -1,7 +1,7 @@
 import { PlanInterval } from "@/features/payment";
 
 import { metric, ratioMetric } from "./metrics";
-import type { MetricState, RevenueHealth } from "./types";
+import type { MetricState, MetricStatus, RevenueHealth } from "./types";
 
 export function calculateMrrMinor(input: {
   amount: number;
@@ -39,40 +39,50 @@ export function buildRevenueHealth(input: {
   refundsMinor: number;
   refundEvents: number;
   registeredUsers: number;
+  activeMrrStatus?: MetricStatus;
+  revenueStatus?: MetricStatus;
+  registeredUsersStatus?: MetricStatus;
 }): RevenueHealth {
+  const revenueSource = "database:revenue-event";
+  const mrrSource = "database:subscription-price";
+  const conversionSource = "database:revenue-event+auth";
+  const revenueFailed = input.revenueStatus === "query-failed";
+  const mrrFailed = input.activeMrrStatus === "query-failed";
+  const conversionFailed =
+    revenueFailed || input.registeredUsersStatus === "query-failed";
+  const failed = (source: string, message: string) =>
+    metric<number>(null, "query-failed", source, message);
+
   return {
-    confirmedRevenueEvents: countMetric(
-      input.confirmedRevenueEvents,
-      "database:revenue-event"
-    ),
-    confirmedRevenueMinor: amountMetric(
-      input.confirmedRevenueMinor,
-      input.confirmedRevenueEvents,
-      "database:revenue-event"
-    ),
+    confirmedRevenueEvents: revenueFailed
+      ? failed(revenueSource, "收入数据查询失败")
+      : countMetric(input.confirmedRevenueEvents, revenueSource),
+    confirmedRevenueMinor: revenueFailed
+      ? failed(revenueSource, "收入数据查询失败")
+      : amountMetric(
+          input.confirmedRevenueMinor,
+          input.confirmedRevenueEvents,
+          revenueSource
+        ),
     currency: input.currency,
-    churnedSubscriptions: countMetric(
-      input.churnedSubscriptions,
-      "database:revenue-event"
-    ),
-    mrrMinor: metric(
-      input.activeMrrMinor,
-      input.activeMrrMinor > 0 ? "ready" : "zero-data",
-      "database:subscription-price"
-    ),
-    paidConversionRate: ratioMetric(
-      input.paidUsers,
-      input.registeredUsers,
-      "database:revenue-event+auth"
-    ),
-    paymentFailures: countMetric(
-      input.paymentFailures,
-      "database:revenue-event"
-    ),
-    refundsMinor: amountMetric(
-      input.refundsMinor,
-      input.refundEvents,
-      "database:revenue-event"
-    ),
+    churnedSubscriptions: revenueFailed
+      ? failed(revenueSource, "收入数据查询失败")
+      : countMetric(input.churnedSubscriptions, revenueSource),
+    mrrMinor: mrrFailed
+      ? failed(mrrSource, "订阅数据查询失败")
+      : metric(
+          input.activeMrrMinor,
+          input.activeMrrMinor > 0 ? "ready" : "zero-data",
+          mrrSource
+        ),
+    paidConversionRate: conversionFailed
+      ? failed(conversionSource, "转化率依赖的数据查询失败")
+      : ratioMetric(input.paidUsers, input.registeredUsers, conversionSource),
+    paymentFailures: revenueFailed
+      ? failed(revenueSource, "收入数据查询失败")
+      : countMetric(input.paymentFailures, revenueSource),
+    refundsMinor: revenueFailed
+      ? failed(revenueSource, "收入数据查询失败")
+      : amountMetric(input.refundsMinor, input.refundEvents, revenueSource),
   };
 }

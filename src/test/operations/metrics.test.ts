@@ -29,13 +29,23 @@ describe("operations metric contracts", () => {
     expect(createHealth().apiSuccessRate.status).toBe("not-configured");
   });
 
-  it("uses a deterministic UTC 30-day period", () => {
+  it("uses local-day boundaries for the configured timezone", () => {
     const period = getOperationsPeriod({
       now: new Date("2026-08-02T18:30:00.000Z"),
       timezone: "Asia/Shanghai",
     });
-    expect(period.start.toISOString()).toBe("2026-07-03T00:00:00.000Z");
-    expect(period.end.toISOString()).toBe("2026-08-02T00:00:00.000Z");
+    expect(period.start.toISOString()).toBe("2026-07-03T16:00:00.000Z");
+    expect(period.end.toISOString()).toBe("2026-08-02T16:00:00.000Z");
     expect(period.timezone).toBe("Asia/Shanghai");
+  });
+
+  it("falls back to UTC for an invalid timezone", () => {
+    const period = getOperationsPeriod({
+      now: new Date("2026-08-02T18:30:00.000Z"),
+      timezone: "not/a-timezone",
+    });
+
+    expect(period.timezone).toBe("UTC");
+    expect(period.end.toISOString()).toBe("2026-08-02T00:00:00.000Z");
   });
 });
