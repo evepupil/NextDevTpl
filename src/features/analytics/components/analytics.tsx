@@ -7,28 +7,9 @@ import {
   COOKIE_CONSENT_CHANGE_EVENT,
   COOKIE_CONSENT_KEY,
   COOKIE_PREFERENCES_KEY,
+  hasAnalyticsConsent,
 } from "@/lib/cookie-consent";
 import { trackPageView } from "@/lib/telemetry/client";
-
-function hasAnalyticsConsent(): boolean {
-  if (localStorage.getItem(COOKIE_CONSENT_KEY) !== "all") {
-    return false;
-  }
-
-  const rawPreferences = localStorage.getItem(COOKIE_PREFERENCES_KEY);
-  if (!rawPreferences) {
-    return true;
-  }
-
-  try {
-    const preferences = JSON.parse(rawPreferences) as {
-      analytics?: unknown;
-    };
-    return preferences.analytics !== false;
-  } catch {
-    return false;
-  }
-}
 
 function clearGoogleAnalytics(gaId: string | undefined): void {
   if (gaId) {
@@ -87,7 +68,7 @@ export function Analytics() {
 
     // 监听 storage 事件以响应其他标签页的更改
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === COOKIE_CONSENT_KEY) {
+      if (e.key === COOKIE_CONSENT_KEY || e.key === COOKIE_PREFERENCES_KEY) {
         checkConsent();
       }
     };

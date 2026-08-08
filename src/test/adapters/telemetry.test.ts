@@ -223,12 +223,18 @@ describe("telemetry adapters", () => {
         requests.push(init ?? {});
         return new Response(null, { status: 200 });
       },
+      siteUrl: "https://app.example.test",
       websiteId: "website-1",
     });
 
     await adapter.track(
       createTelemetryEvent(
-        { name: "core_action.completed", source: "server", version: 1 },
+        {
+          attributes: { path: "/zh/pricing" },
+          name: "core_action.completed",
+          source: "server",
+          version: 1,
+        },
         eventOptions
       )
     );
@@ -238,5 +244,10 @@ describe("telemetry adapters", () => {
       "x-umami-api-key": "umami-secret",
     });
     expect(String(requests[0]?.body)).not.toContain("umami-secret");
+    const body = JSON.parse(String(requests[0]?.body)) as {
+      payload: { hostname: string; url: string };
+    };
+    expect(body.payload.hostname).toBe("app.example.test");
+    expect(body.payload.url).toBe("https://app.example.test/zh/pricing");
   });
 });

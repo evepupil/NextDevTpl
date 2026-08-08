@@ -11,6 +11,7 @@ export const RateLimitConfig = {
   payment: { requests: 10, window: "1m" as const },
   upload: { requests: 30, window: "1m" as const },
   strict: { requests: 3, window: "1m" as const },
+  telemetry: { requests: 60, window: "1m" as const },
 } as const;
 
 export type RateLimitType = keyof typeof RateLimitConfig;

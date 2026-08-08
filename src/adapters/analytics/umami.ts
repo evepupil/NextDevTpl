@@ -9,7 +9,20 @@ export interface UmamiConfig {
   apiKey?: string;
   fetch?: typeof globalThis.fetch;
   host?: string;
+  siteUrl?: string;
   websiteId?: string;
+}
+
+function getEventPath(event: TelemetryEvent): string {
+  const path = event.attributes?.path;
+  if (typeof path !== "string" || !path.trim()) return "/";
+
+  try {
+    const parsed = new URL(path, "https://nextdevtpl.local");
+    return `${parsed.pathname}${parsed.search}`.slice(0, 512) || "/";
+  } catch {
+    return "/";
+  }
 }
 
 function distinctId(event: TelemetryEvent): string {
@@ -29,6 +42,14 @@ export function createUmamiTelemetryAdapter(
     /\/$/u,
     ""
   );
+  let site: URL | undefined;
+  if (config.siteUrl) {
+    try {
+      site = new URL(config.siteUrl);
+    } catch {
+      site = undefined;
+    }
+  }
 
   return {
     provider,
@@ -63,8 +84,10 @@ export function createUmamiTelemetryAdapter(
               type: "event",
               payload: {
                 website: config.websiteId,
-                hostname: "nextdevtpl",
-                url: "/",
+                hostname: site?.hostname ?? "nextdevtpl",
+                url: site
+                  ? new URL(getEventPath(event), site.origin).toString()
+                  : getEventPath(event),
                 name: event.name,
                 eventData: {
                   ...event.attributes,

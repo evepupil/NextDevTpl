@@ -31,3 +31,25 @@ export const COOKIE_PREFERENCES_KEY = "cookie-preferences";
  * Cookie 同意变更事件名
  */
 export const COOKIE_CONSENT_CHANGE_EVENT = "cookie-consent-change";
+
+export function hasAnalyticsConsent(): boolean {
+  if (typeof window === "undefined") return false;
+
+  try {
+    if (window.localStorage.getItem(COOKIE_CONSENT_KEY) !== "all") {
+      return false;
+    }
+
+    const raw = window.localStorage.getItem(COOKIE_PREFERENCES_KEY);
+    if (!raw) return true;
+
+    const parsed: unknown = JSON.parse(raw);
+    return (
+      typeof parsed === "object" &&
+      parsed !== null &&
+      (parsed as { analytics?: unknown }).analytics !== false
+    );
+  } catch {
+    return false;
+  }
+}

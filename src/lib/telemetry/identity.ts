@@ -1,4 +1,5 @@
 import type { TelemetryContext, TelemetryUtm } from "@/core/services";
+import { hasAnalyticsConsent } from "@/lib/cookie-consent";
 
 export const TELEMETRY_ANONYMOUS_ID_COOKIE = "nextdevtpl_anonymous_id";
 export const TELEMETRY_ATTRIBUTION_COOKIE = "nextdevtpl_attribution";
@@ -225,6 +226,23 @@ function setCookie(name: string, value: string): void {
   }
 }
 
+function clearCookie(name: string): void {
+  if (typeof document === "undefined") return;
+  try {
+    const encodedName = encodeURIComponent(name);
+    // biome-ignore lint/suspicious/noDocumentCookie: 需要清理已写入的第一方身份 Cookie。
+    document.cookie = `${encodedName}=; Path=/; Max-Age=0; SameSite=Lax`;
+    if (location.hostname.includes(".")) {
+      // biome-ignore lint/suspicious/noDocumentCookie: 需要覆盖当前域名下的身份 Cookie。
+      document.cookie = `${encodedName}=; Path=/; Max-Age=0; SameSite=Lax; Domain=${location.hostname}`;
+      // biome-ignore lint/suspicious/noDocumentCookie: 需要覆盖父域名下的身份 Cookie。
+      document.cookie = `${encodedName}=; Path=/; Max-Age=0; SameSite=Lax; Domain=.${location.hostname}`;
+    }
+  } catch {
+    // 浏览器禁用 Cookie 时静默降级。
+  }
+}
+
 function getLocalStorage(): Storage | undefined {
   if (typeof window === "undefined") return undefined;
 
@@ -248,6 +266,14 @@ function writeLocalStorage(key: string, value: string): void {
     getLocalStorage()?.setItem(key, value);
   } catch {
     // 浏览器禁用本地存储时由 Cookie 作为降级路径。
+  }
+}
+
+function removeLocalStorage(key: string): void {
+  try {
+    getLocalStorage()?.removeItem(key);
+  } catch {
+    // 浏览器禁用本地存储时继续清理 Cookie。
   }
 }
 
@@ -332,7 +358,7 @@ function getOrCreateAnonymousId(): string | undefined {
 }
 
 export function initializeTelemetryIdentity(): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || !hasAnalyticsConsent()) return;
 
   const attribution = createTelemetryAttribution({
     previous: getStoredAttribution(),
@@ -347,23 +373,33 @@ export function initializeTelemetryIdentity(): void {
   getOrCreateAnonymousId();
 }
 
+export function clearTelemetryIdentity(): void {
+  if (typeof window === "undefined") return;
+
+  removeLocalStorage(ANONYMOUS_ID_STORAGE_KEY);
+  removeLocalStorage(ATTRIBUTION_STORAGE_KEY);
+  clearCookie(TELEMETRY_ANONYMOUS_ID_COOKIE);
+  clearCookie(TELEMETRY_ATTRIBUTION_COOKIE);
+}
+
 export function getClientTelemetryHeaders(): Record<string, string> {
   if (typeof window === "undefined") return {};
 
   try {
-    initializeTelemetryIdentity();
+    const locale = normalizeTelemetryValue(document.documentElement.lang, 16);
+    const headers: Record<string, string> = {};
+    if (locale) headers[TELEMETRY_LOCALE_HEADER] = locale;
 
+    if (!hasAnalyticsConsent()) return headers;
+
+    initializeTelemetryIdentity();
     const anonymousId = normalizeTelemetryIdentifier(
       readLocalStorage(ANONYMOUS_ID_STORAGE_KEY) ??
         getCookie(TELEMETRY_ANONYMOUS_ID_COOKIE)
     );
     const attribution = serializeTelemetryAttribution(getStoredAttribution());
-    const locale = normalizeTelemetryValue(document.documentElement.lang, 16);
-    const headers: Record<string, string> = {};
-
     if (anonymousId) headers[TELEMETRY_ANONYMOUS_ID_HEADER] = anonymousId;
     if (attribution) headers[TELEMETRY_ATTRIBUTION_HEADER] = attribution;
-    if (locale) headers[TELEMETRY_LOCALE_HEADER] = locale;
     return headers;
   } catch {
     return {};

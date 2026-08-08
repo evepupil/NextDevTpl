@@ -7,6 +7,7 @@ import {
   telemetryEventInputSchema,
 } from "@/core/services";
 import { withApiLogging } from "@/lib/api-logger";
+import { readRequestBody, RequestBodyTooLargeError } from "@/lib/request-body";
 import { getTelemetryContextFromRequest } from "@/lib/telemetry/identity";
 import { telemetryService } from "@/services/telemetry";
 
@@ -18,11 +19,39 @@ const clientEventSchema = z
   })
   .strict();
 
+const MAX_TELEMETRY_BODY_BYTES = 16 * 1024;
+
+function hasAllowedOrigin(request: Request): boolean {
+  const origin = request.headers.get("origin");
+  if (!origin) return true;
+
+  try {
+    return new URL(origin).origin === new URL(request.url).origin;
+  } catch {
+    return false;
+  }
+}
+
 export const POST = withApiLogging(async (request: Request) => {
+  if (!hasAllowedOrigin(request)) {
+    return NextResponse.json(
+      { error: "Invalid request origin" },
+      { status: 403 }
+    );
+  }
+
   let payload: unknown;
   try {
-    payload = await request.json();
-  } catch {
+    payload = JSON.parse(
+      await readRequestBody(request, MAX_TELEMETRY_BODY_BYTES)
+    ) as unknown;
+  } catch (error) {
+    if (error instanceof RequestBodyTooLargeError) {
+      return NextResponse.json(
+        { error: "Telemetry payload is too large" },
+        { status: 413 }
+      );
+    }
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
