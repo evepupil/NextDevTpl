@@ -58,6 +58,7 @@ const CLOUDFLARE_RATE_LIMITS = [
   { id: "1004", limit: 10, name: "RATE_LIMIT_PAYMENT" },
   { id: "1005", limit: 30, name: "RATE_LIMIT_UPLOAD" },
   { id: "1006", limit: 3, name: "RATE_LIMIT_STRICT" },
+  { id: "1007", limit: 60, name: "RATE_LIMIT_TELEMETRY" },
 ] as const;
 
 function projectName(target: string): string {
@@ -327,7 +328,12 @@ function cloudflarePreflightConfig(
   if (selection.modules.includes("storage")) {
     addRequired("STORAGE_BUCKET_NAME", "NEXT_PUBLIC_AVATARS_BUCKET_NAME");
   }
-  if (selection.modules.includes("credits")) addRemoteRequired("CRON_SECRET");
+  if (
+    selection.modules.includes("credits") ||
+    selection.modules.includes("operations")
+  ) {
+    addRemoteRequired("CRON_SECRET");
+  }
 
   for (const adapter of Object.values(selection.adapters)) {
     switch (adapter) {
@@ -480,6 +486,7 @@ import {
 
 const intlMiddleware = createIntlMiddleware(routing);
 const API_RATE_LIMITS: Array<{ pattern: RegExp; type: RateLimitType }> = [
+  { pattern: /^\\/api\\/telemetry$/, type: "telemetry" },
   { pattern: /^\\/api\\/upload/, type: "upload" },
 ];
 
@@ -777,6 +784,9 @@ function localeLayout(selection: ProjectSelection): string {
     selection.adapters.analytics !== "analytics:noop"
       ? 'import { Analytics } from "@/features/analytics";\n'
       : "";
+  const telemetryIdentityImport = analyticsImport
+    ? 'import { TelemetryIdentityProvider } from "@/lib/telemetry/identity-provider";\n'
+    : "";
   const marketingImport = hasModule(selection, "marketing")
     ? 'import { CookieConsent } from "@/features/marketing";\n'
     : "";
@@ -788,7 +798,7 @@ import { Toaster } from "sonner";
 import { siteConfig } from "@/config";
 ${analyticsImport}${marketingImport}import { Providers } from "@/features/shared";
 import { routing } from "@/i18n/routing";
-import { TelemetryIdentityProvider } from "@/lib/telemetry/identity-provider";
+${telemetryIdentityImport}
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -811,7 +821,7 @@ export default async function LocaleLayout({ children, params }: { children: Rea
         ${hasModule(selection, "marketing") ? "<CookieConsent />" : ""}
         <Toaster richColors position="top-right" />
         ${analyticsImport ? "<Analytics />" : ""}
-        <TelemetryIdentityProvider />
+        ${telemetryIdentityImport ? "<TelemetryIdentityProvider />" : ""}
       </Providers>
     </NextIntlClientProvider>
   );

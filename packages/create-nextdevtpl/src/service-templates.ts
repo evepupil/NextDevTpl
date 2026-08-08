@@ -382,12 +382,14 @@ function getTelemetryEnvironment(): TelemetryEnvironment {
 const websiteId = getRuntimeEnv("UMAMI_WEBSITE_ID");
 const apiKey = getRuntimeEnv("UMAMI_API_KEY");
 const host = getRuntimeEnv("UMAMI_HOST");
+const siteUrl = getRuntimeEnv("NEXT_PUBLIC_APP_URL");
 const release = getRuntimeEnv("APP_VERSION");
 export const telemetryService = createTelemetryService(
   createUmamiTelemetryAdapter({
     ...(websiteId ? { websiteId } : {}),
     ...(apiKey ? { apiKey } : {}),
     ...(host ? { host } : {}),
+    ...(siteUrl ? { siteUrl } : {}),
   }),
   {
     environment: getTelemetryEnvironment(),
@@ -501,6 +503,7 @@ export const rateLimitService = createCloudflareRateLimitAdapter({
   global: binding("RATE_LIMIT_GLOBAL"),
   payment: binding("RATE_LIMIT_PAYMENT"),
   strict: binding("RATE_LIMIT_STRICT"),
+  telemetry: binding("RATE_LIMIT_TELEMETRY"),
   upload: binding("RATE_LIMIT_UPLOAD"),
 });
 export const anonymousQuotaService = noopUsageQuotaAdapter;

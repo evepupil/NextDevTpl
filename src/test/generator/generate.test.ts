@@ -262,11 +262,16 @@ describe("project generation", () => {
       }),
     ]);
     expect(wrangler.send_email).toEqual([{ name: "NEXTDEVTPL_EMAIL" }]);
-    expect(wrangler.ratelimits).toHaveLength(6);
+    expect(wrangler.ratelimits).toHaveLength(7);
     expect(wrangler.ratelimits).toContainEqual({
       name: "RATE_LIMIT_AUTH",
       namespace_id: "1002",
       simple: { limit: 5, period: 60 },
+    });
+    expect(wrangler.ratelimits).toContainEqual({
+      name: "RATE_LIMIT_TELEMETRY",
+      namespace_id: "1007",
+      simple: { limit: 60, period: 60 },
     });
     expect(database).toContain('from "drizzle-orm/neon-http"');
     expect(database).toContain('from "drizzle-orm/neon-serverless"');

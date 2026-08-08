@@ -154,7 +154,7 @@
       "adapterOverrides": {
         "alerts": "alerts:email",
         "analytics": "analytics:noop",
-        "mail": "mail:disabled",
+        "mail": "mail:resend",
         "payment": "payment:creem",
         "rate-limit": "rate-limit:noop"
       },
@@ -163,9 +163,15 @@
       "healthCheck": true,
       "adapters": {
         "alerts": "alerts:email",
+        "mail": "mail:resend",
         "payment": "payment:creem"
       },
-      "requiredEnv": ["CRON_SECRET", "ALERT_EMAIL_TO", "EMAIL_FROM"],
+      "requiredEnv": [
+        "CRON_SECRET",
+        "ALERT_EMAIL_TO",
+        "EMAIL_FROM",
+        "RESEND_API_KEY"
+      ],
       "forbiddenEnv": ["ALERT_WEBHOOK_URL"],
       "requiredPaths": [
         "vercel.json",
