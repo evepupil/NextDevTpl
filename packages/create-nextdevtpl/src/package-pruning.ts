@@ -13,7 +13,10 @@ const REPOSITORY_ONLY_DEV_DEPENDENCIES: readonly string[] = [
 ];
 
 /** 生成项目里需要整体删除的仓库专用脚本名前缀。 */
-const REPOSITORY_ONLY_SCRIPT_PREFIXES: readonly string[] = ["visual:"];
+const REPOSITORY_ONLY_SCRIPT_PREFIXES: readonly string[] = [
+  "palette:",
+  "visual:",
+];
 const REPOSITORY_ONLY_SCRIPTS: readonly string[] = ["skin:check", "skin:hash"];
 const REPOSITORY_SCRIPT_REWRITES: Readonly<
   Record<string, { from: string; to: string }>

@@ -29,6 +29,8 @@ function buildRepositoryPackageJson() {
         "pnpm --filter create-nextdevtpl build && node scripts/verify-skin.mjs check",
       "skin:hash":
         "pnpm --filter create-nextdevtpl build && node scripts/verify-skin.mjs hash",
+      "palette:sync": "node scripts/sync-stylekit-palettes.mjs",
+      "palette:check": "node scripts/verify-palettes.mjs",
       "visual:baseline": "playwright test --update-snapshots",
       "visual:check": "playwright test",
       "visual:db:down": "docker compose -f e2e/docker-compose.yml down",
@@ -47,6 +49,8 @@ describe("pruneRepositoryOnlyPackageEntries", () => {
     expect(Object.keys(packageJson.scripts)).not.toContain("visual:baseline");
     expect(Object.keys(packageJson.scripts)).not.toContain("visual:check");
     expect(Object.keys(packageJson.scripts)).not.toContain("visual:db:down");
+    expect(Object.keys(packageJson.scripts)).not.toContain("palette:sync");
+    expect(Object.keys(packageJson.scripts)).not.toContain("palette:check");
     expect(
       Object.keys(packageJson.scripts).filter((name) =>
         name.startsWith("visual:")
@@ -98,6 +102,20 @@ describe("pruneRepositoryOnlyPackageEntries", () => {
         "visual:anything-new": "playwright test something",
         "visual:a": "echo a",
         "visual:b": "echo b",
+      },
+    });
+
+    expect(Object.keys(packageJson.scripts)).toEqual(["dev"]);
+  });
+
+  it("prunes any script matching the palette: prefix", () => {
+    const packageJson = pruneRepositoryOnlyPackageEntries({
+      devDependencies: {},
+      scripts: {
+        dev: "next dev --turbopack",
+        "palette:sync": "node scripts/sync-stylekit-palettes.mjs",
+        "palette:check": "node scripts/verify-palettes.mjs",
+        "palette:custom": "echo repository-only",
       },
     });
 

@@ -37,6 +37,14 @@ const artifactDirectory = join(
   "packaged-cli"
 );
 const tokenSentinel = "nextdevtpl-default-skin-token-sentinel";
+const extraArguments = process.argv.slice(2);
+const paletteId = extraArguments[0] === "--palette" ? extraArguments[1] : undefined;
+if (
+  extraArguments.length > 0 &&
+  (extraArguments.length !== 2 || !paletteId || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(paletteId))
+) {
+  throw new Error("Invalid packaged palette verification arguments");
+}
 const runId = randomUUID();
 const receiptPath = join(artifactDirectory, `${runId}.json`);
 const receipt = {
@@ -207,6 +215,23 @@ async function assertGeneratedProject(
     throw new Error("Generated manifest does not record the packaged default skin");
   }
   recordCheck("builtin-skin-manifest");
+  if (paletteId) {
+    if (
+      generated.skin.palette?.provider !== "stylekit" ||
+      generated.skin.palette?.id !== paletteId ||
+      !/^[a-f0-9]{64}$/u.test(generated.skin.palette?.sourceSha256 ?? "")
+    ) {
+      throw new Error("Packaged palette metadata is missing");
+    }
+    const notice = await readFile(join(projectRoot, "STYLEKIT-LICENSE.txt"), "utf8");
+    if (!notice.includes(paletteId) || !notice.includes("AnxForever") || !notice.includes("MIT License")) {
+      throw new Error("Packaged palette license is incomplete");
+    }
+    if ((await readdir(projectRoot)).includes("palettes")) {
+      throw new Error("Generated project contains unselected palette resources");
+    }
+    recordCheck("packaged-palette-and-notice");
+  }
 
   const outputSkinDirectory = join(projectRoot, "src", "skin");
   const outputSkin = JSON.parse(
@@ -386,7 +411,7 @@ try {
   const generation = await runStep(
     "generate-default-install-and-migration",
     process.execPath,
-    [cliPath, projectDirectory, "--preset", "minimal"],
+    [cliPath, projectDirectory, "--preset", "minimal", ...(paletteId ? ["--palette", paletteId] : [])],
     { cwd: runnerDirectory, env: projectEnvironment }
   );
   receipt.timingsMs.defaultInstallAndMigration = generation.durationMs;

@@ -18,6 +18,7 @@
       "!.open-next",
       "!packages/*/dist",
       "!packages/*/template",
+      "!packages/create-nextdevtpl/palettes/stylekit",
       "!worker-configuration.d.ts"
     ]
   },

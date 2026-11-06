@@ -63,6 +63,7 @@ export interface GeneratorOptions {
   catalogPath?: string;
   install?: boolean;
   modules?: readonly string[];
+  palette?: string;
   packageManager?: string;
   preset?: PresetName;
   skin?: SkinSourceSelection;
@@ -96,6 +97,7 @@ export interface GeneratedProjectManifest {
 
 export interface GeneratorAssets {
   catalogPath: string;
+  paletteDirectory: string;
   templateManifestPath: string;
   templateRoot: string;
 }

@@ -14,6 +14,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/components/ui-utils";
+import { sharedSiteNavigation } from "@/features/shared/view";
 import { Link, usePathname, useRouter } from "@/i18n/routing";
 import { useDashboardRuntime } from "@/modules/view-runtime";
 import { AccountCreditsBadge, AccountPlanBadge } from "./account-badges";
@@ -57,7 +58,7 @@ export function DashboardSidebar() {
       <>
         <div className="flex h-14 items-center px-4">
           <Link
-            href="/"
+            href={sharedSiteNavigation.homeHref}
             className="flex items-center gap-2"
             onClick={(event) => {
               if (mobile) {
@@ -219,14 +220,20 @@ export function DashboardSidebar() {
                 </div>
                 <Separator />
                 <div className="p-2">
-                  <button
-                    type="button"
-                    onClick={handleSettingsClick}
-                    className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-muted transition-colors"
-                  >
-                    <Settings className="h-4 w-4" />
-                    {t("sidebar.settings")}
-                  </button>
+                  {runtime.navigation.some((group) =>
+                    group.items.some(
+                      (item) => item.href === "/dashboard/settings"
+                    )
+                  ) && (
+                    <button
+                      type="button"
+                      onClick={handleSettingsClick}
+                      className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-muted transition-colors"
+                    >
+                      <Settings className="h-4 w-4" />
+                      {t("sidebar.settings")}
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={handleSignOut}

@@ -1,0 +1,121 @@
+{
+  "dark": {
+    "colors": {
+      "accent": "rgb(255 0 255)",
+      "accent-foreground": "rgb(249.9 249.9 249.9)",
+      "background": "rgb(5.1 5.1 5.1)",
+      "border": "rgb(55.59 255 20.4)",
+      "card": "rgb(5.1 5.1 5.1)",
+      "card-foreground": "rgb(55.59 255 20.4)",
+      "chart-1": "rgb(55.59 255 20.4)",
+      "chart-2": "rgb(255 0 255)",
+      "chart-3": "rgb(0 255 255)",
+      "chart-4": "rgb(255 40.8 40.8)",
+      "chart-5": "rgb(255 255 0)",
+      "destructive": "rgb(220.014 40.086 40.086)",
+      "foreground": "rgb(55.59 255 20.4)",
+      "input": "rgb(55.59 255 20.4)",
+      "muted": "rgb(10.2 10.2 10.2)",
+      "muted-foreground": "rgb(55.59 255 20.4)",
+      "popover": "rgb(5.1 5.1 5.1)",
+      "popover-foreground": "rgb(55.59 255 20.4)",
+      "primary": "rgb(55.59 255 20.4)",
+      "primary-foreground": "rgb(249.9 249.9 249.9)",
+      "ring": "rgb(55.59 255 20.4)",
+      "secondary": "rgb(5.1 5.1 5.1)",
+      "secondary-foreground": "rgb(249.9 249.9 249.9)",
+      "sidebar": "rgb(5.1 5.1 5.1)",
+      "sidebar-accent": "rgb(255 0 255)",
+      "sidebar-accent-foreground": "rgb(249.9 249.9 249.9)",
+      "sidebar-border": "rgb(55.59 255 20.4)",
+      "sidebar-foreground": "rgb(55.59 255 20.4)",
+      "sidebar-primary": "rgb(55.59 255 20.4)",
+      "sidebar-primary-foreground": "rgb(249.9 249.9 249.9)",
+      "sidebar-ring": "rgb(55.59 255 20.4)",
+      "success": "rgb(96.141198 177.298573 143.684443)",
+      "warning": "rgb(236.129573 167.621048 81.426372)",
+      "grid-line": "rgb(55.59 255 20.4 / 0.065)",
+      "glow-1": "rgb(55.59 255 20.4 / 0.14)",
+      "glow-2": "rgb(255 255 0 / 0.08)"
+    },
+    "radius": "0",
+    "radiusInfo": {
+      "clamped": false,
+      "convertedRem": 0,
+      "effectiveRem": 0,
+      "sourceUnit": "rem",
+      "sourceValue": 0
+    }
+  },
+  "id": "arcade-crt",
+  "ignoredKeys": [
+    "destructive-foreground"
+  ],
+  "light": {
+    "colors": {
+      "accent": "rgb(255 0 255)",
+      "accent-foreground": "rgb(249.9 249.9 249.9)",
+      "background": "rgb(5.1 5.1 5.1)",
+      "border": "rgb(55.59 255 20.4)",
+      "card": "rgb(5.1 5.1 5.1)",
+      "card-foreground": "rgb(55.59 255 20.4)",
+      "chart-1": "rgb(55.59 255 20.4)",
+      "chart-2": "rgb(255 0 255)",
+      "chart-3": "rgb(0 255 255)",
+      "chart-4": "rgb(255 40.8 40.8)",
+      "chart-5": "rgb(255 255 0)",
+      "destructive": "rgb(220.014 40.086 40.086)",
+      "foreground": "rgb(55.59 255 20.4)",
+      "input": "rgb(55.59 255 20.4)",
+      "muted": "rgb(10.2 10.2 10.2)",
+      "muted-foreground": "rgb(55.59 255 20.4)",
+      "popover": "rgb(5.1 5.1 5.1)",
+      "popover-foreground": "rgb(55.59 255 20.4)",
+      "primary": "rgb(55.59 255 20.4)",
+      "primary-foreground": "rgb(249.9 249.9 249.9)",
+      "ring": "rgb(55.59 255 20.4)",
+      "secondary": "rgb(5.1 5.1 5.1)",
+      "secondary-foreground": "rgb(249.9 249.9 249.9)",
+      "sidebar": "rgb(5.1 5.1 5.1)",
+      "sidebar-accent": "rgb(255 0 255)",
+      "sidebar-accent-foreground": "rgb(249.9 249.9 249.9)",
+      "sidebar-border": "rgb(55.59 255 20.4)",
+      "sidebar-foreground": "rgb(55.59 255 20.4)",
+      "sidebar-primary": "rgb(55.59 255 20.4)",
+      "sidebar-primary-foreground": "rgb(249.9 249.9 249.9)",
+      "sidebar-ring": "rgb(55.59 255 20.4)",
+      "success": "rgb(35.903878 121.930672 91.095493)",
+      "warning": "rgb(222.673645 154.975056 67.704243)",
+      "grid-line": "rgb(55.59 255 20.4 / 0.045)",
+      "glow-1": "rgb(55.59 255 20.4 / 0.1)",
+      "glow-2": "rgb(255 255 0 / 0.05)"
+    },
+    "radius": "0",
+    "radiusInfo": {
+      "clamped": false,
+      "convertedRem": 0,
+      "effectiveRem": 0,
+      "sourceUnit": "rem",
+      "sourceValue": 0
+    }
+  },
+  "missingKeys": {
+    "dark": [
+      "success",
+      "warning",
+      "grid-line",
+      "glow-1",
+      "glow-2"
+    ],
+    "light": [
+      "success",
+      "warning",
+      "grid-line",
+      "glow-1",
+      "glow-2"
+    ]
+  },
+  "rulesVersion": 1,
+  "schemaVersion": 1,
+  "sourceSha256": "f4f0b5d9b67679c615b3bd2e83043a12be9f51dcd857486bc87a7e228a38bec6"
+}

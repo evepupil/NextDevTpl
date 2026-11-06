@@ -42,6 +42,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec biome format .
       - run: pnpm lint
+      - run: pnpm palette:check
       - run: pnpm typecheck
       - run: pnpm exec drizzle-kit push --force
       - run: pnpm test:run

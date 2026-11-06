@@ -21,6 +21,11 @@ import {
 import { GeneratorError } from "./generator-error.js";
 import type { GeneratorTestHooks } from "./generator-internals.js";
 import { pruneRepositoryOnlyPackageEntries } from "./package-pruning.js";
+import {
+  applyPaletteToTokensCss,
+  loadPaletteSelection,
+} from "./palettes/index.js";
+import type { LoadedPalette } from "./palettes/types.js";
 import { pruneUnselectedRoutes } from "./route-pruning.js";
 import { createProjectSelection } from "./selection.js";
 import {
@@ -28,7 +33,11 @@ import {
   serviceExportNames,
   serviceSources,
 } from "./service-templates.js";
-import { applySkinPackage, validateSkinPackage } from "./skins/index.js";
+import {
+  applySkinPackage,
+  refreshSkinFileHashes,
+  validateSkinPackage,
+} from "./skins/index.js";
 import { resolveSkinSource } from "./skins/source.js";
 import {
   sanitizeSkinError,
@@ -1268,10 +1277,15 @@ async function writeSmokeTest(
 export async function generateProject(
   options: GeneratorOptions,
   hooks: GeneratorTestHooks = {}
-): Promise<{ manifest: GeneratedProjectManifest; targetDirectory: string }> {
+): Promise<{
+  manifest: GeneratedProjectManifest;
+  targetDirectory: string;
+  warnings: readonly string[];
+}> {
   const discovered = await findGeneratorAssets();
   const assets = {
     catalogPath: options.catalogPath ?? discovered.catalogPath,
+    paletteDirectory: discovered.paletteDirectory,
     templateManifestPath:
       options.templateManifestPath ?? discovered.templateManifestPath,
     templateRoot: options.templateRoot ?? discovered.templateRoot,
@@ -1284,10 +1298,19 @@ export async function generateProject(
     kind: "builtin",
     id: "default",
   };
+  if (
+    options.palette !== undefined &&
+    (skinSelection.kind !== "builtin" || skinSelection.id !== "default")
+  ) {
+    throw new GeneratorError(
+      "StyleKit palettes are available only for the built-in default skin"
+    );
+  }
   const skinSource = await resolveSkinSource(skinSelection, {
     templateRoot: assets.templateRoot,
     ...hooks.sourceOptions,
   });
+  let loadedPalette: LoadedPalette | undefined;
   let stage: Awaited<ReturnType<typeof createGenerationStage>> | undefined;
 
   try {
@@ -1297,6 +1320,26 @@ export async function generateProject(
       catalog,
       selectedModules: selection.modules,
     });
+    if (options.palette !== undefined) {
+      if (
+        validatedSkin.manifest.id !== "default" ||
+        !validatedSkin.manifest.supportsPalettes
+      ) {
+        throw new GeneratorError(
+          "StyleKit palettes are available only for the built-in default skin"
+        );
+      }
+      try {
+        loadedPalette = await loadPaletteSelection(
+          assets.paletteDirectory,
+          options.palette
+        );
+      } catch {
+        throw new GeneratorError(
+          "Selected StyleKit palette is invalid or unavailable"
+        );
+      }
+    }
     const target = await prepareTarget(options.targetDirectory);
     return await runInTargetTransaction(
       target.path,
@@ -1324,6 +1367,30 @@ export async function generateProject(
           catalog,
           selectedModules: selection.modules,
         });
+        if (loadedPalette) {
+          const skinDirectory = join(workPath, "src", "skin");
+          const tokensPath = join(skinDirectory, "tokens.css");
+          const appliedPalette = applyPaletteToTokensCss(
+            await readFile(tokensPath, "utf8"),
+            loadedPalette.palette
+          );
+          if (appliedPalette.changed) {
+            await writeText(tokensPath, appliedPalette.css);
+            await refreshSkinFileHashes(skinDirectory);
+          }
+          await writeText(
+            join(workPath, "STYLEKIT-LICENSE.txt"),
+            [
+              "StyleKit",
+              `Theme: ${loadedPalette.palette.id}`,
+              `Source: https://www.stylekit.top/r/${loadedPalette.palette.id}.json`,
+              `Snapshot date: ${loadedPalette.snapshotDate}`,
+              "",
+              loadedPalette.license.trimEnd(),
+              "",
+            ].join("\n")
+          );
+        }
         await rewriteSchema(workPath, selection, catalog);
         await rewriteTranslations(
           workPath,
@@ -1377,6 +1444,16 @@ export async function generateProject(
             version: validatedSkin.manifest.version,
             packageHash: validatedSkin.packageHash,
             source: skinSource.source,
+            ...(loadedPalette
+              ? {
+                  palette: {
+                    provider: "stylekit" as const,
+                    id: loadedPalette.palette.id,
+                    snapshotDate: loadedPalette.snapshotDate,
+                    sourceSha256: loadedPalette.palette.sourceSha256,
+                  },
+                }
+              : {}),
           } satisfies GeneratedSkinRecord,
         };
         await writeJson(join(workPath, "nextdevtpl.generated.json"), manifest);
@@ -1410,7 +1487,11 @@ export async function generateProject(
             );
           }
         }
-        return { manifest, targetDirectory: target.path };
+        return {
+          manifest,
+          targetDirectory: target.path,
+          warnings: loadedPalette?.warnings ?? [],
+        };
       }
     );
   } catch (error) {

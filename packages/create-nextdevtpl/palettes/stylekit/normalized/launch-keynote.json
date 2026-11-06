@@ -1,0 +1,121 @@
+{
+  "dark": {
+    "colors": {
+      "accent": "rgb(40.8 151.47 255)",
+      "accent-foreground": "rgb(22.95 22.95 22.95)",
+      "background": "rgb(0 0 0)",
+      "border": "rgb(255 255 255)",
+      "card": "rgb(0 0 0)",
+      "card-foreground": "rgb(243.678 243.678 245.922)",
+      "chart-1": "rgb(40.8 151.47 255)",
+      "chart-2": "rgb(40.8 151.47 255)",
+      "chart-3": "rgb(29.682 29.682 31.518)",
+      "chart-4": "rgb(135.354 135.354 140.046)",
+      "chart-5": "rgb(169.32 255 40.8)",
+      "destructive": "rgb(220.014 40.086 40.086)",
+      "foreground": "rgb(243.678 243.678 245.922)",
+      "input": "rgb(255 255 255)",
+      "muted": "rgb(29.682 29.682 31.518)",
+      "muted-foreground": "rgb(255 255 255)",
+      "popover": "rgb(0 0 0)",
+      "popover-foreground": "rgb(243.678 243.678 245.922)",
+      "primary": "rgb(40.8 151.47 255)",
+      "primary-foreground": "rgb(22.95 22.95 22.95)",
+      "ring": "rgb(40.8 151.47 255)",
+      "secondary": "rgb(243.678 243.678 245.922)",
+      "secondary-foreground": "rgb(22.95 22.95 22.95)",
+      "sidebar": "rgb(0 0 0)",
+      "sidebar-accent": "rgb(40.8 151.47 255)",
+      "sidebar-accent-foreground": "rgb(22.95 22.95 22.95)",
+      "sidebar-border": "rgb(255 255 255)",
+      "sidebar-foreground": "rgb(243.678 243.678 245.922)",
+      "sidebar-primary": "rgb(40.8 151.47 255)",
+      "sidebar-primary-foreground": "rgb(22.95 22.95 22.95)",
+      "sidebar-ring": "rgb(40.8 151.47 255)",
+      "success": "rgb(96.141198 177.298573 143.684443)",
+      "warning": "rgb(236.129573 167.621048 81.426372)",
+      "grid-line": "rgb(243.678 243.678 245.922 / 0.065)",
+      "glow-1": "rgb(40.8 151.47 255 / 0.14)",
+      "glow-2": "rgb(169.32 255 40.8 / 0.08)"
+    },
+    "radius": "1rem",
+    "radiusInfo": {
+      "clamped": false,
+      "convertedRem": 1,
+      "effectiveRem": 1,
+      "sourceUnit": "rem",
+      "sourceValue": 1
+    }
+  },
+  "id": "launch-keynote",
+  "ignoredKeys": [
+    "destructive-foreground"
+  ],
+  "light": {
+    "colors": {
+      "accent": "rgb(40.8 151.47 255)",
+      "accent-foreground": "rgb(22.95 22.95 22.95)",
+      "background": "rgb(0 0 0)",
+      "border": "rgb(255 255 255)",
+      "card": "rgb(0 0 0)",
+      "card-foreground": "rgb(243.678 243.678 245.922)",
+      "chart-1": "rgb(40.8 151.47 255)",
+      "chart-2": "rgb(40.8 151.47 255)",
+      "chart-3": "rgb(29.682 29.682 31.518)",
+      "chart-4": "rgb(135.354 135.354 140.046)",
+      "chart-5": "rgb(169.32 255 40.8)",
+      "destructive": "rgb(220.014 40.086 40.086)",
+      "foreground": "rgb(243.678 243.678 245.922)",
+      "input": "rgb(255 255 255)",
+      "muted": "rgb(29.682 29.682 31.518)",
+      "muted-foreground": "rgb(255 255 255)",
+      "popover": "rgb(0 0 0)",
+      "popover-foreground": "rgb(243.678 243.678 245.922)",
+      "primary": "rgb(40.8 151.47 255)",
+      "primary-foreground": "rgb(22.95 22.95 22.95)",
+      "ring": "rgb(40.8 151.47 255)",
+      "secondary": "rgb(243.678 243.678 245.922)",
+      "secondary-foreground": "rgb(22.95 22.95 22.95)",
+      "sidebar": "rgb(0 0 0)",
+      "sidebar-accent": "rgb(40.8 151.47 255)",
+      "sidebar-accent-foreground": "rgb(22.95 22.95 22.95)",
+      "sidebar-border": "rgb(255 255 255)",
+      "sidebar-foreground": "rgb(243.678 243.678 245.922)",
+      "sidebar-primary": "rgb(40.8 151.47 255)",
+      "sidebar-primary-foreground": "rgb(22.95 22.95 22.95)",
+      "sidebar-ring": "rgb(40.8 151.47 255)",
+      "success": "rgb(35.903878 121.930672 91.095493)",
+      "warning": "rgb(222.673645 154.975056 67.704243)",
+      "grid-line": "rgb(243.678 243.678 245.922 / 0.045)",
+      "glow-1": "rgb(40.8 151.47 255 / 0.1)",
+      "glow-2": "rgb(169.32 255 40.8 / 0.05)"
+    },
+    "radius": "1rem",
+    "radiusInfo": {
+      "clamped": false,
+      "convertedRem": 1,
+      "effectiveRem": 1,
+      "sourceUnit": "rem",
+      "sourceValue": 1
+    }
+  },
+  "missingKeys": {
+    "dark": [
+      "success",
+      "warning",
+      "grid-line",
+      "glow-1",
+      "glow-2"
+    ],
+    "light": [
+      "success",
+      "warning",
+      "grid-line",
+      "glow-1",
+      "glow-2"
+    ]
+  },
+  "rulesVersion": 1,
+  "schemaVersion": 1,
+  "sourceSha256": "56219bb58805db6eed6a72472ade4349d4911baac1d317df450b60ada0292798"
+}

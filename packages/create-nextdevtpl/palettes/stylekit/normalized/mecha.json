@@ -1,0 +1,121 @@
+{
+  "dark": {
+    "colors": {
+      "accent": "rgb(250.512 189.4752 35.088)",
+      "accent-foreground": "rgb(22.95 22.95 22.95)",
+      "background": "rgb(25.245 38.3265 66.555)",
+      "border": "rgb(72.8161 90.9585 56.9415)",
+      "card": "rgb(25.245 38.3265 66.555)",
+      "card-foreground": "rgb(250.512 189.4752 35.088)",
+      "chart-1": "rgb(250.512 189.4752 35.088)",
+      "chart-2": "rgb(250.512 189.4752 35.088)",
+      "chart-3": "rgb(238.68 67.32 67.32)",
+      "chart-4": "rgb(86.8139 237.2265 63.6735)",
+      "chart-5": "rgb(5.916 141.984 5.916)",
+      "destructive": "rgb(220.014 40.086 40.086)",
+      "foreground": "rgb(250.512 189.4752 35.088)",
+      "input": "rgb(72.8161 90.9585 56.9415)",
+      "muted": "rgb(72.8161 90.9585 56.9415)",
+      "muted-foreground": "rgb(249.9 249.9 249.9)",
+      "popover": "rgb(25.245 38.3265 66.555)",
+      "popover-foreground": "rgb(250.512 189.4752 35.088)",
+      "primary": "rgb(250.512 189.4752 35.088)",
+      "primary-foreground": "rgb(22.95 22.95 22.95)",
+      "ring": "rgb(250.512 189.4752 35.088)",
+      "secondary": "rgb(72.8161 90.9585 56.9415)",
+      "secondary-foreground": "rgb(249.9 249.9 249.9)",
+      "sidebar": "rgb(25.245 38.3265 66.555)",
+      "sidebar-accent": "rgb(250.512 189.4752 35.088)",
+      "sidebar-accent-foreground": "rgb(22.95 22.95 22.95)",
+      "sidebar-border": "rgb(72.8161 90.9585 56.9415)",
+      "sidebar-foreground": "rgb(250.512 189.4752 35.088)",
+      "sidebar-primary": "rgb(250.512 189.4752 35.088)",
+      "sidebar-primary-foreground": "rgb(22.95 22.95 22.95)",
+      "sidebar-ring": "rgb(250.512 189.4752 35.088)",
+      "success": "rgb(96.141198 177.298573 143.684443)",
+      "warning": "rgb(236.129573 167.621048 81.426372)",
+      "grid-line": "rgb(250.512 189.4752 35.088 / 0.065)",
+      "glow-1": "rgb(250.512 189.4752 35.088 / 0.14)",
+      "glow-2": "rgb(5.916 141.984 5.916 / 0.08)"
+    },
+    "radius": "0",
+    "radiusInfo": {
+      "clamped": false,
+      "convertedRem": 0,
+      "effectiveRem": 0,
+      "sourceUnit": "rem",
+      "sourceValue": 0
+    }
+  },
+  "id": "mecha",
+  "ignoredKeys": [
+    "destructive-foreground"
+  ],
+  "light": {
+    "colors": {
+      "accent": "rgb(250.512 189.4752 35.088)",
+      "accent-foreground": "rgb(22.95 22.95 22.95)",
+      "background": "rgb(25.245 38.3265 66.555)",
+      "border": "rgb(72.8161 90.9585 56.9415)",
+      "card": "rgb(25.245 38.3265 66.555)",
+      "card-foreground": "rgb(250.512 189.4752 35.088)",
+      "chart-1": "rgb(250.512 189.4752 35.088)",
+      "chart-2": "rgb(250.512 189.4752 35.088)",
+      "chart-3": "rgb(238.68 67.32 67.32)",
+      "chart-4": "rgb(86.8139 237.2265 63.6735)",
+      "chart-5": "rgb(5.916 141.984 5.916)",
+      "destructive": "rgb(220.014 40.086 40.086)",
+      "foreground": "rgb(250.512 189.4752 35.088)",
+      "input": "rgb(72.8161 90.9585 56.9415)",
+      "muted": "rgb(72.8161 90.9585 56.9415)",
+      "muted-foreground": "rgb(249.9 249.9 249.9)",
+      "popover": "rgb(25.245 38.3265 66.555)",
+      "popover-foreground": "rgb(250.512 189.4752 35.088)",
+      "primary": "rgb(250.512 189.4752 35.088)",
+      "primary-foreground": "rgb(22.95 22.95 22.95)",
+      "ring": "rgb(250.512 189.4752 35.088)",
+      "secondary": "rgb(72.8161 90.9585 56.9415)",
+      "secondary-foreground": "rgb(249.9 249.9 249.9)",
+      "sidebar": "rgb(25.245 38.3265 66.555)",
+      "sidebar-accent": "rgb(250.512 189.4752 35.088)",
+      "sidebar-accent-foreground": "rgb(22.95 22.95 22.95)",
+      "sidebar-border": "rgb(72.8161 90.9585 56.9415)",
+      "sidebar-foreground": "rgb(250.512 189.4752 35.088)",
+      "sidebar-primary": "rgb(250.512 189.4752 35.088)",
+      "sidebar-primary-foreground": "rgb(22.95 22.95 22.95)",
+      "sidebar-ring": "rgb(250.512 189.4752 35.088)",
+      "success": "rgb(35.903878 121.930672 91.095493)",
+      "warning": "rgb(222.673645 154.975056 67.704243)",
+      "grid-line": "rgb(250.512 189.4752 35.088 / 0.045)",
+      "glow-1": "rgb(250.512 189.4752 35.088 / 0.1)",
+      "glow-2": "rgb(5.916 141.984 5.916 / 0.05)"
+    },
+    "radius": "0",
+    "radiusInfo": {
+      "clamped": false,
+      "convertedRem": 0,
+      "effectiveRem": 0,
+      "sourceUnit": "rem",
+      "sourceValue": 0
+    }
+  },
+  "missingKeys": {
+    "dark": [
+      "success",
+      "warning",
+      "grid-line",
+      "glow-1",
+      "glow-2"
+    ],
+    "light": [
+      "success",
+      "warning",
+      "grid-line",
+      "glow-1",
+      "glow-2"
+    ]
+  },
+  "rulesVersion": 1,
+  "schemaVersion": 1,
+  "sourceSha256": "2f561daae9c746e38322b2c485a2a7b77a2a674f583a7750389887986cb54edb"
+}

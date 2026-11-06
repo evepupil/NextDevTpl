@@ -5,6 +5,7 @@ export { parseSkinManifest, readSkinManifest } from "./manifest.js";
 export { resolveSkinSource } from "./source.js";
 export { sanitizeSkinError, skinProcessEnvironment } from "./source-env.js";
 export type {
+  GeneratedPaletteRecord,
   GeneratedSkinRecord,
   ResolvedSkinSource,
   SkinSourceRecord,

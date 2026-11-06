@@ -31,6 +31,7 @@
   },
   "files": [
     "dist",
+    "palettes",
     "template",
     "catalog.json",
     "README.md",
@@ -48,6 +49,7 @@
     "prepack": "pnpm run assemble-template && pnpm run build"
   },
   "dependencies": {
+    "colorjs.io": "0.7.1",
     "postcss": "8.5.6",
     "postcss-value-parser": "4.2.0",
     "semver": "7.7.3",

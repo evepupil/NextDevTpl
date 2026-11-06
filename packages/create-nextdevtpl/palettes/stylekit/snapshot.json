@@ -1,0 +1,613 @@
+{
+  "fetchedAt": "2026-11-06T21:36:52.051Z",
+  "licenseSha256": "dcd1e458e3d212d23f54c63dddf91dee8c1b09339f60c44afedf3be1e078c828",
+  "normalizedThemesSha256": "6948e2315d04eb7e28be4920d08263a871ca1057f700d3df4a924bc0c55748fa",
+  "originalThemesSha256": "2b69ecb19c42fe8435431c600d5307d218614834fd39dd83cff197bfb9a02855",
+  "registrySha256": "3af6043190a48d6f22096111f831eaeb14605ff30142d422c084f1e0a1d16ff2",
+  "rulesVersion": 1,
+  "schemaVersion": 1,
+  "source": {
+    "licenseSource": "https://github.com/AnxForever/stylekit/blob/main/LICENSE",
+    "registryUrl": "https://www.stylekit.top/registry.json",
+    "themeUrlTemplate": "https://www.stylekit.top/r/{slug}.json"
+  },
+  "themeCount": 149,
+  "themes": {
+    "acid-graphics": {
+      "normalizedSha256": "f0f292299963d0beda760c4875d4250b1f71f092ff9c0e09ec0420fa31968833",
+      "sourceSha256": "54b88148a212a31fc60e32f45f8411cfc978de24d7e218e511f43e15b3c48eb4"
+    },
+    "african-textile": {
+      "normalizedSha256": "004dbdba0cb0d071fdfca7b7a1339e842f1d52423585d510d2d5178ab2e9812f",
+      "sourceSha256": "52909a0647228c7202550be25fb1d472e2993d2c8b527b7b682965782a76814b"
+    },
+    "anti-design": {
+      "normalizedSha256": "2b0e9dc3bca1907a306fa83937f08e84f0e8268383c27bb1c04a2b3d9c6c6f5d",
+      "sourceSha256": "56e3e154b56c3a9d9e178b45280923553319a75eb58933068a4f4e2736c9d104"
+    },
+    "apple-style": {
+      "normalizedSha256": "e2fbbcf3d6d1d16824127751ccef988b39212c514cd2ce87d4c10865c46e0056",
+      "sourceSha256": "f3b434251704500075e2f0f452b0f71d64c20f5f543c4edd00ce7efb615ce9f6"
+    },
+    "arcade-crt": {
+      "normalizedSha256": "b0a4f93b32e10b7994569fa09aea23278630d7577da7d91a05a0e7c94ca091c9",
+      "sourceSha256": "f4f0b5d9b67679c615b3bd2e83043a12be9f51dcd857486bc87a7e228a38bec6"
+    },
+    "art-deco": {
+      "normalizedSha256": "1b2a61b7fd4fa89bb9da3137cc4276f5836121bb0d1798b621bb9309a65c477a",
+      "sourceSha256": "e0193ec4826632331296c3410a8c54854ff2eb0bd26bde3faffa193c2b57be96"
+    },
+    "art-nouveau": {
+      "normalizedSha256": "59d85a3999db82666bd8b7f404869d5c5bcd4f7cff80704b1d36022e5d4e41b1",
+      "sourceSha256": "18dc70479ab4f87c34e3e128191b8f1587490cc34818f97ffed980148ea9789e"
+    },
+    "asymmetric-grid": {
+      "normalizedSha256": "fe74afeab390c90afe254d1ebdba739bb5c4806755c1ba0ac48d266089e17282",
+      "sourceSha256": "64985490cf90c0da25428b5676969825ebdb06b950eb2e1fe148508e5a69396d"
+    },
+    "bauhaus": {
+      "normalizedSha256": "4a65fb2e32cfd8e95bda0d4b52fedaaa9f5bcae618d0626496f64d8180a2b085",
+      "sourceSha256": "ffa02cf788edf9dd6bcea9303409f0e6cd497334bfbd51d2f51ce00c5040e7e1"
+    },
+    "bento-grid": {
+      "normalizedSha256": "50aa3fe8ff95c2a2f17e93c0178fcea74864e3151b1885a1a53187a80f66397d",
+      "sourceSha256": "4764fe13c3787d1d4e302dd8cd1487922a52a8d91fe4a25049319092f1b5133e"
+    },
+    "blueprint": {
+      "normalizedSha256": "1d03a82f49021d33bb19c82f54c0ed554cb1cce3e614ac97ee4cf1c0150f22aa",
+      "sourceSha256": "4fb267a3e59a22bb601d55ae5ca7fb0ef2174e9f890735a27f9a589b342c28ae"
+    },
+    "broadcast-glitch": {
+      "normalizedSha256": "30a8721c8d9b9e560450d9d2af1c3efcc986633e1bc50831e3ddd3e5a08fa96b",
+      "sourceSha256": "8160da87fc8acc82d3fa1d41af9be1ec7a7ee2fb6517d9aea677db8d21308cf1"
+    },
+    "brutalist-web": {
+      "normalizedSha256": "35a3c33f2f4e9e0552c0a5b9f131e691c87a588fb7905c03367e37abc25dcc81",
+      "sourceSha256": "ee880262e29f45456b367a5844f68cd34efc37d93dd655848bcfc6754206360b"
+    },
+    "card-stack": {
+      "normalizedSha256": "369c0c2b63c89414a1d481611861e769b64c670fd9cdada8061e6cf350d72dc7",
+      "sourceSha256": "32c376aff69de31d9793fb9d6fca255ef56fa66c5fe6b6aae06320f0a1865309"
+    },
+    "cel-shading": {
+      "normalizedSha256": "107fe8ffdd05f1d831c489b21a03c9ef1949a15a0f95027dc4ce655375b447cd",
+      "sourceSha256": "c4f72c93d5bd10c2f5ed9733ddcc34274105e67bce0959ae87e0c25c0126c07a"
+    },
+    "cinematic-video-hero": {
+      "normalizedSha256": "8dcd50f52be442197856ddcc5953ea986d0dcd1c3bb40f28a191367ae6035344",
+      "sourceSha256": "892eb0a23cfdc52c7f0a5d5e08e5c4b695a4d2de1c08f5058eb9dbdb6d06db55"
+    },
+    "claymorphism": {
+      "normalizedSha256": "2e1ce6f7e28233d960e0f142c723e4f17f6368a2ebcd621a6584aba1d863c4b8",
+      "sourceSha256": "2c634bcd7d08980bde4b29f0c930419f10018cf694549406ef458f3843211b29"
+    },
+    "collage-art": {
+      "normalizedSha256": "8c19d9173f0e9d624670c49ecc6603fc30ab14dc650473aa185006e653ad31ff",
+      "sourceSha256": "2bb334f309eee74485c2a3dfa4fce797374872febc6940d84a36e024cdf67f97"
+    },
+    "comic-style": {
+      "normalizedSha256": "93762673062ebac6ba17ab4bc0db57ce639143509c8cf838acffe9a313a73ca9",
+      "sourceSha256": "f05d206da0d82e0e3b2c11dc0cac13e4400e02a441af5c0efaaf77d9ac019189"
+    },
+    "constructivism": {
+      "normalizedSha256": "9a416736ada1de324140e4ebd58da197714e97e4076baa7bce8b1e0b22b880a1",
+      "sourceSha256": "99f076fa7e37fbf2fb4ccb28b667d85aa0d45c2cd357360d8949a1b21bec7d1d"
+    },
+    "corporate-clean": {
+      "normalizedSha256": "65fafe9413a528b45497e975f155c2e3d8c1ff18458630c8d8d341803e6634c8",
+      "sourceSha256": "bd5a7cf9882f21744a472e217ca478fd5e0d01f1b08f36385c1a7269631b25ed"
+    },
+    "cottagecore": {
+      "normalizedSha256": "2373dfa0f908032c80df21e2ae12cdbdf65fe5f66d16b3ca627f4d0f753e394f",
+      "sourceSha256": "afe0155670dc771b612e824fe2ce27f6ee51b30947338143a5b7fe60978eba28"
+    },
+    "cubism": {
+      "normalizedSha256": "f6fa3366ed1cbbb3e923c5dd2a403210429d4b1a3ee9226149e8a970e37c8440",
+      "sourceSha256": "cb2ec194db3560d9f50e9eb1f4ebb6f450c8fea9631c2809d05825254484deae"
+    },
+    "cyber-anime": {
+      "normalizedSha256": "5a0514422328cb2cd2d48406abcb0c86e0178439e19f6b785f1ba4ba26e23c1b",
+      "sourceSha256": "8aa0e7bbe42323ebaf4612fa33bfdfbaf72ac9aa54821a21d6f7d55d60fed56e"
+    },
+    "cyber-chinese": {
+      "normalizedSha256": "e0158bafcff5b7797d86a4a31d2b997d9c70d8d7979f83571349bd52f7f423a9",
+      "sourceSha256": "69b357dcdc4b070ed05c8cf7c2da43c7146bb2f4165e0dd719ec981dafec8147"
+    },
+    "cyber-wafuu": {
+      "normalizedSha256": "c5e3c7d497785da94d065ecd3a56471655460e8582aa9bd5eda5e86dfa56572a",
+      "sourceSha256": "34fb5d04c2fff450478d8724a60c0d74f4b199a49df85002acbb1ad745bd784a"
+    },
+    "cyberpunk-neon": {
+      "normalizedSha256": "507f612656c3cd574927b6a25edfa3602538a9b38369a56558c685eabdb5c077",
+      "sourceSha256": "f0bf548a55204a4c45cfc28822b60acee18f30e781ce28063bf3e33063ae509b"
+    },
+    "dark-academia": {
+      "normalizedSha256": "aec45f880ab28ce5ea8d49a4f6bcd747e3069e0ab655580d608ccf5c4fcc7709",
+      "sourceSha256": "40ad0420986a094749bc6940fd154fe3780b5e981ed5c7348bcde3c0bbbea004"
+    },
+    "dark-mode": {
+      "normalizedSha256": "8c53b3e28d4f0f428d1dc0fe83ec9350061eeb358bedc977ab96aba6ad314ecb",
+      "sourceSha256": "432285a271539070133722984849bd40c7b6649ba3da12696c46920a38f36cfd"
+    },
+    "dashboard-layout": {
+      "normalizedSha256": "10cfbabf729207d5e2429a91062ff252e3f62a798f4917557ffb89ee0b739f7f",
+      "sourceSha256": "8f606d263f5913998be81127cdd37638b40c1e9a5619e18182d0e3ee38ca51c1"
+    },
+    "data-dense": {
+      "normalizedSha256": "0a7fc068b36557f8cead57d14fe6bcbeb6d2a60811646a3db3f0b36ace6540a7",
+      "sourceSha256": "18fc36915b410a2657c2801958c3a5cb333eb867f357f61aea9b643931be8d47"
+    },
+    "developer-terminal": {
+      "normalizedSha256": "540e94be1f4a5e79b8eaa053cd8b00b4187738c2ac2e97dd7745ab2c05047baa",
+      "sourceSha256": "c435f4b33fda230691c0b19f5c6d993817a490f203bb939ae198bd8155d1f620"
+    },
+    "distill-style": {
+      "normalizedSha256": "08f9ac254b6ce8f891fbce7a4a82d558bfb1ed5c165ee59a22bd951b78de8800",
+      "sourceSha256": "8c6d1e26e4dc9dffbcd1717f497399ea5efc24fa17fc6f5310c530513682520e"
+    },
+    "dopamine-design": {
+      "normalizedSha256": "fa759acbb529ac041f228c92ac53825e7640fd56ad951ee366c43620f94ab130",
+      "sourceSha256": "0b610ca5624392b8fc6a77e319671df022967a8ab005f4d4973edd9bc8564078"
+    },
+    "editorial": {
+      "normalizedSha256": "24ac4ef8e4123a597ac146ab14e2991c03df4095f8d06c5e420259c4d074f7e5",
+      "sourceSha256": "bbed812b41f22c999a7bc2a77d0067b0abf434dc917d03a910e1236d18eced61"
+    },
+    "f-pattern-layout": {
+      "normalizedSha256": "9dff03d9b58bef52a5af81ef87331bfbf13ba0bbbb64e3f119ca95f11955fc55",
+      "sourceSha256": "67a605bd317c57d2f50588d413c56e6d7dcd17161a63271d8657ecb3462dd82e"
+    },
+    "film-noir": {
+      "normalizedSha256": "4e4741a58a1dde35b539b4ffa7584fe8e993c90d6cfe5bbc01d656fc50bc7911",
+      "sourceSha256": "12ea1b878b36ef6803e20dea61e3a6e05a6942bbc66d09b316c1a5bf8e27215b"
+    },
+    "fluent-design": {
+      "normalizedSha256": "6379bac4ec7140be3aa16d3d1b718f0f52602fe9d2afd81a1be222af07b52276",
+      "sourceSha256": "42eb2e1415dfa6fc3bd4d786b0aa7e21da17b80779ab706bb758b437e42f7761"
+    },
+    "fresh-market": {
+      "normalizedSha256": "6174f9b9593a1502946eacbc2157acdbce6f45c0a2ee56960661e0b1ee378ab8",
+      "sourceSha256": "aa3a20384ad8e0e46e0dacba007b1c965e848d597a3e708529fb06790d215d5a"
+    },
+    "frutiger-aero": {
+      "normalizedSha256": "d84525f2f986dd7b3cf059ce0cfc1f3638eb5c67ee555efca084e14ff9901d21",
+      "sourceSha256": "aee74ce74e59b1d4270403121c7ca4c87ff6125ab66d98045d79e033e819a9c9"
+    },
+    "full-page-scroll": {
+      "normalizedSha256": "af505482475f53cce581e2675be1c1dd6592b25f737d3f8c3be591d99d6daa76",
+      "sourceSha256": "5ee14eb156037e61cf74fe443366952026755ba07006b31c70fbfe341c4ee3b7"
+    },
+    "gallery-dark": {
+      "normalizedSha256": "4d0517baae08ab2d1bd943a38792a67d08eb217bf08874d25172f1ab60b1f575",
+      "sourceSha256": "6dd5637d50e9c410b72007966b6153b1106e830b9aad72f92de66df378554755"
+    },
+    "generative-art": {
+      "normalizedSha256": "8e888bbc4d6c7476edff7a2517b02dbc27c190d27738213affb4051cff0cad3b",
+      "sourceSha256": "313f1c189aadf90e14fbeb0a33136b2a5ba3855e33ac67edd5b7b51d860f9b94"
+    },
+    "geometric-bold": {
+      "normalizedSha256": "e04d3b31b7e3643a6b53c753228324b898755e20cfac284d1c9c468d68b357c6",
+      "sourceSha256": "1506bf13d31db1f0ba9ec304cfa351e817e62c298c94197c67b44c6661d7ef77"
+    },
+    "ghibli-style": {
+      "normalizedSha256": "9878bc80c90c73dadb1055e1bbd6efee6ea72e884e268be8560318015a0d2fbb",
+      "sourceSha256": "922c67539c443114edc1000d9853070a1543b4156b74e1d52b109eae9c58d347"
+    },
+    "github-style": {
+      "normalizedSha256": "22413ffe9026857d9357c8e58e14141db16657ccab4614da886fb4845babbdfb",
+      "sourceSha256": "fa1c10565441d63fd7c80012cb7dee20e700a49c6e586ea58ac661dabb48b224"
+    },
+    "glassmorphism": {
+      "normalizedSha256": "cf5bef2ea14ef671e04895537eea762e4e16cc7ae3aec97e70e980e65f94c4d7",
+      "sourceSha256": "e091fc817fdce71927b496f5232cff946367e11556f576778386d2d9dc47a44d"
+    },
+    "glitch-art": {
+      "normalizedSha256": "4c04732fa860c4ee81b8ae1f412b91e4c51aa398ba9c187bdbab13ea0da7fc11",
+      "sourceSha256": "f1d7f248ac8303b99324ab6b3465d42bb5ce3f8dce0f5cfc4fb32f8bbb87e9b2"
+    },
+    "gothic": {
+      "normalizedSha256": "f0bf392d3b5e06d7979f542fc60b005d0b5fa817d2109668826f0d91f311715b",
+      "sourceSha256": "5626f076837591e06cebfac6427abe59e13411157fa8cb945ef205efbe9fc3a0"
+    },
+    "gothic-lolita": {
+      "normalizedSha256": "d87e2c92d788df78f0a75b4e113544f63279cb2e1b2c034160eef8494886bc79",
+      "sourceSha256": "adb2be55035c712e425a002945ea2eb5076ac759b13bbcab12912a0f991cabee"
+    },
+    "graffiti-street": {
+      "normalizedSha256": "17b6e2a6be3a76f3a9c7bcd95f8fceaf4f2d506bcdf0866f4a2ec3d635f32c06",
+      "sourceSha256": "f9fa10a59a281035fb91463379eaa2e7cf10518e3877fcc1bbe4f77ee0695c86"
+    },
+    "hand-drawn-doodle": {
+      "normalizedSha256": "f8f2e4208a3c4d21374bbb8653f600044176894f0ed2049e3d3e17cff142f55f",
+      "sourceSha256": "ce2bc15249da6a3d3fb0fef1ffbbedcb92041d17625efe8f3c0909aa3a6e3e4d"
+    },
+    "hero-fullscreen": {
+      "normalizedSha256": "3f7986f110ce4747a4beded5adaeacd991600ff1548a42ea62b4d60cecdea50a",
+      "sourceSha256": "1b393c3c7358c71e58f8addb1fda8e0b3962e8c2069467a2ab0d5970498a9e98"
+    },
+    "holographic": {
+      "normalizedSha256": "83890ecad87e40ffa14dee22ba690d721b6dd0cfd2e6e597cca7698623381158",
+      "sourceSha256": "3b3c6a9c446d2917275b0f7dc93a0fe78f20d7ef72814757d715b3c03e8725f0"
+    },
+    "holy-grail-layout": {
+      "normalizedSha256": "b767a6328d343d6af6addd271d90b5e39cea5238c2b3e3e32739106b615c51f5",
+      "sourceSha256": "51b1f7cdaf81451ee38f54278e9856a02b2d214ae458b31702d13d55f3e8c55f"
+    },
+    "horizontal-gallery": {
+      "normalizedSha256": "b2a0d1cefefb10897120523614b9e276dc49545683dcab5d384c63b0d45a6e72",
+      "sourceSha256": "31681c83b38f40a5fde272fb5d97a2b18a4b67e195992923d582377094dbe356"
+    },
+    "immersive-photo": {
+      "normalizedSha256": "54aa3513833bc9eb587e116fdaaf9b88cd4d726b941a226aea7ee94e5a150c11",
+      "sourceSha256": "c1cf9768f069700b9c83e9a06917e28b520e012dd37635f9d926562b7c38e75a"
+    },
+    "impressionist-oil": {
+      "normalizedSha256": "a2f5b6f28a5b9c0959d7187d5d45932d70d05620245aca0678cda3a1184d6f09",
+      "sourceSha256": "d06f27878acf5e541b21a7809328feb221fd6cfcef32e0e071dbbe2ecb70f5cc"
+    },
+    "indian-festive": {
+      "normalizedSha256": "ceb9f9d7c3cc1da98e9c5bbd56e3fc85751f7deb6e7861526830a3e0d4065501",
+      "sourceSha256": "3a96d941feaa78524be51fc529e6cb853fde41517334b1b5b3c0326f40e64543"
+    },
+    "ink-wash": {
+      "normalizedSha256": "bbb58959152213982966c39f8c8193add0b01f026faf4a5ae92235302da2ff7a",
+      "sourceSha256": "8f70250301907241651b914cb22d67792f9223f3f7fcc7f128e5274f76ac426e"
+    },
+    "islamic-geometric": {
+      "normalizedSha256": "c169de92e573335bfaad7ed4d34f3669b26a5f158836b274832965b0bcc6fd41",
+      "sourceSha256": "3e7b50a3d108a0f18c5de4b08788c27d841afb26ab3980c889fe7edf7d2befef"
+    },
+    "japanese-fresh": {
+      "normalizedSha256": "0aab7e0309a2b027eeb9b7a28a0e972648e3a4506af11eed26dae7f6d8b18237",
+      "sourceSha256": "d79a515c4d2e997eedf850202dae1957d63cf02d47ab0abf989dd036e87ca796"
+    },
+    "jrpg": {
+      "normalizedSha256": "cbb82819e31500fc3f5c1dab1ad0bf12c86c468d5b614a9d4755223869556317",
+      "sourceSha256": "89645c1606d25e93eb22976da3ce99c8c99d06819116b2609106a841d53bc4ab"
+    },
+    "kawaii-minimal": {
+      "normalizedSha256": "b24345ddd12f2dbce94f52db6bb3673786bda460e8fe4343ce3a6d9d05561b00",
+      "sourceSha256": "8be1cd655280a619f1864ab05be22cb026f8a25de95e5e46aa7b8eebec11207d"
+    },
+    "kinetic-constructivism": {
+      "normalizedSha256": "b595e86aa517e707f3d094c1b37884fa167061d86cffa93df31d188058d6ec68",
+      "sourceSha256": "a7728a0253e6730dbf10f0471e363db4bfd76083aee83184474b952b4b82d41a"
+    },
+    "kinetic-typography": {
+      "normalizedSha256": "01ecf6ff45fdc963452efe96229996fa0059a9909598a3df1d638303e701570e",
+      "sourceSha256": "a38c40ebfc8d1670d80f965095c0663c5cd727d346e2d237ed9423ec288032e1"
+    },
+    "korean-minimal": {
+      "normalizedSha256": "bf58772985d3ebd032baeae9cc18f93e78fbe6eccb34aba4651c8cb30bd1cb15",
+      "sourceSha256": "b724606b23f2d17412f94d4ab9c28c488f50d9ce7ffc85627b497644fd3a2811"
+    },
+    "latex-paper": {
+      "normalizedSha256": "d595ed1f3d646ece2edc931682ac1744af0211b6d88a36fe052312c74be12a7c",
+      "sourceSha256": "88504cba0e92292bde7fae5f7f5a47f2f0d0ebba16e86db05eb2a1c414fdcb7f"
+    },
+    "launch-keynote": {
+      "normalizedSha256": "1a8470b676c41e4ea82694b5c493a48fb15a6a21aa13502c23fd2271f15debee",
+      "sourceSha256": "56219bb58805db6eed6a72472ade4349d4911baac1d317df450b60ada0292798"
+    },
+    "linear-style": {
+      "normalizedSha256": "54f7259ee5594ce94b564e9debc9f7246ea273c1ce46a02476799161603d2b10",
+      "sourceSha256": "56ed6033ec4351689f444f6b858d53c7885a24937ccea84ca180e53ca6f111c0"
+    },
+    "liquid-glass": {
+      "normalizedSha256": "07930ca99ee5699caec2f53aaabfb84332cbd14aa5089fd7a1f2884157420d60",
+      "sourceSha256": "4e2b40091b126a9ab6eb41e75382d11f2e1d8280034c49a37d2386e3992b2db3"
+    },
+    "luxe-lookbook": {
+      "normalizedSha256": "ac63f434c0900118cebd0375b8e1f280d37011166b6bb45436f249fa14258121",
+      "sourceSha256": "c90341da8b7cc709efc3e9bbd49f92d8efa59b65eb2b63c04c5298fadc6303de"
+    },
+    "luxury-retail": {
+      "normalizedSha256": "19b983cc73d39aa90ee1c6d483e41170bb3a8e92cf8b5e44875c2ad4ff116790",
+      "sourceSha256": "007cbd194402952c1e6a255184fb65e3598117ba4153a9e748a41603a2a35c89"
+    },
+    "macos-vibrancy": {
+      "normalizedSha256": "d662e5322988139ff66616128b6f54f382b92f9b224fa955983cd7831c095881",
+      "sourceSha256": "1334af2b8ac8f83021b491e31ea0af7b13cc69aae0572fd8f4806f371f7c6473"
+    },
+    "magazine-grid": {
+      "normalizedSha256": "604da5f3fdd29595f2dec7959841a98fcea755ee9fb9d7dcd44512c57d573654",
+      "sourceSha256": "6569af9bfa738ae40cb3624bc84f430b1e4d813bf4757465c4fdb55500fa6dfa"
+    },
+    "magic-circle": {
+      "normalizedSha256": "c9141dfa536a7155792bff35c6d8cddcb0a5a91cbf4f8e6f01b54caf6aa14cd4",
+      "sourceSha256": "7cedd7078bf0a18b81c24a68bc0bd9c5af7cdeb8b97952c61191cf74e9c03146"
+    },
+    "marble-luxury": {
+      "normalizedSha256": "85e918a675fa29a387cdb2e75fef9cfb1f2b0add534a52c8b47b8ad9d3a2b757",
+      "sourceSha256": "c7d700c407c5e52f4a4cf8ef49d18520766525a23f4811bf37b423e8c12c9295"
+    },
+    "masonry-flow": {
+      "normalizedSha256": "6922b03c608b929ca0c34cfae3fea2a9887512b0927b4cea39fbb3580e1e8b20",
+      "sourceSha256": "26909c4052773f1ce151f177961979da14ff1662226391b0198ac14aecb02c43"
+    },
+    "material-design": {
+      "normalizedSha256": "44402965cb61d712a7aae11e1438834407a57ffdb687733a22eb9e108d7f4757",
+      "sourceSha256": "8b031fea66f33c80869e91253eee4a232dfc255f85b14981ca2acb5e62c4e594"
+    },
+    "maximalism": {
+      "normalizedSha256": "6b6c49147af8a3b43c07c6a333cbf36d2b1ca4d232a56ee1f65fd8fe79f003a8",
+      "sourceSha256": "d2740c24f525aa58e2213159d384b2d3aa7507c4bd52f2596e0f3e6c23370ced"
+    },
+    "mecha": {
+      "normalizedSha256": "ef9429f84b1c83ea7511a30c674b96d13339fbaf26ec5550d812c5e94ad1cfb2",
+      "sourceSha256": "2f561daae9c746e38322b2c485a2a7b77a2a674f583a7750389887986cb54edb"
+    },
+    "medieval-manuscript": {
+      "normalizedSha256": "4cde477bcdd412042f82b4700585e7346a861508461cefd65ca6a75de9cea61a",
+      "sourceSha256": "b15e629e5c0b95615e39196ac226b51026cdd8414d48fbb09bcef87deb8a143e"
+    },
+    "memphis": {
+      "normalizedSha256": "a59eab17617161a96ed7b8bfb7bf3bdce16828f81952351e8ada15a23d837b89",
+      "sourceSha256": "1c18f4b0cd7a6cffe91eaffd5464adcca9f0a7954cd13eeaabc38f05c6ac264d"
+    },
+    "mid-century-modern": {
+      "normalizedSha256": "96d59cecf264d0ca09ed5ec696db259c0857c0c89f81ba23be2b38162169f5cf",
+      "sourceSha256": "0f7dd7601b1605e3ca96633a3ac641cc1bb927135905ee971e5a56ea5855671c"
+    },
+    "minimalist-flat": {
+      "normalizedSha256": "13a99455014d5946a5530ae56157f66b1fd1f7bf97f634111551122edc4daaa0",
+      "sourceSha256": "ec9d9e6a3652e2dbba4daa00634876e067ea6dd63a04921468de587476c69658"
+    },
+    "mobile-editorial": {
+      "normalizedSha256": "6d07e87f8fb77983005a3834292174788ef607d0f720d72da8743d50fbd1ff14",
+      "sourceSha256": "6ae240b68ac7fe7734a5f7d35b5fd907cca735634f8de79bdd2c2e8b673aaed3"
+    },
+    "modern-gradient": {
+      "normalizedSha256": "928664e36ae248d24f1196056e7b006e48f0e20256229e0f7b8346edc0a95426",
+      "sourceSha256": "63734f20c46a018be95a790e3e07b7e8fffba19cd0d2b5c02b9c0918a2acf2b5"
+    },
+    "monochrome": {
+      "normalizedSha256": "a84fe6926f1aaf1ffd95043542c753a9f3767b931b1d7589c9d43be91d1396f6",
+      "sourceSha256": "538bb93330eb11280788514b1fdf3a95ab12112925bdf5987ee050168ff97d71"
+    },
+    "natural-organic": {
+      "normalizedSha256": "4a709ca475fb592ca7c20155c6f8694900f5dd18fe64cc6527c001b397ea703a",
+      "sourceSha256": "ee44444d4aa8b3f539c967200a80453c40d84f7b9a8d9885752d3f10ef8fc357"
+    },
+    "neo-brutalist": {
+      "normalizedSha256": "0e54a8b15775a2fb282db61b4e1713e4d61ee16f6804bcb0fd38a5494793288c",
+      "sourceSha256": "ada0dccd5bef05083ee6b1683bce8e960f5f7de3e9868be184d8415a3a88a914"
+    },
+    "neo-brutalist-playful": {
+      "normalizedSha256": "fce2dada6296f5b593c11992f51280b31509aa675b42663cd121dcf867d884d4",
+      "sourceSha256": "89d657cf496db43ed5531136fc394f62542ea06bf70a7b28911cd3463c91349b"
+    },
+    "neo-brutalist-soft": {
+      "normalizedSha256": "5c8bea40ad1eae26d0e39848b994f86068dd3b2b98c032459998ff1408919109",
+      "sourceSha256": "239ea2752d2f3017564ffa965a33ef66d45c58ec1cf149927fe6b3b836de1d28"
+    },
+    "neon-gradient": {
+      "normalizedSha256": "ff0321e9af07b4a907c8446f4c972107fbce1152a9c00c8ce2ffcbed91ae94b0",
+      "sourceSha256": "c3b48c256dc15a24c5542ef77989e7b3b774467136b72f1690671d114e24535b"
+    },
+    "neon-samurai": {
+      "normalizedSha256": "6a89151d08b707a9f1abeb77be8fd09159731f0f818cc831d66eaf3a5c21caa9",
+      "sourceSha256": "ee01ecb6ee4a5f41bcc8a16c34ae2058775b02a8beafcd801232a53e8f275f37"
+    },
+    "neon-tokyo": {
+      "normalizedSha256": "dabdf5808bac209d4e36fdae8b1e61eb2db6b5a13c71a93cbe444f0e49097bd7",
+      "sourceSha256": "2a3afc22d6ffd12bf8e83dfda9f21f7d62adbb0f9d4d0d7dc7b3b77e3d2cacea"
+    },
+    "neumorphism": {
+      "normalizedSha256": "b5f3db49980bef1ce3daaeea051664840fedc749ea69ec32639b37c9cb6904f4",
+      "sourceSha256": "438c8b8d1b78b39d0b6cf171a2c6f125c30033b7503972d0d3eac4c93e845bf2"
+    },
+    "notion-style": {
+      "normalizedSha256": "67dbe52cc4f07e304d373839819f445cc6d2a268f9413b5bad5c55e1b700da92",
+      "sourceSha256": "24c096462e7eb3c81542b9e7e9e77ba71129cd879a2eb0187375fb3859a06b92"
+    },
+    "op-art": {
+      "normalizedSha256": "8effd38950f816fd05a3bc6ac59b384b8e6871e920b2222110ac137770f3589c",
+      "sourceSha256": "e28a2f733ec42b59ed36f9f087cabda83573e6c1dfd1c575e425e803189c000e"
+    },
+    "outrun": {
+      "normalizedSha256": "2a6a17d89e5126e0f2d0ba470ddaef64323358dc759e5a4ac8c5fb65cd78ad28",
+      "sourceSha256": "31cacb999986db6da906cda91079722c42f180708b6e647ea1e6b58821eb2b91"
+    },
+    "oversized-typography": {
+      "normalizedSha256": "dc090873ff747d12411ed6f731a3b57c1dedf5f3e276482bbbfa21ec5169ddd3",
+      "sourceSha256": "e68d8772825b62238e7fc8535388cff8b02fa8cb38d84a1be8585b5682cf5c4c"
+    },
+    "paper-craft": {
+      "normalizedSha256": "092b98415505b220638dae7bd0c36473cd3cb9f435e1b3e543b3fab9fea4a686",
+      "sourceSha256": "78b54e31c6b8258e48d8cd2fb383e6739067b5aaea9def6573749398a1538ba9"
+    },
+    "parallax-editorial": {
+      "normalizedSha256": "f09566836d9b987e96d650b6ece80c10d126adf3b92a931bf27ed4d8d2293418",
+      "sourceSha256": "24880c331a4de342a652881f7f49a3a6f5409d4b5f47c2735f8de72a48d718c6"
+    },
+    "parallax-sections": {
+      "normalizedSha256": "f68b0e99fbba266eb22aff45f7e774ce7f6e2ef0921a5152adcb130208d6a6ce",
+      "sourceSha256": "fa5881691f477c9a14eb1b596707d49c98d1eb0572ddf83d692f9cb23277e687"
+    },
+    "particle": {
+      "normalizedSha256": "f30dd2fd95883132057adc011f22cca6b89b4556313ebe0912e44114df19f227",
+      "sourceSha256": "b1813ae79a6c42ead312fe0c33ce38f9d354bb80a827d823ccd9cd4c2d902e33"
+    },
+    "pastel-goth": {
+      "normalizedSha256": "97859a151463f6fefb3817a5445c33fcfeb7f138fa83ca09b640595d0301a3d7",
+      "sourceSha256": "f6f96aa0da1e14448eabe08e04c9cbdc0dc9dbf0c5b4fc4eb89b3cc2011db4b9"
+    },
+    "pastel-ui": {
+      "normalizedSha256": "10aae89202373818f2560ea54b46236838c23dbc4407bd9d10243033137b50ca",
+      "sourceSha256": "8e1ea16ebc7314301ad81ebd756dad1a603c9a4c4da4560af103dde89ad9ce38"
+    },
+    "pixel-anime": {
+      "normalizedSha256": "fcbc476b8719d621e1a0aade18783b6cbe78f5511732c835c096a3eb36e932df",
+      "sourceSha256": "97914fdb94fd2bfb7762a0f8257a9f5f8f0c6e59ddfdcebf1d8bb7fcb680bd34"
+    },
+    "pixel-art": {
+      "normalizedSha256": "52105447a157c58b78bc1aeb095c858fd10e4e558ec1dda324a47531f24c3c2b",
+      "sourceSha256": "2c3bc9e6c4459b6c48ae166d1baa37a7cfc8c78c5e46911e09a947354e9eb740"
+    },
+    "pop-art": {
+      "normalizedSha256": "cf8d54490a150e682ab4ee0375b2192bcbf069da813c4dbd2064a84c9d8358f3",
+      "sourceSha256": "f0511b3dd01a69a9302a58c9399e63c21af65b0c7a66f643958977fccde63d95"
+    },
+    "quantized-line-field": {
+      "normalizedSha256": "56f8ff6ce2ebf0e8ca48ef7ee3c83f20817f37dc5ba0d31196915b1766e9b0a4",
+      "sourceSha256": "97c1d87d26a1e6d8abf0432c4b023a30fa77bb55ed7cfc22dd78556d66b76a27"
+    },
+    "retro-vintage": {
+      "normalizedSha256": "a79338b6241bb6bbf2b99c6f5b129968e460b7e0897ff305dd35983c4c2918d3",
+      "sourceSha256": "b9167fb43f262181502aac61eb9041cb00e5822bc1f09f681d69bcea6c5b9a36"
+    },
+    "risograph": {
+      "normalizedSha256": "678d56757f39541e7c8b9f4dcb2e4fa69b790eb13166eeb086173f5edbdc2b72",
+      "sourceSha256": "1b81ae5b7aba44a48fefa9fee1a6d279904f0092e5f77c491bcd8b3503ac4f6a"
+    },
+    "scandinavian": {
+      "normalizedSha256": "afcad4d253779d079e298e71106a3ca00eb8c6d5dfc354c2abcd1276411277f0",
+      "sourceSha256": "6b74e5e0a0304dd6de9b2970727a069d2d2a5d908cd144844bf71c0b168d5b3e"
+    },
+    "sci-fi-hud": {
+      "normalizedSha256": "277a4fa24ae75cf783161f726d6a3dd89a7750529f3c0e3b5abd3cfab17be195",
+      "sourceSha256": "1569f9ae6fb3022a9fb8fe9233bd3b44e2e3413278748bb3e75a8732954f5003"
+    },
+    "scrollytelling": {
+      "normalizedSha256": "eea7874739f74f9d7a67717ae8e1764dd98c6dad2f9b6fb0f9e0ea3dbf43a868",
+      "sourceSha256": "4d230226b41e2327035cfec3a8c0ebcfd8e0907571c337664fb27ed7b49483fb"
+    },
+    "shader-gradient": {
+      "normalizedSha256": "d4837ceb09b682b0adc9b51bddd49a262b688a62c7adadf2c14b939cba5f9843",
+      "sourceSha256": "ca7c88837538cd7a5133b5d48224229ec561fd4510706fe1f262505fbee6f57a"
+    },
+    "shopify-clean": {
+      "normalizedSha256": "209e1c7ae14e9a1b37cbc00bddc5b4a1dfc25f2b130cc5bf6828c7889a515233",
+      "sourceSha256": "68c373a56a9facf78c98b10ce02b2a9e275d42c681f94174a3d2fec02da03828"
+    },
+    "shoujo-manga": {
+      "normalizedSha256": "a68255d75d1114084577d894854f2a38b03f3dfaab25f0d3fb6baf7fa470e0aa",
+      "sourceSha256": "c07612761277d7358e8f104e624d04760c4acd648a87cbb2ebcb3d296e405a97"
+    },
+    "sidebar-fixed": {
+      "normalizedSha256": "1de67023b233f4aedc7ad04bd7d908dd43610bb20342b2585b3559f7498be7af",
+      "sourceSha256": "4581af559f590f83a74a69f1dbe4e854f715ee9afcf20b51451c79839dfb5624"
+    },
+    "sketch-style": {
+      "normalizedSha256": "5f71a6a51775d94417ebe2f180a845e62c5374de81a67ccf7c5bb3be82467c1a",
+      "sourceSha256": "41ace6ce130585c60413ca40cd20554b0c7d0298d0578acc36fb49a91eb8185b"
+    },
+    "skeuomorphism": {
+      "normalizedSha256": "4569fa492a01bb241c58da527cd6d7637bfe6752562c8c6944cb4622ad93040f",
+      "sourceSha256": "6c741573623d250147899fdbb6737d8a1439bd79783b0605c031d93c3545626f"
+    },
+    "soft-ui": {
+      "normalizedSha256": "a1ed380245da1200798f237bb7719a0d351eb56a30f43ad75d1e15123b34218e",
+      "sourceSha256": "2031148f1208afab26bd8bf38e7b1f9a1c342b4f7fd6641e69f78396b154b66a"
+    },
+    "soft-utility": {
+      "normalizedSha256": "7e5b3c662bbed54e70a6bd36283b8b7fab763c030d57ebed5911fc23fe98c408",
+      "sourceSha256": "9eeb1f420d3ed88bcb20673c004cd95a891de9e6e96601b06f2eb5f41265bbf2"
+    },
+    "solarpunk": {
+      "normalizedSha256": "caef1835463115a11a8e70f134553d99abdd3bc90ca10924cc9c345b41399064",
+      "sourceSha256": "40dbd4c6a9912d60e30b6ac67e2c65e1461d5f0d301d660a45d63053b0cad167"
+    },
+    "split-screen": {
+      "normalizedSha256": "8cab02c26d5929e3e3ff4a063471d906ce0388bcf0c54f4b8052e282b4bb8ed0",
+      "sourceSha256": "5fd64146eeeebb0021369ecd33400468d24246ebd64c6dc96a4fccefe2209af7"
+    },
+    "steampunk": {
+      "normalizedSha256": "80b050b7d7dc5dface216ac7652b5c13831484a43603ff4507450e5f085b7318",
+      "sourceSha256": "3cc4c8ac432b4274734974b456636203feaff92f11ea70edc5bef4cec13c19fb"
+    },
+    "stripe-style": {
+      "normalizedSha256": "884bb84be499f67511585e37e0a23baf0ce04c476f76f77fbce93e0f556c3a27",
+      "sourceSha256": "9611a663c5a85e4ad90f8129b5080bb6e912b7ff65dc3ce9b5065d56ed0293e6"
+    },
+    "studio-bold": {
+      "normalizedSha256": "4396b841299bf4eb51bf9d153fd0f750825efe7c12ff7bf1fa77a5d4953c132a",
+      "sourceSha256": "4235bcdad35d6d2338daa042fc53e0e1055035454d8cde0d02a80a5f2875255d"
+    },
+    "surrealism": {
+      "normalizedSha256": "8d53d194ba0e4f931b5d4480a5dc8f0c1d05b13492184c7b5af142b224e0c026",
+      "sourceSha256": "6618c60d545d86aaa296cfe1d18d7654e24a13f45cd1e61add265113ceb6fac2"
+    },
+    "swiss-poster": {
+      "normalizedSha256": "97598731bef9a93030b64e5aaf8d7f56933fae8243a8a8d6e8008c62f890e333",
+      "sourceSha256": "709df69e682dccb91f0088b336768835f7ae7981dcdd3024871293963ec88aca"
+    },
+    "swiss-style": {
+      "normalizedSha256": "8cc6e6d2583d79d332d93a8f7c5031d9acd6b612ab6f009f011467f606ded9a8",
+      "sourceSha256": "981250aa51a94bd9b832d6d13dcf5dec38ee5dc3d00315c0496114f9c29ca151"
+    },
+    "synthwave": {
+      "normalizedSha256": "6daaefc26196bbf12fcd8559410290a0a45342172eda7005caaa96129580d3f7",
+      "sourceSha256": "481c0525f541b2543de029ae31eaa94dba24a211c661d1d55c4c7daf8971acb5"
+    },
+    "terracotta": {
+      "normalizedSha256": "6000150c51c43efde4e66eeb87cc765b959925ac9987855caef5b4c40430c771",
+      "sourceSha256": "3666b6e34c9c92969cde6220e29edaf566196aeeaafad5e002689e35d140163d"
+    },
+    "timeline-vertical": {
+      "normalizedSha256": "a47b1af60c1c1e925ee243bd4b9a7f3d7aed0c95c2c39b2714c7da1af6f4af59",
+      "sourceSha256": "cce7cab6487f418bb860b37b77cd21713589f55e0eb9878309491401a76a68ea"
+    },
+    "tropical-paradise": {
+      "normalizedSha256": "3238d0c1779981dd73e72ca59806d78865a5ccab30987b04935492001b8610ce",
+      "sourceSha256": "b463d6e765fbd859ff2288b213282015eb30a0de1bdf8d8ca36ac7941af4a8ec"
+    },
+    "ukiyo-e-digital": {
+      "normalizedSha256": "3c5f2c24106ef6c1d214b29e3bbecf65f67738fd6ffeed08526408985e69ef4c",
+      "sourceSha256": "82f82c882ba9995c8f2a1706ac972fa094587a3da9ae2a13f23c7487f7d1e67e"
+    },
+    "vaporwave": {
+      "normalizedSha256": "d3b7eb53d202cccb4da02e6d0625d6b96c12661223090fd958374e0a64943c5f",
+      "sourceSha256": "0aa6d29184ff28096bf177e075229f192a9cd46cd812293df9c9b5686901a678"
+    },
+    "vhs-aesthetic": {
+      "normalizedSha256": "850a0940d98dfb6965466a366ef74fb30732d89785556fbd94f07b7d7309e1a3",
+      "sourceSha256": "62fed716d58eb2854adf9f3af9686c9aab904231eeaf24e73a9ddd6eb1d547fb"
+    },
+    "victorian-botanical": {
+      "normalizedSha256": "205ac9095f4b58e78c54ba57c69351de6d14821027a81732c74a4815516325a7",
+      "sourceSha256": "30833c0cb0b6a67fab2e3f3a5392c4f4fb2a66ab55f797cdc5979ddfc062aa21"
+    },
+    "visual-novel": {
+      "normalizedSha256": "d53eb91cba9d5e3dba2ebb418a9c0bc371bca50aa8ec5e1bcdc8162006ba3021",
+      "sourceSha256": "e27ca95152f3e73c2908a62a86c80245851440d500aad2db1185c82cbbb3e715"
+    },
+    "wabi-sabi": {
+      "normalizedSha256": "02d99e54574fbb38adc79bfb6c9255192a6ae9b15d81817a8b44de9ec2989ff4",
+      "sourceSha256": "72e97f59799935d42e1dd351c6b915ef41f1899ef33840fe563b6224f66ca04c"
+    },
+    "warm-dashboard": {
+      "normalizedSha256": "5c60193662089a7766396a9edac2c8899cca8879c6ece20f3194f338b1233415",
+      "sourceSha256": "69429d13be5c2f648add1e6262c8e40988d9024d7a2bd8922beab81d4cf5a5c9"
+    },
+    "warm-organic": {
+      "normalizedSha256": "77f43ad1ab500c502dcd88d2c538c9236f6ebee26f2e79831dd5af4b51fe0bc9",
+      "sourceSha256": "e51a807465949d0e6fa276d7831367ab355d00b6f85d896bc5f09ee189397688"
+    },
+    "watercolor-art": {
+      "normalizedSha256": "02fe6f47017935a6d3cfde5443484bf76a8824d2be5ef413c85998a046b9453f",
+      "sourceSha256": "d22395e9ee31ac1597fff4a8906ef24f8b892a9e347d4e34546dee74b3935352"
+    },
+    "watercolor-style": {
+      "normalizedSha256": "c5eabe80fedfe400ffeee9a7b561f0ae7708844ecbb1bbdce5c98992dbb3f0f3",
+      "sourceSha256": "505eb1de6afe04b9d6f74723fca0371164ee0caaac98be969a2588b068655d2e"
+    },
+    "witchcore": {
+      "normalizedSha256": "3a3273984d1eb0dc836aa8ba8af849eb5b7e2344d3fb9b0b8f0af4a96b10496c",
+      "sourceSha256": "ac9d613fc5e8a56d54497f38fac77f0be5566144184b36e493d828a5c4651565"
+    },
+    "y2k": {
+      "normalizedSha256": "f72f12fee41cea7e998c2aeec71ed00d5e406786980c20316c348dbceec22527",
+      "sourceSha256": "0411f6697625fb9144991dbf9c9ef476420b1667d17993e1b87bd04dea70a750"
+    },
+    "z-pattern-layout": {
+      "normalizedSha256": "813063f1846c76dba0592e89ff7780467244db46fe5d18b1131328d75b48e6b1",
+      "sourceSha256": "f9d5e212f73a32ea6f449ac684cbebab9f55db44af57d9b9c8697d0a31cedaf5"
+    },
+    "zen-garden": {
+      "normalizedSha256": "eab3cae301e121946196ddf5545607dd8310e483813c99bd5e8b4ded78e4759c",
+      "sourceSha256": "ee6affc90b0a99f465633fd42edfb9c63abfb49bb7c64847df14d9bfc5561c69"
+    }
+  }
+}

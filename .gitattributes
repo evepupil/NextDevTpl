@@ -15,3 +15,5 @@
 *.woff binary
 *.woff2 binary
 *.zip binary
+
+packages/create-nextdevtpl/palettes/stylekit/** -text

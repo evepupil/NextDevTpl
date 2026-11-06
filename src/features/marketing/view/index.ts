@@ -17,6 +17,11 @@ export type {
 } from "./contracts";
 export { MarketingHeaderControllerView } from "./marketing-header-controller";
 export { marketingFeatureCards } from "./presentation";
+export type { MarketingSiteNavigation } from "./site-navigation";
+export {
+  filterMarketingNavigation,
+  marketingSiteNavigation,
+} from "./site-navigation";
 export type MarketingFeatureCard =
   typeof import("./presentation").marketingFeatureCards[number];
 export { useMarketingFooterController } from "./use-footer-controller";

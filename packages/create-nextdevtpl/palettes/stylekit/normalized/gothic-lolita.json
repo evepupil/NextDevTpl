@@ -1,0 +1,121 @@
+{
+  "dark": {
+    "colors": {
+      "accent": "rgb(229.5 229.5 229.5)",
+      "accent-foreground": "rgb(22.95 22.95 22.95)",
+      "background": "rgb(10.2 10.2 10.2)",
+      "border": "rgb(75.48 26.52 75.48)",
+      "card": "rgb(10.2 10.2 10.2)",
+      "card-foreground": "rgb(229.5 229.5 229.5)",
+      "chart-1": "rgb(75.48 26.52 75.48)",
+      "chart-2": "rgb(229.5 229.5 229.5)",
+      "chart-3": "rgb(25.5 25.5 25.5)",
+      "chart-4": "rgb(107.865 45.135 92.1825)",
+      "chart-5": "rgb(229.5 229.5 229.5)",
+      "destructive": "rgb(220.014 40.086 40.086)",
+      "foreground": "rgb(229.5 229.5 229.5)",
+      "input": "rgb(75.48 26.52 75.48)",
+      "muted": "rgb(25.704 9.996 25.704)",
+      "muted-foreground": "rgb(249.9 249.9 249.9)",
+      "popover": "rgb(10.2 10.2 10.2)",
+      "popover-foreground": "rgb(229.5 229.5 229.5)",
+      "primary": "rgb(75.48 26.52 75.48)",
+      "primary-foreground": "rgb(249.9 249.9 249.9)",
+      "ring": "rgb(75.48 26.52 75.48)",
+      "secondary": "rgb(137.088 26.112 40.9088)",
+      "secondary-foreground": "rgb(249.9 249.9 249.9)",
+      "sidebar": "rgb(10.2 10.2 10.2)",
+      "sidebar-accent": "rgb(229.5 229.5 229.5)",
+      "sidebar-accent-foreground": "rgb(22.95 22.95 22.95)",
+      "sidebar-border": "rgb(75.48 26.52 75.48)",
+      "sidebar-foreground": "rgb(229.5 229.5 229.5)",
+      "sidebar-primary": "rgb(75.48 26.52 75.48)",
+      "sidebar-primary-foreground": "rgb(249.9 249.9 249.9)",
+      "sidebar-ring": "rgb(75.48 26.52 75.48)",
+      "success": "rgb(96.141198 177.298573 143.684443)",
+      "warning": "rgb(236.129573 167.621048 81.426372)",
+      "grid-line": "rgb(229.5 229.5 229.5 / 0.065)",
+      "glow-1": "rgb(75.48 26.52 75.48 / 0.14)",
+      "glow-2": "rgb(229.5 229.5 229.5 / 0.08)"
+    },
+    "radius": "0.125rem",
+    "radiusInfo": {
+      "clamped": false,
+      "convertedRem": 0.125,
+      "effectiveRem": 0.125,
+      "sourceUnit": "rem",
+      "sourceValue": 0.125
+    }
+  },
+  "id": "gothic-lolita",
+  "ignoredKeys": [
+    "destructive-foreground"
+  ],
+  "light": {
+    "colors": {
+      "accent": "rgb(229.5 229.5 229.5)",
+      "accent-foreground": "rgb(22.95 22.95 22.95)",
+      "background": "rgb(10.2 10.2 10.2)",
+      "border": "rgb(75.48 26.52 75.48)",
+      "card": "rgb(10.2 10.2 10.2)",
+      "card-foreground": "rgb(229.5 229.5 229.5)",
+      "chart-1": "rgb(75.48 26.52 75.48)",
+      "chart-2": "rgb(229.5 229.5 229.5)",
+      "chart-3": "rgb(25.5 25.5 25.5)",
+      "chart-4": "rgb(107.865 45.135 92.1825)",
+      "chart-5": "rgb(229.5 229.5 229.5)",
+      "destructive": "rgb(220.014 40.086 40.086)",
+      "foreground": "rgb(229.5 229.5 229.5)",
+      "input": "rgb(75.48 26.52 75.48)",
+      "muted": "rgb(25.704 9.996 25.704)",
+      "muted-foreground": "rgb(249.9 249.9 249.9)",
+      "popover": "rgb(10.2 10.2 10.2)",
+      "popover-foreground": "rgb(229.5 229.5 229.5)",
+      "primary": "rgb(75.48 26.52 75.48)",
+      "primary-foreground": "rgb(249.9 249.9 249.9)",
+      "ring": "rgb(75.48 26.52 75.48)",
+      "secondary": "rgb(137.088 26.112 40.9088)",
+      "secondary-foreground": "rgb(249.9 249.9 249.9)",
+      "sidebar": "rgb(10.2 10.2 10.2)",
+      "sidebar-accent": "rgb(229.5 229.5 229.5)",
+      "sidebar-accent-foreground": "rgb(22.95 22.95 22.95)",
+      "sidebar-border": "rgb(75.48 26.52 75.48)",
+      "sidebar-foreground": "rgb(229.5 229.5 229.5)",
+      "sidebar-primary": "rgb(75.48 26.52 75.48)",
+      "sidebar-primary-foreground": "rgb(249.9 249.9 249.9)",
+      "sidebar-ring": "rgb(75.48 26.52 75.48)",
+      "success": "rgb(35.903878 121.930672 91.095493)",
+      "warning": "rgb(222.673645 154.975056 67.704243)",
+      "grid-line": "rgb(229.5 229.5 229.5 / 0.045)",
+      "glow-1": "rgb(75.48 26.52 75.48 / 0.1)",
+      "glow-2": "rgb(229.5 229.5 229.5 / 0.05)"
+    },
+    "radius": "0.125rem",
+    "radiusInfo": {
+      "clamped": false,
+      "convertedRem": 0.125,
+      "effectiveRem": 0.125,
+      "sourceUnit": "rem",
+      "sourceValue": 0.125
+    }
+  },
+  "missingKeys": {
+    "dark": [
+      "success",
+      "warning",
+      "grid-line",
+      "glow-1",
+      "glow-2"
+    ],
+    "light": [
+      "success",
+      "warning",
+      "grid-line",
+      "glow-1",
+      "glow-2"
+    ]
+  },
+  "rulesVersion": 1,
+  "schemaVersion": 1,
+  "sourceSha256": "adb2be55035c712e425a002945ea2eb5076ac759b13bbcab12912a0f991cabee"
+}

@@ -1,0 +1,121 @@
+{
+  "dark": {
+    "colors": {
+      "accent": "rgb(211.854 86.5708 58.446)",
+      "accent-foreground": "rgb(249.9 249.9 249.9)",
+      "background": "rgb(9.945 9.945 9.945)",
+      "border": "rgb(37.995 37.995 37.995)",
+      "card": "rgb(9.945 9.945 9.945)",
+      "card-foreground": "rgb(249.9 249.9 249.9)",
+      "chart-1": "rgb(26.367 48.1712 85.833)",
+      "chart-2": "rgb(211.854 86.5708 58.446)",
+      "chart-3": "rgb(201.348 163.3156 38.352)",
+      "chart-4": "rgb(42.228 90.1476 141.372)",
+      "chart-5": "rgb(118.32 122.4 0)",
+      "destructive": "rgb(220.014 40.086 40.086)",
+      "foreground": "rgb(249.9 249.9 249.9)",
+      "input": "rgb(37.995 37.995 37.995)",
+      "muted": "rgb(37.995 37.995 37.995)",
+      "muted-foreground": "rgb(162.945 162.945 162.945)",
+      "popover": "rgb(9.945 9.945 9.945)",
+      "popover-foreground": "rgb(249.9 249.9 249.9)",
+      "primary": "rgb(26.367 48.1712 85.833)",
+      "primary-foreground": "rgb(249.9 249.9 249.9)",
+      "ring": "rgb(26.367 48.1712 85.833)",
+      "secondary": "rgb(244.8 239.7 224.4)",
+      "secondary-foreground": "rgb(22.95 22.95 22.95)",
+      "sidebar": "rgb(9.945 9.945 9.945)",
+      "sidebar-accent": "rgb(211.854 86.5708 58.446)",
+      "sidebar-accent-foreground": "rgb(249.9 249.9 249.9)",
+      "sidebar-border": "rgb(37.995 37.995 37.995)",
+      "sidebar-foreground": "rgb(249.9 249.9 249.9)",
+      "sidebar-primary": "rgb(26.367 48.1712 85.833)",
+      "sidebar-primary-foreground": "rgb(249.9 249.9 249.9)",
+      "sidebar-ring": "rgb(26.367 48.1712 85.833)",
+      "success": "rgb(96.141198 177.298573 143.684443)",
+      "warning": "rgb(236.129573 167.621048 81.426372)",
+      "grid-line": "rgb(249.9 249.9 249.9 / 0.065)",
+      "glow-1": "rgb(26.367 48.1712 85.833 / 0.14)",
+      "glow-2": "rgb(118.32 122.4 0 / 0.08)"
+    },
+    "radius": "0.125rem",
+    "radiusInfo": {
+      "clamped": false,
+      "convertedRem": 0.125,
+      "effectiveRem": 0.125,
+      "sourceUnit": "rem",
+      "sourceValue": 0.125
+    }
+  },
+  "id": "ukiyo-e-digital",
+  "ignoredKeys": [
+    "destructive-foreground"
+  ],
+  "light": {
+    "colors": {
+      "accent": "rgb(211.854 86.5708 58.446)",
+      "accent-foreground": "rgb(249.9 249.9 249.9)",
+      "background": "rgb(244.8 239.7 224.4)",
+      "border": "rgb(26.367 48.1712 85.833)",
+      "card": "rgb(244.8 239.7 224.4)",
+      "card-foreground": "rgb(26.367 48.1712 85.833)",
+      "chart-1": "rgb(26.367 48.1712 85.833)",
+      "chart-2": "rgb(211.854 86.5708 58.446)",
+      "chart-3": "rgb(201.348 163.3156 38.352)",
+      "chart-4": "rgb(42.228 90.1476 141.372)",
+      "chart-5": "rgb(118.32 122.4 0)",
+      "destructive": "rgb(220.014 40.086 40.086)",
+      "foreground": "rgb(26.367 48.1712 85.833)",
+      "input": "rgb(26.367 48.1712 85.833)",
+      "muted": "rgb(26.367 48.1712 85.833)",
+      "muted-foreground": "rgb(249.9 249.9 249.9)",
+      "popover": "rgb(244.8 239.7 224.4)",
+      "popover-foreground": "rgb(26.367 48.1712 85.833)",
+      "primary": "rgb(26.367 48.1712 85.833)",
+      "primary-foreground": "rgb(249.9 249.9 249.9)",
+      "ring": "rgb(26.367 48.1712 85.833)",
+      "secondary": "rgb(244.8 239.7 224.4)",
+      "secondary-foreground": "rgb(22.95 22.95 22.95)",
+      "sidebar": "rgb(244.8 239.7 224.4)",
+      "sidebar-accent": "rgb(211.854 86.5708 58.446)",
+      "sidebar-accent-foreground": "rgb(249.9 249.9 249.9)",
+      "sidebar-border": "rgb(26.367 48.1712 85.833)",
+      "sidebar-foreground": "rgb(26.367 48.1712 85.833)",
+      "sidebar-primary": "rgb(26.367 48.1712 85.833)",
+      "sidebar-primary-foreground": "rgb(249.9 249.9 249.9)",
+      "sidebar-ring": "rgb(26.367 48.1712 85.833)",
+      "success": "rgb(35.903878 121.930672 91.095493)",
+      "warning": "rgb(222.673645 154.975056 67.704243)",
+      "grid-line": "rgb(26.367 48.1712 85.833 / 0.045)",
+      "glow-1": "rgb(26.367 48.1712 85.833 / 0.1)",
+      "glow-2": "rgb(118.32 122.4 0 / 0.05)"
+    },
+    "radius": "0.125rem",
+    "radiusInfo": {
+      "clamped": false,
+      "convertedRem": 0.125,
+      "effectiveRem": 0.125,
+      "sourceUnit": "rem",
+      "sourceValue": 0.125
+    }
+  },
+  "missingKeys": {
+    "dark": [
+      "success",
+      "warning",
+      "grid-line",
+      "glow-1",
+      "glow-2"
+    ],
+    "light": [
+      "success",
+      "warning",
+      "grid-line",
+      "glow-1",
+      "glow-2"
+    ]
+  },
+  "rulesVersion": 1,
+  "schemaVersion": 1,
+  "sourceSha256": "82f82c882ba9995c8f2a1706ac972fa094587a3da9ae2a13f23c7487f7d1e67e"
+}

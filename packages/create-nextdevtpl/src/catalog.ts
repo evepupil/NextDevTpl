@@ -598,6 +598,13 @@ export async function findGeneratorAssets(): Promise<GeneratorAssets> {
   const candidates: GeneratorAssets[] = [
     {
       catalogPath: resolve(repositoryRoot, "recipes", "catalog.json"),
+      paletteDirectory: resolve(
+        repositoryRoot,
+        "packages",
+        "create-nextdevtpl",
+        "palettes",
+        "stylekit"
+      ),
       templateManifestPath: resolve(
         repositoryRoot,
         "templates",
@@ -608,6 +615,7 @@ export async function findGeneratorAssets(): Promise<GeneratorAssets> {
     },
     {
       catalogPath: resolve(packageRoot, "catalog.json"),
+      paletteDirectory: resolve(packageRoot, "palettes", "stylekit"),
       templateManifestPath: resolve(packageRoot, "template", "manifest.json"),
       templateRoot: resolve(packageRoot, "template"),
     },

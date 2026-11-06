@@ -27,6 +27,7 @@ Options:
   --skin default|<directory>|https://.../skin.tgz
   --skin-sha256 <64-hex-digits>  Required for remote skins
   --skin-token-env <NAME>       Remote token environment variable
+  --palette <slug>              StyleKit theme for the built-in skin
   --yes                 Accept defaults without prompts
   --no-install          Skip dependency installation
   --help                Show this help
@@ -68,6 +69,7 @@ export function parseCliArguments(
   let skinValue: string | undefined;
   let skinSha256: string | undefined;
   let skinTokenEnv: string | undefined;
+  let palette: string | undefined;
   const adapterOverrides: Partial<Record<ServiceKind, string | null>> = {};
 
   for (let index = 0; index < args.length; index += 1) {
@@ -112,6 +114,14 @@ export function parseCliArguments(
       if (skinTokenEnv !== undefined)
         throw new Error("Duplicate --skin-token-env option");
       skinTokenEnv = readValue(args, index, argument);
+      index += 1;
+      continue;
+    }
+    if (argument === "--palette") {
+      if (palette !== undefined) {
+        throw new Error("Duplicate --palette option");
+      }
+      palette = readValue(args, index, argument);
       index += 1;
       continue;
     }
@@ -182,6 +192,7 @@ export function parseCliArguments(
     ...(preset ? { preset } : {}),
     ...(target ? { target } : {}),
     skin,
+    ...(palette !== undefined ? { palette } : {}),
     ...(modules ? { modules } : {}),
     ...(Object.keys(adapterOverrides).length > 0 ? { adapterOverrides } : {}),
   };
@@ -197,6 +208,9 @@ async function main(): Promise<void> {
   process.stdout.write(
     `Created NextDevTpl project in ${result.targetDirectory}\n`
   );
+  for (const warning of result.warnings) {
+    process.stdout.write(`Warning: ${warning}\n`);
+  }
   if (result.manifest.bindings.length > 0) {
     process.stdout.write(
       `Required Cloudflare bindings: ${result.manifest.bindings.join(", ")}\n`

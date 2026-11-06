@@ -9,6 +9,39 @@ const DASHBOARD_GROUP = [
   "support",
 ] as const;
 
+function createSiteNavigationSource(
+  selectedModules: readonly string[]
+): string {
+  const selected = new Set(selectedModules);
+  const homeHref = selected.has("marketing")
+    ? "/"
+    : selected.has("dashboard")
+      ? "/dashboard"
+      : selected.has("auth")
+        ? "/sign-in"
+        : "/";
+  const hasMarketing = selected.has("marketing");
+
+  return `export interface SiteNavigation {
+  blogHref: string | null;
+  cookiePolicyHref: string | null;
+  homeHref: string;
+  pseoHref: string | null;
+  privacyHref: string | null;
+  termsHref: string | null;
+}
+
+export const siteNavigation = {
+  blogHref: ${JSON.stringify(selected.has("blog") ? "/blog" : null)},
+  cookiePolicyHref: ${JSON.stringify(hasMarketing ? "/legal/cookie-policy" : null)},
+  homeHref: ${JSON.stringify(homeHref)},
+  pseoHref: ${JSON.stringify(selected.has("pseo") ? "/pseo" : null)},
+  privacyHref: ${JSON.stringify(hasMarketing ? "/legal/privacy" : null)},
+  termsHref: ${JSON.stringify(hasMarketing ? "/legal/terms" : null)},
+} as const satisfies SiteNavigation;
+`;
+}
+
 function createViewDataSource(selectedModules: readonly string[]): string {
   const selected = new Set(selectedModules);
   const hasAuth = selected.has("auth");
@@ -189,6 +222,10 @@ export async function writeWorkspaceComposition(
   selectedModules: readonly string[]
 ): Promise<void> {
   const selected = new Set(selectedModules);
+  await writeText(
+    resolve(target, "src", "modules", "site-navigation.ts"),
+    createSiteNavigationSource(selectedModules)
+  );
   const hasDashboardGroupRoutes = DASHBOARD_GROUP.some((id) =>
     selected.has(id)
   );

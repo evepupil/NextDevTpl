@@ -3,6 +3,7 @@ export { generateProject } from "./generate.js";
 export type { GeneratorTestHooks } from "./generator-internals.js";
 export { createProjectSelection } from "./selection.js";
 export type {
+  GeneratedPaletteRecord,
   GeneratedSkinRecord,
   SkinSourceSelection,
 } from "./skins/source-types.js";

@@ -1,3 +1,7 @@
+import type { GeneratedPaletteRecord } from "../palettes/types.js";
+
+export type { GeneratedPaletteRecord } from "../palettes/types.js";
+
 export type SkinSourceSelection =
   | { kind: "builtin"; id: string }
   | { kind: "local"; directory: string }
@@ -17,6 +21,7 @@ export interface GeneratedSkinRecord {
   id: string;
   version: string;
   packageHash: string;
+  palette?: GeneratedPaletteRecord;
   source: SkinSourceRecord;
 }
 

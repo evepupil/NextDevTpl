@@ -160,9 +160,12 @@ async function scrollThroughPage(page: Page): Promise<void> {
   });
 }
 
-function isReady(probe: ReadinessProbe): boolean {
+function isReady(
+  probe: ReadinessProbe,
+  requireHydrationMarker: boolean
+): boolean {
   return (
-    probe.hydrated &&
+    (!requireHydrationMarker || probe.hydrated) &&
     probe.fontsLoaded &&
     probe.skeletons === 0 &&
     probe.ellipsis === 0
@@ -176,7 +179,8 @@ function sleep(ms: number): Promise<void> {
 /** 等页面完全画完，超时则带上当前状态报错，而不是拍一张半成品 */
 export async function waitForPageReady(
   page: Page,
-  tracker: NetworkTracker
+  tracker: NetworkTracker,
+  options: { requireHydrationMarker?: boolean } = {}
 ): Promise<void> {
   const t0 = Date.now();
   const lap = (name: string) => {
@@ -187,7 +191,7 @@ export async function waitForPageReady(
   const deadline = Date.now() + READY_TIMEOUT_MS;
   for (;;) {
     const probe = await page.evaluate(probeReadiness);
-    if (isReady(probe)) break;
+    if (isReady(probe, options.requireHydrationMarker ?? true)) break;
     if (Date.now() > deadline) {
       throw new Error(
         `页面没有在 ${READY_TIMEOUT_MS / 1000} 秒内画完：${JSON.stringify(probe)}`

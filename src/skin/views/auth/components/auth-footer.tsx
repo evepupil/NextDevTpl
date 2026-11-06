@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 
 import { CookieSettingsDialog } from "@/components/ui/cookie-settings-dialog";
-import { authSiteName } from "@/features/auth/view";
+import { authSiteName, authSiteNavigation } from "@/features/auth/view";
 import { Link } from "@/i18n/routing";
 
 export function AuthFooter() {
@@ -19,18 +19,22 @@ export function AuthFooter() {
           })}
         </p>
         <nav className="flex gap-6">
-          <Link
-            href="/legal/privacy"
-            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
-            {t("privacy")}
-          </Link>
-          <Link
-            href="/legal/terms"
-            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
-            {t("terms")}
-          </Link>
+          {authSiteNavigation.privacyHref && (
+            <Link
+              href={authSiteNavigation.privacyHref}
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {t("privacy")}
+            </Link>
+          )}
+          {authSiteNavigation.termsHref && (
+            <Link
+              href={authSiteNavigation.termsHref}
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {t("terms")}
+            </Link>
+          )}
           <CookieSettingsDialog>
             <button
               type="button"

@@ -36,6 +36,8 @@
     "release:check": "pnpm --filter create-nextdevtpl run prepack && node scripts/verify-release-package.mjs",
     "skin:check": "pnpm --filter create-nextdevtpl build && node scripts/verify-skin.mjs check",
     "skin:hash": "pnpm --filter create-nextdevtpl build && node scripts/verify-skin.mjs hash",
+    "palette:sync": "pnpm --filter create-nextdevtpl build && node scripts/sync-stylekit-palettes.mjs",
+    "palette:check": "pnpm --filter create-nextdevtpl build && node scripts/verify-palettes.mjs",
     "verify:health": "node deploy/verify-production-health.mjs",
     "deploy:check": "node deploy/check-health.mjs",
     "deploy:server:build": "bash deploy/server/build.sh",
