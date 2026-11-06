@@ -15,6 +15,7 @@ function buildRepositoryPackageJson() {
     devDependencies: {
       "@biomejs/biome": "^2.3.11",
       "@playwright/test": "^1.51.1",
+      "tar-stream": "3.2.2",
       typescript: "^5",
       vitest: "^4.0.18",
     },
@@ -42,6 +43,7 @@ describe("pruneRepositoryOnlyPackageEntries", () => {
     );
 
     expect(packageJson.devDependencies).not.toHaveProperty("@playwright/test");
+    expect(packageJson.devDependencies).not.toHaveProperty("tar-stream");
     expect(Object.keys(packageJson.scripts)).not.toContain("visual:baseline");
     expect(Object.keys(packageJson.scripts)).not.toContain("visual:check");
     expect(Object.keys(packageJson.scripts)).not.toContain("visual:db:down");

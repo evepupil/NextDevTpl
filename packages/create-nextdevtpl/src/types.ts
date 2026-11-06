@@ -1,3 +1,8 @@
+import type {
+  GeneratedSkinRecord,
+  SkinSourceSelection,
+} from "./skins/source-types.js";
+
 export type DeploymentTarget = "cloudflare" | "docker" | "server" | "vercel";
 
 export type PresetName = "ai-saas" | "custom" | "minimal" | "saas";
@@ -60,6 +65,7 @@ export interface GeneratorOptions {
   modules?: readonly string[];
   packageManager?: string;
   preset?: PresetName;
+  skin?: SkinSourceSelection;
   target?: DeploymentTarget;
   targetDirectory: string;
   templateManifestPath?: string;
@@ -84,6 +90,7 @@ export interface GeneratedProjectManifest {
   catalogVersion: number;
   modules: readonly string[];
   preset: PresetName;
+  skin: GeneratedSkinRecord;
   target: DeploymentTarget;
 }
 

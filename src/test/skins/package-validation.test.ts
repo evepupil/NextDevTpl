@@ -681,27 +681,17 @@ describe("skin package validation", () => {
   it("rejects case-only duplicate source paths when the filesystem supports them", async ({
     skip,
   }) => {
-    const fixture = await createSkinFixture({
-      skinFiles: {
-        "assets/Icon.svg": "<svg />\n",
-        "assets/icon.svg": "<svg />\n",
-      },
-    });
+    const fixture = await createSkinFixture();
     try {
+      await fixture.writeSkinFile("assets/Icon.svg", "<svg />\n");
+      await fixture.writeSkinFile("assets/icon.svg", "<svg />\n");
       const assets = await readdir(join(fixture.directory, "assets"));
       if (!assets.includes("Icon.svg") || !assets.includes("icon.svg")) {
         skip("The filesystem treats paths as case-insensitive");
       }
-      await expect(fixture.refreshHashes()).rejects.toThrow();
-    } catch (error) {
-      if (
-        error instanceof Error &&
-        "code" in error &&
-        (error.code === "EEXIST" || error.code === "EPERM")
-      ) {
-        return;
-      }
-      throw error;
+      await expect(fixture.refreshHashes()).rejects.toThrow(
+        "Package contains paths that differ only by case"
+      );
     } finally {
       await fixture.dispose();
     }

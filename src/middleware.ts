@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 
+import { authNavigation } from "@/config/auth-navigation";
 import { routing } from "@/i18n/routing";
 import { authRoutes } from "@/lib/auth/edge";
 import {
@@ -133,9 +134,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(signInUrl);
   }
 
-  // 如果已登录用户访问认证页面，重定向到 Dashboard
-  if (isAuthRoute && sessionToken) {
-    return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
+  // 如果已登录用户访问认证页面，且存在成功后去向，则进行跳转
+  if (isAuthRoute && sessionToken && authNavigation.afterSignIn) {
+    return NextResponse.redirect(
+      new URL(`/${locale}${authNavigation.afterSignIn}`, request.url)
+    );
   }
 
   // 执行国际化中间件

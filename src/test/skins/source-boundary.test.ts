@@ -132,6 +132,9 @@ describe("skin source reference boundaries", () => {
 
   it.each([
     ["remote CSS import", '@import "https://assets.example.test/theme.css";'],
+    ["Tailwind configuration loading", '@config "./config.ts";'],
+    ["Tailwind plugin loading", '@plugin "untrusted-plugin";'],
+    ["mixed-case Tailwind plugin loading", '@PlUgIn "untrusted-plugin";'],
     [
       "protocol-relative CSS import",
       '@import "//assets.example.test/theme.css";',

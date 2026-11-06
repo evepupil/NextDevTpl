@@ -3,7 +3,12 @@
 import { act, renderHook } from "@testing-library/react";
 import type { FormEvent } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
+import {
+  useForgotPasswordController,
+  useResetPasswordController,
+  useSignInController,
+  useSignUpController,
+} from "@/features/auth/view";
 import {
   forgetPassword,
   resendVerificationEmail,
@@ -12,15 +17,12 @@ import {
   signInWithGoogle,
   signUpWithEmail,
 } from "@/lib/auth/client";
-import {
-  useForgotPasswordController,
-  useResetPasswordController,
-  useSignInController,
-  useSignUpController,
-} from "@/features/auth/view";
+import englishMessages from "../../../messages/en.json";
+import chineseMessages from "../../../messages/zh.json";
 
 const mocks = vi.hoisted(() => ({
   forgetPassword: vi.fn(),
+  getSession: vi.fn(),
   resendVerificationEmail: vi.fn(),
   resetPassword: vi.fn(),
   router: { replace: vi.fn() },
@@ -32,7 +34,10 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/auth/client", () => ({
+  OAUTH_SUCCESS_QUERY_PARAM: "oauthSuccess",
+  OAUTH_SUCCESS_STORAGE_KEY: "nextdevtpl:oauth-success-state",
   forgetPassword: mocks.forgetPassword,
+  getSession: mocks.getSession,
   resendVerificationEmail: mocks.resendVerificationEmail,
   resetPassword: mocks.resetPassword,
   signInWithEmail: mocks.signInWithEmail,
@@ -74,11 +79,24 @@ function deferred<T>() {
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.search = "token=reset-token";
+  mocks.signInWithEmail.mockResolvedValue({} as never);
+  mocks.signInWithGoogle.mockResolvedValue({} as never);
+  mocks.signUpWithEmail.mockResolvedValue({} as never);
 });
 
 afterEach(() => {
   vi.clearAllTimers();
   vi.useRealTimers();
+});
+
+describe("auth success translations", () => {
+  it.each([
+    { locale: "en", messages: englishMessages },
+    { locale: "zh", messages: chineseMessages },
+  ])("defines sign-in and sign-up success text for $locale", ({ messages }) => {
+    expect(messages.Auth.signIn.success.trim()).not.toBe("");
+    expect(messages.Auth.signUp.success.trim()).not.toBe("");
+  });
 });
 
 describe("sign-in controller", () => {
@@ -130,7 +148,7 @@ describe("sign-in controller", () => {
       await result.current.actions.onSubmit(submitEvent());
     });
 
-    expect(mocks.toastSuccess).toHaveBeenCalledWith("Auth.common.success");
+    expect(mocks.toastSuccess).toHaveBeenCalledWith("Auth.signIn.success");
     expect(mocks.router.replace).toHaveBeenCalledWith("/dashboard");
     expect(result.current.state.error).toBeNull();
   });
@@ -172,6 +190,20 @@ describe("sign-in controller", () => {
     });
 
     expect(mocks.signInWithGoogle).toHaveBeenCalledOnce();
+    expect(result.current.state.error).toBe("Auth.signIn.errors.google");
+    expect(result.current.state.isLoading).toBe(false);
+  });
+
+  it("reports resolved Google sign-in errors and clears loading", async () => {
+    vi.mocked(signInWithGoogle).mockResolvedValueOnce({
+      error: { message: "OAuth failed" },
+    } as never);
+    const { result } = renderHook(() => useSignInController());
+
+    await act(async () => {
+      await result.current.actions.onGoogleSignIn();
+    });
+
     expect(result.current.state.error).toBe("Auth.signIn.errors.google");
     expect(result.current.state.isLoading).toBe(false);
   });
@@ -242,7 +274,7 @@ describe("sign-up controller", () => {
       "password1",
       "Alex Morgan"
     );
-    expect(mocks.toastSuccess).toHaveBeenCalledWith("Auth.common.success");
+    expect(mocks.toastSuccess).toHaveBeenCalledWith("Auth.signUp.success");
     expect(mocks.router.replace).toHaveBeenCalledWith("/dashboard");
     expect(result.current.state.emailSent).toBe(false);
   });
@@ -326,6 +358,20 @@ describe("sign-up controller", () => {
     });
 
     expect(result.current.state.error).toBe("Auth.signUp.errors.emailInUse");
+    expect(result.current.state.isLoading).toBe(false);
+  });
+
+  it("reports resolved Google sign-up errors and clears loading", async () => {
+    vi.mocked(signInWithGoogle).mockResolvedValueOnce({
+      error: { message: "OAuth failed" },
+    } as never);
+    const { result } = renderHook(() => useSignUpController());
+
+    await act(async () => {
+      await result.current.actions.onGoogleSignUp();
+    });
+
+    expect(result.current.state.error).toBe("Auth.signUp.errors.google");
     expect(result.current.state.isLoading).toBe(false);
   });
 });

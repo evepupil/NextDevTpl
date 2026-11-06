@@ -1,19 +1,25 @@
 import { createHash } from "node:crypto";
-import { readdir, readFile, rm } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import { basename, join } from "node:path";
 
 import { parse, stringify } from "yaml";
 
 import { findGeneratorAssets, loadCatalog } from "./catalog.js";
+import { collectSourcePackageImports } from "./dependency-analysis.js";
 import {
   copyTemplate,
+  createGenerationStage,
+  deliverStage,
   installDependencies,
   prepareTarget,
   removePath,
   runPackageScript,
+  updateLockfileOnly,
   writeJson,
   writeText,
 } from "./filesystem.js";
+import { GeneratorError } from "./generator-error.js";
+import type { GeneratorTestHooks } from "./generator-internals.js";
 import { pruneRepositoryOnlyPackageEntries } from "./package-pruning.js";
 import { pruneUnselectedRoutes } from "./route-pruning.js";
 import { createProjectSelection } from "./selection.js";
@@ -22,6 +28,17 @@ import {
   serviceExportNames,
   serviceSources,
 } from "./service-templates.js";
+import { applySkinPackage, validateSkinPackage } from "./skins/index.js";
+import { resolveSkinSource } from "./skins/source.js";
+import {
+  sanitizeSkinError,
+  skinProcessEnvironment,
+} from "./skins/source-env.js";
+import type {
+  GeneratedSkinRecord,
+  SkinSourceSelection,
+} from "./skins/source-types.js";
+import { runInTargetTransaction } from "./target-transaction.js";
 import type {
   GeneratedProjectManifest,
   GeneratorOptions,
@@ -104,7 +121,7 @@ function cloudflareCompatibilityDate(): string {
     !Number.isNaN(parsed.getTime()) &&
     parsed.toISOString().slice(0, 10) === override;
   if (!isValidDate || override > today) {
-    throw new Error(
+    throw new GeneratorError(
       `CF_COMPATIBILITY_DATE must be an existing UTC date no later than ${today}`
     );
   }
@@ -556,6 +573,7 @@ async function pruneModules(
   selection: ProjectSelection,
   catalog: RecipeCatalog
 ): Promise<void> {
+  await removePath(join(target, "src", "components", "motion", "reveal.tsx"));
   await pruneUnselectedSkinSources(target, selection.modules, catalog);
   await pruneUnselectedRoutes(target, selection.modules, catalog);
   for (const id of selection.excludedModules) {
@@ -566,6 +584,7 @@ async function pruneModules(
     await removePath(join(target, "src", "app", "api", "auth"));
     await removePath(join(target, "src", "lib", "auth"));
     await removePath(join(target, "src", "lib", "safe-action.ts"));
+    await removePath(join(target, "src", "config", "auth-navigation.ts"));
     await writeText(join(target, "src", "middleware.ts"), AUTHLESS_MIDDLEWARE);
   }
   if (!hasModule(selection, "marketing")) {
@@ -585,12 +604,16 @@ async function pruneModules(
     await writeText(
       join(target, "next.config.mjs"),
       `import createNextIntlPlugin from "next-intl/plugin";
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+const projectRoot = dirname(fileURLToPath(import.meta.url));
 
 /** @type {import("next").NextConfig} */
 const nextConfig = {
   output: "standalone",
+  outputFileTracingRoot: projectRoot,
   serverExternalPackages: [
     "@neondatabase/serverless",
     "pino",
@@ -774,7 +797,8 @@ async function rewriteSchema(
 async function rewriteTranslations(
   target: string,
   selection: ProjectSelection,
-  catalog: RecipeCatalog
+  catalog: RecipeCatalog,
+  skinId: string
 ): Promise<void> {
   const namespaces = new Set(
     selection.modules.flatMap((id) => catalog.modules[id]?.translations ?? [])
@@ -785,12 +809,32 @@ async function rewriteTranslations(
       string,
       unknown
     >;
-    await writeJson(
-      path,
-      Object.fromEntries(
-        Object.entries(current).filter(([key]) => namespaces.has(key))
-      )
+    const retained = Object.fromEntries(
+      Object.entries(current).filter(([key]) => namespaces.has(key))
     );
+    const skinNamespace = `Skin.${skinId}`;
+    const skinMessagePath = join(
+      target,
+      "src",
+      "skin",
+      "messages",
+      `${locale}.json`
+    );
+    try {
+      if (Object.hasOwn(current, skinNamespace)) {
+        throw new Error("Skin messages cannot replace an existing namespace");
+      }
+      const skinMessages = JSON.parse(
+        await readFile(skinMessagePath, "utf8")
+      ) as unknown;
+      if (!isRecord(skinMessages)) {
+        throw new Error("Skin messages must be a JSON object");
+      }
+      retained[skinNamespace] = skinMessages;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    }
+    await writeJson(path, retained);
   }
 }
 
@@ -912,6 +956,18 @@ async function rewriteComposition(
     join(target, "src", "app", "sitemap.ts"),
     sitemapSource(selection)
   );
+  if (hasModule(selection, "auth")) {
+    const afterSignIn = [
+      selection.modules.includes("dashboard") ? "/dashboard" : null,
+      selection.modules.includes("settings") ? "/dashboard/settings" : null,
+      selection.modules.includes("support") ? "/dashboard/support" : null,
+      selection.modules.includes("marketing") ? "/" : null,
+    ].find((path) => path !== null);
+    await writeText(
+      join(target, "src", "config", "auth-navigation.ts"),
+      `export interface AuthNavigation {\n  afterSignIn: string | null;\n  afterSignOut: string;\n}\n\nexport const authNavigation: AuthNavigation = {\n  afterSignIn: ${JSON.stringify(afterSignIn ?? null)},\n  afterSignOut: ${JSON.stringify(selection.modules.includes("marketing") ? "/" : "/sign-in")},\n};\n`
+    );
+  }
 }
 
 async function rewriteEnvironment(
@@ -1036,7 +1092,9 @@ async function rewriteDeployment(
 async function rewritePackage(
   target: string,
   selection: ProjectSelection,
-  catalog: RecipeCatalog
+  catalog: RecipeCatalog,
+  skinDependencies: Readonly<Record<string, string>> = {},
+  sourceDependencies: ReadonlySet<string> = new Set()
 ): Promise<void> {
   const path = join(target, "package.json");
   const packageJson = JSON.parse(await readFile(path, "utf8")) as {
@@ -1053,6 +1111,13 @@ async function rewritePackage(
   for (const dependency of allAdapterPackages) {
     if (!selectedPackages.has(dependency))
       delete packageJson.dependencies[dependency];
+  }
+  Object.assign(packageJson.dependencies, skinDependencies);
+  for (const packageName of ["framer-motion", "geist"]) {
+    if (!sourceDependencies.has(packageName)) {
+      delete packageJson.dependencies[packageName];
+      delete packageJson.devDependencies[packageName];
+    }
   }
   if (!hasModule(selection, "analytics")) {
     delete packageJson.dependencies["@next/third-parties"];
@@ -1124,7 +1189,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-async function rewriteLockfile(target: string): Promise<void> {
+async function rewriteLockfile(
+  target: string,
+  skinDependencies: Readonly<Record<string, string>>
+): Promise<boolean> {
   const packageJson = JSON.parse(
     await readFile(join(target, "package.json"), "utf8")
   ) as Record<string, unknown>;
@@ -1138,6 +1206,10 @@ async function rewriteLockfile(target: string): Promise<void> {
     throw new Error("Generated pnpm lockfile has no root importer");
   }
 
+  const updates: Array<{
+    group: "dependencies" | "devDependencies" | "optionalDependencies";
+    entries: Record<string, unknown>;
+  }> = [];
   for (const group of [
     "dependencies",
     "devDependencies",
@@ -1146,26 +1218,36 @@ async function rewriteLockfile(target: string): Promise<void> {
     const selected = packageJson[group];
     const locked = rootImporter[group];
     if (selected === undefined) {
-      delete rootImporter[group];
+      updates.push({ group, entries: {} });
       continue;
     }
-    if (!isRecord(selected) || !isRecord(locked)) {
-      throw new Error(`Generated pnpm lockfile is missing ${group}`);
+    if (!isRecord(selected)) throw new Error(`Invalid generated ${group}`);
+    if (!isRecord(locked)) return true;
+    const entries: Record<string, unknown> = {};
+    for (const [name, specifier] of Object.entries(selected)) {
+      const entry = locked[name];
+      if (!isRecord(entry) || typeof specifier !== "string") {
+        return true;
+      }
+      const exactSkinVersion = skinDependencies[name];
+      if (exactSkinVersion) {
+        const lockedVersion =
+          typeof entry.version === "string"
+            ? entry.version.split("(", 1)[0]
+            : "";
+        if (lockedVersion !== exactSkinVersion) return true;
+      }
+      entries[name] = { ...entry, specifier };
     }
-    rootImporter[group] = Object.fromEntries(
-      Object.entries(selected).map(([name, specifier]) => {
-        const entry = locked[name];
-        if (!isRecord(entry) || typeof specifier !== "string") {
-          throw new Error(
-            `Generated pnpm lockfile is missing ${group}.${name}`
-          );
-        }
-        return [name, { ...entry, specifier }];
-      })
-    );
+    updates.push({ group, entries });
   }
 
+  for (const { group, entries } of updates) {
+    if (Object.keys(entries).length === 0) delete rootImporter[group];
+    else rootImporter[group] = entries;
+  }
   await writeText(lockfilePath, stringify(lockfile, { lineWidth: 0 }));
+  return false;
 }
 
 async function writeSmokeTest(
@@ -1184,7 +1266,8 @@ async function writeSmokeTest(
 }
 
 export async function generateProject(
-  options: GeneratorOptions
+  options: GeneratorOptions,
+  hooks: GeneratorTestHooks = {}
 ): Promise<{ manifest: GeneratedProjectManifest; targetDirectory: string }> {
   const discovered = await findGeneratorAssets();
   const assets = {
@@ -1197,50 +1280,146 @@ export async function generateProject(
     templateRoot: assets.templateRoot,
   });
   const selection = createProjectSelection(catalog, options);
-  const target = await prepareTarget(options.targetDirectory);
+  const skinSelection: SkinSourceSelection = options.skin ?? {
+    kind: "builtin",
+    id: "default",
+  };
+  const skinSource = await resolveSkinSource(skinSelection, {
+    templateRoot: assets.templateRoot,
+    ...hooks.sourceOptions,
+  });
+  let stage: Awaited<ReturnType<typeof createGenerationStage>> | undefined;
 
   try {
-    await copyTemplate(
-      assets.templateRoot,
-      assets.templateManifestPath,
-      target.path
-    );
-    await removePath(join(target.path, "drizzle"));
-    await pruneModules(target.path, selection, catalog);
-    await rewriteAdapters(target.path, selection, catalog);
-    await rewriteServices(target.path, selection);
-    await rewriteModuleRegistry(target.path, selection);
-    await writeSelectedSkinViews(target.path, selection.modules, catalog);
-    await writeWorkspaceComposition(target.path, selection.modules);
-    await rewriteSchema(target.path, selection, catalog);
-    await rewriteTranslations(target.path, selection, catalog);
-    await rewriteComposition(target.path, selection);
-    await rewriteEnvironment(target.path, selection);
-    await rewriteDeployment(target.path, selection);
-    await rewritePackage(target.path, selection, catalog);
-    await rewriteLockfile(target.path);
+    const validatedSkin = await validateSkinPackage({
+      directory: skinSource.directory,
+      templateDirectory: assets.templateRoot,
+      catalog,
+      selectedModules: selection.modules,
+    });
+    const target = await prepareTarget(options.targetDirectory);
+    return await runInTargetTransaction(
+      target.path,
+      target.created,
+      target.identity,
+      async () => {
+        const generationStage = await createGenerationStage(target.path);
+        stage = generationStage;
+        const workPath = generationStage.project;
+        await copyTemplate(
+          assets.templateRoot,
+          assets.templateManifestPath,
+          workPath
+        );
+        await removePath(join(workPath, "drizzle"));
+        await pruneModules(workPath, selection, catalog);
+        await rewriteAdapters(workPath, selection, catalog);
+        await rewriteServices(workPath, selection);
+        await rewriteModuleRegistry(workPath, selection);
+        await writeSelectedSkinViews(workPath, selection.modules, catalog);
+        await writeWorkspaceComposition(workPath, selection.modules);
+        const appliedSkin = await applySkinPackage({
+          skin: validatedSkin,
+          targetDirectory: workPath,
+          catalog,
+          selectedModules: selection.modules,
+        });
+        await rewriteSchema(workPath, selection, catalog);
+        await rewriteTranslations(
+          workPath,
+          selection,
+          catalog,
+          appliedSkin.manifest.id
+        );
+        await rewriteComposition(workPath, selection);
+        await rewriteEnvironment(workPath, selection);
+        await rewriteDeployment(workPath, selection);
+        const skinDependencies = Object.fromEntries(
+          [...appliedSkin.reachableDependencies.keys()].flatMap((name) => {
+            const version = appliedSkin.manifest.dependencies[name];
+            return version ? [[name, version]] : [];
+          })
+        );
+        const sourceDependencies = await collectSourcePackageImports(
+          join(workPath, "src")
+        );
+        await rewritePackage(
+          workPath,
+          selection,
+          catalog,
+          skinDependencies,
+          sourceDependencies
+        );
+        const packageManager = options.packageManager ?? "pnpm";
+        const childEnvironment = skinProcessEnvironment(skinSelection);
+        const requiresLockOnly = await rewriteLockfile(
+          workPath,
+          skinDependencies
+        );
+        if (requiresLockOnly) {
+          await updateLockfileOnly(
+            workPath,
+            packageManager,
+            childEnvironment,
+            hooks.runProcess
+          );
+        }
 
-    const manifest: GeneratedProjectManifest = {
-      catalogVersion: catalog.version,
-      preset: selection.preset,
-      target: selection.target,
-      modules: selection.modules,
-      adapters: selection.adapters,
-      bindings: selection.bindings,
-    };
-    await writeJson(join(target.path, "nextdevtpl.generated.json"), manifest);
-    await writeSmokeTest(target.path, manifest);
-    if (options.install !== false) {
-      const packageManager = options.packageManager ?? "pnpm";
-      await installDependencies(target.path, packageManager);
-      await runPackageScript(target.path, packageManager, "db:generate:init");
-      if (selection.target === "cloudflare") {
-        await runPackageScript(target.path, packageManager, "cf:types");
+        const manifest: GeneratedProjectManifest = {
+          catalogVersion: catalog.version,
+          preset: selection.preset,
+          target: selection.target,
+          modules: selection.modules,
+          adapters: selection.adapters,
+          bindings: selection.bindings,
+          skin: {
+            id: validatedSkin.manifest.id,
+            version: validatedSkin.manifest.version,
+            packageHash: validatedSkin.packageHash,
+            source: skinSource.source,
+          } satisfies GeneratedSkinRecord,
+        };
+        await writeJson(join(workPath, "nextdevtpl.generated.json"), manifest);
+        await writeSmokeTest(workPath, manifest);
+        await deliverStage(
+          workPath,
+          target.path,
+          hooks.afterStageFileDelivered
+        );
+        if (options.install !== false) {
+          await installDependencies(
+            target.path,
+            packageManager,
+            childEnvironment,
+            hooks.runProcess
+          );
+          await runPackageScript(
+            target.path,
+            packageManager,
+            "db:generate:init",
+            childEnvironment,
+            hooks.runProcess
+          );
+          if (selection.target === "cloudflare") {
+            await runPackageScript(
+              target.path,
+              packageManager,
+              "cf:types",
+              childEnvironment,
+              hooks.runProcess
+            );
+          }
+        }
+        return { manifest, targetDirectory: target.path };
       }
-    }
-    return { manifest, targetDirectory: target.path };
+    );
   } catch (error) {
-    if (target.created) await rm(target.path, { recursive: true, force: true });
-    throw error;
+    throw sanitizeSkinError(error, skinSelection);
+  } finally {
+    try {
+      await stage?.dispose();
+    } finally {
+      await skinSource.dispose();
+    }
   }
 }

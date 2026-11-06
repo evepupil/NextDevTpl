@@ -11,6 +11,7 @@ interface CssValidationOptions {
   templateDependencies: Readonly<Record<string, string>>;
   moduleRoot: (specifier: string) => string;
   isDeniedPackage: (name: string) => boolean;
+  recordDependency: (name: string, importer: string) => void;
   resolveLocalPath: (importer: string, specifier: string) => Promise<string>;
 }
 
@@ -95,6 +96,9 @@ export async function inspectSkinCss(
       if (token?.includes("\\")) {
         failSkin(["Escaped CSS at-rule names are not supported"]);
       }
+      if (["config", "plugin"].includes(node.name.toLowerCase())) {
+        failSkin(["Skin CSS must not load Tailwind configuration or plugins"]);
+      }
     }
     if (node.type === "atrule" && node.name.toLowerCase() === "import") {
       const parsed = valueParser(node.params);
@@ -127,6 +131,7 @@ export async function inspectSkinCss(
         if (options.isDeniedPackage(packageName)) {
           failSkin(["CSS @import references a prohibited package"]);
         }
+        options.recordDependency(packageName, relativePath);
         if (
           !manifest.dependencies[packageName] &&
           !options.templateDependencies[packageName]

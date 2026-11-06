@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowLeft, ChevronsUpDown, LogOut } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,8 +13,10 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { adminConfig, siteConfig } from "@/config";
 import { ModeToggle } from "@/features/shared";
-import { Link, usePathname, useRouter } from "@/i18n/routing";
+import type { Locale } from "@/i18n/routing";
+import { Link, usePathname } from "@/i18n/routing";
 import { signOut, useSession } from "@/lib/auth/client";
+import { navigateAfterSignOut } from "@/lib/auth/navigation";
 import { cn } from "@/lib/utils";
 
 /**
@@ -26,7 +28,7 @@ import { cn } from "@/lib/utils";
  */
 export function AdminSidebar() {
   const pathname = usePathname();
-  const router = useRouter();
+  const locale = useLocale() as Locale;
   const t = useTranslations("AdminSidebar");
 
   const getNavTitle = (title: string, translationKey?: string) =>
@@ -48,9 +50,7 @@ export function AdminSidebar() {
     setOpen(false);
     await signOut({
       fetchOptions: {
-        onSuccess: () => {
-          router.push("/");
-        },
+        onSuccess: () => navigateAfterSignOut(locale),
       },
     });
   };

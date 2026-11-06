@@ -116,14 +116,20 @@ export function WorkspaceNavigation() {
                     <PlanLabel />
                   </div>
                 )}
-                <Link
-                  className="text-sm text-primary underline-offset-4 hover:underline"
-                  href="/dashboard/settings"
-                  onClick={() => setAccountOpen(false)}
-                  role="menuitem"
-                >
-                  {t("sidebar.settings")}
-                </Link>
+                {runtime.navigation.some((group) =>
+                  group.items.some(
+                    (item) => item.href === "/dashboard/settings"
+                  )
+                ) && (
+                  <Link
+                    className="text-sm text-primary underline-offset-4 hover:underline"
+                    href="/dashboard/settings"
+                    onClick={() => setAccountOpen(false)}
+                    role="menuitem"
+                  >
+                    {t("sidebar.settings")}
+                  </Link>
+                )}
                 <Button
                   onClick={() => void signOut()}
                   role="menuitem"

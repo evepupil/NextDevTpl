@@ -24,6 +24,13 @@ async function exists(path: string): Promise<boolean> {
   }
 }
 
+async function readRateLimitNamespaceIds(target: string): Promise<string[]> {
+  const wrangler = JSON.parse(
+    await readFile(join(target, "wrangler.jsonc"), "utf8")
+  ) as { ratelimits: Array<{ namespace_id: string }> };
+  return wrangler.ratelimits.map((item) => item.namespace_id);
+}
+
 describe("project generation", () => {
   let root: string;
 
@@ -60,6 +67,7 @@ describe("project generation", () => {
     );
 
     expect(manifest.modules).toEqual(["mail", "shared", "auth", "dashboard"]);
+    expect(manifest.modules).not.toContain("marketing");
     expect(manifest.adapters.analytics).toBe("analytics:noop");
     expect(await exists(join(target, "src/services/telemetry.ts"))).toBe(true);
     expect(
@@ -159,6 +167,10 @@ describe("project generation", () => {
     expect(rootLayout).toContain(
       "<ThemeProvider defaultTheme={skinConfig.defaultTheme}>"
     );
+    const nextConfig = await readFile(join(target, "next.config.mjs"), "utf8");
+    expect(nextConfig).toContain('import { dirname } from "node:path";');
+    expect(nextConfig).toContain('import { fileURLToPath } from "node:url";');
+    expect(nextConfig).toContain("outputFileTracingRoot: projectRoot");
   });
 
   it("omits an unconfigured OpenAI-compatible key from generated options", async () => {
@@ -442,18 +454,11 @@ describe("project generation", () => {
     expect(environment).not.toContain("NEXT_PUBLIC_SENTRY_DSN");
   });
 
-  it("isolates Cloudflare rate-limit namespaces per generated project", async () => {
+  it("isolates Cloudflare rate-limit namespaces across project names", async () => {
     const firstTarget = join(root, "rate-limit-project-a");
     const secondTarget = join(root, "rate-limit-project-b");
-    const stableTargetA = join(root, "stable-a", "same-project");
-    const stableTargetB = join(root, "stable-b", "same-project");
 
-    for (const target of [
-      firstTarget,
-      secondTarget,
-      stableTargetA,
-      stableTargetB,
-    ]) {
+    for (const target of [firstTarget, secondTarget]) {
       await generateProject({
         targetDirectory: target,
         preset: "ai-saas",
@@ -461,22 +466,29 @@ describe("project generation", () => {
       });
     }
 
-    const readNamespaceIds = async (target: string): Promise<string[]> => {
-      const wrangler = JSON.parse(
-        await readFile(join(target, "wrangler.jsonc"), "utf8")
-      ) as { ratelimits: Array<{ namespace_id: string }> };
-      return wrangler.ratelimits.map((item) => item.namespace_id);
-    };
-
-    const firstIds = await readNamespaceIds(firstTarget);
-    const secondIds = await readNamespaceIds(secondTarget);
-    const stableIdsA = await readNamespaceIds(stableTargetA);
-    const stableIdsB = await readNamespaceIds(stableTargetB);
+    const firstIds = await readRateLimitNamespaceIds(firstTarget);
+    const secondIds = await readRateLimitNamespaceIds(secondTarget);
 
     expect(firstIds).toHaveLength(7);
     expect(new Set(firstIds).size).toBe(7);
     expect(firstIds.every((id) => /^[1-9]\d*$/u.test(id))).toBe(true);
     expect(new Set([...firstIds, ...secondIds]).size).toBe(14);
+  });
+
+  it("keeps Cloudflare rate-limit namespaces stable for the same project name", async () => {
+    const stableTargetA = join(root, "stable-a", "same-project");
+    const stableTargetB = join(root, "stable-b", "same-project");
+
+    for (const target of [stableTargetA, stableTargetB]) {
+      await generateProject({
+        targetDirectory: target,
+        preset: "ai-saas",
+        install: false,
+      });
+    }
+
+    const stableIdsA = await readRateLimitNamespaceIds(stableTargetA);
+    const stableIdsB = await readRateLimitNamespaceIds(stableTargetB);
     expect(stableIdsA).toEqual(stableIdsB);
   });
 

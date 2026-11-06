@@ -2,6 +2,7 @@
 import { pathToFileURL } from "node:url";
 
 import { generateProject } from "./generate.js";
+import type { SkinSourceSelection } from "./skins/source-types.js";
 import type {
   DeploymentTarget,
   GeneratorOptions,
@@ -23,6 +24,9 @@ Options:
   --analytics noop|logger|posthog|ga4|umami|none
   --jobs inngest|cloudflare-workflows|none
   --rate-limit noop|upstash|cloudflare-rate-limit
+  --skin default|<directory>|https://.../skin.tgz
+  --skin-sha256 <64-hex-digits>  Required for remote skins
+  --skin-token-env <NAME>       Remote token environment variable
   --yes                 Accept defaults without prompts
   --no-install          Skip dependency installation
   --help                Show this help
@@ -61,6 +65,9 @@ export function parseCliArguments(
   let target: DeploymentTarget | undefined;
   let modules: string[] | undefined;
   let install = true;
+  let skinValue: string | undefined;
+  let skinSha256: string | undefined;
+  let skinTokenEnv: string | undefined;
   const adapterOverrides: Partial<Record<ServiceKind, string | null>> = {};
 
   for (let index = 0; index < args.length; index += 1) {
@@ -88,6 +95,26 @@ export function parseCliArguments(
       index += 1;
       continue;
     }
+    if (argument === "--skin") {
+      if (skinValue !== undefined) throw new Error("Duplicate --skin option");
+      skinValue = readValue(args, index, argument);
+      index += 1;
+      continue;
+    }
+    if (argument === "--skin-sha256") {
+      if (skinSha256 !== undefined)
+        throw new Error("Duplicate --skin-sha256 option");
+      skinSha256 = readValue(args, index, argument);
+      index += 1;
+      continue;
+    }
+    if (argument === "--skin-token-env") {
+      if (skinTokenEnv !== undefined)
+        throw new Error("Duplicate --skin-token-env option");
+      skinTokenEnv = readValue(args, index, argument);
+      index += 1;
+      continue;
+    }
     const service = SERVICE_FLAGS[argument];
     if (service) {
       const value = readValue(args, index, argument);
@@ -96,19 +123,65 @@ export function parseCliArguments(
       index += 1;
       continue;
     }
-    if (argument.startsWith("-"))
-      throw new Error(`Unknown option: ${argument}`);
+    if (argument.startsWith("-")) throw new Error("Unknown option");
     if (targetDirectory)
       throw new Error("Only one target directory is allowed");
     targetDirectory = argument;
   }
 
   if (!targetDirectory) throw new Error("A target directory is required");
+  let skin: SkinSourceSelection = { kind: "builtin", id: "default" };
+  if (skinValue !== undefined && skinValue !== "default") {
+    const isWindowsPath =
+      /^[A-Za-z]:[\\/]/u.test(skinValue) ||
+      skinValue.startsWith("\\\\") ||
+      skinValue.startsWith("//");
+    if (!isWindowsPath && /^[A-Za-z][A-Za-z0-9+.-]*:/u.test(skinValue)) {
+      let url: URL;
+      try {
+        url = new URL(skinValue);
+      } catch {
+        throw new Error("Remote skin URL is invalid");
+      }
+      if (
+        url.protocol !== "https:" ||
+        url.username ||
+        url.password ||
+        url.search ||
+        url.hash
+      ) {
+        throw new Error("Remote skin URL must be a plain HTTPS URL");
+      }
+      if (!skinSha256 || !/^[a-f0-9]{64}$/iu.test(skinSha256)) {
+        throw new Error("Remote skins require a 64-digit SHA-256 digest");
+      }
+      if (
+        skinTokenEnv !== undefined &&
+        !/^[A-Za-z_][A-Za-z0-9_]*$/u.test(skinTokenEnv)
+      ) {
+        throw new Error("Skin token environment variable name is invalid");
+      }
+      skin = {
+        kind: "remote",
+        url: url.href,
+        sha256: skinSha256.toLowerCase(),
+        ...(skinTokenEnv ? { tokenEnv: skinTokenEnv } : {}),
+      };
+    } else {
+      if (skinSha256 !== undefined || skinTokenEnv !== undefined) {
+        throw new Error("Remote skin options require an HTTPS skin source");
+      }
+      skin = { kind: "local", directory: skinValue };
+    }
+  } else if (skinSha256 !== undefined || skinTokenEnv !== undefined) {
+    throw new Error("Remote skin options require an HTTPS skin source");
+  }
   return {
     targetDirectory,
     install,
     ...(preset ? { preset } : {}),
     ...(target ? { target } : {}),
+    skin,
     ...(modules ? { modules } : {}),
     ...(Object.keys(adapterOverrides).length > 0 ? { adapterOverrides } : {}),
   };

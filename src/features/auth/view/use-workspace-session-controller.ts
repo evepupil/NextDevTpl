@@ -1,8 +1,11 @@
 "use client";
 
-import { useSession, signOut } from "@/lib/auth/client";
-import { useRouter } from "@/i18n/routing";
+import { useLocale } from "next-intl";
+
 import type { WorkspaceUser } from "@/features/shared/view";
+import type { Locale } from "@/i18n/routing";
+import { signOut, useSession } from "@/lib/auth/client";
+import { navigateAfterSignOut } from "@/lib/auth/navigation";
 
 export interface WorkspaceSessionController {
   user: WorkspaceUser | null;
@@ -11,7 +14,7 @@ export interface WorkspaceSessionController {
 
 export function useWorkspaceSessionController(): WorkspaceSessionController {
   const { data: session } = useSession();
-  const router = useRouter();
+  const locale = useLocale() as Locale;
   const user = session?.user
     ? {
         id: session.user.id,
@@ -24,7 +27,7 @@ export function useWorkspaceSessionController(): WorkspaceSessionController {
   const onSignOut = async () => {
     await signOut({
       fetchOptions: {
-        onSuccess: () => router.push("/"),
+        onSuccess: () => navigateAfterSignOut(locale),
       },
     });
   };

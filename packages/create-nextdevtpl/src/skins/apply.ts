@@ -3,6 +3,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
 import { removePath } from "../filesystem.js";
+import { recordTargetFile } from "../target-transaction.js";
 import { writeSelectedSkinViews } from "../view-composition.js";
 import { failSkin } from "./errors.js";
 import { sha256, stableSkinManifestJson } from "./hash.js";
@@ -13,13 +14,13 @@ import {
 } from "./manifest.js";
 import { readPackageFile, validateSkinPackageFiles } from "./package-files.js";
 import { analyzeSkinSources } from "./source-validation.js";
-import type { ApplySkinOptions } from "./types.js";
+import type { ApplySkinOptions, ApplySkinResult } from "./types.js";
 
 const REQUIRED_ROOT_FILES = ["config.ts", "fonts.ts", "tokens.css"] as const;
 
 export async function applySkinPackage(
   options: ApplySkinOptions
-): Promise<void> {
+): Promise<ApplySkinResult> {
   const { skin, targetDirectory, catalog, selectedModules } = options;
   for (const module of selectedModules) {
     if (
@@ -82,6 +83,10 @@ export async function applySkinPackage(
   });
 
   const selectedFiles = new Set<string>(REQUIRED_ROOT_FILES);
+  for (const locale of ["en", "zh"] as const) {
+    const messageFile = `messages/${locale}.json`;
+    if (fileContents.has(messageFile)) selectedFiles.add(messageFile);
+  }
   for (const file of analysis.reachableFiles) selectedFiles.add(file);
   for (const file of fileInfo.files) {
     if (file === "DESIGN.md") selectedFiles.add(file);
@@ -100,6 +105,7 @@ export async function applySkinPackage(
     const destination = resolve(skinRoot, ...file.split("/"));
     await mkdir(dirname(destination), { recursive: true });
     await writeFile(destination, content);
+    await recordTargetFile(destination, content);
   }
   for (const [component, file] of Object.entries(currentManifest.uiOverrides)) {
     const destination = resolve(
@@ -113,7 +119,9 @@ export async function applySkinPackage(
       .replace(/^ui\//u, "")
       .replace(/\/index\.tsx?$/u, "")
       .replace(/\.tsx?$/u, "");
-    await writeFile(destination, `export * from "@/skin/ui/${skinEntry}";\n`);
+    const content = `export * from "@/skin/ui/${skinEntry}";\n`;
+    await writeFile(destination, content);
+    await recordTargetFile(destination, content);
   }
   await writeSelectedSkinViews(
     targetDirectory,
@@ -132,6 +140,13 @@ export async function applySkinPackage(
   const outputSet = new Set(selectedFiles);
   const outputAssets = currentManifest.assets.flatMap((asset) => {
     const files = asset.files?.filter((file) => outputSet.has(file));
+    if (
+      asset.kind === "dependency" &&
+      (!asset.package ||
+        !analysis.reachableDependencies.has(asset.package.name))
+    ) {
+      return [];
+    }
     if (asset.kind !== "dependency" && (!files || files.length === 0)) {
       return [];
     }
@@ -153,11 +168,19 @@ export async function applySkinPackage(
       )
     ),
     assets: outputAssets,
+    dependencies: Object.fromEntries(
+      Object.entries(currentManifest.dependencies).filter(([name]) =>
+        analysis.reachableDependencies.has(name)
+      )
+    ),
     files: outputFiles,
   });
-  await writeFile(
-    resolve(skinRoot, "skin.json"),
-    serializeSkinManifest(outputManifest),
-    "utf8"
-  );
+  const outputManifestJson = serializeSkinManifest(outputManifest);
+  const outputManifestPath = resolve(skinRoot, "skin.json");
+  await writeFile(outputManifestPath, outputManifestJson, "utf8");
+  await recordTargetFile(outputManifestPath, outputManifestJson);
+  return {
+    manifest: outputManifest,
+    reachableDependencies: analysis.reachableDependencies,
+  };
 }

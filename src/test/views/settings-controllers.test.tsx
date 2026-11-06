@@ -18,6 +18,10 @@ interface SignOutOptions {
   fetchOptions: { onSuccess: () => void };
 }
 
+interface SignOutResult {
+  error?: unknown;
+}
+
 interface ActionCallbacks {
   onError?: (result: unknown) => void;
   onSuccess?: (result: unknown) => void | Promise<void>;
@@ -50,10 +54,12 @@ const mocks = vi.hoisted(() => ({
   isDeletingAccount: false,
   isProfileSaving: false,
   isTransactionsLoading: false,
+  navigateAfterSignOut: vi.fn(),
   planResult: { data: {} as Record<string, unknown> },
   resumeSubscription: vi.fn(),
   router: { refresh: vi.fn(), replace: vi.fn() },
-  signOut: vi.fn<(options: SignOutOptions) => Promise<void>>(),
+  signOut:
+    vi.fn<(options: SignOutOptions) => Promise<SignOutResult | undefined>>(),
   toastError: vi.fn(),
   toastSuccess: vi.fn(),
   transactionsResult: {
@@ -138,6 +144,9 @@ vi.mock("next-safe-action/hooks", () => ({
 vi.mock("@/lib/auth/client", () => ({
   changePassword: mocks.changePassword,
   signOut: mocks.signOut,
+}));
+vi.mock("@/lib/auth/navigation", () => ({
+  navigateAfterSignOut: mocks.navigateAfterSignOut,
 }));
 
 vi.mock("@/features/storage/utils", () => ({
@@ -381,8 +390,9 @@ describe("settings account controller", () => {
     expect(mocks.toastSuccess).toHaveBeenCalledWith("Account deleted");
     const signOutOptions = mocks.signOut.mock.calls[0]?.[0];
     act(() => signOutOptions?.fetchOptions.onSuccess());
-    expect(mocks.router.replace).toHaveBeenCalledWith("/");
-    expect(mocks.router.refresh).toHaveBeenCalledTimes(1);
+    expect(mocks.navigateAfterSignOut).toHaveBeenCalledWith("en");
+    expect(mocks.router.replace).not.toHaveBeenCalled();
+    expect(mocks.router.refresh).not.toHaveBeenCalled();
 
     act(() => result.current.actions.setDeleteDialogOpen(true));
     act(() => {
@@ -392,8 +402,38 @@ describe("settings account controller", () => {
     });
     expect(result.current.state.isDeleteDialogOpen).toBe(true);
     expect(mocks.signOut).toHaveBeenCalledTimes(1);
-    expect(mocks.router.replace).toHaveBeenCalledTimes(1);
+    expect(mocks.router.replace).not.toHaveBeenCalled();
     expect(mocks.toastError).toHaveBeenCalledWith("Delete failed");
+  });
+
+  it("navigates after deletion when the follow-up sign-out request fails", async () => {
+    mocks.signOut.mockRejectedValueOnce(new Error("Sign-out request failed"));
+    const { result } = renderHook(() => useSettingsAccountController(user));
+
+    act(() => result.current.actions.onDeleteAccount());
+    await act(async () => {
+      await getCallbacks(mocks.deleteAccountAction).onSuccess?.({
+        data: { message: "Account deleted" },
+      });
+    });
+
+    expect(mocks.navigateAfterSignOut).toHaveBeenCalledWith("en");
+  });
+
+  it("navigates after deletion when sign-out resolves with an error", async () => {
+    mocks.signOut.mockResolvedValueOnce({
+      error: { message: "Sign-out failed" },
+    });
+    const { result } = renderHook(() => useSettingsAccountController(user));
+
+    act(() => result.current.actions.onDeleteAccount());
+    await act(async () => {
+      await getCallbacks(mocks.deleteAccountAction).onSuccess?.({
+        data: { message: "Account deleted" },
+      });
+    });
+
+    expect(mocks.navigateAfterSignOut).toHaveBeenCalledWith("en");
   });
 });
 

@@ -79,3 +79,8 @@ export interface ApplySkinOptions {
   catalog: RecipeCatalog;
   selectedModules: readonly string[];
 }
+
+export interface ApplySkinResult {
+  manifest: SkinManifest;
+  reachableDependencies: ReadonlyMap<string, readonly string[]>;
+}

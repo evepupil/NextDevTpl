@@ -1,3 +1,5 @@
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { createMDX } from "fumadocs-mdx/next";
 import createNextIntlPlugin from "next-intl/plugin";
 
@@ -11,10 +13,12 @@ const withMDX = createMDX();
  * 指定国际化请求配置文件路径
  */
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+const projectRoot = dirname(fileURLToPath(import.meta.url));
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
+  outputFileTracingRoot: projectRoot,
   // Exclude packages with webpack-specific syntax from server bundling
   serverExternalPackages: [
     "@neondatabase/serverless",

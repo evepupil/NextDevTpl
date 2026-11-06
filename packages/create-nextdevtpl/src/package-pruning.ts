@@ -9,6 +9,7 @@
 /** 仓库专用的截图基线依赖，生成项目不带 e2e 目录，也不需要它们。 */
 const REPOSITORY_ONLY_DEV_DEPENDENCIES: readonly string[] = [
   "@playwright/test",
+  "tar-stream",
 ];
 
 /** 生成项目里需要整体删除的仓库专用脚本名前缀。 */

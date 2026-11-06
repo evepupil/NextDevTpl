@@ -1,10 +1,11 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState } from "react";
 import type { FormEventHandler } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
+import { authNavigation } from "@/config/auth-navigation";
 import { useRouter } from "@/i18n/routing";
 import {
   resendVerificationEmail,
@@ -13,11 +14,12 @@ import {
 } from "@/lib/auth/client";
 
 import type { SignUpController } from "./contracts";
+import { useOAuthSuccessFeedback } from "./use-oauth-success-feedback";
 import { useResendCooldown } from "./use-resend-cooldown";
 
 export function useSignUpController(): SignUpController {
+  useOAuthSuccessFeedback();
   const t = useTranslations("Auth.signUp");
-  const tCommon = useTranslations("Auth.common");
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -44,7 +46,8 @@ export function useSignUpController(): SignUpController {
     try {
       setIsLoading(true);
       setError(null);
-      await signInWithGoogle();
+      const result = await signInWithGoogle();
+      if (result.error) setError(t("errors.google"));
     } catch {
       setError(t("errors.google"));
     } finally {
@@ -82,13 +85,18 @@ export function useSignUpController(): SignUpController {
       }
 
       if (result.data?.token) {
-        toast.success(tCommon("success"));
-        router.replace("/dashboard");
+        toast.success(t("success"));
+        if (authNavigation.afterSignIn) {
+          router.replace(authNavigation.afterSignIn);
+        } else {
+          setIsLoading(false);
+        }
         return;
       }
 
       setEmailSent(true);
       restart();
+      setIsLoading(false);
     } catch {
       setError(t("errors.emailInUse"));
       setIsLoading(false);

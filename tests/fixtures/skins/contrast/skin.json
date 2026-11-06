@@ -146,7 +146,7 @@
     "views/workspace/dashboard-layout.tsx": "7f8cdd8c9b3f1390f8a1ea1cf7784e4682658a6aab1f23204d3d660b6ea11a8e",
     "views/workspace/empty-dashboard.tsx": "173d046e79354fe5d977d520a2a61248cc1c153b195e41a27c3937eb2303a271",
     "views/workspace/entry.ts": "1952662598b63655b41b80293ddc63dfe2230396b77a74abf1f06e22b7199ced",
-    "views/workspace/navigation.tsx": "462adb401557356937b787ec01fe2aa41d0a0285ba6e536fad5ed2513092afcf",
+    "views/workspace/navigation.tsx": "80fafee0ea518d21e69314b28e21e1a2897b08e2f58a7a6c1de2f655b0ae6c53",
     "views/workspace/overview.tsx": "c762da3ee9b95a02e73ec48f3acce4c0e4c43d9dd7103dd213a197e613c6fcb1"
   }
 }

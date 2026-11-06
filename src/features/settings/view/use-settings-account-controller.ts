@@ -1,13 +1,13 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useLocale, useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
-import { useState, useTransition } from "react";
 import type { ChangeEvent } from "react";
-import { useForm } from "react-hook-form";
+import { useState, useTransition } from "react";
 import type { SubmitHandler, UseFormReturn } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type { z } from "zod";
 
@@ -19,8 +19,10 @@ import { updateProfileSchema } from "@/features/settings/schemas";
 import { getSignedUploadUrlAction } from "@/features/storage/actions";
 import { ALLOWED_IMAGE_TYPES, MAX_FILE_SIZE } from "@/features/storage/types";
 import { generateAvatarKey, getAvatarUrl } from "@/features/storage/utils";
+import type { Locale } from "@/i18n/routing";
 import { usePathname, useRouter } from "@/i18n/routing";
 import { signOut } from "@/lib/auth/client";
+import { navigateAfterSignOut } from "@/lib/auth/navigation";
 
 import type { SettingsPageViewProps } from "./contracts";
 
@@ -62,7 +64,7 @@ export function useSettingsAccountController(
   user: SettingsPageViewProps["user"]
 ): SettingsAccountController {
   const t = useTranslations("Settings");
-  const locale = useLocale();
+  const locale = useLocale() as Locale;
   const router = useRouter();
   const pathname = usePathname();
   const params = useParams();
@@ -103,17 +105,14 @@ export function useSettingsAccountController(
         }
 
         try {
-          await signOut({
+          const signOutResult = await signOut({
             fetchOptions: {
-              onSuccess: () => {
-                router.replace("/");
-                router.refresh();
-              },
+              onSuccess: () => navigateAfterSignOut(locale),
             },
           });
+          if (signOutResult?.error) navigateAfterSignOut(locale);
         } catch {
-          router.replace("/");
-          router.refresh();
+          navigateAfterSignOut(locale);
         }
       },
       onError: ({ error }) => {

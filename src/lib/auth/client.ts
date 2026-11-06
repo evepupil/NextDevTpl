@@ -2,7 +2,11 @@
 
 import { createAuthClient } from "better-auth/react";
 
+import { authNavigation } from "@/config/auth-navigation";
 import { getClientTelemetryHeaders } from "@/lib/telemetry/identity";
+
+export const OAUTH_SUCCESS_QUERY_PARAM = "oauthSuccess";
+export const OAUTH_SUCCESS_STORAGE_KEY = "nextdevtpl:oauth-success-state";
 
 /**
  * Better Auth 客户端配置
@@ -120,22 +124,71 @@ export async function resetPassword(newPassword: string, token: string) {
  * 使用 GitHub 登录
  * @param callbackURL - 登录成功后的跳转地址
  */
-export async function signInWithGitHub(callbackURL = "/dashboard") {
-  return signIn.social({
-    provider: "github",
-    callbackURL,
-  });
+function createOAuthCallback(callbackURL?: string): {
+  callbackURL: string;
+  state: string | null;
+} {
+  const destination = callbackURL ?? authNavigation.afterSignIn;
+  if (destination !== null) return { callbackURL: destination, state: null };
+  if (typeof window === "undefined") {
+    return { callbackURL: "/sign-in", state: null };
+  }
+
+  const currentUrl = new URL(window.location.href);
+  currentUrl.search = "";
+  currentUrl.hash = "";
+  const state = Array.from(window.crypto.getRandomValues(new Uint8Array(16)))
+    .map((value) => value.toString(16).padStart(2, "0"))
+    .join("");
+
+  try {
+    window.sessionStorage.setItem(OAUTH_SUCCESS_STORAGE_KEY, state);
+  } catch {
+    return { callbackURL: currentUrl.pathname, state: null };
+  }
+
+  currentUrl.searchParams.set(OAUTH_SUCCESS_QUERY_PARAM, state);
+  return { callbackURL: `${currentUrl.pathname}${currentUrl.search}`, state };
+}
+
+function clearOAuthCallbackState(state: string): void {
+  try {
+    if (window.sessionStorage.getItem(OAUTH_SUCCESS_STORAGE_KEY) === state) {
+      window.sessionStorage.removeItem(OAUTH_SUCCESS_STORAGE_KEY);
+    }
+  } catch {
+    // 存储不可用时仍允许认证服务完成登录。
+  }
+}
+
+async function signInWithSocialProvider(
+  provider: "github" | "google",
+  callbackURL?: string
+) {
+  const callback = createOAuthCallback(callbackURL);
+  try {
+    const result = await signIn.social({
+      provider,
+      callbackURL: callback.callbackURL,
+    });
+    if (result.error && callback.state) clearOAuthCallbackState(callback.state);
+    return result;
+  } catch (error) {
+    if (callback.state) clearOAuthCallbackState(callback.state);
+    throw error;
+  }
+}
+
+export async function signInWithGitHub(callbackURL?: string) {
+  return signInWithSocialProvider("github", callbackURL);
 }
 
 /**
  * 使用 Google 登录
  * @param callbackURL - 登录成功后的跳转地址
  */
-export async function signInWithGoogle(callbackURL = "/dashboard") {
-  return signIn.social({
-    provider: "google",
-    callbackURL,
-  });
+export async function signInWithGoogle(callbackURL?: string) {
+  return signInWithSocialProvider("google", callbackURL);
 }
 
 /**
@@ -147,12 +200,13 @@ export async function signInWithGoogle(callbackURL = "/dashboard") {
 export async function signInWithEmail(
   email: string,
   password: string,
-  callbackURL = "/dashboard"
+  callbackURL?: string
 ) {
+  const destination = callbackURL ?? authNavigation.afterSignIn;
   return signIn.email({
     email,
     password,
-    callbackURL,
+    ...(destination ? { callbackURL: destination } : {}),
   });
 }
 

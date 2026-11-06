@@ -68,6 +68,7 @@ const ASSET_EXTENSIONS = [
 
 export interface SkinSourceAnalysis {
   readonly reachableFiles: ReadonlySet<string>;
+  readonly reachableDependencies: ReadonlyMap<string, readonly string[]>;
   readonly viewFiles: ReadonlyMap<string, string>;
   readonly viewIds: ReadonlyMap<string, readonly string[]>;
 }
@@ -81,6 +82,7 @@ interface ScanContext {
   allowedModules: ReadonlySet<string>;
   templateDependencies: Readonly<Record<string, string>>;
   edges: Map<string, Set<string>>;
+  dependencies: Map<string, Set<string>>;
 }
 
 function moduleRoot(specifier: string): string {
@@ -308,6 +310,9 @@ async function resolveModuleSpecifier(
   if (!declaredVersion && !templateVersion) {
     failSkin(["Skin imports an undeclared UI dependency"]);
   }
+  const importers = context.dependencies.get(packageName) ?? new Set<string>();
+  importers.add(importer);
+  context.dependencies.set(packageName, importers);
 }
 
 function resolveCssLocalPath(
@@ -384,6 +389,7 @@ export async function analyzeSkinSources(input: {
     allowedModules: new Set(input.allowedModules),
     templateDependencies: await packageDependencies(input.templateDirectory),
     edges: new Map(),
+    dependencies: new Map(),
   };
 
   for (const relativePath of input.packageFiles) {
@@ -404,6 +410,12 @@ export async function analyzeSkinSources(input: {
           templateDependencies: context.templateDependencies,
           moduleRoot,
           isDeniedPackage,
+          recordDependency: (name, importer) => {
+            const importers =
+              context.dependencies.get(name) ?? new Set<string>();
+            importers.add(importer);
+            context.dependencies.set(name, importers);
+          },
           resolveLocalPath: async (importer, specifier) =>
             resolveCssLocalPath(context, importer, specifier),
         });
@@ -479,5 +491,14 @@ export async function analyzeSkinSources(input: {
     if (entry) visit(entry);
   }
   for (const file of input.rootFiles ?? []) visit(file);
-  return { reachableFiles, viewFiles, viewIds };
+  const reachableDependencies = new Map<string, readonly string[]>();
+  for (const [name, importers] of context.dependencies) {
+    const reachableImporters = [...importers].filter((file) =>
+      reachableFiles.has(file)
+    );
+    if (reachableImporters.length > 0) {
+      reachableDependencies.set(name, reachableImporters);
+    }
+  }
+  return { reachableFiles, reachableDependencies, viewFiles, viewIds };
 }
