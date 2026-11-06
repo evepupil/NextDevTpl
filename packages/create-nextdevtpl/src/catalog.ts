@@ -1,11 +1,19 @@
 import { access, readFile, stat } from "node:fs/promises";
-import { basename, dirname, resolve } from "node:path";
+import {
+  basename,
+  dirname,
+  isAbsolute,
+  relative,
+  resolve,
+  sep,
+} from "node:path";
 import { fileURLToPath } from "node:url";
 
 import type {
   CatalogAdapter,
   CatalogModule,
   CatalogPreset,
+  CatalogView,
   GeneratorAssets,
   RecipeCatalog,
 } from "./types.js";
@@ -45,6 +53,22 @@ function isStringArray(value: unknown): value is string[] {
   );
 }
 
+function parseViews(value: unknown): CatalogView[] | undefined {
+  if (value === undefined) return undefined;
+  if (
+    !Array.isArray(value) ||
+    value.some(
+      (item) =>
+        !isRecord(item) ||
+        typeof item.id !== "string" ||
+        (item.kind !== "page" && item.kind !== "layout")
+    )
+  ) {
+    return undefined;
+  }
+  return value as CatalogView[];
+}
+
 function isRelativePath(value: string): boolean {
   return (
     value.length > 0 &&
@@ -54,7 +78,107 @@ function isRelativePath(value: string): boolean {
   );
 }
 
+function isWithinPath(base: string, candidate: string): boolean {
+  const relativePath = relative(resolve(base), resolve(candidate));
+  return (
+    relativePath === "" ||
+    (!isAbsolute(relativePath) &&
+      relativePath !== ".." &&
+      !relativePath.startsWith(`..${sep}`))
+  );
+}
+
+function allowedExtraSkinSources(moduleId: string): readonly string[] {
+  switch (moduleId) {
+    case "auth":
+      return ["src/skin/layouts/auth.tsx"];
+    case "marketing":
+      return ["src/skin/layouts/marketing.tsx"];
+    case "shared":
+      return ["src/skin/layouts/dashboard.tsx"];
+    default:
+      return [];
+  }
+}
+
+function validateModuleViewMetadata(
+  id: string,
+  module: CatalogModule
+): string[] {
+  const errors: string[] = [];
+  const views = module.views ?? [];
+  const hasEntries =
+    module.viewContract !== undefined ||
+    module.skinEntry !== undefined ||
+    module.skinSources !== undefined;
+  if (views.length === 0) {
+    if (hasEntries) errors.push(`模块 ${id} 的视图入口缺少 views 登记`);
+    return errors;
+  }
+
+  if (
+    module.viewContract !== `src/features/${id}/view/index.ts` ||
+    module.skinEntry !== `src/skin/views/${id}/index.ts` ||
+    !module.skinSources ||
+    module.skinSources.length === 0
+  ) {
+    errors.push(`模块 ${id} 的视图契约、皮肤入口和来源目录必须成套登记`);
+  }
+
+  const viewIds = new Set<string>();
+  for (const view of views) {
+    if (
+      !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/u.test(
+        view.id
+      ) ||
+      !view.id.startsWith(`${id}.`)
+    ) {
+      errors.push(`模块 ${id} 登记了格式错误或归属不符的视图编号 ${view.id}`);
+    }
+    if (viewIds.has(view.id)) {
+      errors.push(`模块 ${id} 重复登记视图 ${view.id}`);
+    }
+    viewIds.add(view.id);
+  }
+
+  if (!module.skinSources) return errors;
+  const sourcePaths = new Set<string>();
+  const viewRoot = `src/skin/views/${id}`;
+  const allowedExtras = allowedExtraSkinSources(id);
+  for (const source of module.skinSources) {
+    if (!isRelativePath(source)) {
+      errors.push(`模块 ${id} 包含无效皮肤来源路径 ${source}`);
+      continue;
+    }
+    const normalizedSource = resolve(source);
+    const normalizedViewRoot = resolve(viewRoot);
+    if (
+      !isWithinPath(normalizedViewRoot, normalizedSource) &&
+      !allowedExtras.some((allowed) => resolve(allowed) === normalizedSource)
+    ) {
+      errors.push(`模块 ${id} 无权裁剪皮肤来源 ${source}`);
+    }
+    if (sourcePaths.has(normalizedSource)) {
+      errors.push(`模块 ${id} 重复登记皮肤来源 ${source}`);
+    }
+    sourcePaths.add(normalizedSource);
+  }
+  if (!sourcePaths.has(resolve(viewRoot))) {
+    errors.push(`模块 ${id} 的皮肤来源必须包含 ${viewRoot}`);
+  }
+  if (
+    module.skinEntry &&
+    !module.skinSources.some((source) =>
+      isWithinPath(resolve(source), resolve(module.skinEntry!))
+    )
+  ) {
+    errors.push(`模块 ${id} 的皮肤入口未包含在 skinSources 中`);
+  }
+  return errors;
+}
+
 function parseModule(id: string, value: unknown): CatalogModule {
+  const views = isRecord(value) ? parseViews(value.views) : undefined;
   if (
     !isRecord(value) ||
     (value.kind !== "core" && value.kind !== "optional") ||
@@ -63,7 +187,12 @@ function parseModule(id: string, value: unknown): CatalogModule {
     !isStringArray(value.schema) ||
     !isStringArray(value.telemetryEvents) ||
     !isStringArray(value.translations) ||
-    !isStringArray(value.env)
+    !isStringArray(value.env) ||
+    (value.views !== undefined && views === undefined) ||
+    (value.viewContract !== undefined &&
+      typeof value.viewContract !== "string") ||
+    (value.skinEntry !== undefined && typeof value.skinEntry !== "string") ||
+    (value.skinSources !== undefined && !isStringArray(value.skinSources))
   ) {
     throw new Error(`Invalid module recipe: ${id}`);
   }
@@ -75,6 +204,16 @@ function parseModule(id: string, value: unknown): CatalogModule {
     telemetryEvents: value.telemetryEvents,
     translations: value.translations,
     env: value.env,
+    ...(views !== undefined ? { views } : {}),
+    ...(typeof value.viewContract === "string"
+      ? { viewContract: value.viewContract }
+      : {}),
+    ...(typeof value.skinEntry === "string"
+      ? { skinEntry: value.skinEntry }
+      : {}),
+    ...(isStringArray(value.skinSources)
+      ? { skinSources: value.skinSources }
+      : {}),
   };
 }
 
@@ -189,8 +328,18 @@ export async function validateCatalog(
   const translationOwners = new Map<string, string>();
   const routeOwners = new Map<string, string>();
   const adapterSourceOwners = new Map<string, string>();
+  const viewOwners = new Map<string, string>();
 
   for (const [id, module] of Object.entries(catalog.modules)) {
+    errors.push(...validateModuleViewMetadata(id, module));
+    for (const view of module.views ?? []) {
+      const owner = viewOwners.get(view.id);
+      if (owner && owner !== id) {
+        errors.push(`视图 ${view.id} 同时属于 ${owner} 和 ${id}`);
+      } else {
+        viewOwners.set(view.id, id);
+      }
+    }
     for (const dependency of module.dependencies) {
       if (!moduleIds.has(dependency)) {
         errors.push(`模块 ${id} 依赖未注册模块 ${dependency}`);
@@ -325,6 +474,23 @@ export async function validateCatalog(
     for (const route of module.routes) {
       if (!(await isFile(resolve(templateRoot, route)))) {
         errors.push(`模块 ${id} 引用不存在的路由源码 ${route}`);
+      }
+    }
+    if (
+      module.viewContract &&
+      !(await isFile(resolve(templateRoot, module.viewContract)))
+    ) {
+      errors.push(`模块 ${id} 引用不存在的视图契约 ${module.viewContract}`);
+    }
+    if (
+      module.skinEntry &&
+      !(await isFile(resolve(templateRoot, module.skinEntry)))
+    ) {
+      errors.push(`模块 ${id} 引用不存在的皮肤入口 ${module.skinEntry}`);
+    }
+    for (const source of module.skinSources ?? []) {
+      if (!(await isFileOrDirectory(resolve(templateRoot, source)))) {
+        errors.push(`模块 ${id} 引用不存在的皮肤来源 ${source}`);
       }
     }
     for (const translation of module.translations) {

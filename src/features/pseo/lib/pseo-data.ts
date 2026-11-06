@@ -1,101 +1,40 @@
 import pseoPages from "../data/pseo-pages.json";
+import type { PseoLocale, PseoPage, PseoPageRecord } from "../view/contracts";
 
-export interface PseoCtaLink {
-  label: string;
-  href: string;
-}
-
-export interface PseoHeroData {
-  badge: string;
-  title: string;
-  highlight: string;
-  subtitle: string;
-  primaryCta: PseoCtaLink;
-  secondaryCta: PseoCtaLink;
-  summaryTitle: string;
-  summaryItems: string[];
-}
-
-export interface PseoStat {
-  label: string;
-  value: string;
-  detail: string;
-}
-
-export interface PseoSectionCopy {
-  title: string;
-  subtitle: string;
-}
-
-export interface PseoFeature {
-  title: string;
-  description: string;
-  icon: string;
-}
-
-export interface PseoUseCase {
-  title: string;
-  description: string;
-  metric: string;
-  metricLabel: string;
-}
-
-export interface PseoFaqItem {
-  question: string;
-  answer: string;
-}
-
-export interface PseoCtaData {
-  title: string;
-  description: string;
-  primaryCta: PseoCtaLink;
-  secondaryCta: PseoCtaLink;
-  note: string;
-}
-
-export interface PseoLocaleData {
-  seo: {
-    title: string;
-    description: string;
-  };
-  hero: PseoHeroData;
-  stats: PseoStat[];
-  sections: {
-    features: PseoSectionCopy;
-    useCases: PseoSectionCopy;
-    faq: PseoSectionCopy;
-    related: PseoSectionCopy;
-  };
-  features: PseoFeature[];
-  useCases: PseoUseCase[];
-  faq: PseoFaqItem[];
-  cta: PseoCtaData;
-}
-
-export interface PseoPageRecord {
-  slug: string;
-  category: string;
-  locales: Record<string, PseoLocaleData>;
-}
-
-export interface PseoPage {
-  slug: string;
-  category: string;
-  locale: string;
-  data: PseoLocaleData;
-}
+export type {
+  PseoCtaData,
+  PseoCtaLink,
+  PseoFaqItem,
+  PseoFeature,
+  PseoHeroData,
+  PseoLocale,
+  PseoLocaleData,
+  PseoPage,
+  PseoPageRecord,
+  PseoSectionCopy,
+  PseoStat,
+  PseoUseCase,
+} from "../view/contracts";
 
 const pages = pseoPages as PseoPageRecord[];
-const fallbackLocale = "en";
+const fallbackLocale: PseoLocale = "en";
+
+function resolveLocale(locale: string): PseoLocale {
+  return locale === "zh" ? "zh" : "en";
+}
 
 export function getPseoPages(locale: string) {
+  const requestedLocale = resolveLocale(locale);
   return pages
     .map((page) => {
-      const data = page.locales[locale] ?? page.locales[fallbackLocale];
+      const data =
+        page.locales[requestedLocale] ?? page.locales[fallbackLocale];
       if (!data) {
         return null;
       }
-      const resolvedLocale = page.locales[locale] ? locale : fallbackLocale;
+      const resolvedLocale = page.locales[requestedLocale]
+        ? requestedLocale
+        : fallbackLocale;
       return {
         slug: page.slug,
         category: page.category,
@@ -107,15 +46,18 @@ export function getPseoPages(locale: string) {
 }
 
 export function getPseoPage(locale: string, slug: string) {
+  const requestedLocale = resolveLocale(locale);
   const page = pages.find((entry) => entry.slug === slug);
   if (!page) {
     return null;
   }
-  const data = page.locales[locale] ?? page.locales[fallbackLocale];
+  const data = page.locales[requestedLocale] ?? page.locales[fallbackLocale];
   if (!data) {
     return null;
   }
-  const resolvedLocale = page.locales[locale] ? locale : fallbackLocale;
+  const resolvedLocale = page.locales[requestedLocale]
+    ? requestedLocale
+    : fallbackLocale;
   return {
     slug: page.slug,
     category: page.category,
@@ -132,7 +74,7 @@ export function getRelatedPseoPages(locale: string, slug: string, limit = 3) {
 
 export function getAllPseoParams() {
   return pages.flatMap((page) =>
-    Object.keys(page.locales).map((locale) => ({
+    (Object.keys(page.locales) as PseoLocale[]).map((locale) => ({
       locale,
       slug: page.slug,
     }))

@@ -31,5 +31,12 @@ export const authModule = defineModule({
   navigation: [],
   translations: ["Auth"],
   schema: ["auth"],
+  views: [
+    { id: "auth.layout", kind: "layout" },
+    { id: "auth.sign-in", kind: "page" },
+    { id: "auth.sign-up", kind: "page" },
+    { id: "auth.forgot-password", kind: "page" },
+    { id: "auth.reset-password", kind: "page" },
+  ],
   telemetryEvents: ["signup.completed", "login.completed", "identity.linked"],
 });

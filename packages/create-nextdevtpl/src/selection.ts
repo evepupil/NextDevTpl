@@ -155,6 +155,7 @@ export function createProjectSelection(
     preset,
     target,
     modules,
+    views: moduleRecipes.flatMap((item) => item.views ?? []),
     excludedModules: Object.keys(catalog.modules).filter(
       (id) => !moduleSet.has(id)
     ),

@@ -1,6 +1,6 @@
-import { SettingsProfileView } from "@/features/settings";
 import { type Locale, redirect } from "@/i18n/routing";
 import { getServerSession } from "@/lib/auth/server";
+import { skinViews } from "@/modules/skin-views";
 
 /**
  * 设置页面元数据
@@ -14,7 +14,7 @@ export const metadata = {
  * 用户设置页面
  *
  * Server Component - 在服务端获取用户数据
- * 将数据传递给客户端 SettingsProfileView 组件
+ * 将数据传递给客户端设置视图
  */
 export default async function SettingsPage({
   params,
@@ -31,13 +31,15 @@ export default async function SettingsPage({
     return null;
   }
 
+  const SettingsPageView = skinViews["settings.page"];
+
   return (
-    <SettingsProfileView
+    <SettingsPageView
       user={{
         id: session.user.id,
         name: session.user.name || "",
         email: session.user.email || "",
-        image: session.user.image,
+        image: session.user.image ?? null,
       }}
     />
   );

@@ -1,16 +1,7 @@
 import type { Metadata } from "next";
-import { SiteJsonLd, SoftwareAppJsonLd } from "@/components/seo/json-ld";
 import { siteConfig } from "@/config";
-import {
-  CTASection,
-  FAQSection,
-  FeatureGrid,
-  HeroSection,
-  HowItWorks,
-  PricingSection,
-  Testimonials,
-  UseCasesSection,
-} from "@/features/marketing";
+import { getMarketingHomeViewData } from "@/features/marketing/server";
+import { skinViews } from "@/modules/skin-views";
 
 /**
  * 生成首页 Metadata
@@ -73,22 +64,8 @@ export default async function HomePage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  const props = getMarketingHomeViewData(locale);
+  const View = skinViews["marketing.home"];
 
-  return (
-    <>
-      {/* JSON-LD Structured Data */}
-      <SiteJsonLd locale={locale as "en" | "zh"} />
-      <SoftwareAppJsonLd locale={locale as "en" | "zh"} />
-
-      {/* Page Sections */}
-      <HeroSection />
-      <FeatureGrid />
-      <HowItWorks />
-      <UseCasesSection />
-      <Testimonials />
-      <PricingSection />
-      <FAQSection />
-      <CTASection />
-    </>
-  );
+  return <View {...props} />;
 }

@@ -1,15 +1,12 @@
-import { Footer, Header } from "@/features/marketing";
+import { skinViews } from "@/modules/skin-views";
 
 export default function MarketingLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-      <main className="flex-1">{children}</main>
-      <Footer />
-    </div>
-  );
+  const props = { children };
+  const View = skinViews["marketing.layout"];
+
+  return <View {...props} />;
 }

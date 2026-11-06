@@ -1,9 +1,10 @@
-import { SignInForm } from "@/features/auth";
+import { skinViews } from "@/modules/skin-views";
 
 /**
  * 登录页面
  * 路由: /sign-in
  */
 export default function SignInPage() {
-  return <SignInForm />;
+  const SignInView = skinViews["auth.sign-in"];
+  return <SignInView />;
 }

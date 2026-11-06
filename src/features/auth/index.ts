@@ -1,3 +1,2 @@
-// Auth Feature
-export * from "./components";
+export * from "./view";
 export { authModule } from "./manifest";

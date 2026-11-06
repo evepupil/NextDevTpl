@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { readdir, readFile, rm } from "node:fs/promises";
-import { basename, dirname, join } from "node:path";
+import { basename, join } from "node:path";
 
 import { parse, stringify } from "yaml";
 
@@ -16,6 +16,12 @@ import {
 } from "./filesystem.js";
 import { pruneRepositoryOnlyPackageEntries } from "./package-pruning.js";
 import { createProjectSelection } from "./selection.js";
+import {
+  pruneUnselectedSkinSources,
+  writeSelectedSkinViews,
+} from "./view-composition.js";
+import { pruneUnselectedRoutes } from "./route-pruning.js";
+import { writeWorkspaceComposition } from "./workspace-composition.js";
 import {
   adapterExports,
   serviceExportNames,
@@ -491,13 +497,6 @@ function hasModule(selection: ProjectSelection, id: string): boolean {
   return selection.modules.includes(id);
 }
 
-const AUTHLESS_DASHBOARD_SIDEBAR = `"use client";
-
-export function DashboardSidebar() {
-  return null;
-}
-`;
-
 const AUTHLESS_MIDDLEWARE = `import { type NextRequest, NextResponse } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 
@@ -557,25 +556,16 @@ async function pruneModules(
   selection: ProjectSelection,
   catalog: RecipeCatalog
 ): Promise<void> {
+  await pruneUnselectedSkinSources(target, selection.modules, catalog);
+  await pruneUnselectedRoutes(target, selection.modules, catalog);
   for (const id of selection.excludedModules) {
     await removePath(join(target, "src", "features", id));
-    for (const route of catalog.modules[id]?.routes ?? []) {
-      await removePath(dirname(join(target, ...route.split("/"))));
-    }
-  }
-
-  if (!hasModule(selection, "admin")) {
-    await removePath(join(target, "src", "app", "[locale]", "(admin)"));
   }
   if (!hasModule(selection, "auth")) {
     await removePath(join(target, "src", "app", "[locale]", "(auth)"));
     await removePath(join(target, "src", "app", "api", "auth"));
     await removePath(join(target, "src", "lib", "auth"));
     await removePath(join(target, "src", "lib", "safe-action.ts"));
-    await writeText(
-      join(target, "src", "features", "dashboard", "components", "sidebar.tsx"),
-      AUTHLESS_DASHBOARD_SIDEBAR
-    );
     await writeText(join(target, "src", "middleware.ts"), AUTHLESS_MIDDLEWARE);
   }
   if (!hasModule(selection, "marketing")) {
@@ -855,85 +845,12 @@ export default async function LocaleLayout({ children, params }: { children: Rea
 `;
 }
 
-function dashboardLayout(selection: ProjectSelection): string {
-  if (!hasModule(selection, "auth")) {
-    return `export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  return <main className="min-h-screen bg-muted/40 p-6">{children}</main>;
-}
-`;
-  }
-
-  if (!hasModule(selection, "dashboard")) {
-    return `import { getLocale } from "next-intl/server";
-import { getServerSession } from "@/lib/auth/server";
-import { redirect } from "@/i18n/routing";
-
-export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const locale = (await getLocale()) as "en" | "zh";
-  const session = await getServerSession();
-  if (!session?.user) redirect({ href: "/sign-in", locale });
-  return <main className="min-h-screen bg-muted/40 p-6">{children}</main>;
-}
-`;
-  }
-
-  const creditsImport = hasModule(selection, "credits")
-    ? 'import { CreditBalanceBadge } from "@/features/credits";\n'
-    : "";
-  const subscriptionImport = hasModule(selection, "subscription")
-    ? 'import { CurrentPlanBadge } from "@/features/subscription";\n'
-    : "";
-  const props = [
-    hasModule(selection, "credits")
-      ? "compactAccountBadge={<CreditBalanceBadge />}"
-      : "",
-    hasModule(selection, "subscription")
-      ? "accountPlanBadge={<CurrentPlanBadge />}"
-      : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
-  return `import { getLocale } from "next-intl/server";
-${creditsImport}import { DashboardMainWrapper, DashboardSidebar, SidebarProvider } from "@/features/dashboard";
-${subscriptionImport}import { getServerSession } from "@/lib/auth/server";
-import { redirect } from "@/i18n/routing";
-
-export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const locale = (await getLocale()) as "en" | "zh";
-  const session = await getServerSession();
-  if (!session?.user) redirect({ href: "/sign-in", locale });
-  return (
-    <SidebarProvider>
-      <div className="min-h-screen bg-muted/40">
-        <DashboardSidebar ${props} />
-        <DashboardMainWrapper>{children}</DashboardMainWrapper>
-      </div>
-    </SidebarProvider>
-  );
-}
-`;
-}
-
-const BASIC_DASHBOARD = `import { getTranslations } from "next-intl/server";
-
-export default async function DashboardPage({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "DashboardPages.dashboard" });
-  return (
-    <div className="space-y-2">
-      <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
-      <p className="text-muted-foreground">{t("subtitle")}</p>
-    </div>
-  );
-}
-`;
-
 function sitemapSource(selection: ProjectSelection): string {
   const imports = [
     'import type { MetadataRoute } from "next";',
     'import { siteConfig } from "@/config";',
     hasModule(selection, "pseo")
-      ? 'import { getAllPseoParams } from "@/features/pseo";'
+      ? 'import { getAllPseoParams } from "@/features/pseo/server";'
       : "",
     hasModule(selection, "blog") || hasModule(selection, "marketing")
       ? `import { ${[
@@ -991,24 +908,6 @@ async function rewriteComposition(
     join(target, "src", "app", "[locale]", "layout.tsx"),
     localeLayout(selection)
   );
-  await writeText(
-    join(target, "src", "app", "[locale]", "(dashboard)", "layout.tsx"),
-    dashboardLayout(selection)
-  );
-  if (!hasModule(selection, "credits")) {
-    await writeText(
-      join(
-        target,
-        "src",
-        "app",
-        "[locale]",
-        "(dashboard)",
-        "dashboard",
-        "page.tsx"
-      ),
-      BASIC_DASHBOARD
-    );
-  }
   await writeText(
     join(target, "src", "app", "sitemap.ts"),
     sitemapSource(selection)
@@ -1311,6 +1210,8 @@ export async function generateProject(
     await rewriteAdapters(target.path, selection, catalog);
     await rewriteServices(target.path, selection);
     await rewriteModuleRegistry(target.path, selection);
+    await writeSelectedSkinViews(target.path, selection.modules, catalog);
+    await writeWorkspaceComposition(target.path, selection.modules);
     await rewriteSchema(target.path, selection, catalog);
     await rewriteTranslations(target.path, selection, catalog);
     await rewriteComposition(target.path, selection);

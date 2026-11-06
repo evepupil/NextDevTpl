@@ -8,7 +8,18 @@ export const sharedModule = defineModule({
   dependencies: [],
   routes: [],
   navigation: [],
-  translations: ["Common", "Cookie", "Theme"],
+  translations: [
+    "Common",
+    "Cookie",
+    "Dashboard",
+    "DashboardPages",
+    "Subscription",
+    "Theme",
+  ],
   schema: [],
+  views: [
+    { id: "shared.dashboard-layout", kind: "layout" },
+    { id: "shared.empty-dashboard", kind: "page" },
+  ],
   telemetryEvents: ["api.request.failed", "action.failed", "job.failed"],
 });

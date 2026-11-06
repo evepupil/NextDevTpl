@@ -1,3 +1,4 @@
 // Blog Feature
-export * from "./components";
+
 export { blogModule } from "./manifest";
+export * from "./view";

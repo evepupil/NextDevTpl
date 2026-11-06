@@ -12,6 +12,11 @@ export type ServiceKind =
   | "rate-limit"
   | "storage";
 
+export interface CatalogView {
+  id: string;
+  kind: "layout" | "page";
+}
+
 export interface CatalogModule {
   dependencies: readonly string[];
   env: readonly string[];
@@ -20,6 +25,10 @@ export interface CatalogModule {
   schema: readonly string[];
   telemetryEvents: readonly string[];
   translations: readonly string[];
+  views?: readonly CatalogView[];
+  viewContract?: string;
+  skinEntry?: string;
+  skinSources?: readonly string[];
 }
 
 export interface CatalogAdapter {
@@ -66,6 +75,7 @@ export interface ProjectSelection {
   packages: readonly string[];
   preset: PresetName;
   target: DeploymentTarget;
+  views: readonly CatalogView[];
 }
 
 export interface GeneratedProjectManifest {

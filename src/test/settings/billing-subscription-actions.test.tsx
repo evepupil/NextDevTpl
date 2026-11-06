@@ -10,7 +10,7 @@ import {
 } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { BillingSection } from "@/features/settings/components";
+import { BillingSection } from "@/skin/views/settings/components/billing-section";
 
 const mocks = vi.hoisted(() => ({
   cancelSubscription: vi.fn(),
@@ -52,10 +52,6 @@ vi.mock("sonner", () => ({
     error: mocks.toastError,
     success: mocks.toastSuccess,
   },
-}));
-
-vi.mock("@/features/subscription/components", () => ({
-  PlanBadge: () => null,
 }));
 
 vi.mock("@/i18n/routing", () => ({

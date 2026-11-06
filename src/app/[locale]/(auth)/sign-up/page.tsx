@@ -1,9 +1,10 @@
-import { SignUpForm } from "@/features/auth";
+import { skinViews } from "@/modules/skin-views";
 
 /**
  * 注册页面
  * 路由: /sign-up
  */
 export default function SignUpPage() {
-  return <SignUpForm />;
+  const SignUpView = skinViews["auth.sign-up"];
+  return <SignUpView />;
 }

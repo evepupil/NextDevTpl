@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ArticleJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { siteConfig } from "@/config";
-import { Link } from "@/i18n/routing";
-import { getAllBlogSlugs, getBlogPost, getBlogPostLocales } from "@/lib/source";
+import {
+  getAllBlogStaticParams,
+  getBlogPostMetadataData,
+  getBlogPostViewData,
+} from "@/features/blog/server";
+import { skinViews } from "@/modules/skin-views";
 
 /**
  * 生成静态参数
  */
 export function generateStaticParams() {
-  return getAllBlogSlugs();
+  return getAllBlogStaticParams();
 }
 
 /**
@@ -21,7 +24,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
-  const post = getBlogPost(slug, locale);
+  const post = getBlogPostMetadataData(locale, slug);
 
   if (!post) {
     return {
@@ -29,12 +32,9 @@ export async function generateMetadata({
     };
   }
 
-  const publishedDate =
-    typeof post.date === "string" ? post.date : post.date.toISOString();
-
   const url = `${siteConfig.url}/${locale}/blog/${slug}`;
   const languages = Object.fromEntries(
-    getBlogPostLocales(slug).map((postLocale) => [
+    post.locales.map((postLocale) => [
       postLocale,
       `${siteConfig.url}/${postLocale}/blog/${slug}`,
     ])
@@ -50,7 +50,7 @@ export async function generateMetadata({
       type: "article",
       url,
       siteName: siteConfig.name,
-      publishedTime: publishedDate,
+      publishedTime: post.publishedDate,
       authors: post.author ? [post.author] : undefined,
       tags: post.tags,
       images: [
@@ -83,99 +83,11 @@ export default async function BlogPostPage({
   params: Promise<{ locale: string; slug: string }>;
 }) {
   const { locale, slug } = await params;
-  const post = getBlogPost(slug, locale);
-
-  if (!post) {
+  const props = getBlogPostViewData(locale, slug);
+  if (!props) {
     notFound();
   }
+  const View = skinViews["blog.post"];
 
-  // 获取 MDX 内容组件
-  const MDXContent = post.body;
-
-  // 格式化日期
-  const formattedDate =
-    typeof post.date === "string"
-      ? post.date
-      : post.date.toLocaleDateString(locale === "zh" ? "zh-CN" : "en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        });
-
-  const isoDate =
-    typeof post.date === "string" ? post.date : post.date.toISOString();
-
-  return (
-    <article className="container mx-auto max-w-3xl py-20">
-      {/* JSON-LD Structured Data */}
-      <ArticleJsonLd
-        title={post.title}
-        description={post.description || ""}
-        slug={slug}
-        locale={locale as "en" | "zh"}
-        publishedAt={isoDate}
-        {...(post.author && { author: post.author })}
-        {...(post.tags && { tags: post.tags })}
-      />
-      <BreadcrumbJsonLd
-        items={[
-          { name: "Home", url: `/${locale}` },
-          {
-            name: locale === "zh" ? "博客" : "Blog",
-            url: `/${locale}/blog`,
-          },
-          { name: post.title, url: `/${locale}/blog/${slug}` },
-        ]}
-      />
-
-      {/* 返回链接 */}
-      <Link
-        href="/blog"
-        className="mb-8 inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
-      >
-        ← {locale === "zh" ? "返回博客" : "Back to Blog"}
-      </Link>
-
-      {/* 文章头部 */}
-      <header className="mb-12">
-        {/* 标签 */}
-        {post.tags && post.tags.length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-2">
-            {post.tags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* 标题 */}
-        <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl">
-          {post.title}
-        </h1>
-
-        {/* 描述 */}
-        {post.description && (
-          <p className="mb-6 text-xl text-muted-foreground">
-            {post.description}
-          </p>
-        )}
-
-        {/* 元数据 */}
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          {post.author && <span>{post.author}</span>}
-          <span>•</span>
-          <time dateTime={formattedDate}>{formattedDate}</time>
-        </div>
-      </header>
-
-      {/* 文章内容 */}
-      <div className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-bold prose-a:text-primary prose-code:rounded prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-pre:bg-muted">
-        <MDXContent />
-      </div>
-    </article>
-  );
+  return <View {...props} />;
 }

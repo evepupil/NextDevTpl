@@ -1,4 +1,4 @@
-import { AuthBrandPanel, AuthFooter } from "@/features/auth";
+import { skinViews } from "@/modules/skin-views";
 
 /**
  * Auth 路由组布局
@@ -11,18 +11,6 @@ export default function AuthLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="grid min-h-screen lg:grid-cols-[1.05fr_1fr]">
-      <AuthBrandPanel />
-      <div className="flex flex-col bg-background">
-        {/* 主内容区域 */}
-        <main className="flex flex-1 items-center justify-center px-4 py-12">
-          {children}
-        </main>
-
-        {/* 底部版权和法律链接 */}
-        <AuthFooter />
-      </div>
-    </div>
-  );
+  const AuthLayoutView = skinViews["auth.layout"];
+  return <AuthLayoutView>{children}</AuthLayoutView>;
 }

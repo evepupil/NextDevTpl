@@ -50,6 +50,16 @@
       ],
       "schema": ["auth"],
       "translations": ["Auth"],
+      "views": [
+        { "id": "auth.layout", "kind": "layout" },
+        { "id": "auth.sign-in", "kind": "page" },
+        { "id": "auth.sign-up", "kind": "page" },
+        { "id": "auth.forgot-password", "kind": "page" },
+        { "id": "auth.reset-password", "kind": "page" }
+      ],
+      "viewContract": "src/features/auth/view/index.ts",
+      "skinEntry": "src/skin/views/auth/index.ts",
+      "skinSources": ["src/skin/views/auth", "src/skin/layouts/auth.tsx"],
       "telemetryEvents": [
         "signup.completed",
         "login.completed",
@@ -74,6 +84,13 @@
       ],
       "schema": [],
       "translations": [],
+      "views": [
+        { "id": "blog.list", "kind": "page" },
+        { "id": "blog.post", "kind": "page" }
+      ],
+      "viewContract": "src/features/blog/view/index.ts",
+      "skinEntry": "src/skin/views/blog/index.ts",
+      "skinSources": ["src/skin/views/blog"],
       "telemetryEvents": [],
       "env": []
     },
@@ -101,7 +118,11 @@
       "dependencies": ["shared"],
       "routes": ["src/app/[locale]/(dashboard)/dashboard/page.tsx"],
       "schema": [],
-      "translations": ["Dashboard", "DashboardPages"],
+      "translations": [],
+      "views": [{ "id": "dashboard.overview", "kind": "page" }],
+      "viewContract": "src/features/dashboard/view/index.ts",
+      "skinEntry": "src/skin/views/dashboard/index.ts",
+      "skinSources": ["src/skin/views/dashboard"],
       "telemetryEvents": [],
       "env": []
     },
@@ -135,6 +156,17 @@
         "Navigation",
         "Pricing",
         "Footer"
+      ],
+      "views": [
+        { "id": "marketing.layout", "kind": "layout" },
+        { "id": "marketing.home", "kind": "page" },
+        { "id": "marketing.legal", "kind": "page" }
+      ],
+      "viewContract": "src/features/marketing/view/index.ts",
+      "skinEntry": "src/skin/views/marketing/index.ts",
+      "skinSources": [
+        "src/skin/views/marketing",
+        "src/skin/layouts/marketing.tsx"
       ],
       "telemetryEvents": [],
       "env": []
@@ -191,6 +223,13 @@
       ],
       "schema": [],
       "translations": [],
+      "views": [
+        { "id": "pseo.list", "kind": "page" },
+        { "id": "pseo.detail", "kind": "page" }
+      ],
+      "viewContract": "src/features/pseo/view/index.ts",
+      "skinEntry": "src/skin/views/pseo/index.ts",
+      "skinSources": ["src/skin/views/pseo"],
       "telemetryEvents": [],
       "env": []
     },
@@ -200,6 +239,10 @@
       "routes": ["src/app/[locale]/(dashboard)/dashboard/settings/page.tsx"],
       "schema": [],
       "translations": ["Settings"],
+      "views": [{ "id": "settings.page", "kind": "page" }],
+      "viewContract": "src/features/settings/view/index.ts",
+      "skinEntry": "src/skin/views/settings/index.ts",
+      "skinSources": ["src/skin/views/settings"],
       "telemetryEvents": [],
       "env": []
     },
@@ -208,7 +251,24 @@
       "dependencies": [],
       "routes": [],
       "schema": [],
-      "translations": ["Common", "Cookie", "Theme"],
+      "translations": [
+        "Common",
+        "Cookie",
+        "Dashboard",
+        "DashboardPages",
+        "Subscription",
+        "Theme"
+      ],
+      "views": [
+        { "id": "shared.dashboard-layout", "kind": "layout" },
+        { "id": "shared.empty-dashboard", "kind": "page" }
+      ],
+      "viewContract": "src/features/shared/view/index.ts",
+      "skinEntry": "src/skin/views/shared/index.ts",
+      "skinSources": [
+        "src/skin/views/shared",
+        "src/skin/layouts/dashboard.tsx"
+      ],
       "telemetryEvents": ["api.request.failed", "action.failed", "job.failed"],
       "env": []
     },
@@ -229,7 +289,7 @@
       "dependencies": [],
       "routes": [],
       "schema": ["subscription"],
-      "translations": ["Subscription"],
+      "translations": [],
       "telemetryEvents": ["subscription.activated"],
       "env": []
     },
@@ -245,6 +305,14 @@
       ],
       "schema": ["support"],
       "translations": ["Support"],
+      "views": [
+        { "id": "support.list", "kind": "page" },
+        { "id": "support.new", "kind": "page" },
+        { "id": "support.detail", "kind": "page" }
+      ],
+      "viewContract": "src/features/support/view/index.ts",
+      "skinEntry": "src/skin/views/support/index.ts",
+      "skinSources": ["src/skin/views/support"],
       "telemetryEvents": [],
       "env": []
     }

@@ -2,18 +2,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import {
-  PseoCta,
-  PseoFaq,
-  PseoFeatureGrid,
-  PseoHero,
-  PseoRelated,
-  PseoUseCases,
-} from "@/features/pseo";
-import {
   getAllPseoParams,
+  getPseoDetailViewData,
   getPseoPage,
-  getRelatedPseoPages,
-} from "@/features/pseo";
+} from "@/features/pseo/server";
+import { skinViews } from "@/modules/skin-views";
 
 export function generateStaticParams() {
   return getAllPseoParams();
@@ -43,26 +36,12 @@ export default async function PseoPage({
   params: Promise<{ locale: string; slug: string }>;
 }) {
   const { locale, slug } = await params;
-  const page = getPseoPage(locale, slug);
-
-  if (!page) {
+  const props = getPseoDetailViewData(locale, slug);
+  if (!props) {
     notFound();
   }
 
-  const related = getRelatedPseoPages(page.locale, page.slug);
+  const View = skinViews["pseo.detail"];
 
-  return (
-    <>
-      <PseoHero page={page} />
-      <PseoFeatureGrid page={page} />
-      <PseoUseCases page={page} />
-      <PseoFaq page={page} />
-      <PseoRelated
-        pages={related}
-        title={page.data.sections.related.title}
-        subtitle={page.data.sections.related.subtitle}
-      />
-      <PseoCta page={page} />
-    </>
-  );
+  return <View {...props} />;
 }

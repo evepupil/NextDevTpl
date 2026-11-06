@@ -8,7 +8,7 @@ export const subscriptionModule = defineModule({
   dependencies: [],
   routes: [],
   navigation: [],
-  translations: ["Subscription"],
+  translations: [],
   schema: ["subscription"],
   telemetryEvents: ["subscription.activated"],
 });

@@ -1,39 +1,23 @@
-import { CreditBalanceBadge } from "@/features/credits";
-import {
-  DashboardMainWrapper,
-  DashboardSidebar,
-  SidebarProvider,
-} from "@/features/dashboard";
-import { CurrentPlanBadge } from "@/features/subscription";
+import type { ReactNode } from "react";
+
 import { redirect } from "@/i18n/routing";
-import { getServerSession } from "@/lib/auth/server";
+import { getWorkspaceSession, workspaceMode } from "@/modules/view-data";
+import { skinViews } from "@/modules/skin-views";
+
+const View = skinViews["shared.dashboard-layout"];
 
 export default async function DashboardLayout({
   children,
   params,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  // 服务端会话校验（防御纵深）
-  // middleware 仅做 cookie 存在性检查（可被伪造），此处用 Better Auth 做
-  // 真正的 DB 会话校验，确保所有 /dashboard 子页面都受到强制保护。
-  const session = await getServerSession();
-  if (!session?.user) {
-    redirect({ href: "/sign-in", locale });
-    return null;
+  if (workspaceMode !== "public") {
+    const session = await getWorkspaceSession();
+    if (!session?.user) redirect({ href: "/sign-in", locale });
   }
 
-  return (
-    <SidebarProvider>
-      <div className="min-h-screen bg-muted/40">
-        <DashboardSidebar
-          compactAccountBadge={<CreditBalanceBadge />}
-          accountPlanBadge={<CurrentPlanBadge />}
-        />
-        <DashboardMainWrapper>{children}</DashboardMainWrapper>
-      </div>
-    </SidebarProvider>
-  );
+  return <View mode={workspaceMode}>{children}</View>;
 }

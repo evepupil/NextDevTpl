@@ -32,5 +32,10 @@ export const marketingModule = defineModule({
     "Footer",
   ],
   schema: [],
+  views: [
+    { id: "marketing.layout", kind: "layout" },
+    { id: "marketing.home", kind: "page" },
+    { id: "marketing.legal", kind: "page" },
+  ],
   telemetryEvents: [],
 });

@@ -24,6 +24,7 @@ const publicRuntimeEntries = new Set([
   "/server",
   "/types",
   "/utils",
+  "/view",
 ]);
 
 function collectSourceFiles(directory: string): string[] {

@@ -50,5 +50,10 @@ export const supportModule = defineModule({
   ],
   translations: ["Support"],
   schema: ["support"],
+  views: [
+    { id: "support.list", kind: "page" },
+    { id: "support.new", kind: "page" },
+    { id: "support.detail", kind: "page" },
+  ],
   telemetryEvents: [],
 });

@@ -1,4 +1,8 @@
-import type { ModuleId, ModuleSchemaGroup } from "@/core/modules";
+import type {
+  ModuleId,
+  ModuleSchemaGroup,
+  ModuleViewDefinition,
+} from "@/core/modules";
 
 import { moduleRegistry } from "./registry";
 import { type ModulePresetName, modulePresets } from "./presets";
@@ -10,6 +14,7 @@ export interface ModuleSelection {
   routeSources: readonly string[];
   schema: readonly ModuleSchemaGroup[];
   translations: readonly string[];
+  views: readonly ModuleViewDefinition[];
 }
 
 export function createModuleSelection(
@@ -35,6 +40,7 @@ export function createModuleSelection(
     ),
     schema: manifests.flatMap((manifest) => manifest.schema),
     translations: manifests.flatMap((manifest) => manifest.translations),
+    views: manifests.flatMap((manifest) => manifest.views ?? []),
   };
 }
 

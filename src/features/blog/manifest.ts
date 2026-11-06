@@ -19,5 +19,9 @@ export const blogModule = defineModule({
   navigation: [],
   translations: [],
   schema: [],
+  views: [
+    { id: "blog.list", kind: "page" },
+    { id: "blog.post", kind: "page" },
+  ],
   telemetryEvents: [],
 });

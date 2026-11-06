@@ -1,18 +1,7 @@
-import { desc, eq } from "drizzle-orm";
-import { Plus, Ticket } from "lucide-react";
-import { getTranslations } from "next-intl/server";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { db } from "@/db";
-import { ticket } from "@/db/schema/support";
-import {
-  ticketCategories,
-  ticketPriorities,
-  ticketStatuses,
-} from "@/features/support";
-import { Link, redirect } from "@/i18n/routing";
+import { getSupportListViewData } from "@/features/support/server";
+import { redirect } from "@/i18n/routing";
 import { getServerSession } from "@/lib/auth/server";
+import { skinViews } from "@/modules/skin-views";
 
 /**
  * 用户工单列表页面
@@ -25,7 +14,6 @@ export default async function SupportPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "Support" });
   // 获取当前用户会话
   const session = await getServerSession();
   if (!session?.user) {
@@ -33,122 +21,8 @@ export default async function SupportPage({
     return null;
   }
 
-  // 获取用户的工单列表
-  const tickets = await db
-    .select()
-    .from(ticket)
-    .where(eq(ticket.userId, session.user.id))
-    .orderBy(desc(ticket.createdAt));
+  const data = await getSupportListViewData(session.user.id, locale);
+  const View = skinViews["support.list"];
 
-  /**
-   * 获取状态徽章样式
-   */
-  const getStatusBadge = (status: string) => {
-    const statusConfig = ticketStatuses.find((s) => s.value === status);
-    const colorMap: Record<string, string> = {
-      open: "bg-primary/15 text-primary",
-      in_progress: "bg-warning/15 text-warning",
-      resolved: "bg-success/15 text-success",
-      closed: "bg-muted text-muted-foreground",
-    };
-    return (
-      <Badge
-        className={colorMap[status] || colorMap.closed}
-        variant="secondary"
-      >
-        {statusConfig ? t(statusConfig.label) : status}
-      </Badge>
-    );
-  };
-
-  /**
-   * 获取优先级徽章样式
-   */
-  const getPriorityBadge = (priority: string) => {
-    const priorityConfig = ticketPriorities.find((p) => p.value === priority);
-    const colorMap: Record<string, string> = {
-      low: "bg-success/15 text-success",
-      medium: "bg-warning/15 text-warning",
-      high: "bg-destructive/15 text-destructive",
-    };
-    return (
-      <Badge
-        className={colorMap[priority] || colorMap.medium}
-        variant="secondary"
-      >
-        {priorityConfig ? t(priorityConfig.label) : priority}
-      </Badge>
-    );
-  };
-
-  /**
-   * 获取类别标签
-   */
-  const getCategoryLabel = (category: string) => {
-    const categoryConfig = ticketCategories.find((c) => c.value === category);
-    return categoryConfig ? t(categoryConfig.label) : category;
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* 页面标题 */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">
-            {t("pages.title")}
-          </h2>
-          <p className="text-muted-foreground">{t("pages.description")}</p>
-        </div>
-        <Link href="/dashboard/support/new">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            {t("pages.newTicket")}
-          </Button>
-        </Link>
-      </div>
-
-      {/* 工单列表 */}
-      {tickets.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <Ticket className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium">{t("pages.emptyTitle")}</h3>
-            <p className="text-muted-foreground mb-4">
-              {t("pages.emptyDescription")}
-            </p>
-            <Link href="/dashboard/support/new">
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                {t("pages.createFirst")}
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {tickets.map((t) => (
-            <Link key={t.id} href={`/dashboard/support/${t.id}`}>
-              <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
-                <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <CardTitle className="text-base">{t.subject}</CardTitle>
-                      <p className="text-sm text-muted-foreground">
-                        {getCategoryLabel(t.category)} ·{" "}
-                        {new Date(t.createdAt).toLocaleDateString(locale)}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {getPriorityBadge(t.priority)}
-                      {getStatusBadge(t.status)}
-                    </div>
-                  </div>
-                </CardHeader>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+  return <View {...data} />;
 }

@@ -19,5 +19,9 @@ export const pseoModule = defineModule({
   navigation: [],
   translations: [],
   schema: [],
+  views: [
+    { id: "pseo.list", kind: "page" },
+    { id: "pseo.detail", kind: "page" },
+  ],
   telemetryEvents: [],
 });

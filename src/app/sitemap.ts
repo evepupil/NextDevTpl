@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { siteConfig } from "@/config";
-import { getAllPseoParams } from "@/features/pseo";
+import { getAllPseoParams } from "@/features/pseo/server";
 import { getAllBlogSlugs, getAllLegalSlugs } from "@/lib/source";
 
 /** Supported locales */

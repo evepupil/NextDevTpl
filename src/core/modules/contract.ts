@@ -2,6 +2,7 @@ import {
   type TelemetryEventName,
   telemetryEventRegistry,
 } from "../services/telemetry";
+import { validateModuleViews } from "./view-validation";
 
 export const MODULE_IDS = [
   "admin",
@@ -57,6 +58,11 @@ export interface ModuleRoute {
   source: string;
 }
 
+export interface ModuleViewDefinition {
+  id: `${ModuleId}.${string}`;
+  kind: "page" | "layout";
+}
+
 export interface ModuleManifest {
   id: ModuleId;
   name: string;
@@ -68,6 +74,7 @@ export interface ModuleManifest {
   translations: readonly string[];
   schema: readonly ModuleSchemaGroup[];
   telemetryEvents: readonly TelemetryEventName[];
+  views?: readonly ModuleViewDefinition[];
 }
 
 export interface ModuleRegistry {
@@ -90,6 +97,7 @@ export function validateModuleManifests(
   const schemaOwners = new Map<ModuleSchemaGroup, ModuleId>();
   const telemetryEventOwners = new Map<TelemetryEventName, ModuleId>();
   const translationOwners = new Map<string, ModuleId>();
+  errors.push(...validateModuleViews(manifests));
 
   for (const manifest of manifests) {
     if (byId.has(manifest.id)) {

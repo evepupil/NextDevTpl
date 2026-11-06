@@ -2,5 +2,4 @@
 
 export { AdminTicketReplyForm } from "./admin-ticket-reply-form";
 export { AdminTicketStatusSelect } from "./admin-ticket-status-select";
-export { TicketMessageForm } from "./ticket-message-form";
 export { UserRoleSelect } from "./user-role-select";
