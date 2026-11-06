@@ -329,8 +329,14 @@ describe("Newsletter Reactivation", () => {
 
   it("重新激活应更新 subscribedAt", async () => {
     const email = `test_reactivate_time_${Date.now()}@test.local`;
+    const historicalSubscribedAt = new Date("2020-01-01T00:00:00.000Z");
 
     await subscribeNewsletter(email);
+
+    await testDb
+      .update(newsletterSubscriber)
+      .set({ subscribedAt: historicalSubscribedAt })
+      .where(eq(newsletterSubscriber.email, email.toLowerCase()));
 
     const [original] = await testDb
       .select()
@@ -340,12 +346,9 @@ describe("Newsletter Reactivation", () => {
 
     const originalSubscribedAt = original!.subscribedAt;
 
-    // 等待一小段时间
-    await new Promise((resolve) => setTimeout(resolve, 10));
-
     // 取消并重新激活
     await unsubscribeNewsletter(email);
-    await subscribeNewsletter(email);
+    const result = await subscribeNewsletter(email);
 
     const [reactivated] = await testDb
       .select()
@@ -353,6 +356,8 @@ describe("Newsletter Reactivation", () => {
       .where(eq(newsletterSubscriber.email, email.toLowerCase()))
       .limit(1);
 
+    expect(result.success).toBe(true);
+    expect(result.reactivated).toBe(true);
     expect(reactivated!.subscribedAt.getTime()).toBeGreaterThan(
       originalSubscribedAt.getTime()
     );
