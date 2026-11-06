@@ -60,3 +60,5 @@ nul
 
 # deploy artifacts
 deploy.tgz
+/.docseek/
+/.fleet/

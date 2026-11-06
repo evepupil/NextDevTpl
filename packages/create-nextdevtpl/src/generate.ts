@@ -14,6 +14,7 @@ import {
   writeJson,
   writeText,
 } from "./filesystem.js";
+import { pruneRepositoryOnlyPackageEntries } from "./package-pruning.js";
 import { createProjectSelection } from "./selection.js";
 import {
   adapterExports,
@@ -1170,6 +1171,7 @@ async function rewritePackage(
   }
   packageJson.name = projectName(target);
   packageJson.private = true;
+  pruneRepositoryOnlyPackageEntries(packageJson);
   delete packageJson.scripts["verify:generated"];
   delete packageJson.scripts["deploy:check"];
   delete packageJson.scripts["deploy:server:build"];

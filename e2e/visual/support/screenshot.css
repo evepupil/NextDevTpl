@@ -1,0 +1,17 @@
+/*
+ * 只在截图瞬间生效的样式（Playwright 的 stylePath）
+ *
+ * - nextjs-portal：Next 开发模式下角落里的开发指示器，生产环境没有，必须隐藏
+ * - 滚动条：不同状态下滚动条的出现与否会让整页截图错位一两个像素
+ */
+nextjs-portal {
+  display: none !important;
+}
+
+html {
+  scrollbar-width: none !important;
+}
+
+::-webkit-scrollbar {
+  display: none !important;
+}

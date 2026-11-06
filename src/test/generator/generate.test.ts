@@ -103,8 +103,15 @@ describe("project generation", () => {
     expect(packageJson.devDependencies).not.toHaveProperty(
       "@opennextjs/cloudflare"
     );
+    expect(packageJson.devDependencies).not.toHaveProperty("@playwright/test");
     expect(packageJson.devDependencies).not.toHaveProperty("wrangler");
+    expect(
+      Object.keys(packageJson.scripts).filter((name) =>
+        name.startsWith("visual:")
+      )
+    ).toEqual([]);
     expect(packageJson.scripts).not.toHaveProperty("postinstall");
+    expect(await exists(join(target, "e2e"))).toBe(false);
     expect(lockfile).not.toContain("specifier: ^6.8.0");
     expect(lockfile).not.toContain("specifier: 4.113.0");
     expect(await exists(join(target, "deploy/server/build.sh"))).toBe(true);

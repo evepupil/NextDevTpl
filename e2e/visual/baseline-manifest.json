@@ -1,0 +1,730 @@
+{
+  "capturedAt": "2026-11-06T10:43:59.686Z",
+  "commit": "85256635e749a55181fa1415e5b861fc1f9ea4b7",
+  "edgeVersion": "156.0.4314.42",
+  "images": {
+    "desktop-dark/en-blog-list.png": {
+      "height": 1316,
+      "width": 1440,
+      "sha256": "2ba8c7d513f742ddf32d0b5c9577e10adf4cc1c5b2edb000064c4a72deec1f4b"
+    },
+    "desktop-dark/en-blog-post.png": {
+      "height": 2077,
+      "width": 1440,
+      "sha256": "d490151056b7995197c8e37071551dde23ebbb15b1280f54e335c8c3e5e13887"
+    },
+    "desktop-dark/en-dashboard.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "b6db4fe5ed1afe643bf0668986790424f7f9e59c5af3dd508f3fa58de566ac90"
+    },
+    "desktop-dark/en-forgot-password.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "57238c8e3c2e8746378daf91367f61f9373ef18d419c9e9a7af6c79b38b216af"
+    },
+    "desktop-dark/en-home.png": {
+      "height": 6472,
+      "width": 1440,
+      "sha256": "c985e4db500554a5d7f5d95753bb47c6148fb8d513696de76313002c0345794c"
+    },
+    "desktop-dark/en-legal-terms.png": {
+      "height": 4000,
+      "width": 1440,
+      "sha256": "6474e16863816bb4302b00a0cbfece134377570cd04d1c1973417566c5917b7f"
+    },
+    "desktop-dark/en-pseo-detail.png": {
+      "height": 3869,
+      "width": 1440,
+      "sha256": "ac1e9b01896a620431d0dc4ec686b899e841ecd19fa320ea8dd5cbd8d4112568"
+    },
+    "desktop-dark/en-pseo-list.png": {
+      "height": 1459,
+      "width": 1440,
+      "sha256": "09a1f7c117404201b737c0519de4920885f83f192efb4934271bad07ccc8cf58"
+    },
+    "desktop-dark/en-reset-password.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "5dd98b0410ca1d724bc59714b80988b3afdec5e4a910428a70b2148eace6dd16"
+    },
+    "desktop-dark/en-settings-billing.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "3fe894a09565e23cfaa6bc0da6f72500e2677c9d6cdb8b9287b08cb1b55a5bab"
+    },
+    "desktop-dark/en-settings-security.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "27ec937d3198d7bca2c0a91ae1e83f05d56a316a50d84d70215ceb643b5bc2e2"
+    },
+    "desktop-dark/en-settings-usage.png": {
+      "height": 1366,
+      "width": 1440,
+      "sha256": "28bd43ef9e122bbb1ddb20df0ea378b71814599d1ad0e1bcad7aaa2b7efee08b"
+    },
+    "desktop-dark/en-settings.png": {
+      "height": 985,
+      "width": 1440,
+      "sha256": "b67299f504befdcdd993db259abcd038a174adbeeacdb9c123ad0ab7521e3e7a"
+    },
+    "desktop-dark/en-sign-in.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "fa36fa80b8bd1cfda3f2733ce410556f2cf0f50f7b209e73f9be1d2033ef3b0d"
+    },
+    "desktop-dark/en-sign-up.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "ea0395d77946b816dc9bdd5d95668278ce628a5e7c2d63fa87a903d14b264dcb"
+    },
+    "desktop-dark/en-support-detail.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "325d2be57bed0b24137a9c4b8628c2ca3e60ad7fbfcab2a115b9b76e15ae7c56"
+    },
+    "desktop-dark/en-support-list.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "87cf51a130ec3408b60771b666941bf54640d44b22a48bb58f60a1d2d2d001f9"
+    },
+    "desktop-dark/en-support-new.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "57d9f7f152b56a6d676735cc747ce5497f364170dfaddde51f7063b9714d2d75"
+    },
+    "desktop-dark/zh-blog-list.png": {
+      "height": 1578,
+      "width": 1440,
+      "sha256": "f8d5c1fd552d80b7f897880165aac20a1ba84a023420447e5c09eac5521a70f7"
+    },
+    "desktop-dark/zh-blog-post.png": {
+      "height": 1993,
+      "width": 1440,
+      "sha256": "657c6fc5569e17d7e060b963205b2dd8ad7dc7e90a8353aa3dcd2289076768f8"
+    },
+    "desktop-dark/zh-dashboard.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "aed090cb79ef6645571e1bbb73f2ddfa7c7bfacc29c517cf9a0fb38d64236d73"
+    },
+    "desktop-dark/zh-forgot-password.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "354a22a3e33f58da2b0b6f0b8688c100cf0b5344edc9643d09910bcc5fa281be"
+    },
+    "desktop-dark/zh-home.png": {
+      "height": 6320,
+      "width": 1440,
+      "sha256": "1beceba90b20f1c6808ef29f443ab71e911a2fead61554195c417e3c898d750b"
+    },
+    "desktop-dark/zh-legal-terms.png": {
+      "height": 3684,
+      "width": 1440,
+      "sha256": "162d66484731e35e810de474cfe7c3c60e0f7a0df5da74b0d0822c28d672b3f4"
+    },
+    "desktop-dark/zh-pseo-detail.png": {
+      "height": 3757,
+      "width": 1440,
+      "sha256": "973c7b5e6b4a74463b8f375584fcb055f8526dbb6144d2d05d2894637dd0f0c1"
+    },
+    "desktop-dark/zh-pseo-list.png": {
+      "height": 1411,
+      "width": 1440,
+      "sha256": "9885aa27feacf55e852bb4f832e0ae4a50b37df37aa0435358c4816ad87287fe"
+    },
+    "desktop-dark/zh-reset-password.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "56c15219c67fec78b74001886e7595c49a35f7c6be8e84ce452d2bdda0f5bab4"
+    },
+    "desktop-dark/zh-settings-billing.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "a195bf952796776a99db334fe7e06fe93712d564e38ac86f6c44c91a0e4de266"
+    },
+    "desktop-dark/zh-settings-security.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "d16bfdcba139d18eaade708ebb28a170cd9264ffb3ff85e7800f1eed7f61c4e4"
+    },
+    "desktop-dark/zh-settings-usage.png": {
+      "height": 1366,
+      "width": 1440,
+      "sha256": "023b6b51cf85179cf84a72d422c7d74eaf89b6890c6588ebefa1ed59e908b9a0"
+    },
+    "desktop-dark/zh-settings.png": {
+      "height": 985,
+      "width": 1440,
+      "sha256": "396df5abfe6bc50c025a749e76bb5a279fa492548cea0980cf4f2dc7ecbb61be"
+    },
+    "desktop-dark/zh-sign-in.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "798031d923e26774e34b6edbbbc9509e56793b342adb0abc9ad04ecf565bbc36"
+    },
+    "desktop-dark/zh-sign-up.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "ec3ac76d688baa752e848855ca8972a52303daa4b22e1ce9cd5b1db318cc2713"
+    },
+    "desktop-dark/zh-support-detail.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "abbdd9df40c392f9dcc70810859d1d42fd1908b6234e7fe14ad679950bfef8df"
+    },
+    "desktop-dark/zh-support-list.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "3fd1c9769aec03a668d22546230c1d5e9a630f44ff2e50af262a65ed958de2ab"
+    },
+    "desktop-dark/zh-support-new.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "2aa1fe1ea7a1f8631f6dfc559917053aa15e98b06dd8002d9fc19bffea264dd8"
+    },
+    "desktop-light/en-blog-list.png": {
+      "height": 1316,
+      "width": 1440,
+      "sha256": "d796932d3aade8fb19c70ae13361e03bf5cff3536208f17eecab2786b73d8874"
+    },
+    "desktop-light/en-blog-post.png": {
+      "height": 2077,
+      "width": 1440,
+      "sha256": "bcda98f686e4b0b52b0904306363646fe2ded9c52f34ec868aff362d3a723aaa"
+    },
+    "desktop-light/en-dashboard.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "fd13f3747fa03ffac81e482b0f5dcaea6952aa79c9644d58dc12a2b0a6a6bb8e"
+    },
+    "desktop-light/en-forgot-password.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "b0dd59c716319064688f9c0e8dd5ca7c5c0bd4fc2c59df6a0906653dd82ff4b4"
+    },
+    "desktop-light/en-home.png": {
+      "height": 6472,
+      "width": 1440,
+      "sha256": "4c1cb80a3bc6159a4e38baf359df5f88ccee7ab8b388ac0d5aea151aebf404bd"
+    },
+    "desktop-light/en-legal-terms.png": {
+      "height": 4000,
+      "width": 1440,
+      "sha256": "26d78b1db68c78f566f5579fa7a1f75ed6f68c9dfb4a7f165307fbb6b0523576"
+    },
+    "desktop-light/en-pseo-detail.png": {
+      "height": 3869,
+      "width": 1440,
+      "sha256": "699555ad0f3f0803523480a458f3ad9dada24fae888c37c3ea0b9da164ce8880"
+    },
+    "desktop-light/en-pseo-list.png": {
+      "height": 1459,
+      "width": 1440,
+      "sha256": "fd95ca2bb09aa1398ccc61b3f22cc30f7e97c8979efc9adf320e31e18d9a7d84"
+    },
+    "desktop-light/en-reset-password.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "b0860061b48c6ed7cc26bd2e1d9b0b85df7d74fc7b5c234b38612d879a31afdd"
+    },
+    "desktop-light/en-settings-billing.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "dd16ee3a8beda6f84cfbb4c7a80f369b0f45ce32525cecba3280bf6190d61b41"
+    },
+    "desktop-light/en-settings-security.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "9e34fd06ff15c61d954a65b322eef3495a1bc29d924ba3432714a75a1c57eaba"
+    },
+    "desktop-light/en-settings-usage.png": {
+      "height": 1366,
+      "width": 1440,
+      "sha256": "28e999dd90b40d6a10caad85d2e304f24cdcd87af5c3c0b3d6999b8acf7b6e84"
+    },
+    "desktop-light/en-settings.png": {
+      "height": 985,
+      "width": 1440,
+      "sha256": "6d965acb883e2c28675ec1b95c4b518b8d893f2b292f46f8a10b2c05af534d02"
+    },
+    "desktop-light/en-sign-in.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "d88779a1673a91670adcf253ea2b9916476770fb857285f449844b71a99a7d9a"
+    },
+    "desktop-light/en-sign-up.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "e2901879a6b439b0097f6ffbb982557023471ccd85ea44848de2ea2a5b320279"
+    },
+    "desktop-light/en-support-detail.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "0c72af8148d027f1a7aece6059e101fdff8809ad5d93ec35188fca0acf886c34"
+    },
+    "desktop-light/en-support-list.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "cd1618f759ece1d4ccf26186977d3a766329a2f04d5f58475c1e3b0bfc6db340"
+    },
+    "desktop-light/en-support-new.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "bb3be2f2498b5545d0a3174c0d53d4e780c44d76909639aa06fbe6e6330a355d"
+    },
+    "desktop-light/zh-blog-list.png": {
+      "height": 1578,
+      "width": 1440,
+      "sha256": "648f7f6c1e89e94eb92be8dc2c94b8f90090f360e826ff1ee12b2b27458a7e9e"
+    },
+    "desktop-light/zh-blog-post.png": {
+      "height": 1993,
+      "width": 1440,
+      "sha256": "f0ef0f52669346a782f4b376214efc5cab01e7241a298bf24c4e2ea0f27b2af7"
+    },
+    "desktop-light/zh-dashboard.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "73014ded926d041953d3f1891084d274d3a2af28f6574a352f78dff81d55d958"
+    },
+    "desktop-light/zh-forgot-password.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "f5523ba0a70ca5dcfea97c474f59857a07ca4bb4a1573532a9f71b72838fae06"
+    },
+    "desktop-light/zh-home.png": {
+      "height": 6320,
+      "width": 1440,
+      "sha256": "a04c42da9f0c979b252df008aa8d4bc092899fa672e67cf5d6dcdec263ff3f29"
+    },
+    "desktop-light/zh-legal-terms.png": {
+      "height": 3684,
+      "width": 1440,
+      "sha256": "5de12aca5d9f382f4b054b0f7d0c6efeebc3d4239d893f505445cb85c61e323b"
+    },
+    "desktop-light/zh-pseo-detail.png": {
+      "height": 3757,
+      "width": 1440,
+      "sha256": "1be26f8c6c4284ca9b1ca7bab1ad3e47cfc506d3332bfb05c2d551ebe5e0b8cf"
+    },
+    "desktop-light/zh-pseo-list.png": {
+      "height": 1411,
+      "width": 1440,
+      "sha256": "3a2b221fe85ec78f32616372bf1306977fb1774db77bd148235721549cbabd44"
+    },
+    "desktop-light/zh-reset-password.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "ce319c41f02c366c460b8dee7c382d57ed6808e69b13c2a5fca29ea8e3af34af"
+    },
+    "desktop-light/zh-settings-billing.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "9161bb482c20299c0b21695bad477cf33c3666a2005c7bdf62619cf75d8d1ecf"
+    },
+    "desktop-light/zh-settings-security.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "30ce243c4bd9b9a541778564b76216f27354a3f6311eb2abe896b6df3f373a87"
+    },
+    "desktop-light/zh-settings-usage.png": {
+      "height": 1366,
+      "width": 1440,
+      "sha256": "2bddce9d2ce44b76ec771eef46a2d2b94673e81fea43c9952c0218e7a2971173"
+    },
+    "desktop-light/zh-settings.png": {
+      "height": 985,
+      "width": 1440,
+      "sha256": "62750fc87c8afb1fd6e4277d2638ca84dda6e2ee82bc8cb54d2a846eec3bca1b"
+    },
+    "desktop-light/zh-sign-in.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "af347c0e04f1dd0f174a547d48bad5b7babc80b8bd0b38b23351d4f6f8bc58b1"
+    },
+    "desktop-light/zh-sign-up.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "cf3dca7b237950451f075282d1a4e8b098cb9a49b6cda7697e1209dbf3a937e4"
+    },
+    "desktop-light/zh-support-detail.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "4cbdc2a9a99299a7ff638d2ac4472eb5ca313ade79cd4836fdc1ed097b99c688"
+    },
+    "desktop-light/zh-support-list.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "92656161c5ec0ae90f6aebc640d79ff29383a7543b8ad566ad7f9e8621ee435b"
+    },
+    "desktop-light/zh-support-new.png": {
+      "height": 900,
+      "width": 1440,
+      "sha256": "eb74f5caaf4f4cdc62c177a4de8bf635a36ce64bca702956b5e56188e79a10f4"
+    },
+    "mobile-dark/en-blog-list.png": {
+      "height": 1948,
+      "width": 390,
+      "sha256": "7a8ee0a33bf864df91a5efa63bbb68349576c391aed8028d8f7bf4e3b24c4862"
+    },
+    "mobile-dark/en-blog-post.png": {
+      "height": 2513,
+      "width": 434,
+      "sha256": "2ad9bdf9bdacc30448fb82202c6961975248e3de4769a747d9f97c475eae6659"
+    },
+    "mobile-dark/en-dashboard.png": {
+      "height": 1618,
+      "width": 451,
+      "sha256": "c40f175d229226fbae6619bcce4902a58ed3c7e59fb5d4b51cf391c8789bf9b9"
+    },
+    "mobile-dark/en-forgot-password.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "f5833abf116e6d927bbfb788d5a84e24003ac4e9815b120ae9e62a7440c6df34"
+    },
+    "mobile-dark/en-home.png": {
+      "height": 11924,
+      "width": 390,
+      "sha256": "f8a6ac813a0e1a63cb1b28ceb2410de4903b6cbfe61a29a0dc5f1b27e567202c"
+    },
+    "mobile-dark/en-legal-terms.png": {
+      "height": 5200,
+      "width": 390,
+      "sha256": "3f176d034453d74c91316a78f974c0d2c703a37840fde54e142d0dc1a456679c"
+    },
+    "mobile-dark/en-pseo-detail.png": {
+      "height": 6127,
+      "width": 390,
+      "sha256": "009fa09f3b2c82384ad53127d7691ea645ffafd22bf5bc1fa6fb1d0618040e1c"
+    },
+    "mobile-dark/en-pseo-list.png": {
+      "height": 2529,
+      "width": 390,
+      "sha256": "dc01aa27a9730754a7ba69209fd7dd4629d2b15a60a4a13378dd3be35b7ad0a9"
+    },
+    "mobile-dark/en-reset-password.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "cda251a8200b1054fbba3f01f97e75cb9b4c8ad7bbe2faaf1893a90d47ff05d1"
+    },
+    "mobile-dark/en-settings-billing.png": {
+      "height": 1218,
+      "width": 400,
+      "sha256": "71dbaabe4e0a2d1395df5807ff2fcfca9b51c85e7ac9d2da8f2d0071063508ed"
+    },
+    "mobile-dark/en-settings-security.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "d92c998531018c252cc1ce3f08e0827e1861bff78eb34338cd35ad266b37965c"
+    },
+    "mobile-dark/en-settings-usage.png": {
+      "height": 1830,
+      "width": 443,
+      "sha256": "f28eb3f0b79dcfeabb4a8eb92201fe61cd45779e4e9a957769a78defd2475a7e"
+    },
+    "mobile-dark/en-settings.png": {
+      "height": 1129,
+      "width": 390,
+      "sha256": "d8ea33b0b76a1a24ac1a9e8bf663160df295b4c54dcf5e9003a552425b6258fe"
+    },
+    "mobile-dark/en-sign-in.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "dae2e7f5fd4d0f2134c7cda5fba582c33a4c1c2bf2ddc316145c77f636633203"
+    },
+    "mobile-dark/en-sign-up.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "3f4fdaa958b3f7f3ae1324de2ac59c63fae168812cc41987d19e008f5cfafa44"
+    },
+    "mobile-dark/en-support-detail.png": {
+      "height": 1470,
+      "width": 390,
+      "sha256": "fccb9f3f9de33f20d92e261be827f1b456cd6f46e2615d47d45389e1009f17ab"
+    },
+    "mobile-dark/en-support-list.png": {
+      "height": 954,
+      "width": 390,
+      "sha256": "56a1c7cda9eedfa64be6cb4d6940afbc995cbc91eeb5ec238ae098138c3da99d"
+    },
+    "mobile-dark/en-support-new.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "bd31649dd4cebfeec753067cc2e3c1260b598fc92e32b82b50e0fba1272d504f"
+    },
+    "mobile-dark/zh-blog-list.png": {
+      "height": 2455,
+      "width": 390,
+      "sha256": "3f3c718864dbcd4b00da18de0916e4c06948e0e4ea786bf821720adcbf886555"
+    },
+    "mobile-dark/zh-blog-post.png": {
+      "height": 2317,
+      "width": 434,
+      "sha256": "803c8db81519c3bc92b9b20d51e4ec4d75d23b828f6b61c8f8602245d696754a"
+    },
+    "mobile-dark/zh-dashboard.png": {
+      "height": 1594,
+      "width": 451,
+      "sha256": "9f8de6813ec02655cb91e38d5d525b3b7a0c0efa84bcef30c3bc87a5de2cb594"
+    },
+    "mobile-dark/zh-forgot-password.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "9fd3a91c8cf402c9d8d6791f03b09d1e067b7bbc7c2ee85e1d5aaa8884b3fcdc"
+    },
+    "mobile-dark/zh-home.png": {
+      "height": 11172,
+      "width": 390,
+      "sha256": "41f9ebb8b5dca8796d0881d4ffab21998cf4e5e407247a0d25d8de1c8c9e437a"
+    },
+    "mobile-dark/zh-legal-terms.png": {
+      "height": 4264,
+      "width": 390,
+      "sha256": "8fee9ab13dc453a7c58641df1ad63f6ae32f1506fd170042b2955dfbaafe6991"
+    },
+    "mobile-dark/zh-pseo-detail.png": {
+      "height": 5763,
+      "width": 390,
+      "sha256": "71c07f21c14c2d8b02e23d34ca852fa3da4c07f2aba8bd490a912134084c680a"
+    },
+    "mobile-dark/zh-pseo-list.png": {
+      "height": 2329,
+      "width": 390,
+      "sha256": "9ca6165c5a6d9682baf321ca114dffad2842649cf170fe83cf4ad9740f242d13"
+    },
+    "mobile-dark/zh-reset-password.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "2cf879c2da5272d24afec8413d6a195744c7a05e265fb204d4b1ab26cac0d64b"
+    },
+    "mobile-dark/zh-settings-billing.png": {
+      "height": 1178,
+      "width": 390,
+      "sha256": "468664ced0cb800e8a84cdf489f2572a0d63041b75e7c2cf42c828894cb4675c"
+    },
+    "mobile-dark/zh-settings-security.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "91f4444acf1fbee94339d18cabe5a8eb858e6ea92c20008ed2d3802f5d980d84"
+    },
+    "mobile-dark/zh-settings-usage.png": {
+      "height": 1690,
+      "width": 390,
+      "sha256": "e41c24960e365eeab625de6f946344c991184058d965a42b65edbcc96549d8ba"
+    },
+    "mobile-dark/zh-settings.png": {
+      "height": 1049,
+      "width": 390,
+      "sha256": "0a867b66859d3bd35f3957b70c4ba0d1d293ebb330348e7d20d1790d7ba56e00"
+    },
+    "mobile-dark/zh-sign-in.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "97efe5cb9245b03c1daa9bae9eeaf6dd328f4c6f5909ba888a3a46c336fc2b57"
+    },
+    "mobile-dark/zh-sign-up.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "46e494566b842ce2b7ed764c0a3f403cceffebc1e8108f607cb03b137b8dc3a9"
+    },
+    "mobile-dark/zh-support-detail.png": {
+      "height": 1458,
+      "width": 390,
+      "sha256": "24d78e266ee52262311c719fb30a6f0604cab05c684e619292f48209130c15b5"
+    },
+    "mobile-dark/zh-support-list.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "abe60d85a7bd522c3db43dde977f6eec935f4604d79394d5e15a2533b3622c9d"
+    },
+    "mobile-dark/zh-support-new.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "5838e0f86c30515edd022b31b2004cfea81eefe40c124faceaa18d070e383c57"
+    },
+    "mobile-light/en-blog-list.png": {
+      "height": 1948,
+      "width": 390,
+      "sha256": "03a456b9487884665232fa57c56804cc945ae7e4f3c266f7a61dc41049929543"
+    },
+    "mobile-light/en-blog-post.png": {
+      "height": 2513,
+      "width": 434,
+      "sha256": "4953b7c489afd09e9801011900db4d146ea3eea9f6188b457142e6fe3e8379a9"
+    },
+    "mobile-light/en-dashboard.png": {
+      "height": 1618,
+      "width": 451,
+      "sha256": "042986f7829be8bc4b76fb2fa6bcf75157d3e6f6b72da07a5a5d922d51c46600"
+    },
+    "mobile-light/en-forgot-password.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "61c44e099812827f3079f3d4d66eb5383c63939d82b4ee28ba51e69e2af535b3"
+    },
+    "mobile-light/en-home.png": {
+      "height": 11924,
+      "width": 390,
+      "sha256": "cc4c47c62a0a8b765e70285b5177e21495d540f078d2d317ce4b713ef30c9e1d"
+    },
+    "mobile-light/en-legal-terms.png": {
+      "height": 5200,
+      "width": 390,
+      "sha256": "d32acd55a1712860dde3f6a727fa146424a0ed7ece97336eec9a117cb786dec9"
+    },
+    "mobile-light/en-pseo-detail.png": {
+      "height": 6127,
+      "width": 390,
+      "sha256": "6ac6745ab01c47b5251820a8a3a3631cf81ad8bc855f90f9c4c502873df81eb6"
+    },
+    "mobile-light/en-pseo-list.png": {
+      "height": 2529,
+      "width": 390,
+      "sha256": "9e414a1bb4d01d47412e5c33872f1743b6f6fca8f24251bb40dbcac49545eea1"
+    },
+    "mobile-light/en-reset-password.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "f0bce6f7a12e064b8a52d07474b7bb0faa34c4d826ee6380aadd1cc9cf67792e"
+    },
+    "mobile-light/en-settings-billing.png": {
+      "height": 1218,
+      "width": 400,
+      "sha256": "901b1a6b90d174df3ed7fbd2cbaedf26a295472ab3f254cc3d2ec64984d0c979"
+    },
+    "mobile-light/en-settings-security.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "c74dc3b2b05c46c00e734ba700d50070546e7cb68e48bc7963d8d09dbf2f4557"
+    },
+    "mobile-light/en-settings-usage.png": {
+      "height": 1830,
+      "width": 443,
+      "sha256": "39eca6d5b095d948a26fbacc1d43fe280ee1af71b14aac7f829134d8d0ae2676"
+    },
+    "mobile-light/en-settings.png": {
+      "height": 1129,
+      "width": 390,
+      "sha256": "a27b40c4f73542b45380899508b59358de9ca9ec7875522962f4b5dc49dc7e55"
+    },
+    "mobile-light/en-sign-in.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "7ea1315d9e03295b33d3ae3f204a2f337c97739cd38a0743d54455aab447a104"
+    },
+    "mobile-light/en-sign-up.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "5e9af869988a71352dbfdafffab415755a1f41d0f8a658187bd3af40a94e13ea"
+    },
+    "mobile-light/en-support-detail.png": {
+      "height": 1470,
+      "width": 390,
+      "sha256": "746ce4fffa7c2fba59234580145c41ff3c9f8f6cd6dbc5ec26b7128fa7f5b602"
+    },
+    "mobile-light/en-support-list.png": {
+      "height": 954,
+      "width": 390,
+      "sha256": "981b83905fcc3056c8e00b8187245c16921ba68c40640837671be61730abfc55"
+    },
+    "mobile-light/en-support-new.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "df0fd14cc893810e55c8558928f030e7a23a0a306e83fd9eb3c2710c6f4f65eb"
+    },
+    "mobile-light/zh-blog-list.png": {
+      "height": 2455,
+      "width": 390,
+      "sha256": "30b7ac52e6a284af7dc212da3bc4835a4f5903f9d5d5cea9f5cea098146a4d81"
+    },
+    "mobile-light/zh-blog-post.png": {
+      "height": 2317,
+      "width": 434,
+      "sha256": "2d684e4700a5b31e436f21d8703f99baad088838ceaa8ac580bbddb2c2189aa5"
+    },
+    "mobile-light/zh-dashboard.png": {
+      "height": 1594,
+      "width": 451,
+      "sha256": "56c7a8483c25dfaadae2ed37a8615f2002a714eaec9f4b3c0f4e9413a128ce38"
+    },
+    "mobile-light/zh-forgot-password.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "4a3c59c09b0fadafd7c8971f956dcddc6fa7c5c323ea7c82a4004198a117936e"
+    },
+    "mobile-light/zh-home.png": {
+      "height": 11172,
+      "width": 390,
+      "sha256": "f75371c792a2dc2ea6c7dd23b7217a79c8c00bef31e8443a8f9079f6b1465efb"
+    },
+    "mobile-light/zh-legal-terms.png": {
+      "height": 4264,
+      "width": 390,
+      "sha256": "15700eaa5d0b18b1c1751f9fcd56592f567ca7fe827ad632b56916501f0f9c46"
+    },
+    "mobile-light/zh-pseo-detail.png": {
+      "height": 5763,
+      "width": 390,
+      "sha256": "be22908cae8bbdf5a9171ee73ed16a6e67097b84a861b4388b470c9b6a9f5f5e"
+    },
+    "mobile-light/zh-pseo-list.png": {
+      "height": 2329,
+      "width": 390,
+      "sha256": "418ed17d2f980911856a31cda076db2885cbf4e2c1817162ca314a98695976a8"
+    },
+    "mobile-light/zh-reset-password.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "e5ecf1e8bac453772aaae759f017142366d273cced91fe2d6cd76acd14fbbf7d"
+    },
+    "mobile-light/zh-settings-billing.png": {
+      "height": 1178,
+      "width": 390,
+      "sha256": "7b387dd7f605231251e24a025c81bc3bfae2bd5309fe92654075e11a375124ed"
+    },
+    "mobile-light/zh-settings-security.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "b64364e41461dca8c6e9aaf5aaddba70abfbab1ecfee175d54e1601b3e05fb03"
+    },
+    "mobile-light/zh-settings-usage.png": {
+      "height": 1690,
+      "width": 390,
+      "sha256": "461ea0a8709c202f37ee13a306cdcec50b4ab6468d850c2d5912ab32d9c79917"
+    },
+    "mobile-light/zh-settings.png": {
+      "height": 1049,
+      "width": 390,
+      "sha256": "4fea6798edbe82094f6c5d62510e17ec05b6592dbc801e3051ecaf4ef8913acb"
+    },
+    "mobile-light/zh-sign-in.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "dd29eb18feb8a3de5f171af2d6aaec743587b6f1645586ed58bed709602176ad"
+    },
+    "mobile-light/zh-sign-up.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "135eabc3d749801a85bea057524ac2d89fba5d58e04588f3ef5f0e55fd27b99f"
+    },
+    "mobile-light/zh-support-detail.png": {
+      "height": 1458,
+      "width": 390,
+      "sha256": "9b0a4f3c0b99e6a14ae715b335189efd4864565bd79b06bc23628c3d6294b15f"
+    },
+    "mobile-light/zh-support-list.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "f672ed7209bac99b6800ecf5db649b78808106f31103b1ffeea89ddbc98f4f75"
+    },
+    "mobile-light/zh-support-new.png": {
+      "height": 844,
+      "width": 390,
+      "sha256": "f52979459e68173ba343701250ff983fcbfd97008d282eab64c74c28c08902b2"
+    }
+  },
+  "playwrightVersion": "1.64.1",
+  "visualNow": "2026-10-15T08:00:00.000Z",
+  "workingTreeDirty": true
+}
