@@ -5,6 +5,7 @@
 import { afterAll, beforeAll } from "vitest";
 
 import { closeDatabase } from "@/db";
+import { assertSafeTestDatabase } from "./utils/database-safety";
 import { closeTestDb, syncLegacyTestSchema, testDb } from "./utils/db";
 
 const TEST_DATABASE_ATTEMPTS = 3;
@@ -32,6 +33,11 @@ beforeAll(async () => {
       "DATABASE_URL is not configured. Create .env.test and point it to a test database."
     );
   }
+
+  assertSafeTestDatabase(
+    dbUrl,
+    process.env.NEXTDEVTPL_ALLOW_REMOTE_TEST_DATABASE === "1"
+  );
 
   if (
     !dbUrl.includes("test") &&
