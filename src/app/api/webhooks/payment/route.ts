@@ -27,6 +27,7 @@ import {
   grantCredits,
 } from "@/features/credits";
 import {
+  findPendingPlanChangeRequest,
   isStaleSubscriptionEvent,
   PlanInterval,
   recordRevenueEvent,
@@ -785,24 +786,14 @@ async function createOrUpdateSubscription(
       pendingPriceId: existing.pendingPriceId,
     });
 
-    const [requestedChange] = await tx
-      .select()
-      .from(subscriptionHistory)
-      .where(
-        and(
-          eq(subscriptionHistory.subscriptionId, externalSubscription.id),
-          eq(subscriptionHistory.sourceType, "action"),
-          inArray(subscriptionHistory.eventType, [
-            "upgrade_requested",
-            "downgrade_requested",
-          ]),
-          eq(subscriptionHistory.toPriceId, externalSubscription.productId)
-        )
-      )
-      .orderBy(desc(subscriptionHistory.createdAt))
-      .limit(1);
-    const requestedCorrelationId =
-      requestedChange?.correlationId ?? requestedChange?.sourceEventId;
+    // 待生效价格已应用时按本地生效价匹配，避免供应商仍报旧价时关联到其他请求。
+    const planChange = await findPendingPlanChangeRequest(
+      tx,
+      externalSubscription.id,
+      resolved.appliedPendingPrice
+        ? resolved.priceId
+        : externalSubscription.productId
+    );
 
     await tx
       .update(subscription)
@@ -820,44 +811,53 @@ async function createOrUpdateSubscription(
       .where(eq(subscription.id, existing.id));
 
     if (existing.priceId !== resolved.priceId) {
+      const eventType = planChange.pendingRequest
+        ? planChange.pendingRequest.eventType === "upgrade_requested"
+          ? "upgrade_confirmed"
+          : "downgrade_confirmed"
+        : resolved.appliedPendingPrice
+          ? "downgraded"
+          : "changed";
+      // changed 不带旧请求的关联 ID，否则改回同一价格会撞上确认事件唯一索引。
+      const correlationId = planChange.pendingRequest
+        ? planChange.pendingCorrelationId
+        : eventType === "downgraded" &&
+            planChange.latestRequest?.eventType === "downgrade_requested" &&
+            planChange.latestRequest.toPriceId === resolved.priceId &&
+            planChange.latestRequestCorrelationId
+          ? planChange.latestRequestCorrelationId
+          : undefined;
+
       await recordSubscriptionHistory(tx, {
         effectiveAt: externalSubscription.currentPeriodStart ?? new Date(),
-        eventType: requestedChange
-          ? requestedChange.eventType === "upgrade_requested"
-            ? "upgrade_confirmed"
-            : "downgrade_confirmed"
-          : resolved.appliedPendingPrice
-            ? "downgraded"
-            : "changed",
+        eventType,
         fromPriceId: existing.priceId,
         sourceEventId: eventId,
         sourceType: "webhook",
         subscriptionId: externalSubscription.id,
         toPriceId: resolved.priceId,
         userId,
-        ...(requestedCorrelationId
-          ? {
-              correlationId: requestedCorrelationId,
-            }
-          : {}),
+        ...(correlationId ? { correlationId } : {}),
       });
-    } else if (requestedChange && requestedCorrelationId) {
+    } else if (planChange.pendingRequest) {
       await recordSubscriptionHistory(tx, {
-        correlationId: requestedCorrelationId,
+        ...(planChange.pendingCorrelationId
+          ? { correlationId: planChange.pendingCorrelationId }
+          : {}),
         effectiveAt:
-          requestedChange.eventType === "downgrade_requested"
-            ? requestedChange.effectiveAt
+          planChange.pendingRequest.eventType === "downgrade_requested"
+            ? planChange.pendingRequest.effectiveAt
             : (externalSubscription.currentPeriodStart ??
-              requestedChange.effectiveAt),
+              planChange.pendingRequest.effectiveAt),
         eventType:
-          requestedChange.eventType === "upgrade_requested"
+          planChange.pendingRequest.eventType === "upgrade_requested"
             ? "upgrade_confirmed"
             : "downgrade_confirmed",
         fromPriceId: existing.priceId,
         sourceEventId: eventId,
         sourceType: "webhook",
         subscriptionId: externalSubscription.id,
-        toPriceId: requestedChange.toPriceId ?? resolved.priceId,
+        toPriceId: planChange.pendingRequest.toPriceId ?? resolved.priceId,
         userId,
       });
     } else if (

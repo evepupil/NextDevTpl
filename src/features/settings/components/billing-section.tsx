@@ -39,6 +39,10 @@ import {
   getSubscriptionHistory,
   resumeSubscription,
 } from "@/features/payment/actions";
+import {
+  resolveSubscriptionActionOutcome,
+  type SubscriptionActionResult,
+} from "@/features/settings/utils";
 import { getMyPlanAction } from "@/features/subscription/actions";
 import { PlanBadge, type PlanType } from "@/features/subscription/components";
 import { Link } from "@/i18n/routing";
@@ -126,12 +130,24 @@ export function BillingSection() {
   };
 
   // 处理取消订阅
+  // next-safe-action 会把服务端错误转成返回值里的 serverError / validationErrors
+  // 而不是抛异常，因此必须用 resolveSubscriptionActionOutcome 判定真实结果。
+  // 失败时保留 cancelRequestIdRef 里的请求 ID，重试沿用同一请求 ID（服务端重放
+  // 判定与供应商幂等键都以它为准，事务回滚后用同一 ID 重试是安全的）。
   const handleCancelSubscription = () => {
     startCancelTransition(async () => {
       try {
         const requestId = cancelRequestIdRef.current ?? crypto.randomUUID();
         cancelRequestIdRef.current = requestId;
-        await cancelSubscription({ requestId });
+        const result: SubscriptionActionResult = await cancelSubscription({
+          requestId,
+        });
+        const outcome = resolveSubscriptionActionOutcome(result);
+        if (!outcome.ok) {
+          console.error("Failed to cancel subscription:", outcome.reason);
+          toast.error(t("currentPlan.actionFailed"));
+          return;
+        }
         cancelRequestIdRef.current = null;
         setCancelDialogOpen(false);
         refreshBilling();
@@ -146,7 +162,13 @@ export function BillingSection() {
   const handleResumeSubscription = () => {
     startCancelTransition(async () => {
       try {
-        await resumeSubscription();
+        const result: SubscriptionActionResult = await resumeSubscription();
+        const outcome = resolveSubscriptionActionOutcome(result);
+        if (!outcome.ok) {
+          console.error("Failed to resume subscription:", outcome.reason);
+          toast.error(t("currentPlan.actionFailed"));
+          return;
+        }
         refreshBilling();
         toast.success(t("currentPlan.resumeSuccess"));
       } catch (error) {
@@ -252,7 +274,12 @@ export function BillingSection() {
                           {t("currentPlan.cancelDialog.cancel")}
                         </AlertDialogCancel>
                         <AlertDialogAction
-                          onClick={handleCancelSubscription}
+                          onClick={(event) => {
+                            // 阻止 Radix 默认的点击即关闭，失败时对话框必须保持打开，
+                            // 只有判定成功后才由 handleCancelSubscription 关闭。
+                            event.preventDefault();
+                            handleCancelSubscription();
+                          }}
                           disabled={isCancelling}
                           className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >

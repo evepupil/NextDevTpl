@@ -9,6 +9,8 @@ export {
 export * from "./subscription-change";
 export * from "./subscription-event";
 export {
+  type FindPendingPlanChangeRequestResult,
+  findPendingPlanChangeRequest,
   type RecordSubscriptionHistoryInput,
   recordSubscriptionHistory,
   type SubscriptionHistoryEventType,

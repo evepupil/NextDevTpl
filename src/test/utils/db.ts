@@ -91,6 +91,7 @@ SELECT
 	) AS has_pending_price_id,
 	to_regclass('public.subscription_history') IS NOT NULL AS has_subscription_history,
 	to_regclass('public.subscription_checkout') IS NOT NULL AS has_subscription_checkout,
+	to_regclass('public.payment_webhook_event') IS NOT NULL AS has_payment_webhook_event,
 	(
 		to_regclass('public.revenue_event') IS NOT NULL AND EXISTS (
 			SELECT 1
@@ -125,6 +126,7 @@ SELECT
         has_pending_price_id?: boolean;
         has_subscription_history?: boolean;
         has_subscription_checkout?: boolean;
+        has_payment_webhook_event?: boolean;
         has_revenue_transaction_id?: boolean;
         has_subscription_history_audit_columns?: boolean;
         has_subscription_user_unique?: boolean;
@@ -139,6 +141,7 @@ SELECT
     readinessRow.has_pending_price_id &&
     readinessRow.has_subscription_history &&
     readinessRow.has_subscription_checkout &&
+    readinessRow.has_payment_webhook_event &&
     readinessRow.has_revenue_transaction_id &&
     readinessRow.has_subscription_history_audit_columns &&
     readinessRow.has_subscription_user_unique
@@ -359,6 +362,15 @@ ALTER TABLE IF EXISTS "revenue_event"
 ADD COLUMN IF NOT EXISTS "transaction_id" text;
 CREATE UNIQUE INDEX IF NOT EXISTS "revenue_event_transaction_kind_unique"
 ON "revenue_event" ("transaction_id", "kind");
+
+CREATE TABLE IF NOT EXISTS "payment_webhook_event" (
+	"id" text PRIMARY KEY NOT NULL,
+	"type" text NOT NULL,
+	"status" text DEFAULT 'processing' NOT NULL,
+	"received_at" timestamp DEFAULT now() NOT NULL,
+	"processed_at" timestamp,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
 `)
     );
   });
