@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { ArticleJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { siteConfig } from "@/config";
 import {
   getAllBlogStaticParams,
@@ -89,5 +90,31 @@ export default async function BlogPostPage({
   }
   const View = skinViews["blog.post"];
 
-  return <View {...props} />;
+  return (
+    <>
+      <ArticleJsonLd
+        title={props.title}
+        description={props.description || ""}
+        slug={props.slug}
+        locale={props.locale as "en" | "zh"}
+        publishedAt={props.publishedAt}
+        {...(props.author && { author: props.author })}
+        {...(props.tags && { tags: [...props.tags] })}
+      />
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: `/${props.locale}` },
+          {
+            name: props.locale === "zh" ? "博客" : "Blog",
+            url: `/${props.locale}/blog`,
+          },
+          {
+            name: props.title,
+            url: `/${props.locale}/blog/${props.slug}`,
+          },
+        ]}
+      />
+      <View {...props} />
+    </>
+  );
 }

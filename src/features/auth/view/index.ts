@@ -19,6 +19,7 @@ export type {
   SignUpState,
   ViewContracts,
 } from "./contracts";
+export { authSiteName } from "./site-data";
 export { useForgotPasswordController } from "./use-forgot-password-controller";
 export { useResetPasswordController } from "./use-reset-password-controller";
 export { useSignInController } from "./use-sign-in-controller";

@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "id": "contrast",
+  "name": "Contrast",
+  "version": "1.0.0",
+  "compatibility": {
+    "template": "^4.0.0",
+    "viewApi": 1
+  },
+  "modules": [
+    "admin",
+    "analytics",
+    "auth",
+    "blog",
+    "credits",
+    "dashboard",
+    "mail",
+    "marketing",
+    "operations",
+    "payment",
+    "pseo",
+    "settings",
+    "shared",
+    "storage",
+    "subscription",
+    "support"
+  ],
+  "viewEntries": {
+    "auth": "views/account/entry.ts",
+    "blog": "views/journal/entry.ts",
+    "dashboard": "views/workspace/dashboard-entry.ts",
+    "marketing": "views/marketing/entry.ts",
+    "pseo": "views/discovery/entry.ts",
+    "settings": "views/preferences/entry.ts",
+    "shared": "views/workspace/entry.ts",
+    "support": "views/helpdesk/entry.ts"
+  },
+  "uiOverrides": {
+    "button.tsx": "ui/button.tsx"
+  },
+  "customization": {
+    "brandColor": {
+      "variable": "--primary",
+      "foregroundVariable": "--primary-foreground"
+    },
+    "radius": {
+      "variable": "--radius",
+      "min": 0,
+      "max": 0,
+      "unit": "rem"
+    },
+    "fonts": {
+      "body": [
+        {
+          "id": "system",
+          "label": "System sans"
+        }
+      ],
+      "heading": [
+        {
+          "id": "system-mono",
+          "label": "System mono"
+        }
+      ],
+      "mono": [
+        {
+          "id": "system-mono",
+          "label": "System mono"
+        }
+      ]
+    },
+    "defaultTheme": ["system"]
+  },
+  "supportsPalettes": false,
+  "dependencies": {
+    "lucide-react": "0.562.0"
+  },
+  "assets": [
+    {
+      "id": "lucide-react",
+      "kind": "dependency",
+      "author": "Lucide contributors",
+      "source": "https://github.com/lucide-icons/lucide",
+      "license": "ISC",
+      "purpose": "visual",
+      "package": {
+        "name": "lucide-react",
+        "version": "0.562.0"
+      }
+    },
+    {
+      "id": "contrast-brand",
+      "kind": "file",
+      "author": "NextDevTpl contributors",
+      "source": "https://github.com/evepupil/NextDevTpl/blob/ac2b7da/src/app/icon.svg",
+      "license": "MIT",
+      "purpose": "visual",
+      "files": ["assets/brand.svg"]
+    },
+    {
+      "id": "google-sign-in-mark",
+      "kind": "inline",
+      "author": "Google",
+      "source": "https://developers.google.com/identity/branding-guidelines",
+      "license": "Google Identity branding guidelines",
+      "purpose": "functional"
+    }
+  ],
+  "files": {
+    "DESIGN.md": "d95c4d3bc4142f3713e73805cbc5c03cca67fa7387103227a3536af7243115c7",
+    "assets/brand.svg": "9686debba131dae7eeb966a0cfc4fe3904c8fb18b09d655bba6649456f7d86a3",
+    "config.ts": "bf3753bda122c534f581a7fe06b4471d0dee64b5593dd2f3421e9afebf51aba1",
+    "fonts.ts": "92b226a1dd0818c96313a92326a814ac5bb96584cf658e0282f71d2c0836db2d",
+    "tokens.css": "585dc798acded3ad662fa48d8167558398a1b7f06494acf63986e67b6303c5a7",
+    "ui/button.tsx": "8b1e9cec59bf0e86591b2edc51b5c427a4f7840afcfeefa00dcc90085bfb7370",
+    "views/account/entry.ts": "689f66f7d2b4c4079f17eebd479c79a086a1272cc01e8cb86f74b26df9c599ed",
+    "views/account/forgot-password.tsx": "e4f7aaa30ed2e6645a5225e0d4beb3d490a6f1782fa42988c4b628a989dc5085",
+    "views/account/layout.tsx": "bf078d05ea6c890c2bd99a60961a104fc313b5dc4aea74fe47b976664df7383e",
+    "views/account/reset-password.tsx": "62cf36fd665dc0e9de48082d0e8085dc95ab37efb0a8138691728cb0e908d697",
+    "views/account/sign-in.tsx": "f2042224211d87272318baed12cc7256dd1f40571eba6788885ceeba72d33fa2",
+    "views/account/sign-up.tsx": "51658ffa994d3ec3d8aa5ede53800894a3ad884326a855055932c95a9496c364",
+    "views/discovery/detail.tsx": "461bc5bafcaef1933585a28f9f711047b4b2ab8706e91354f1eca5b738838fd4",
+    "views/discovery/entry.ts": "086c629f2b2e6d06e64d6d708f2ba0fca46a58a2a307eecda76004985c8b2fdc",
+    "views/discovery/list.tsx": "cb86a17cc1173b3bf772ca173826c1cacf531755d7be8ab1326d88365c600938",
+    "views/helpdesk/detail.tsx": "5ee48c73248bb14b578cc771613ecda45b02e35ee357ed28ae4e2210825c4b01",
+    "views/helpdesk/entry.ts": "cdea51d6080a48f089f96ed23bc4fe6ab809102e484602581a03d7f602437bd3",
+    "views/helpdesk/list.tsx": "9e09fecbe2b78c058e16ddd3e815ddbdb82ee6641510576ee5a3d38d52926709",
+    "views/helpdesk/new.tsx": "ca4cd072258e955c8e0c3cf77652e58ffcd5062030ac9f549e373e6d95d75cf9",
+    "views/journal/entry.ts": "9d0ba55ccad16d9b0b71ea4c33dc87be54bfdfeafecd5e0eca8e89298cc0283c",
+    "views/journal/list.tsx": "d021956445d0dedaf63d2499ecb591cb6026859dc53eab01b2267a1538bb24da",
+    "views/journal/post.tsx": "4199ceb8a37c0a28783cf92ac528cd8ffec28cbca57cf848f96cc20b09de3a01",
+    "views/marketing/entry.ts": "e3c5d5f284cf31868c85790deba7237f0ad76013a921838dbb5374ec5ee6f20d",
+    "views/marketing/footer.tsx": "ed1576bb723f0afae555af55af5d33814ffcd2f33850682a579e6ffc3f35104d",
+    "views/marketing/header.tsx": "53ce953c845d14885658b9606defd313c6c183c00c4502b8b88db4ec6664a005",
+    "views/marketing/home.tsx": "20acc42cd5267f177e1278312e9a814919029c2e85a49b15b475f30eb65dbc34",
+    "views/marketing/layout.tsx": "0429a4d52202d85076b034aee5cf6870d4e302c505d23af336eff7e4692a5f69",
+    "views/marketing/legal.tsx": "24335b7a2ecde444e446200b5efdc6cc9a9e39da518522849feeddec14dd2c9d",
+    "views/preferences/account.tsx": "cf9f1422496a3d299d4f04b29f757aae7b33662ac2522e3ccc2017e9fa882637",
+    "views/preferences/billing.tsx": "d7788aa020c179a30c2c3afd8f276e8ad0fe5a5bf4b0701a60327b0288681586",
+    "views/preferences/entry.ts": "6021bf948fb1bf47b2207807fc82d132505baf09d499ad8860f8d2e9d58abfcc",
+    "views/preferences/page.tsx": "f54acfacfdddf95013c8942c604cbc31a678367c8712d713a22f3660d8cacbb9",
+    "views/preferences/security.tsx": "0c354768573d7a5f44ebab43cc10c910549fc0a7379909661ff3c9911542da54",
+    "views/preferences/usage.tsx": "bd6675317497ebe89ef5ff289204b02be05a7ad79ee4983fcf02ce4d8e2f2d41",
+    "views/shared/fields.tsx": "bfe9f9c55eac4d84d8f5b48f31735fcfa9e330e97529576b78f7ab0cf81c0c45",
+    "views/workspace/dashboard-entry.ts": "b735f04dd41b53a9244a9e6e204426adcb69b9692ccc04fe05f519c5f68cbc88",
+    "views/workspace/dashboard-layout.tsx": "7f8cdd8c9b3f1390f8a1ea1cf7784e4682658a6aab1f23204d3d660b6ea11a8e",
+    "views/workspace/empty-dashboard.tsx": "173d046e79354fe5d977d520a2a61248cc1c153b195e41a27c3937eb2303a271",
+    "views/workspace/entry.ts": "1952662598b63655b41b80293ddc63dfe2230396b77a74abf1f06e22b7199ced",
+    "views/workspace/navigation.tsx": "462adb401557356937b787ec01fe2aa41d0a0285ba6e536fad5ed2513092afcf",
+    "views/workspace/overview.tsx": "c762da3ee9b95a02e73ec48f3acce4c0e4c43d9dd7103dd213a197e613c6fcb1"
+  }
+}

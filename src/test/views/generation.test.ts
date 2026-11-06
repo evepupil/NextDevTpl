@@ -50,6 +50,22 @@ describe("generated view ownership", () => {
     await expect(
       access(join(target, "src/app/[locale]/(dashboard)/dashboard/page.tsx"))
     ).rejects.toMatchObject({ code: "ENOENT" });
+    for (const route of [
+      "src/app/[locale]/(admin)/admin/page.tsx",
+      "src/app/[locale]/(admin)/admin/users/page.tsx",
+      "src/app/[locale]/(admin)/admin/tickets/page.tsx",
+      "src/app/[locale]/(admin)/admin/tickets/[id]/page.tsx",
+      "src/app/[locale]/(admin)/admin/layout.tsx",
+    ]) {
+      await expect(access(join(target, route))).rejects.toMatchObject({
+        code: "ENOENT",
+      });
+    }
+    await expect(
+      access(join(target, "src/features/admin"))
+    ).rejects.toMatchObject({
+      code: "ENOENT",
+    });
     await expect(
       access(join(target, "src/skin/views/dashboard"))
     ).rejects.toMatchObject({ code: "ENOENT" });

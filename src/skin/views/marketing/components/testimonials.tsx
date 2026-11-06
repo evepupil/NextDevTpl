@@ -3,7 +3,7 @@
 import { Quote } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { Reveal } from "@/components/motion/reveal";
+import { Reveal } from "./reveal";
 
 export function Testimonials() {
   const t = useTranslations("Testimonials");

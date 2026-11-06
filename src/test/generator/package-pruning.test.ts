@@ -23,6 +23,11 @@ function buildRepositoryPackageJson() {
       build: "next build --webpack",
       test: "vitest",
       "test:run": "vitest run",
+      lint: "pnpm skin:check && biome lint .",
+      "skin:check":
+        "pnpm --filter create-nextdevtpl build && node scripts/verify-skin.mjs check",
+      "skin:hash":
+        "pnpm --filter create-nextdevtpl build && node scripts/verify-skin.mjs hash",
       "visual:baseline": "playwright test --update-snapshots",
       "visual:check": "playwright test",
       "visual:db:down": "docker compose -f e2e/docker-compose.yml down",
@@ -49,6 +54,7 @@ describe("pruneRepositoryOnlyPackageEntries", () => {
 
   it("keeps every other dependency and script untouched", () => {
     const input = buildRepositoryPackageJson();
+    expect(input.scripts.lint).toBe("pnpm skin:check && biome lint .");
     const packageJson = pruneRepositoryOnlyPackageEntries(
       buildRepositoryPackageJson()
     );
@@ -64,6 +70,22 @@ describe("pruneRepositoryOnlyPackageEntries", () => {
     expect(packageJson.scripts.dev).toBe(input.scripts.dev);
     expect(packageJson.scripts.build).toBe(input.scripts.build);
     expect(packageJson.scripts["test:run"]).toBe(input.scripts["test:run"]);
+    expect(packageJson.scripts.lint).toBe("biome lint .");
+    expect(packageJson.scripts.lint).not.toContain("skin:check");
+    expect(packageJson.scripts.lint).not.toContain("create-nextdevtpl");
+    expect(packageJson.scripts).not.toHaveProperty("skin:check");
+    expect(packageJson.scripts).not.toHaveProperty("skin:hash");
+  });
+
+  it("rewrites only the known repository lint chain", () => {
+    const customCommand = "biome lint src && eslint legacy";
+    const packageJson = pruneRepositoryOnlyPackageEntries({
+      scripts: {
+        lint: customCommand,
+      },
+    });
+
+    expect(packageJson.scripts.lint).toBe(customCommand);
   });
 
   it("prunes any script matching the visual: prefix", () => {

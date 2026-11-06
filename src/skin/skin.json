@@ -1,0 +1,224 @@
+{
+  "schemaVersion": 1,
+  "id": "default",
+  "name": "默认皮肤",
+  "version": "1.0.0",
+  "compatibility": {
+    "template": "^4.0.0",
+    "viewApi": 1
+  },
+  "modules": [
+    "admin",
+    "analytics",
+    "auth",
+    "blog",
+    "credits",
+    "dashboard",
+    "mail",
+    "marketing",
+    "operations",
+    "payment",
+    "pseo",
+    "settings",
+    "shared",
+    "storage",
+    "subscription",
+    "support"
+  ],
+  "viewEntries": {
+    "auth": "views/auth/index.ts",
+    "blog": "views/blog/index.ts",
+    "dashboard": "views/dashboard/index.ts",
+    "marketing": "views/marketing/index.ts",
+    "pseo": "views/pseo/index.ts",
+    "settings": "views/settings/index.ts",
+    "shared": "views/shared/index.ts",
+    "support": "views/support/index.ts"
+  },
+  "uiOverrides": {},
+  "customization": {
+    "brandColor": {
+      "variable": "--primary",
+      "foregroundVariable": "--primary-foreground"
+    },
+    "radius": {
+      "variable": "--radius",
+      "min": 0,
+      "max": 2,
+      "unit": "rem"
+    },
+    "fonts": {
+      "body": [
+        {
+          "id": "geist-sans",
+          "label": "Geist Sans"
+        }
+      ],
+      "heading": [
+        {
+          "id": "geist-sans",
+          "label": "Geist Sans"
+        }
+      ],
+      "mono": [
+        {
+          "id": "geist-mono",
+          "label": "Geist Mono"
+        }
+      ]
+    },
+    "defaultTheme": ["system", "light", "dark"]
+  },
+  "supportsPalettes": true,
+  "dependencies": {
+    "framer-motion": "12.29.2",
+    "geist": "1.7.2",
+    "lucide-react": "0.562.0",
+    "next": "16.2.11",
+    "next-intl": "4.7.0",
+    "next-themes": "0.4.6",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "assets": [
+    {
+      "id": "geist-font",
+      "kind": "dependency",
+      "author": "Vercel and Basement Studio",
+      "source": "https://github.com/vercel/geist-font",
+      "license": "OFL-1.1",
+      "purpose": "visual",
+      "package": {
+        "name": "geist",
+        "version": "1.7.2"
+      }
+    },
+    {
+      "id": "lucide-react-icons",
+      "kind": "dependency",
+      "author": "Eric Fennis",
+      "source": "https://github.com/lucide-icons/lucide",
+      "license": "ISC",
+      "purpose": "functional",
+      "package": {
+        "name": "lucide-react",
+        "version": "0.562.0"
+      }
+    },
+    {
+      "id": "framer-motion",
+      "kind": "dependency",
+      "author": "Matt Perry",
+      "source": "https://github.com/motiondivision/motion/",
+      "license": "MIT",
+      "purpose": "visual",
+      "package": {
+        "name": "framer-motion",
+        "version": "12.29.2"
+      }
+    },
+    {
+      "id": "google-oauth-mark",
+      "kind": "inline",
+      "author": "Google",
+      "source": "https://developers.google.com/identity/branding-guidelines",
+      "license": "Google branding guidelines for a functional sign-in button",
+      "purpose": "functional",
+      "files": ["views/auth/sign-in.tsx", "views/auth/sign-up.tsx"]
+    },
+    {
+      "id": "nextdevtpl-mark",
+      "kind": "inline",
+      "author": "NextDevTpl contributors",
+      "source": "https://github.com/evepupil/NextDevTpl",
+      "license": "MIT",
+      "purpose": "visual",
+      "files": [
+        "views/auth/components/auth-logo.tsx",
+        "views/auth/components/auth-brand-panel.tsx",
+        "views/marketing/components/header.tsx",
+        "views/marketing/components/footer.tsx",
+        "views/shared/sidebar.tsx"
+      ]
+    },
+    {
+      "id": "grain-noise",
+      "kind": "inline",
+      "author": "NextDevTpl contributors",
+      "source": "https://github.com/evepupil/NextDevTpl",
+      "license": "MIT",
+      "purpose": "visual",
+      "files": ["tokens.css"]
+    }
+  ],
+  "files": {
+    "DESIGN.md": "bc537a8af7cf2a4174fa7e6cf5c575ef7df881b497cda38ff921e635746071b8",
+    "config.ts": "93f378db18717b81e8b56d9eba19910bd37b4350fd00582a65ed44afcf4d754e",
+    "fonts.ts": "fd9830e0e07f4ccf610250d32a26d6f7a7e471939839ac6e71f92950bda4ce0e",
+    "layouts/auth.tsx": "a36669b4482ca3ccf72253f4566090d79d3fa642b0673611402ca212864070d2",
+    "layouts/dashboard.tsx": "2774a038375e418f444573c119d67ee2264fdd422bebbd1bcd1630412c76c569",
+    "layouts/marketing.tsx": "177865b14a3a2c0e51f5d8ddca01f9af72e2c59fe5e0ee56a3186ce21dfa5dce",
+    "tokens.css": "d9cb7ede177b4a5a20ad4ca78cdf3a2df571bebe4cca382947b2ed9531c7a80d",
+    "views/auth/components/auth-brand-panel.tsx": "5359b48b061d51b937b8992b9497d80b6d6db7da8f42e91891b0386be75db3bd",
+    "views/auth/components/auth-error-alert.tsx": "1079e089eec2f7b5c50bd6361abffbcfca27a823fbf1bcb08ae8c0474895d5df",
+    "views/auth/components/auth-footer.tsx": "c9538ccf7cd96f16944e75a6932a5f6a7fc8783d6d644358d7bc7c08ac430c71",
+    "views/auth/components/auth-logo.tsx": "832a90a6dd273a5c8c3c772a2af967a6cafd6496ba6fd9e20dc9d6548b8b7f3b",
+    "views/auth/forgot-password.tsx": "c2589222349cafbe17a67dfe2ff95c1ab1e29d0a272dca35a044de8ca3f3c482",
+    "views/auth/index.ts": "d5a73911af45af9229f26c0c3afd3e4bcfacc6a2b5af8f4cef2f5f52c7f33906",
+    "views/auth/reset-password.tsx": "05be3d56987016d4abd35bd0febba1cc88f78f12a89948b6684b8ab142fbacf8",
+    "views/auth/sign-in.tsx": "0ef54ea0d95d3736c29462fda723912f7d8f0b0daf33fc0d16a26c5c73771193",
+    "views/auth/sign-up.tsx": "45e827bbd3c1b52432c76c06f84d6a16d8f0fab114f389bf4c1fc15d2c78dc75",
+    "views/blog/components/blog-post-card.tsx": "08780cf2be4138d7fa0600cfeaf27aad63977aabf122dec2f19d07299c89efd3",
+    "views/blog/index.ts": "4e1f35272bb46caed9c5718e0df5cefbf9c4ff78659eda64c0f1340610b5dd52",
+    "views/blog/list.tsx": "84bdeaf31ce0d0d3f89982ec0c1d1c896b1b2ec97c0f83ddd3ee4b9e10e12267",
+    "views/blog/post.tsx": "a19cb448197b3fbffb446e4be05943455d7250cf45ec6ce8b81a9d025b1dbeda",
+    "views/dashboard/index.ts": "5bd3e6b886345d388d86f2360418424e4f38ad04f91c4e21e532d99e70518be3",
+    "views/dashboard/overview.tsx": "6c44fadedc5af6ed675351ea989d2a81ffd7318641562b7e5f8bcfd78a5f657b",
+    "views/marketing/components/animated-price.tsx": "1c1b4ddbeb3d0c73ccde35ef648623ca6ee5f0bd7f0bd47426d79473480b661c",
+    "views/marketing/components/cta-section.tsx": "5f0b6800afb2e68736bbda2fd1d53ef5bd631aa176c2496b48643537144e4356",
+    "views/marketing/components/faq-section.tsx": "17261cc3eea4f8a42a93a611b69ca0cca7cb36eb2b961df7e9c464bbc3c1a4ae",
+    "views/marketing/components/feature-grid.tsx": "0bf4bb10c859e6e163cbb7807fec19e61c027d36a9cd22e4ea140a971b1d6cf8",
+    "views/marketing/components/footer.tsx": "21c566faf86e978dcb397fd9789b3d9210c619d43895dffb03052f9138a7bdb2",
+    "views/marketing/components/header.tsx": "92e0d600d5aabe46d52a26c0766f6c2db67d6ca2da003c8e3174a16932211930",
+    "views/marketing/components/hero-section.tsx": "40f5f38ac2979e3e110f75c93fd6442f79d92875c2736ba1505ac4064017d997",
+    "views/marketing/components/how-it-works.tsx": "3b5c659b7686171156bfb933da1e954f356da1b74249223312d049443ca745a2",
+    "views/marketing/components/index.ts": "aa16587c9b8e37e723256456b0ab3aa038a6416500ad4bb7258235b678a994db",
+    "views/marketing/components/nav-menu.tsx": "fef3f3fef09ebb7e115710085b56076581003860ea4d8314740a6505423e303b",
+    "views/marketing/components/pricing-section.tsx": "cdc7454761f946a4bec5a3724e2d5b4f0f5a213e6d8aaca5301e7bc79545d0b3",
+    "views/marketing/components/reveal.tsx": "d48a7015d368def8396775d363a167c24f69d1823e427f37567bbf8cd87eb992",
+    "views/marketing/components/testimonials.tsx": "1a2c8a760b7d9dd636baf69158874118e758a0e9f80f9853b2e3c0507e07ab7d",
+    "views/marketing/components/use-cases-section.tsx": "cfbbbbec287a369380fe2db48df24242bd510dcb5f0546b52fd7128fc91dea5f",
+    "views/marketing/home.tsx": "4bf343fab7234c6bdf17e09af8eb757031b0f6323a71a303b2182f055dc2ac00",
+    "views/marketing/index.ts": "91dffdc723c5de0c1f9db5fe8a275b2f0b06ae85541a448bcd150a7dddd82db2",
+    "views/marketing/legal.tsx": "6ce79498577c86db92b04349696a542a71379864f3b7f212b265ac5dcc68adc2",
+    "views/pseo/components/index.ts": "4e2bf514cff7ae70369b7a3fcdd6687150612ae73aaeeaddaf3084d72d4710f4",
+    "views/pseo/components/pseo-cta.tsx": "c293f8897a0a554bea127942c2070a74d1e26ff11e9c6c0c6da4890875e4511a",
+    "views/pseo/components/pseo-faq.tsx": "6c9689aee383ac86f45c4a5b1e31eaab8aa150216719d032722d6b17986f46d4",
+    "views/pseo/components/pseo-feature-grid.tsx": "e2cb0b49111b897f418d89ba9a252a1b49f7844bd1951fb84ae830853605e6fd",
+    "views/pseo/components/pseo-hero.tsx": "a895b2dd3d1f19a8cad953eb0d48e8351c63fc8021cdc85094a08ed186e9979d",
+    "views/pseo/components/pseo-related.tsx": "680bd2a6456ca87c0bb10b2d3ffefed9c7315aa28e620816253c319dddfc68f5",
+    "views/pseo/components/pseo-use-cases.tsx": "286b21a5ec8d12c3a6d17629f088a760c8965ad2036191735715c547ae1b83c1",
+    "views/pseo/index.ts": "ee6e67d239086efc0c9006afe605d8df406fb01e1ed89a7392f474885aeae208",
+    "views/pseo/pseo-detail.tsx": "c2ab7bcd26a2d53c0646a86b6270f8c5c503333502f6d70eddac4d0a45763597",
+    "views/pseo/pseo-list.tsx": "512abee365d81ed02a6aa92e460ed3632fbaa0669871758a16742ea5cd43a7e1",
+    "views/settings/components/account-section.tsx": "a4a0969f2595178e8fac9f51f69906f697e3c876f0e57df25e9938d1ec982570",
+    "views/settings/components/billing-section.tsx": "8ab22ebaf0abee6d4ca9d7d7584149be902a17912f89a42ece277e04ac6514d2",
+    "views/settings/components/credits/credit-usage-section.tsx": "59353df05c34bdb02ccead850a52ba5ecad8c14a6f620b53e564306adb59bd2c",
+    "views/settings/components/credits/transaction-history.tsx": "35b9de6bf6444557674733104b75efa335313055cabd35a9fc5a655fcad26d94",
+    "views/settings/components/security-section.tsx": "f5fbbc55725928cc0aba9156876baa1f9c91702f27c8feba2f65e52d7cb0da2b",
+    "views/settings/index.ts": "289d3a5bebd1b37a62016e895292745cdb0a3321ae302d260f4bdac7002e6880",
+    "views/settings/page.tsx": "01b3184f6800e744a6738a9fa5e0aef4816cdcbfc9c5232da6e3797a683104a9",
+    "views/shared/account-badges.tsx": "7e9aab72b5ce975b5ad7754e563ae478db7f5ac11ee5def2c502c0da0aea6631",
+    "views/shared/empty-dashboard.tsx": "9bd0e47b13b29794b873fe32f3b719a1b8e5ed282a887de90aef6250ef511464",
+    "views/shared/index.ts": "663bceb2c449fbdeefd1bea8aa2aefe1ae9e082faf4c532fad7361abf37bacde",
+    "views/shared/main-wrapper.tsx": "08987dab8b4e1bad1c5fd2f28f9d286e49ccd36686712b207b5106f5829ac8c0",
+    "views/shared/sidebar-context.tsx": "6dc605f84953b4f98d3c16c7fa014ce39ab043187cc7e62a350e481b9663416e",
+    "views/shared/sidebar.tsx": "5214eff08b5d08bf72120094efcb62e4c7adc05e9ea405b427c09fbe25ad3db7",
+    "views/support/components/ticket-badges.tsx": "9fc199b38b9286a645bd6a19597bcc8748fb0c4c4958f96828ba8ba68885ec05",
+    "views/support/components/ticket-message-form.tsx": "ce2adaf6c69a1bb02f289f22bfa7d867962a1ebae29d94da92d8ced5c691f2c3",
+    "views/support/detail.tsx": "4b132c15f8e66a037dea1c6f31fc7b02baeeffd856c3ec8b13673a30153b9558",
+    "views/support/index.ts": "5aeabaec79545751388874a8e910da37ca67d3fc0782d77c1ceec3a659c4c7bb",
+    "views/support/list.tsx": "720cb949980009e0659e162c727fe68b75ff1157fd6e52c338b0050e006033d5",
+    "views/support/new.tsx": "ddcf1bce241e8809645ef528d26e0b9d153cb137b0e2292cd435df3f94a3349d"
+  }
+}

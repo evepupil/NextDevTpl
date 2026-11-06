@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ModeToggle } from "@/components/ui/mode-toggle";
 import {
   Popover,
   PopoverContent,
@@ -12,9 +13,8 @@ import {
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-import { ModeToggle } from "@/features/shared";
+import { cn } from "@/components/ui-utils";
 import { Link, usePathname, useRouter } from "@/i18n/routing";
-import { cn } from "@/lib/utils";
 import { useDashboardRuntime } from "@/modules/view-runtime";
 import { AccountCreditsBadge, AccountPlanBadge } from "./account-badges";
 import { useSidebar } from "./sidebar-context";

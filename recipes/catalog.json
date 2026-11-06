@@ -6,7 +6,9 @@
       "dependencies": ["shared", "support"],
       "routes": [
         "src/app/[locale]/(admin)/admin/page.tsx",
-        "src/app/[locale]/(admin)/admin/users/page.tsx"
+        "src/app/[locale]/(admin)/admin/users/page.tsx",
+        "src/app/[locale]/(admin)/admin/tickets/page.tsx",
+        "src/app/[locale]/(admin)/admin/tickets/[id]/page.tsx"
       ],
       "schema": [],
       "translations": ["AdminSidebar"],
@@ -158,6 +160,7 @@
         "Footer"
       ],
       "views": [
+        { "id": "marketing.header", "kind": "component" },
         { "id": "marketing.layout", "kind": "layout" },
         { "id": "marketing.home", "kind": "page" },
         { "id": "marketing.legal", "kind": "page" }
@@ -299,9 +302,7 @@
       "routes": [
         "src/app/[locale]/(dashboard)/dashboard/support/page.tsx",
         "src/app/[locale]/(dashboard)/dashboard/support/new/page.tsx",
-        "src/app/[locale]/(dashboard)/dashboard/support/[id]/page.tsx",
-        "src/app/[locale]/(admin)/admin/tickets/page.tsx",
-        "src/app/[locale]/(admin)/admin/tickets/[id]/page.tsx"
+        "src/app/[locale]/(dashboard)/dashboard/support/[id]/page.tsx"
       ],
       "schema": ["support"],
       "translations": ["Support"],

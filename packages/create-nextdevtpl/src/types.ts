@@ -14,7 +14,7 @@ export type ServiceKind =
 
 export interface CatalogView {
   id: string;
-  kind: "layout" | "page";
+  kind: "component" | "layout" | "page";
 }
 
 export interface CatalogModule {

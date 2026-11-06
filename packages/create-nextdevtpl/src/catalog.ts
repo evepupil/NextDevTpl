@@ -61,7 +61,9 @@ function parseViews(value: unknown): CatalogView[] | undefined {
       (item) =>
         !isRecord(item) ||
         typeof item.id !== "string" ||
-        (item.kind !== "page" && item.kind !== "layout")
+        (item.kind !== "page" &&
+          item.kind !== "layout" &&
+          item.kind !== "component")
     )
   ) {
     return undefined;

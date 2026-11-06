@@ -17,9 +17,8 @@ import net from "node:net";
 import path from "node:path";
 
 import { VISUAL_BASE_URL, VISUAL_SERVER_PORT } from "../constants";
-import { NEXT_DEV_DIR, REPO_ROOT, SERVER_LOG_FILE } from "../paths";
+import { REPO_ROOT, SERVER_LOG_FILE } from "../paths";
 
-const LOCK_FILE = path.join(NEXT_DEV_DIR, "lock");
 const READY_TIMEOUT_MS = 240_000;
 const LOG_TAIL_LINES = 60;
 
@@ -40,10 +39,10 @@ interface DevServerLock {
 }
 
 /** 读取 Next 开发服务器的锁文件；不存在或内容不是 JSON 时返回 undefined */
-function readDevServerLock(): DevServerLock | undefined {
+function readDevServerLock(lockFile: string): DevServerLock | undefined {
   let content: string;
   try {
-    content = fs.readFileSync(LOCK_FILE, "utf8");
+    content = fs.readFileSync(lockFile, "utf8");
   } catch {
     return undefined;
   }
@@ -94,8 +93,8 @@ function isNodeProcess(pid: number): boolean {
 }
 
 /** 日常开发服务器占着 .next/dev 时直接报错，什么都不删 */
-function assertNoRunningDevServer(): void {
-  const lock = readDevServerLock();
+function assertNoRunningDevServer(lockFile: string): void {
+  const lock = readDevServerLock(lockFile);
   if (!lock?.pid) return;
   if (!isProcessAlive(lock.pid) || !isNodeProcess(lock.pid)) return;
 
@@ -140,9 +139,9 @@ async function assertPortFree(port: number): Promise<void> {
 }
 
 /** 删除 .next/dev；删不掉说明有进程占着文件，同样提示先停掉开发服务器 */
-function removeNextDevDir(): void {
+function removeNextDevDir(nextDevDir: string): void {
   try {
-    fs.rmSync(NEXT_DEV_DIR, {
+    fs.rmSync(nextDevDir, {
       force: true,
       maxRetries: 5,
       recursive: true,
@@ -151,7 +150,7 @@ function removeNextDevDir(): void {
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error);
     throw new Error(
-      `无法清理 ${NEXT_DEV_DIR}，可能有开发服务器正在使用它。` +
+      `无法清理 ${nextDevDir}，可能有开发服务器正在使用它。` +
         `先停掉 pnpm dev 再跑截图。原因：${reason}`
     );
   }
@@ -215,6 +214,35 @@ export interface RunningDevServer {
   stop: () => Promise<void>;
 }
 
+export interface DevServerOptions {
+  projectRoot?: string;
+  logFile?: string;
+}
+
+function resolveServerPaths(options: DevServerOptions) {
+  const projectRoot = fs.realpathSync(options.projectRoot ?? REPO_ROOT);
+  const nextRoot = path.join(projectRoot, ".next");
+  const nextDevDir = path.join(nextRoot, "dev");
+  const relativePath = path.relative(projectRoot, nextDevDir);
+  if (relativePath !== path.join(".next", "dev")) {
+    throw new Error("截图缓存目录必须位于指定项目内。");
+  }
+  // 不沿目录链接清理另一个项目或磁盘上的缓存。
+  if (
+    [nextRoot, nextDevDir].some((directory) =>
+      fs.lstatSync(directory, { throwIfNoEntry: false })?.isSymbolicLink()
+    )
+  ) {
+    throw new Error("截图项目的 .next 及 dev 目录不能是符号链接。");
+  }
+  return {
+    projectRoot,
+    nextDevDir,
+    lockFile: path.join(nextDevDir, "lock"),
+    logFile: path.resolve(options.logFile ?? SERVER_LOG_FILE),
+  };
+}
+
 function killProcessTree(pid: number): void {
   if (process.platform === "win32") {
     spawnSync("taskkill", ["/pid", String(pid), "/T", "/F"], {
@@ -230,23 +258,29 @@ function killProcessTree(pid: number): void {
   }
 }
 
-async function waitForExit(child: ChildProcess, timeoutMs: number) {
+async function waitForExit(
+  child: ChildProcess,
+  timeoutMs: number
+): Promise<boolean> {
   const deadline = Date.now() + timeoutMs;
   while (child.exitCode === null && child.signalCode === null) {
-    if (Date.now() > deadline) return;
+    if (Date.now() > deadline) return false;
     await sleep(100);
   }
+  return true;
 }
 
 export async function startDevServer(
-  env: NodeJS.ProcessEnv
+  env: NodeJS.ProcessEnv,
+  options: DevServerOptions = {}
 ): Promise<RunningDevServer> {
-  assertNoRunningDevServer();
+  const paths = resolveServerPaths(options);
+  assertNoRunningDevServer(paths.lockFile);
   await assertPortFree(VISUAL_SERVER_PORT);
-  removeNextDevDir();
+  removeNextDevDir(paths.nextDevDir);
 
-  fs.mkdirSync(path.dirname(SERVER_LOG_FILE), { recursive: true });
-  const logStream = fs.createWriteStream(SERVER_LOG_FILE, { flags: "w" });
+  fs.mkdirSync(path.dirname(paths.logFile), { recursive: true });
+  const logStream = fs.createWriteStream(paths.logFile, { flags: "w" });
   const tail: string[] = [];
   let readyInMs: number | undefined;
   let sawAlreadyRunning = false;
@@ -270,12 +304,14 @@ export async function startDevServer(
 
   // 直接用 node 执行 next 的入口脚本，不经过 pnpm / .cmd 外壳，
   // 这样 child.pid 就是 node 进程本身，关闭时才能准确杀掉整棵进程树。
-  const nextBin = require.resolve("next/dist/bin/next", { paths: [REPO_ROOT] });
+  const nextBin = require.resolve("next/dist/bin/next", {
+    paths: [paths.projectRoot],
+  });
   const child = spawn(
     process.execPath,
     [nextBin, "dev", "--turbopack", "--port", String(VISUAL_SERVER_PORT)],
     {
-      cwd: REPO_ROOT,
+      cwd: paths.projectRoot,
       detached: process.platform !== "win32",
       env,
       stdio: ["ignore", "pipe", "pipe"],
@@ -302,11 +338,13 @@ export async function startDevServer(
 
   const logTail = () => tail.join("\n");
   const stop = async () => {
-    process.off("exit", killOnExit);
-    if (!exited) {
+    if (child.exitCode === null && child.signalCode === null) {
       killProcessTree(pid);
-      await waitForExit(child, 15_000);
+      if (!(await waitForExit(child, 15_000))) {
+        throw new Error(`截图服务器未能退出，进程号 ${pid}`);
+      }
     }
+    process.off("exit", killOnExit);
     logStream.end();
   };
 

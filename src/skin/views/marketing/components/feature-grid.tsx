@@ -1,9 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-
-import { Reveal } from "@/components/motion/reveal";
 import { marketingFeatureCards } from "@/features/marketing/view";
+import { Reveal } from "./reveal";
 
 /**
  * 功能模块配置

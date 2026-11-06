@@ -13,7 +13,10 @@ function moduleAlias(id: string): string {
 }
 
 function sourceAlias(path: string): string {
-  return `@/${path.replace(/^src\//u, "").replace(/\/index\.ts$/u, "")}`;
+  return `@/${path
+    .replace(/^src\//u, "")
+    .replace(/\/index\.tsx?$/u, "")
+    .replace(/\.tsx?$/u, "")}`;
 }
 
 function modulesWithViews(
@@ -32,14 +35,18 @@ function modulesWithViews(
 
 export function createSelectedSkinViewsSource(
   selectedModules: readonly string[],
-  catalog: RecipeCatalog
+  catalog: RecipeCatalog,
+  viewEntries?: Readonly<Record<string, string>>
 ): string {
   const modules = modulesWithViews(selectedModules, catalog);
   const imports = modules.flatMap(({ id, recipe }) => {
     const alias = moduleAlias(id);
+    const entry = viewEntries?.[id]
+      ? sourceAlias(`src/skin/${viewEntries[id]}`)
+      : sourceAlias(recipe.skinEntry!);
     return [
       `import type { ViewContracts as ${alias}ViewContracts } from "${sourceAlias(recipe.viewContract!)}";`,
-      `import { views as ${alias}Views } from "${sourceAlias(recipe.skinEntry!)}";`,
+      `import { views as ${alias}Views } from "${entry}";`,
     ];
   });
   const contractAliases = modules.map(
@@ -62,11 +69,12 @@ ${viewSpreads.join("\n")}
 export async function writeSelectedSkinViews(
   target: string,
   selectedModules: readonly string[],
-  catalog: RecipeCatalog
+  catalog: RecipeCatalog,
+  viewEntries?: Readonly<Record<string, string>>
 ): Promise<void> {
   await writeText(
     resolve(target, "src", "modules", "skin-views.ts"),
-    createSelectedSkinViewsSource(selectedModules, catalog)
+    createSelectedSkinViewsSource(selectedModules, catalog, viewEntries)
   );
 }
 

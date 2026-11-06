@@ -2,9 +2,8 @@
 
 import { Menu, PanelLeft, PanelLeftClose } from "lucide-react";
 import { useTranslations } from "next-intl";
-
+import { cn } from "@/components/ui-utils";
 import { usePathname } from "@/i18n/routing";
-import { cn } from "@/lib/utils";
 
 import { useSidebar } from "./sidebar-context";
 

@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, resolve, sep } from "node:path";
+import ts from "typescript";
 import { describe, expect, it } from "vitest";
 import { adminNav, dashboardNav } from "@/config/nav";
 import {
@@ -15,8 +16,7 @@ import {
 
 const sourceRoot = resolve(process.cwd(), "src");
 const featureRoot = join(sourceRoot, "features");
-const importPattern =
-  /(?:from\s+|import\s*\()\s*["']@\/features\/([^/"']+)(\/[^"']+)?["']/g;
+const featureImportPattern = /^@\/features\/([^/]+)(\/.*)?$/u;
 const publicRuntimeEntries = new Set([
   "/actions",
   "/components",
@@ -44,6 +44,40 @@ function getOwningFeature(path: string): ModuleId | undefined {
   }
   const [feature] = relativePath.split(sep);
   return MODULE_IDS.find((id) => id === feature);
+}
+
+function featureImports(file: string, source: string): readonly string[] {
+  const parsed = ts.createSourceFile(
+    file,
+    source,
+    ts.ScriptTarget.Latest,
+    true
+  );
+  const imports: string[] = [];
+  const visit = (node: ts.Node): void => {
+    if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) {
+      if (node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
+        imports.push(node.moduleSpecifier.text);
+      }
+    } else if (
+      ts.isCallExpression(node) &&
+      (node.expression.kind === ts.SyntaxKind.ImportKeyword ||
+        (ts.isIdentifier(node.expression) &&
+          node.expression.text === "require"))
+    ) {
+      const first = node.arguments[0];
+      if (first && ts.isStringLiteral(first)) imports.push(first.text);
+    } else if (
+      ts.isImportTypeNode(node) &&
+      ts.isLiteralTypeNode(node.argument) &&
+      ts.isStringLiteral(node.argument.literal)
+    ) {
+      imports.push(node.argument.literal.text);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(parsed);
+  return imports;
 }
 
 describe("module registry", () => {
@@ -151,7 +185,9 @@ describe("module source boundaries", () => {
       const sourceModule = getOwningFeature(file);
       const source = readFileSync(file, "utf8");
 
-      for (const match of source.matchAll(importPattern)) {
+      for (const specifier of featureImports(file, source)) {
+        const match = featureImportPattern.exec(specifier);
+        if (!match) continue;
         const target = match[1] as ModuleId | undefined;
         const deepPath = match[2];
         if (!target || !MODULE_IDS.includes(target)) {

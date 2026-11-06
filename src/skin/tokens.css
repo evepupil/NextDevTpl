@@ -1,0 +1,147 @@
+:root {
+  --radius: 0.625rem;
+
+  --background: oklch(0.985 0.003 95);
+  --foreground: oklch(0.24 0.006 60);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.24 0.006 60);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.24 0.006 60);
+
+  --primary: oklch(0.40 0.072 184);
+  --primary-foreground: oklch(0.99 0.005 95);
+
+  --secondary: oklch(0.965 0.005 95);
+  --secondary-foreground: oklch(0.24 0.006 60);
+  --muted: oklch(0.965 0.005 95);
+  --muted-foreground: oklch(0.50 0.008 60);
+  --accent: oklch(0.965 0.005 95);
+  --accent-foreground: oklch(0.24 0.006 60);
+
+  --destructive: oklch(0.58 0.20 28);
+  --success: oklch(0.52 0.095 165);
+  --warning: oklch(0.74 0.13 70);
+
+  --border: oklch(0.905 0.006 90);
+  --input: oklch(0.905 0.006 90);
+  --ring: oklch(0.40 0.072 184);
+
+  --grid-line: oklch(0.24 0.006 60 / 0.045);
+  --glow-1: oklch(0.50 0.09 184 / 0.10);
+  --glow-2: oklch(0.45 0.06 250 / 0.05);
+
+  --chart-1: oklch(0.40 0.072 184);
+  --chart-2: oklch(0.55 0.10 165);
+  --chart-3: oklch(0.72 0.13 70);
+  --chart-4: oklch(0.58 0.20 28);
+  --chart-5: oklch(0.50 0.12 295);
+
+  --sidebar: oklch(0.975 0.004 95);
+  --sidebar-foreground: oklch(0.24 0.006 60);
+  --sidebar-primary: oklch(0.40 0.072 184);
+  --sidebar-primary-foreground: oklch(0.99 0.005 95);
+  --sidebar-accent: oklch(0.95 0.005 95);
+  --sidebar-accent-foreground: oklch(0.24 0.006 60);
+  --sidebar-border: oklch(0.905 0.006 90);
+  --sidebar-ring: oklch(0.40 0.072 184);
+}
+
+.dark {
+  --background: oklch(0.165 0.004 60);
+  --foreground: oklch(0.93 0.004 90);
+  --card: oklch(0.205 0.005 60);
+  --card-foreground: oklch(0.93 0.004 90);
+  --popover: oklch(0.205 0.005 60);
+  --popover-foreground: oklch(0.93 0.004 90);
+
+  --primary: oklch(0.68 0.11 178);
+  --primary-foreground: oklch(0.165 0.004 60);
+  --secondary: oklch(0.25 0.005 60);
+  --secondary-foreground: oklch(0.93 0.004 90);
+  --muted: oklch(0.23 0.005 60);
+  --muted-foreground: oklch(0.66 0.006 70);
+  --accent: oklch(0.25 0.005 60);
+  --accent-foreground: oklch(0.93 0.004 90);
+
+  --destructive: oklch(0.62 0.19 28);
+  --success: oklch(0.60 0.10 165);
+  --warning: oklch(0.74 0.13 70);
+
+  --border: oklch(0.30 0.006 60);
+  --input: oklch(0.27 0.006 60);
+  --ring: oklch(0.68 0.11 178);
+
+  --grid-line: oklch(0.93 0.004 90 / 0.04);
+  --glow-1: oklch(0.68 0.11 178 / 0.14);
+  --glow-2: oklch(0.50 0.12 295 / 0.08);
+
+  --chart-1: oklch(0.68 0.11 178);
+  --chart-2: oklch(0.62 0.11 165);
+  --chart-3: oklch(0.74 0.13 70);
+  --chart-4: oklch(0.62 0.19 28);
+  --chart-5: oklch(0.60 0.13 295);
+
+  --sidebar: oklch(0.14 0.004 60);
+  --sidebar-foreground: oklch(0.93 0.004 90);
+  --sidebar-primary: oklch(0.68 0.11 178);
+  --sidebar-primary-foreground: oklch(0.165 0.004 60);
+  --sidebar-accent: oklch(0.23 0.005 60);
+  --sidebar-accent-foreground: oklch(0.93 0.004 90);
+  --sidebar-border: oklch(0.26 0.006 60);
+  --sidebar-ring: oklch(0.68 0.11 178);
+}
+
+@layer components {
+  .bg-grid {
+    background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 56px 56px;
+    background-position: center;
+  }
+
+  .aura {
+    position: relative;
+  }
+
+  .aura::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+        55% 50% at 78% -4%,
+        var(--glow-1),
+        transparent 70%
+      ),
+      radial-gradient(45% 42% at 8% 4%, var(--glow-2), transparent 72%);
+  }
+
+  .aura > * {
+    position: relative;
+  }
+
+  .grain {
+    position: relative;
+  }
+
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.045;
+    mix-blend-mode: soft-light;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .shadow-soft {
+    box-shadow: 0 1px 0 0 color-mix(in srgb, var(--foreground) 4%, transparent),
+      0 1px 2px 0 color-mix(in srgb, var(--foreground) 5%, transparent),
+      0 14px 30px -16px color-mix(in srgb, var(--foreground) 14%, transparent);
+  }
+
+  .shadow-lifted {
+    box-shadow: 0 1px 0 0 color-mix(in srgb, var(--foreground) 5%, transparent),
+      0 30px 70px -30px color-mix(in srgb, var(--foreground) 22%, transparent);
+  }
+}

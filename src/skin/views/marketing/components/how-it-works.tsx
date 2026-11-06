@@ -4,7 +4,7 @@ import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
-import { Reveal } from "@/components/motion/reveal";
+import { Reveal } from "./reveal";
 
 /**
  * HowItWorks —— 三步流程

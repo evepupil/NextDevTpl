@@ -1,4 +1,6 @@
 import type { ComponentType, ReactNode } from "react";
+import type { SkinTheme } from "@/core/skin";
+import type { CookiePreferences } from "@/lib/cookie-consent";
 
 export interface WorkspaceUser {
   id: string;
@@ -48,6 +50,39 @@ export interface DashboardLayoutViewProps {
 
 export interface EmptyDashboardViewProps {
   locale: string;
+}
+
+export type CookieCategoryId = "necessary" | "analytics" | "marketing";
+
+export interface CookieSettingsController {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  preferences: CookiePreferences;
+  expandedItems: readonly CookieCategoryId[];
+  toggleExpanded: (id: CookieCategoryId) => void;
+  getCategoryValue: (id: CookieCategoryId) => boolean;
+  onCategoryChange: (id: CookieCategoryId, value: boolean) => void;
+  onAcceptAll: () => void;
+  onRejectAll: () => void;
+  onSavePreferences: () => void;
+}
+
+export interface LanguageOption {
+  code: string;
+  label: string;
+  flag: string;
+}
+
+export interface LanguageController {
+  locale: string;
+  isPending: boolean;
+  locales: readonly LanguageOption[];
+  onLocaleChange: (locale: string) => void;
+}
+
+export interface ThemeController {
+  theme: SkinTheme;
+  onThemeChange: (theme: SkinTheme) => void;
 }
 
 export interface ViewContracts {

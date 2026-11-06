@@ -2,16 +2,15 @@
 
 import { BookOpen, Check, Coins, Layers, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Reveal } from "@/components/motion/reveal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { cn } from "@/components/ui-utils";
 import { usePricingController } from "@/features/marketing/view";
-import { cn } from "@/lib/utils";
-
 import { AnimatedPrice } from "./animated-price";
+import { Reveal } from "./reveal";
 
 /**
  * 价格计划组件属性

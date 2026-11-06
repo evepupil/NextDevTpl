@@ -1,22 +1,22 @@
 @import "fumadocs-ui/style.css";
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "../skin/tokens.css";
 
 @custom-variant dark (&:is(.dark *));
 
 /* ============================================================
-   NextDevTpl · "Engineered Spec-Sheet" 设计系统
-   色板：暖中性底（亮：冷 drafting paper / 暗：暖石墨）+ Spruce 主色
-   字体：Geist Sans（正文/展示）+ Geist Mono（点缀/数据）
+   Tailwind token 映射
    ============================================================ */
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  /* 字体：geist 包注入 --font-geist-sans/mono；后面挂 CJK 回退栈 */
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
+  --font-sans: var(--font-skin-sans), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular",
+  --font-heading: var(--font-skin-heading), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-mono: var(--font-skin-mono), ui-monospace, "SFMono-Regular",
     "Cascadia Code", Consolas, "Roboto Mono", Menlo, monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -59,67 +59,7 @@
 }
 
 :root {
-  /* 圆角：偏克制的 10px 基准（lg=10 / md=8 / sm=6 / xl=14） */
-  --radius: 0.625rem;
-
-  /* ── 亮色：冷 drafting paper 底 + 暖石墨墨色 ── */
-  --background: oklch(0.985 0.003 95);
-  --foreground: oklch(0.24 0.006 60);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.24 0.006 60);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.24 0.006 60);
-
-  /* 主色：Spruce 深云杉绿（品牌定） */
-  --primary: oklch(0.40 0.072 184);
-  --primary-foreground: oklch(0.99 0.005 95);
-
-  --secondary: oklch(0.965 0.005 95);
-  --secondary-foreground: oklch(0.24 0.006 60);
-
-  --muted: oklch(0.965 0.005 95);
-  --muted-foreground: oklch(0.50 0.008 60);
-
-  --accent: oklch(0.965 0.005 95);
-  --accent-foreground: oklch(0.24 0.006 60);
-
-  /* 语义色 */
-  --destructive: oklch(0.58 0.20 28);
-  --success: oklch(0.52 0.095 165);
-  --warning: oklch(0.74 0.13 70);
-
-  /* 发丝级边框：暖灰 */
-  --border: oklch(0.905 0.006 90);
-  --input: oklch(0.905 0.006 90);
-  --ring: oklch(0.40 0.072 184);
-
-  /* 氛围层：极淡网格 + 双色光晕 */
-  --grid-line: oklch(0.24 0.006 60 / 0.045);
-  --glow-1: oklch(0.50 0.09 184 / 0.10);
-  --glow-2: oklch(0.45 0.06 250 / 0.05);
-
-  /* 图表色（与主色成体系） */
-  --chart-1: oklch(0.40 0.072 184);
-  --chart-2: oklch(0.55 0.10 165);
-  --chart-3: oklch(0.72 0.13 70);
-  --chart-4: oklch(0.58 0.20 28);
-  --chart-5: oklch(0.50 0.12 295);
-
-  /* 侧栏 */
-  --sidebar: oklch(0.975 0.004 95);
-  --sidebar-foreground: oklch(0.24 0.006 60);
-  --sidebar-primary: oklch(0.40 0.072 184);
-  --sidebar-primary-foreground: oklch(0.99 0.005 95);
-  --sidebar-accent: oklch(0.95 0.005 95);
-  --sidebar-accent-foreground: oklch(0.24 0.006 60);
-  --sidebar-border: oklch(0.905 0.006 90);
-  --sidebar-ring: oklch(0.40 0.072 184);
-
-  /* ── Fumadocs 主题对齐 ──
-     把 --color-fd-* 全部映射到设计系统 token，让 docs/blog 不再是
-     Fumadocs 默认蓝/灰，而是 Spruce + 暖中性，与全站一致。
-     此处 :root 未分层，优先级高于 Fumadocs 在 @layer theme 里的定义；
-     且值是 var(--token)，会随 .dark 自动切换，故只需写一处。 */
+  /* 文档站映射保持未分层，覆盖 Fumadocs 的主题层变量。 */
   --color-fd-background: var(--background);
   --color-fd-foreground: var(--foreground);
   --color-fd-muted: var(--muted);
@@ -148,55 +88,6 @@
   --color-fd-overlay: oklch(0.1 0 0 / 0.5);
 }
 
-.dark {
-  /* ── 暗色：暖石墨（非 zinc 冷灰）+ 更亮的 Spruce ── */
-  --background: oklch(0.165 0.004 60);
-  --foreground: oklch(0.93 0.004 90);
-  --card: oklch(0.205 0.005 60);
-  --card-foreground: oklch(0.93 0.004 90);
-  --popover: oklch(0.205 0.005 60);
-  --popover-foreground: oklch(0.93 0.004 90);
-
-  --primary: oklch(0.68 0.11 178);
-  --primary-foreground: oklch(0.165 0.004 60);
-
-  --secondary: oklch(0.25 0.005 60);
-  --secondary-foreground: oklch(0.93 0.004 90);
-
-  --muted: oklch(0.23 0.005 60);
-  --muted-foreground: oklch(0.66 0.006 70);
-
-  --accent: oklch(0.25 0.005 60);
-  --accent-foreground: oklch(0.93 0.004 90);
-
-  --destructive: oklch(0.62 0.19 28);
-  --success: oklch(0.60 0.10 165);
-  --warning: oklch(0.74 0.13 70);
-
-  --border: oklch(0.30 0.006 60);
-  --input: oklch(0.27 0.006 60);
-  --ring: oklch(0.68 0.11 178);
-
-  --grid-line: oklch(0.93 0.004 90 / 0.04);
-  --glow-1: oklch(0.68 0.11 178 / 0.14);
-  --glow-2: oklch(0.50 0.12 295 / 0.08);
-
-  --chart-1: oklch(0.68 0.11 178);
-  --chart-2: oklch(0.62 0.11 165);
-  --chart-3: oklch(0.74 0.13 70);
-  --chart-4: oklch(0.62 0.19 28);
-  --chart-5: oklch(0.60 0.13 295);
-
-  --sidebar: oklch(0.14 0.004 60);
-  --sidebar-foreground: oklch(0.93 0.004 90);
-  --sidebar-primary: oklch(0.68 0.11 178);
-  --sidebar-primary-foreground: oklch(0.165 0.004 60);
-  --sidebar-accent: oklch(0.23 0.005 60);
-  --sidebar-accent-foreground: oklch(0.93 0.004 90);
-  --sidebar-border: oklch(0.26 0.006 60);
-  --sidebar-ring: oklch(0.68 0.11 178);
-}
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -208,6 +99,14 @@
     @apply bg-background text-foreground;
     /* 数字列对齐：所有 tabular 场景默认受益 */
     font-feature-settings: "cv11", "ss01";
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
   }
   /* 锚点跳转时考虑 sticky header 的高度 */
   [id] {
@@ -249,10 +148,7 @@
   }
 }
 
-/* ============================================================
-   组件级工具类：eyebrow 标签 / 网格底纹 / 光晕氛围 / 颗粒噪点
-   都挂 CSS 变量，亮暗 + 主色切换自动跟随
-   ============================================================ */
+/* Core utility classes also used by the admin interface. */
 @layer components {
   /* mono 大写小标签——技术控制台视觉的核心点缀 */
   .eyebrow {
@@ -275,51 +171,6 @@
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 14%, transparent);
   }
 
-  /* 极淡网格底纹（工程图纸味） */
-  .bg-grid {
-    background-image: linear-gradient(
-        var(--grid-line) 1px,
-        transparent 1px
-      ),
-      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-    background-size: 56px 56px;
-    background-position: center;
-  }
-
-  /* 双色光晕氛围——用在 hero / cta 等需要深度的区块 */
-  .aura {
-    position: relative;
-  }
-  .aura::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: radial-gradient(
-        55% 50% at 78% -4%,
-        var(--glow-1),
-        transparent 70%
-      ),
-      radial-gradient(45% 42% at 8% 4%, var(--glow-2), transparent 72%);
-  }
-  .aura > * {
-    position: relative;
-  }
-
-  /* 颗粒噪点叠加（消除塑料感）——挂在需要的区块上 */
-  .grain {
-    position: relative;
-  }
-  .grain::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.045;
-    mix-blend-mode: soft-light;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-
   /* 数据/代码默认等宽 + tabular 数字 */
   .mono-data {
     font-family: var(--font-mono);
@@ -327,16 +178,6 @@
     font-feature-settings: "tnum";
   }
 
-  /* 分层柔性阴影（亮暗各一套） */
-  .shadow-soft {
-    box-shadow: 0 1px 0 0 color-mix(in srgb, var(--foreground) 4%, transparent),
-      0 1px 2px 0 color-mix(in srgb, var(--foreground) 5%, transparent),
-      0 14px 30px -16px color-mix(in srgb, var(--foreground) 14%, transparent);
-  }
-  .shadow-lifted {
-    box-shadow: 0 1px 0 0 color-mix(in srgb, var(--foreground) 5%, transparent),
-      0 30px 70px -30px color-mix(in srgb, var(--foreground) 22%, transparent);
-  }
 }
 
 /* ============================================================

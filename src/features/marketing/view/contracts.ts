@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import type { LucideIcon } from "lucide-react";
+import type { ComponentType, ReactNode } from "react";
 
 export interface MarketingLayoutViewProps {
   children: ReactNode;
@@ -21,9 +22,55 @@ export interface MarketingHeaderUser {
   name: string;
 }
 
-export interface MarketingHeaderController {
+export interface MarketingNavigationItem {
+  title: string;
+  href: string;
+  translationKey?: string;
+  disabled?: boolean;
+  external?: boolean;
+  icon?: LucideIcon;
+  description?: string;
+}
+
+export interface MarketingProductNavigationItem {
+  title: string;
+  href: string;
+  description: string;
+  icon: LucideIcon;
+}
+
+export interface MarketingProductNavigationGroup {
+  title: string;
+  items: readonly MarketingProductNavigationItem[];
+}
+
+export interface MarketingHeaderViewProps {
   isPending: boolean;
   user: MarketingHeaderUser | null;
+  mainNav: readonly MarketingNavigationItem[];
+  productsNav: readonly MarketingProductNavigationGroup[];
+}
+
+export type MarketingHeaderController = MarketingHeaderViewProps;
+
+export interface MarketingHeaderViewHostProps {
+  View: ComponentType<MarketingHeaderViewProps>;
+}
+
+export interface MarketingFooterLink {
+  title: string;
+  href: string;
+  external?: boolean;
+}
+
+export interface MarketingFooterController {
+  siteName: string;
+  productLinks: readonly MarketingFooterLink[];
+  legalLinks: readonly MarketingFooterLink[];
+  socialLinks: {
+    github: string;
+    twitter: string;
+  };
 }
 
 export interface MarketingPricingPlanModel {
@@ -50,6 +97,7 @@ export interface MarketingPricingController {
 }
 
 export interface ViewContracts {
+  "marketing.header": MarketingHeaderViewProps;
   "marketing.layout": MarketingLayoutViewProps;
   "marketing.home": MarketingHomeViewProps;
   "marketing.legal": MarketingLegalViewProps;

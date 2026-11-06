@@ -2,8 +2,8 @@
 
 import { useTranslations } from "next-intl";
 
-import { siteConfig } from "@/config";
-import { CookieSettingsDialog } from "@/features/shared";
+import { CookieSettingsDialog } from "@/components/ui/cookie-settings-dialog";
+import { authSiteName } from "@/features/auth/view";
 import { Link } from "@/i18n/routing";
 
 export function AuthFooter() {
@@ -15,7 +15,7 @@ export function AuthFooter() {
         <p className="text-sm text-muted-foreground">
           {t("copyright", {
             year: new Date().getFullYear(),
-            name: siteConfig.name,
+            name: authSiteName,
           })}
         </p>
         <nav className="flex gap-6">

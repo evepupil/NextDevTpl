@@ -25,7 +25,11 @@ export function validateModuleViews(manifests: readonly ViewOwner[]): string[] {
           `模块 ${manifest.id} 登记了格式错误或归属不符的视图编号 ${view.id}`
         );
       }
-      if (view.kind !== "page" && view.kind !== "layout") {
+      if (
+        view.kind !== "page" &&
+        view.kind !== "layout" &&
+        view.kind !== "component"
+      ) {
         errors.push(`模块 ${manifest.id} 的视图 ${view.id} 类型无效`);
       }
       const owner = viewOwners.get(view.id);

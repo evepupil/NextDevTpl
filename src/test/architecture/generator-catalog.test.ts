@@ -27,6 +27,16 @@ describe("generator catalog", () => {
         manifest.translations
       );
     }
+    expect(catalog.modules.admin?.dependencies).toContain("support");
+    expect(catalog.modules.admin?.routes).toEqual(
+      expect.arrayContaining([
+        "src/app/[locale]/(admin)/admin/tickets/page.tsx",
+        "src/app/[locale]/(admin)/admin/tickets/[id]/page.tsx",
+      ])
+    );
+    expect(catalog.modules.support?.routes).not.toContain(
+      "src/app/[locale]/(admin)/admin/tickets/page.tsx"
+    );
   });
 
   it("validates the complete source and configuration closure", async () => {

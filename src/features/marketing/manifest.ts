@@ -33,6 +33,7 @@ export const marketingModule = defineModule({
   ],
   schema: [],
   views: [
+    { id: "marketing.header", kind: "component" },
     { id: "marketing.layout", kind: "layout" },
     { id: "marketing.home", kind: "page" },
     { id: "marketing.legal", kind: "page" },

@@ -1,10 +1,10 @@
 "use server";
 
-import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 
-import { db, user } from "@/db";
 import { updateProfileSchema } from "@/features/settings/schemas";
+import { auth } from "@/lib/auth";
 import { protectedAction } from "@/lib/safe-action";
 
 /**
@@ -21,24 +21,18 @@ import { protectedAction } from "@/lib/safe-action";
 export const updateProfileAction = protectedAction
   .metadata({ action: "settings.updateProfile" })
   .schema(updateProfileSchema)
-  .action(async ({ parsedInput: data, ctx }) => {
-    // 构建更新对象
-    const updateData: { name?: string; image?: string; updatedAt: Date } = {
-      updatedAt: new Date(),
+  .action(async ({ parsedInput: data }) => {
+    const body = {
+      ...(data.name !== undefined ? { name: data.name } : {}),
+      ...(data.image !== undefined ? { image: data.image } : {}),
     };
 
-    // 如果提供了 name，添加到更新对象
-    if (data.name !== undefined) {
-      updateData.name = data.name;
+    if (Object.keys(body).length > 0) {
+      await auth.api.updateUser({
+        headers: await headers(),
+        body,
+      });
     }
-
-    // 如果提供了 image，添加到更新对象
-    if (data.image !== undefined) {
-      updateData.image = data.image;
-    }
-
-    // 使用 Drizzle 更新用户资料
-    await db.update(user).set(updateData).where(eq(user.id, ctx.userId));
 
     // 刷新设置页面缓存，使 UI 更新
     revalidatePath("/dashboard/settings");

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SiteJsonLd, SoftwareAppJsonLd } from "@/components/seo/json-ld";
 import { siteConfig } from "@/config";
 import { getMarketingHomeViewData } from "@/features/marketing/server";
 import { skinViews } from "@/modules/skin-views";
@@ -67,5 +68,11 @@ export default async function HomePage({
   const props = getMarketingHomeViewData(locale);
   const View = skinViews["marketing.home"];
 
-  return <View {...props} />;
+  return (
+    <>
+      <SiteJsonLd locale={locale as "en" | "zh"} />
+      <SoftwareAppJsonLd locale={locale as "en" | "zh"} />
+      <View {...props} />
+    </>
+  );
 }

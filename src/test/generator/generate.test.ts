@@ -8,7 +8,9 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { runInNewContext } from "node:vm";
 
+import ts from "typescript";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { generateProject } from "../../../packages/create-nextdevtpl/src/generate";
@@ -140,6 +142,83 @@ describe("project generation", () => {
     expect(
       await readFile(join(target, "src/app/[locale]/layout.tsx"), "utf8")
     ).toContain("<NextIntlClientProvider key={locale}");
+    const localeLayout = await readFile(
+      join(target, "src/app/[locale]/layout.tsx"),
+      "utf8"
+    );
+    expect(localeLayout).not.toContain("skinConfig");
+    expect(localeLayout).not.toContain("defaultTheme");
+    expect(localeLayout).toContain("<Providers locale={locale}>");
+    const rootLayout = await readFile(
+      join(target, "src/app/layout.tsx"),
+      "utf8"
+    );
+    expect(rootLayout).toContain(
+      'import { ThemeProvider } from "@/features/shared";'
+    );
+    expect(rootLayout).toContain(
+      "<ThemeProvider defaultTheme={skinConfig.defaultTheme}>"
+    );
+  });
+
+  it("omits an unconfigured OpenAI-compatible key from generated options", async () => {
+    const target = join(root, "openai-compatible");
+    await generateProject({
+      targetDirectory: target,
+      preset: "custom",
+      modules: ["auth", "dashboard"],
+      adapterOverrides: { ai: "ai:openai-compatible" },
+      target: "server",
+      install: false,
+    });
+    const ai = await readFile(join(target, "src/services/ai.ts"), "utf8");
+
+    const compiled = ts.transpileModule(ai, {
+      compilerOptions: {
+        module: ts.ModuleKind.CommonJS,
+        target: ts.ScriptTarget.ES2022,
+      },
+    }).outputText;
+    for (const [provider, model, baseURL] of [
+      ["openai", "gpt-4o-mini", undefined],
+      ["deepseek", "deepseek-chat", "https://api.deepseek.com/v1"],
+      ["mimo", "mimo-v2-flash", "https://api.xiaomimimo.com/v1"],
+    ] as const) {
+      for (const configured of [false, true]) {
+        const values: Record<string, string> = {
+          AI_PROVIDER: provider,
+          ...(configured
+            ? { [`${provider.toUpperCase()}_API_KEY`]: "test-key" }
+            : {}),
+        };
+        const exports: Record<string, unknown> = {};
+        runInNewContext(
+          compiled,
+          {
+            exports,
+            require(specifier: string) {
+              if (specifier === "@/adapters/ai") {
+                return {
+                  createOpenAICompatibleAdapter: (config: unknown) => config,
+                };
+              }
+              if (specifier === "@/lib/runtime-config") {
+                return { getRuntimeEnv: (name: string) => values[name] };
+              }
+              throw new Error(
+                `Unexpected generated service import: ${specifier}`
+              );
+            },
+          },
+          { timeout: 1000 }
+        );
+        expect(exports.aiService).toEqual({
+          model,
+          ...(baseURL ? { baseURL } : {}),
+          ...(configured ? { apiKey: "test-key" } : {}),
+        });
+      }
+    }
   });
 
   it("keeps only SaaS preset adapters", async () => {

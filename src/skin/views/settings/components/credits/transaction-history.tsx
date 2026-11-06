@@ -19,8 +19,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/components/ui-utils";
 import type { CreditUsageController } from "@/features/credits/view";
-import { cn } from "@/lib/utils";
 
 type TransactionTypeKey =
   | "registration_bonus"

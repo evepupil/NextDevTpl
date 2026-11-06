@@ -118,11 +118,19 @@ export function getAIModel(): string {
 }
 
 const provider = getAIProvider();
+const apiKey = provider === "deepseek"
+  ? getRuntimeEnv("DEEPSEEK_API_KEY")
+  : provider === "mimo"
+    ? getRuntimeEnv("MIMO_API_KEY")
+    : getRuntimeEnv("OPENAI_API_KEY");
 export const aiService = createOpenAICompatibleAdapter({
   model: getAIModel(),
-  ...(provider === "deepseek" ? { apiKey: getRuntimeEnv("DEEPSEEK_API_KEY"), baseURL: "https://api.deepseek.com/v1" } : {}),
-  ...(provider === "mimo" ? { apiKey: getRuntimeEnv("MIMO_API_KEY"), baseURL: "https://api.xiaomimimo.com/v1" } : {}),
-  ...(provider === "openai" ? { apiKey: getRuntimeEnv("OPENAI_API_KEY") } : {}),
+  ...(apiKey ? { apiKey } : {}),
+  ...(provider === "deepseek"
+    ? { baseURL: "https://api.deepseek.com/v1" }
+    : provider === "mimo"
+      ? { baseURL: "https://api.xiaomimimo.com/v1" }
+      : {}),
 });
 `,
   "ai:anthropic": `import { createAnthropicAdapter } from "@/adapters/ai";

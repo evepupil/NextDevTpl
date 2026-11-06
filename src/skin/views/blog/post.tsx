@@ -1,4 +1,3 @@
-import { ArticleJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import type { BlogPostViewProps } from "@/features/blog/view";
 import { Link } from "@/i18n/routing";
 
@@ -8,33 +7,11 @@ export function BlogPostView({
   description,
   formattedDate,
   locale,
-  publishedAt,
-  slug,
   tags,
   title,
 }: BlogPostViewProps) {
   return (
     <article className="container mx-auto max-w-3xl py-20">
-      <ArticleJsonLd
-        title={title}
-        description={description || ""}
-        slug={slug}
-        locale={locale as "en" | "zh"}
-        publishedAt={publishedAt}
-        {...(author && { author })}
-        {...(tags && { tags: [...tags] })}
-      />
-      <BreadcrumbJsonLd
-        items={[
-          { name: "Home", url: `/${locale}` },
-          {
-            name: locale === "zh" ? "博客" : "Blog",
-            url: `/${locale}/blog`,
-          },
-          { name: title, url: `/${locale}/blog/${slug}` },
-        ]}
-      />
-
       <Link
         href="/blog"
         className="mb-8 inline-flex items-center text-sm text-muted-foreground hover:text-foreground"

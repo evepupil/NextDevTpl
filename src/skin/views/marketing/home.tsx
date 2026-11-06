@@ -1,6 +1,4 @@
-import { SiteJsonLd, SoftwareAppJsonLd } from "@/components/seo/json-ld";
 import type { MarketingHomeViewProps } from "@/features/marketing/view";
-
 import {
   CTASection,
   FAQSection,
@@ -12,11 +10,9 @@ import {
   UseCasesSection,
 } from "./components";
 
-export function MarketingHomeView({ locale }: MarketingHomeViewProps) {
+export function MarketingHomeView(_props: MarketingHomeViewProps) {
   return (
     <>
-      <SiteJsonLd locale={locale as "en" | "zh"} />
-      <SoftwareAppJsonLd locale={locale as "en" | "zh"} />
       <HeroSection />
       <FeatureGrid />
       <HowItWorks />

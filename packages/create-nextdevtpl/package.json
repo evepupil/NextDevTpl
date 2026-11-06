@@ -42,14 +42,20 @@
   "scripts": {
     "assemble-template": "node scripts/assemble-template.mjs",
     "build": "tsc -p tsconfig.json",
+    "skin:check": "pnpm run build && node scripts/verify-skin.mjs check",
+    "skin:hash": "pnpm run build && node scripts/verify-skin.mjs hash",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "prepack": "pnpm run assemble-template && pnpm run build"
   },
   "dependencies": {
+    "postcss": "8.5.6",
+    "postcss-value-parser": "4.2.0",
+    "semver": "7.7.3",
+    "typescript": "5.9.3",
     "yaml": "^2.8.2"
   },
   "devDependencies": {
     "@types/node": "^20",
-    "typescript": "^5"
+    "@types/semver": "7.8.0"
   }
 }

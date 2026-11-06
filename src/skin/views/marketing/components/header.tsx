@@ -6,10 +6,10 @@ import { useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { ModeToggle } from "@/components/ui/mode-toggle";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-import { mainNav, productsNav } from "@/config/nav";
-import { useMarketingHeaderController } from "@/features/marketing/view";
-import { LanguageSwitcher, ModeToggle } from "@/features/shared";
+import type { MarketingHeaderViewProps } from "@/features/marketing/view";
 import { Link } from "@/i18n/routing";
 
 import { NavMenu } from "./nav-menu";
@@ -37,8 +37,12 @@ const productsTitleMap: Record<string, string> = {
  *
  * 布局: [Logo + Nav 靠左] -------- [Actions 靠右]
  */
-export function Header() {
-  const { user, isPending } = useMarketingHeaderController();
+export function Header({
+  user,
+  isPending,
+  mainNav,
+  productsNav,
+}: MarketingHeaderViewProps) {
   const t = useTranslations("Header");
   const tNav = useTranslations("Navigation");
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -100,7 +104,7 @@ export function Header() {
 
           {/* 导航菜单 (桌面端) */}
           <div className="hidden md:flex">
-            <NavMenu />
+            <NavMenu mainNav={mainNav} productsNav={productsNav} />
           </div>
         </div>
 

@@ -15,6 +15,14 @@ export const adminModule = defineModule({
       path: "/admin/users",
       source: "src/app/[locale]/(admin)/admin/users/page.tsx",
     },
+    {
+      path: "/admin/tickets",
+      source: "src/app/[locale]/(admin)/admin/tickets/page.tsx",
+    },
+    {
+      path: "/admin/tickets/[id]",
+      source: "src/app/[locale]/(admin)/admin/tickets/[id]/page.tsx",
+    },
   ],
   navigation: [
     {
@@ -34,6 +42,15 @@ export const adminModule = defineModule({
       href: "/admin/users",
       icon: "users",
       order: 20,
+    },
+    {
+      area: "admin",
+      group: "control-panel",
+      groupTranslationKey: "nav.controlPanel",
+      translationKey: "nav.ticketManagement",
+      href: "/admin/tickets",
+      icon: "ticket",
+      order: 30,
     },
   ],
   translations: ["AdminSidebar"],

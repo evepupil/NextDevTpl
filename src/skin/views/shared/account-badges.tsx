@@ -3,9 +3,8 @@
 import { Coins } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { PlanBadge } from "@/components/ui/plan-badge";
 import { useWorkspaceCredits, useWorkspacePlan } from "@/modules/view-runtime";
-
-import { PlanBadge } from "./plan-badge";
 
 export function AccountCreditsBadge() {
   const { balance, isPending } = useWorkspaceCredits();

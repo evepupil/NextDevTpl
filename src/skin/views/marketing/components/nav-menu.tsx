@@ -11,9 +11,12 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
-import { mainNav, productsNav } from "@/config";
+import { cn } from "@/components/ui-utils";
+import type {
+  MarketingNavigationItem,
+  MarketingProductNavigationGroup,
+} from "@/features/marketing/view";
 import { Link, usePathname } from "@/i18n/routing";
-import { cn } from "@/lib/utils";
 
 /**
  * Products 下拉菜单翻译映射 key
@@ -51,7 +54,13 @@ const productsDescMap: Record<string, string> = {
  *
  * 包含 Products 下拉菜单和普通导航链接
  */
-export function NavMenu() {
+export function NavMenu({
+  mainNav,
+  productsNav,
+}: {
+  mainNav: readonly MarketingNavigationItem[];
+  productsNav: readonly MarketingProductNavigationGroup[];
+}) {
   const pathname = usePathname();
   const t = useTranslations("Navigation");
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);

@@ -1,9 +1,8 @@
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import type { ReactNode } from "react";
-
+import { MarketingDocsHeader } from "@/features/marketing/server";
 import { routing } from "@/i18n/routing";
 import { docsI18n, docsSource } from "@/lib/source";
-import { Header } from "@/skin/views/marketing/components/header";
 
 export default async function Layout({
   children,
@@ -20,7 +19,7 @@ export default async function Layout({
 
   return (
     <>
-      <Header />
+      <MarketingDocsHeader />
 
       <DocsLayout
         tree={tree}

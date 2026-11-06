@@ -1,14 +1,13 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-
-import { Reveal } from "@/components/motion/reveal";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Reveal } from "./reveal";
 
 export function FAQSection() {
   const t = useTranslations("FAQ");

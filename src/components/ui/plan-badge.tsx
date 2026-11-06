@@ -3,12 +3,12 @@
 import { Crown, Gem, Sparkles, User } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/components/ui-utils";
 
 export type PlanType = "free" | "starter" | "pro" | "ultra";
 export type BadgeSize = "xs" | "sm" | "md" | "lg";
 
-interface PlanBadgeProps {
+export interface PlanBadgeProps {
   plan: PlanType;
   size?: BadgeSize;
   showLabel?: boolean;

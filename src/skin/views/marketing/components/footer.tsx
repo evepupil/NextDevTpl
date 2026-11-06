@@ -1,11 +1,15 @@
+"use client";
+
 import { Github, Twitter } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { footerNav, siteConfig } from "@/config";
+import { useMarketingFooterController } from "@/features/marketing/view";
 import { Link } from "@/i18n/routing";
 
 export function Footer() {
   const t = useTranslations("Footer");
+  const { siteName, productLinks, legalLinks, socialLinks } =
+    useMarketingFooterController();
 
   return (
     <footer className="border-t bg-background">
@@ -43,7 +47,7 @@ export function Footer() {
                   stroke="none"
                 />
               </svg>
-              {siteConfig.name}
+              {siteName}
             </Link>
             <p className="max-w-sm text-sm text-muted-foreground">
               {t("description")}
@@ -56,7 +60,7 @@ export function Footer() {
             <div>
               <h3 className="mb-4 text-sm font-semibold">{t("product")}</h3>
               <ul className="space-y-3">
-                {footerNav.product.map((link) => (
+                {productLinks.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
@@ -76,7 +80,7 @@ export function Footer() {
             <div>
               <h3 className="mb-4 text-sm font-semibold">{t("legal")}</h3>
               <ul className="space-y-3">
-                {footerNav.legal.map((link) => (
+                {legalLinks.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
@@ -96,14 +100,14 @@ export function Footer() {
           <p className="font-mono text-xs tracking-wide text-muted-foreground">
             {t("copyright", {
               year: new Date().getFullYear(),
-              name: siteConfig.name,
+              name: siteName,
             })}
           </p>
 
           {/* 社交链接 */}
           <div className="flex items-center gap-4">
             <Link
-              href={siteConfig.links.twitter}
+              href={socialLinks.twitter}
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground transition-colors hover:text-foreground"
@@ -112,7 +116,7 @@ export function Footer() {
               <span className="sr-only">{t("twitter")}</span>
             </Link>
             <Link
-              href={siteConfig.links.github}
+              href={socialLinks.github}
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground transition-colors hover:text-foreground"

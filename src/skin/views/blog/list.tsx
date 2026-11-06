@@ -1,4 +1,3 @@
-import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { Separator } from "@/components/ui/separator";
 import type { BlogListViewProps } from "@/features/blog/view";
 
@@ -7,16 +6,6 @@ import { BlogPostCard } from "./components/blog-post-card";
 export function BlogListView({ locale, posts }: BlogListViewProps) {
   return (
     <div className="container mx-auto max-w-5xl py-20">
-      <BreadcrumbJsonLd
-        items={[
-          { name: "Home", url: `/${locale}` },
-          {
-            name: locale === "zh" ? "博客" : "Blog",
-            url: `/${locale}/blog`,
-          },
-        ]}
-      />
-
       <div className="mb-16 text-center">
         <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
           {locale === "zh" ? "博客文章" : "Blog Posts"}

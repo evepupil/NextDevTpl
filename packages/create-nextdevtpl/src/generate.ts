@@ -15,13 +15,8 @@ import {
   writeText,
 } from "./filesystem.js";
 import { pruneRepositoryOnlyPackageEntries } from "./package-pruning.js";
-import { createProjectSelection } from "./selection.js";
-import {
-  pruneUnselectedSkinSources,
-  writeSelectedSkinViews,
-} from "./view-composition.js";
 import { pruneUnselectedRoutes } from "./route-pruning.js";
-import { writeWorkspaceComposition } from "./workspace-composition.js";
+import { createProjectSelection } from "./selection.js";
 import {
   adapterExports,
   serviceExportNames,
@@ -34,6 +29,11 @@ import type {
   RecipeCatalog,
   ServiceKind,
 } from "./types.js";
+import {
+  pruneUnselectedSkinSources,
+  writeSelectedSkinViews,
+} from "./view-composition.js";
+import { writeWorkspaceComposition } from "./workspace-composition.js";
 
 const SERVICE_KINDS: readonly ServiceKind[] = [
   "payment",

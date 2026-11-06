@@ -1,5 +1,6 @@
 export {
-  PlanBadge,
   type BadgeSize,
+  PlanBadge,
+  type PlanBadgeProps,
   type PlanType,
-} from "@/skin/views/shared/plan-badge";
+} from "@/components/ui/plan-badge";

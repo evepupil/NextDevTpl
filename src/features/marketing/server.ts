@@ -1,10 +1,10 @@
 import "server-only";
 
 import { createElement } from "react";
-
 import { getAllLegalSlugs, getLegalDoc } from "@/lib/source";
-
+import { skinViews } from "@/modules/skin-views";
 import type { MarketingHomeViewProps, MarketingLegalViewProps } from "./view";
+import { MarketingHeaderControllerView } from "./view";
 
 export function getMarketingHomeViewData(
   locale: string
@@ -46,4 +46,10 @@ export function getMarketingLegalMetadataData(locale: string, slug: string) {
 
 export function getAllMarketingLegalStaticParams() {
   return getAllLegalSlugs();
+}
+
+export function MarketingDocsHeader() {
+  return createElement(MarketingHeaderControllerView, {
+    View: skinViews["marketing.header"],
+  });
 }

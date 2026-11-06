@@ -25,6 +25,7 @@ export const MODULE_IDS = [
 
 export type ModuleId = (typeof MODULE_IDS)[number];
 export type ModuleKind = "core" | "optional";
+export type ModuleViewKind = "page" | "layout" | "component";
 export type ModuleNavigationArea = "dashboard" | "admin";
 export type ModuleNavigationIcon =
   | "activity"
@@ -60,7 +61,7 @@ export interface ModuleRoute {
 
 export interface ModuleViewDefinition {
   id: `${ModuleId}.${string}`;
-  kind: "page" | "layout";
+  kind: ModuleViewKind;
 }
 
 export interface ModuleManifest {

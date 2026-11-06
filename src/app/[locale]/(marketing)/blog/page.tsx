@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { siteConfig } from "@/config";
 import { getBlogListViewData } from "@/features/blog/server";
 import { skinViews } from "@/modules/skin-views";
@@ -53,5 +54,18 @@ export default async function BlogPage({
   const props = getBlogListViewData(locale);
   const View = skinViews["blog.list"];
 
-  return <View {...props} />;
+  return (
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: `/${locale}` },
+          {
+            name: locale === "zh" ? "博客" : "Blog",
+            url: `/${locale}/blog`,
+          },
+        ]}
+      />
+      <View {...props} />
+    </>
+  );
 }

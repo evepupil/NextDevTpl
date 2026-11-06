@@ -16,10 +16,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { PlanBadge } from "@/components/ui/plan-badge";
 import { Separator } from "@/components/ui/separator";
 import { useSettingsBillingController } from "@/features/settings/view";
 import { Link } from "@/i18n/routing";
-import { PlanBadge } from "@/skin/views/shared/plan-badge";
 
 function formatDate(date: string, locale: string): string {
   return new Date(date).toLocaleDateString(

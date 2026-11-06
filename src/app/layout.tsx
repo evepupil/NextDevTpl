@@ -1,9 +1,10 @@
-import { GeistMono } from "geist/font/mono";
-import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
+import { getLocale } from "next-intl/server";
 
 import { siteConfig } from "@/config";
+import { ThemeProvider } from "@/features/shared";
+import { skinConfig } from "@/skin/config";
+import { fontClassName, fontVariables } from "@/skin/fonts";
 
 import "./globals.css";
 
@@ -58,15 +59,17 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  const locale = cookieStore.get("NEXT_LOCALE")?.value ?? "en";
+  const locale = await getLocale();
 
   return (
     <html lang={locale} suppressHydrationWarning>
       <body
-        className={`${GeistSans.variable} ${GeistMono.variable} font-sans antialiased`}
+        className={`${fontClassName} font-sans antialiased`}
+        style={fontVariables}
       >
-        {children}
+        <ThemeProvider defaultTheme={skinConfig.defaultTheme}>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
