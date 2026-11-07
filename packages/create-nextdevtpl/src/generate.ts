@@ -5,6 +5,21 @@ import { basename, join } from "node:path";
 import { parse, stringify } from "yaml";
 
 import { findGeneratorAssets, loadCatalog } from "./catalog.js";
+import { validateDemoClientViews } from "./demo-client-validation.js";
+import {
+  pruneDemoBackendFiles,
+  rewriteDemoProjectConfig,
+  writeDemoPageFacade,
+  writeDemoRuntime,
+  writeDemoSkinViewsFromManifest,
+} from "./demo-composition.js";
+import {
+  DEMO_VIEW_MODULES,
+  prepareDemoData,
+  validateDemoOptions,
+  writeDemoAvatarAssets,
+  writePreparedDemoData,
+} from "./demo-generation.js";
 import { collectSourcePackageImports } from "./dependency-analysis.js";
 import {
   copyTemplate,
@@ -1266,12 +1281,43 @@ async function writeSmokeTest(
   await removePath(join(target, "src", "test"));
   await writeText(
     join(target, "src", "test", "generated.test.ts"),
-    `import { describe, expect, it } from "vitest";\nimport manifest from "../../nextdevtpl.generated.json";\n\ndescribe("generated project", () => {\n  it("records a stable selection", () => {\n    expect(manifest.modules).toEqual(${JSON.stringify(manifest.modules)});\n    expect(manifest.target).toBe(${JSON.stringify(manifest.target)});\n  });\n});\n`
+    `import { describe, expect, it } from "vitest";\nimport manifest from "../../nextdevtpl.generated.json";\n\ndescribe("generated project", () => {\n  it("records a stable selection", () => {\n    expect(manifest.mode).toBe(${JSON.stringify(manifest.mode)});\n    expect(manifest.modules).toEqual(${JSON.stringify(manifest.modules)});\n    expect(manifest.target).toBe(${JSON.stringify(manifest.target)});\n  });\n});\n`
   );
   await writeText(
     join(target, "vitest.config.ts"),
     `import { defineConfig } from "vitest/config";\n\nexport default defineConfig({ test: { environment: "node", include: ["src/test/**/*.test.ts"] } });\n`
   );
+}
+
+function createDemoTranslationSelection(
+  catalog: RecipeCatalog
+): ProjectSelection {
+  const requested = [...DEMO_VIEW_MODULES, "credits", "subscription"];
+  const resolved = new Set<string>();
+  const add = (id: string) => {
+    if (resolved.has(id)) return;
+    const module = catalog.modules[id];
+    if (!module)
+      throw new GeneratorError(`Demo module is not registered: ${id}`);
+    for (const dependency of module.dependencies) add(dependency);
+    resolved.add(id);
+  };
+  for (const module of requested) add(module);
+  const modules = [...resolved];
+  const selected = new Set(modules);
+  return {
+    preset: "custom",
+    target: "server",
+    modules,
+    views: modules.flatMap((id) => catalog.modules[id]?.views ?? []),
+    adapters: {},
+    bindings: [],
+    env: [],
+    packages: [],
+    excludedModules: Object.keys(catalog.modules).filter(
+      (id) => !selected.has(id)
+    ),
+  };
 }
 
 export async function generateProject(
@@ -1282,6 +1328,15 @@ export async function generateProject(
   targetDirectory: string;
   warnings: readonly string[];
 }> {
+  if (
+    options.mode !== undefined &&
+    options.mode !== "full" &&
+    options.mode !== "demo"
+  ) {
+    throw new GeneratorError("Generation mode must be full or demo");
+  }
+  validateDemoOptions(options);
+  const demoMode = options.mode === "demo";
   const discovered = await findGeneratorAssets();
   const assets = {
     catalogPath: options.catalogPath ?? discovered.catalogPath,
@@ -1293,7 +1348,10 @@ export async function generateProject(
   const catalog = await loadCatalog(assets.catalogPath, {
     templateRoot: assets.templateRoot,
   });
-  const selection = createProjectSelection(catalog, options);
+  const selection = demoMode
+    ? createDemoTranslationSelection(catalog)
+    : createProjectSelection(catalog, options);
+  const skinModules = demoMode ? DEMO_VIEW_MODULES : selection.modules;
   const skinSelection: SkinSourceSelection = options.skin ?? {
     kind: "builtin",
     id: "default",
@@ -1318,8 +1376,12 @@ export async function generateProject(
       directory: skinSource.directory,
       templateDirectory: assets.templateRoot,
       catalog,
-      selectedModules: selection.modules,
+      selectedModules: skinModules,
     });
+    if (demoMode) await validateDemoClientViews(validatedSkin, catalog);
+    const preparedDemoData = demoMode
+      ? await prepareDemoData(validatedSkin)
+      : undefined;
     if (options.palette !== undefined) {
       if (
         validatedSkin.manifest.id !== "default" ||
@@ -1354,19 +1416,59 @@ export async function generateProject(
           assets.templateManifestPath,
           workPath
         );
-        await removePath(join(workPath, "drizzle"));
-        await pruneModules(workPath, selection, catalog);
-        await rewriteAdapters(workPath, selection, catalog);
-        await rewriteServices(workPath, selection);
-        await rewriteModuleRegistry(workPath, selection);
-        await writeSelectedSkinViews(workPath, selection.modules, catalog);
-        await writeWorkspaceComposition(workPath, selection.modules);
-        const appliedSkin = await applySkinPackage({
-          skin: validatedSkin,
-          targetDirectory: workPath,
-          catalog,
-          selectedModules: selection.modules,
-        });
+        let appliedSkin: Awaited<ReturnType<typeof applySkinPackage>>;
+        if (demoMode) {
+          await pruneDemoBackendFiles(workPath);
+          await rewriteModuleRegistry(workPath, selection);
+          await writeWorkspaceComposition(workPath, selection.modules, {
+            docsEnabled: false,
+          });
+          await writeDemoRuntime(workPath);
+          appliedSkin = await applySkinPackage({
+            skin: validatedSkin,
+            targetDirectory: workPath,
+            catalog,
+            selectedModules: skinModules,
+            additionalAssetFiles: preparedDemoData!.avatarAssets,
+          });
+          await writeDemoSkinViewsFromManifest(
+            workPath,
+            catalog,
+            appliedSkin.manifest.viewEntries
+          );
+          await writePreparedDemoData(workPath, preparedDemoData!);
+          await writeDemoAvatarAssets(
+            workPath,
+            preparedDemoData!.avatarAssetContents
+          );
+          await rewriteTranslations(
+            workPath,
+            selection,
+            catalog,
+            appliedSkin.manifest.id
+          );
+          await rewriteComposition(workPath, selection);
+          await writeDemoPageFacade(workPath);
+          await rewriteDeployment(workPath, selection);
+        } else {
+          await removePath(join(workPath, "drizzle"));
+          await removePath(join(workPath, "src", "core", "skin", "demo"));
+          await removePath(
+            join(workPath, "src", "modules", "demo-skin-views.ts")
+          );
+          await pruneModules(workPath, selection, catalog);
+          await rewriteAdapters(workPath, selection, catalog);
+          await rewriteServices(workPath, selection);
+          await rewriteModuleRegistry(workPath, selection);
+          await writeSelectedSkinViews(workPath, selection.modules, catalog);
+          await writeWorkspaceComposition(workPath, selection.modules);
+          appliedSkin = await applySkinPackage({
+            skin: validatedSkin,
+            targetDirectory: workPath,
+            catalog,
+            selectedModules: selection.modules,
+          });
+        }
         if (loadedPalette) {
           const skinDirectory = join(workPath, "src", "skin");
           const tokensPath = join(skinDirectory, "tokens.css");
@@ -1391,16 +1493,18 @@ export async function generateProject(
             ].join("\n")
           );
         }
-        await rewriteSchema(workPath, selection, catalog);
-        await rewriteTranslations(
-          workPath,
-          selection,
-          catalog,
-          appliedSkin.manifest.id
-        );
-        await rewriteComposition(workPath, selection);
-        await rewriteEnvironment(workPath, selection);
-        await rewriteDeployment(workPath, selection);
+        if (!demoMode) {
+          await rewriteSchema(workPath, selection, catalog);
+          await rewriteTranslations(
+            workPath,
+            selection,
+            catalog,
+            appliedSkin.manifest.id
+          );
+          await rewriteComposition(workPath, selection);
+          await rewriteEnvironment(workPath, selection);
+          await rewriteDeployment(workPath, selection);
+        }
         const skinDependencies = Object.fromEntries(
           [...appliedSkin.reachableDependencies.keys()].flatMap((name) => {
             const version = appliedSkin.manifest.dependencies[name];
@@ -1410,13 +1514,21 @@ export async function generateProject(
         const sourceDependencies = await collectSourcePackageImports(
           join(workPath, "src")
         );
-        await rewritePackage(
-          workPath,
-          selection,
-          catalog,
-          skinDependencies,
-          sourceDependencies
-        );
+        if (demoMode) {
+          await rewriteDemoProjectConfig(
+            workPath,
+            sourceDependencies,
+            skinDependencies
+          );
+        } else {
+          await rewritePackage(
+            workPath,
+            selection,
+            catalog,
+            skinDependencies,
+            sourceDependencies
+          );
+        }
         const packageManager = options.packageManager ?? "pnpm";
         const childEnvironment = skinProcessEnvironment(skinSelection);
         const requiresLockOnly = await rewriteLockfile(
@@ -1434,11 +1546,18 @@ export async function generateProject(
 
         const manifest: GeneratedProjectManifest = {
           catalogVersion: catalog.version,
-          preset: selection.preset,
+          mode: demoMode ? "demo" : "full",
+          preset: demoMode ? "custom" : selection.preset,
           target: selection.target,
-          modules: selection.modules,
-          adapters: selection.adapters,
-          bindings: selection.bindings,
+          modules: demoMode ? [] : selection.modules,
+          adapters: demoMode ? {} : selection.adapters,
+          bindings: demoMode ? [] : selection.bindings,
+          ...(demoMode
+            ? {
+                viewModules: [...DEMO_VIEW_MODULES],
+                demo: { dataSha256: preparedDemoData!.dataSha256 },
+              }
+            : {}),
           skin: {
             id: validatedSkin.manifest.id,
             version: validatedSkin.manifest.version,
@@ -1470,14 +1589,16 @@ export async function generateProject(
             childEnvironment,
             hooks.runProcess
           );
-          await runPackageScript(
-            target.path,
-            packageManager,
-            "db:generate:init",
-            childEnvironment,
-            hooks.runProcess
-          );
-          if (selection.target === "cloudflare") {
+          if (!demoMode) {
+            await runPackageScript(
+              target.path,
+              packageManager,
+              "db:generate:init",
+              childEnvironment,
+              hooks.runProcess
+            );
+          }
+          if (!demoMode && selection.target === "cloudflare") {
             await runPackageScript(
               target.path,
               packageManager,

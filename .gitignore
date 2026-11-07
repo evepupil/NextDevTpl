@@ -29,6 +29,7 @@
 packages/*/dist/
 packages/*/template/
 packages/*/catalog.json
+/packages/create-nextdevtpl/src/demo-contract-generated/
 
 # misc
 .DS_Store

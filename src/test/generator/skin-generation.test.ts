@@ -138,10 +138,7 @@ async function createSkinWithAdditionalDependency(
 
   const viewPath = join(directory, "views", "shared", "empty-dashboard.tsx");
   const view = await readFile(viewPath, "utf8");
-  const importedView = view.replace(
-    'import { getTranslations } from "next-intl/server";',
-    'import { getTranslations } from "next-intl/server";\nimport { HiHome } from "react-icons/hi2";'
-  );
+  const importedView = `import { HiHome } from "react-icons/hi2";\n${view}`;
   const updatedView = importedView.replace(
     '<h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>',
     '<h1 className="text-2xl font-bold tracking-tight"><HiHome aria-hidden /> {t("title")}</h1>'

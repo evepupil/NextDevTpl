@@ -1,31 +1,20 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/routing";
-import { useState } from "react";
 import type { FormEventHandler } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
-
 import { addTicketMessageAction } from "@/features/support/actions";
+import { useRouter } from "@/i18n/routing";
 
-export interface SupportReplyModel {
-  content: string;
-}
+import type { SupportReplyController } from "./contracts";
 
-export interface SupportReplyState {
-  isLoading: boolean;
-}
-
-export interface SupportReplyActions {
-  onSubmit: FormEventHandler<HTMLFormElement>;
-  setContent: (value: string) => void;
-}
-
-export interface SupportReplyController {
-  actions: SupportReplyActions;
-  model: SupportReplyModel;
-  state: SupportReplyState;
-}
+export type {
+  SupportReplyActions,
+  SupportReplyController,
+  SupportReplyModel,
+  SupportReplyState,
+} from "./contracts";
 
 export function useSupportReplyController(
   ticketId: string

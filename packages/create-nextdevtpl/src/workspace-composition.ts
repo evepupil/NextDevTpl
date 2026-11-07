@@ -10,7 +10,8 @@ const DASHBOARD_GROUP = [
 ] as const;
 
 function createSiteNavigationSource(
-  selectedModules: readonly string[]
+  selectedModules: readonly string[],
+  docsEnabled: boolean
 ): string {
   const selected = new Set(selectedModules);
   const homeHref = selected.has("marketing")
@@ -25,6 +26,7 @@ function createSiteNavigationSource(
   return `export interface SiteNavigation {
   blogHref: string | null;
   cookiePolicyHref: string | null;
+  docsHref: string | null;
   homeHref: string;
   pseoHref: string | null;
   privacyHref: string | null;
@@ -34,6 +36,7 @@ function createSiteNavigationSource(
 export const siteNavigation = {
   blogHref: ${JSON.stringify(selected.has("blog") ? "/blog" : null)},
   cookiePolicyHref: ${JSON.stringify(hasMarketing ? "/legal/cookie-policy" : null)},
+  docsHref: ${JSON.stringify(docsEnabled ? "/docs" : null)},
   homeHref: ${JSON.stringify(homeHref)},
   pseoHref: ${JSON.stringify(selected.has("pseo") ? "/pseo" : null)},
   privacyHref: ${JSON.stringify(hasMarketing ? "/legal/privacy" : null)},
@@ -180,51 +183,99 @@ export default async function DashboardLayout({
 function createDashboardPageSource(selectedModules: readonly string[]): string {
   const selected = new Set(selectedModules);
   if (!selected.has("dashboard")) return "";
-  if (!selected.has("credits")) {
-    return `import { getLocale } from "next-intl/server";
+  return `import { DashboardPage } from "@/modules/view-pages";
 
-import { skinViews } from "@/modules/skin-views";
-
-const View = skinViews["shared.empty-dashboard"];
-
-export default async function DashboardPage() {
-  const locale = await getLocale();
-  return <View locale={locale} />;
+export default async function DashboardRoute({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  return <DashboardPage locale={locale} />;
 }
 `;
-  }
+}
 
-  return `import { redirect } from "@/i18n/routing";
-import {
-  getDashboardViewData,
-  getWorkspaceSession,
-} from "@/modules/view-data";
-import { skinViews } from "@/modules/skin-views";
-
-const View = skinViews["dashboard.overview"];
-
-export default async function DashboardPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
+function createViewPagesSource(selectedModules: readonly string[]): string {
+  const selected = new Set(selectedModules);
+  const hasPageFacade = ["dashboard", "settings", "support"].some((id) =>
+    selected.has(id)
+  );
+  const needsWorkspaceSession = selected.has("auth") && hasPageFacade;
+  const imports = [
+    hasPageFacade ? 'import { skinViews } from "@/modules/skin-views";' : "",
+    needsWorkspaceSession
+      ? 'import { getWorkspaceSession } from "@/modules/view-data";'
+      : "",
+    selected.has("dashboard") && selected.has("credits")
+      ? 'import { getDashboardViewData } from "@/modules/view-data";'
+      : "",
+    selected.has("support")
+      ? 'import { getSupportDetailViewData, getSupportListViewData } from "@/features/support/server";'
+      : "",
+    selected.has("support")
+      ? 'import { notFound } from "next/navigation";'
+      : "",
+    needsWorkspaceSession ? 'import { redirect } from "@/i18n/routing";' : "",
+    selected.has("support")
+      ? 'import type { SupportDetailPageInput } from "@/core/support/contracts";'
+      : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+  const dashboard = selected.has("dashboard")
+    ? `export async function DashboardPage({ locale }: { locale: string }) {
+${selected.has("auth") ? '  const session = await getWorkspaceSession();\n  if (!session?.user) return redirect({ href: "/sign-in", locale });\n' : ""}${
+  selected.has("credits")
+    ? `  const data = await getDashboardViewData(${selected.has("auth") ? "session.user.id" : '""'});
+  const View = skinViews["dashboard.overview"];
+  return <View locale={locale} data={data} />;`
+    : `  const View = skinViews["shared.empty-dashboard"];
+  return <View locale={locale} />;`
+}
+}
+`
+    : "";
+  const settings = selected.has("settings")
+    ? `export async function SettingsPage({ locale }: { locale: string }) {
   const session = await getWorkspaceSession();
   if (!session?.user) return redirect({ href: "/sign-in", locale });
-  const data = await getDashboardViewData(session.user.id);
-  return <View locale={locale} data={data} />;
+  const View = skinViews["settings.page"];
+  return <View user={{ id: session.user.id, name: session.user.name, email: session.user.email, image: session.user.image ?? null }} />;
 }
-`;
+`
+    : "";
+  const support = selected.has("support")
+    ? `export async function SupportListPage({ locale }: { locale: string }) {
+  const session = await getWorkspaceSession();
+  if (!session?.user) return redirect({ href: "/sign-in", locale });
+  const data = await getSupportListViewData(session.user.id, locale);
+  const View = skinViews["support.list"];
+  return <View {...data} />;
+}
+
+export async function SupportDetailPage(input: SupportDetailPageInput) {
+  const session = await getWorkspaceSession();
+  if (!session?.user) return redirect({ href: "/sign-in", locale: input.locale });
+  const data = await getSupportDetailViewData({ ...input, userId: session.user.id });
+  if (!data) notFound();
+  const View = skinViews["support.detail"];
+  return <View {...data} />;
+}
+`
+    : "";
+  return `${imports}\n\n${dashboard}${settings}${support}`;
 }
 
 export async function writeWorkspaceComposition(
   target: string,
-  selectedModules: readonly string[]
+  selectedModules: readonly string[],
+  options: { docsEnabled?: boolean } = {}
 ): Promise<void> {
   const selected = new Set(selectedModules);
   await writeText(
+    resolve(target, "src", "modules", "view-pages.tsx"),
+    createViewPagesSource(selectedModules)
+  );
+  await writeText(
     resolve(target, "src", "modules", "site-navigation.ts"),
-    createSiteNavigationSource(selectedModules)
+    createSiteNavigationSource(selectedModules, options.docsEnabled ?? true)
   );
   const hasDashboardGroupRoutes = DASHBOARD_GROUP.some((id) =>
     selected.has(id)

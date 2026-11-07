@@ -278,7 +278,6 @@ async function resolveModuleSpecifier(
   if (specifier.startsWith("node:")) {
     failSkin(["Skin code must not import Node.js built-in modules"]);
   }
-
   if (specifier.startsWith("@/")) {
     const resolved = await resolveCoreAlias(context, specifier);
     if (resolved.packagePath) addEdge(context, importer, resolved.packagePath);
@@ -294,6 +293,9 @@ async function resolveModuleSpecifier(
       failSkin([
         "Relative skin import does not resolve to a declared package file",
       ]);
+    if (match.startsWith("demo/")) {
+      failSkin(["Demo JSON data must not be imported by skin source"]);
+    }
     addEdge(context, importer, match);
     return;
   }
@@ -342,6 +344,9 @@ function resolveCssLocalPath(
     context.packageFiles.has(candidate)
   );
   if (!match) failSkin(["CSS URL does not resolve to a declared package file"]);
+  if (match.startsWith("demo/")) {
+    failSkin(["Demo JSON data must not be imported by skin source"]);
+  }
   addEdge(context, importer, match);
   return match;
 }

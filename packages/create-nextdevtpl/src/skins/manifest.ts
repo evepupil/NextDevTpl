@@ -18,6 +18,7 @@ const ROOT_KEYS = [
   "customization",
   "supportsPalettes",
   "dependencies",
+  "demo",
   "assets",
   "files",
 ] as const;
@@ -449,6 +450,25 @@ export function parseSkinManifest(value: unknown): SkinManifest {
     }
   );
 
+  let demo: SkinManifest["demo"];
+  if (value.demo !== undefined) {
+    if (!isRecord(value.demo)) {
+      failSkin(["demo must be an object"]);
+    }
+    knownKeys(value.demo, ["data"], "demo");
+    const data = validatePosixRelativePath(
+      requireString(value.demo.data, "demo.data", 512),
+      "demo.data"
+    );
+    if (!data.startsWith("demo/") || !data.endsWith(".json")) {
+      failSkin(["demo.data must point to a JSON file under demo/"]);
+    }
+    if (!Object.hasOwn(files, data)) {
+      failSkin(["demo.data must be covered by files hashes"]);
+    }
+    demo = { data };
+  }
+
   if (
     assets.some(
       (asset) =>
@@ -477,6 +497,7 @@ export function parseSkinManifest(value: unknown): SkinManifest {
     customization: parseCustomization(value.customization),
     supportsPalettes: value.supportsPalettes,
     dependencies,
+    ...(demo ? { demo } : {}),
     assets,
     files,
   };

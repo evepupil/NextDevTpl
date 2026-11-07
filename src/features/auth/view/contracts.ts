@@ -1,9 +1,15 @@
 import type { FormEventHandler, ReactNode } from "react";
+import type { WorkspaceUser } from "@/features/shared/view";
 
 export type EmptyAuthViewProps = Record<never, never>;
 
 export interface AuthLayoutViewProps {
   children: ReactNode;
+}
+
+export interface WorkspaceSessionController {
+  user: WorkspaceUser | null;
+  onSignOut: () => Promise<void>;
 }
 
 export interface SignInModel {

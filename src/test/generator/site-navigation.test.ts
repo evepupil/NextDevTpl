@@ -5,14 +5,13 @@ import { runInNewContext } from "node:vm";
 
 import ts from "typescript";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-
-import { filterMarketingNavigation } from "../../features/marketing/view";
-import { footerNav, mainNav } from "../../config/nav";
-import type { SiteNavigation } from "../../modules/site-navigation";
 import { loadCatalog } from "../../../packages/create-nextdevtpl/src/catalog";
 import { createProjectSelection } from "../../../packages/create-nextdevtpl/src/selection";
-import { writeWorkspaceComposition } from "../../../packages/create-nextdevtpl/src/workspace-composition";
 import type { RecipeCatalog } from "../../../packages/create-nextdevtpl/src/types";
+import { writeWorkspaceComposition } from "../../../packages/create-nextdevtpl/src/workspace-composition";
+import { footerNav, mainNav } from "../../config/nav";
+import { filterMarketingNavigation } from "../../features/marketing/view";
+import type { SiteNavigation } from "../../modules/site-navigation";
 
 function importsNamedExport(
   source: string,
@@ -85,10 +84,11 @@ describe("generated site navigation", () => {
 
   async function writeNavigation(
     name: string,
-    modules: readonly string[]
+    modules: readonly string[],
+    docsEnabled = true
   ): Promise<SiteNavigation> {
     const target = join(root, name);
-    await writeWorkspaceComposition(target, modules);
+    await writeWorkspaceComposition(target, modules, { docsEnabled });
 
     const source = await readFile(
       join(target, "src", "modules", "site-navigation.ts"),
@@ -106,6 +106,7 @@ describe("generated site navigation", () => {
     return {
       blogHref: navigation.blogHref,
       cookiePolicyHref: navigation.cookiePolicyHref,
+      docsHref: navigation.docsHref,
       homeHref: navigation.homeHref,
       pseoHref: navigation.pseoHref,
       privacyHref: navigation.privacyHref,
@@ -123,6 +124,7 @@ describe("generated site navigation", () => {
     ).resolves.toEqual({
       blogHref: null,
       cookiePolicyHref: "/legal/cookie-policy",
+      docsHref: "/docs",
       homeHref: "/",
       pseoHref: null,
       privacyHref: "/legal/privacy",
@@ -136,6 +138,7 @@ describe("generated site navigation", () => {
     ).resolves.toEqual({
       blogHref: null,
       cookiePolicyHref: null,
+      docsHref: "/docs",
       homeHref: "/dashboard",
       pseoHref: null,
       privacyHref: null,
@@ -154,6 +157,7 @@ describe("generated site navigation", () => {
     ).resolves.toEqual({
       blogHref: null,
       cookiePolicyHref: null,
+      docsHref: "/docs",
       homeHref: "/sign-in",
       pseoHref: null,
       privacyHref: null,
@@ -172,6 +176,7 @@ describe("generated site navigation", () => {
     ).resolves.toEqual({
       blogHref: null,
       cookiePolicyHref: null,
+      docsHref: "/docs",
       homeHref: "/dashboard",
       pseoHref: null,
       privacyHref: null,
@@ -223,6 +228,28 @@ describe("generated site navigation", () => {
         (link) => link.href
       )
     ).toEqual(footerNav.product.map((link) => link.href));
+  });
+
+  it("omits Docs in demo navigation while keeping other selected routes", async () => {
+    const modules = ["marketing", "blog", "pseo"];
+    const navigation = await writeNavigation("demo", modules, false);
+
+    expect(navigation.docsHref).toBeNull();
+    expect(
+      filterMarketingNavigation(mainNav, navigation).map((link) => link.href)
+    ).toEqual(["/pseo", "/#pricing", "/blog"]);
+  });
+
+  it("keeps Docs for existing skins that omit the new navigation field", () => {
+    expect(
+      filterMarketingNavigation([{ href: "/docs" }], {
+        blogHref: null,
+        cookiePolicyHref: null,
+        pseoHref: null,
+        privacyHref: null,
+        termsHref: null,
+      })
+    ).toEqual([{ href: "/docs" }]);
   });
 
   it("keeps skin components on the public feature view exports", async () => {

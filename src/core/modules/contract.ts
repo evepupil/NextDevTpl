@@ -1,7 +1,7 @@
 import {
+  isTelemetryEventName,
   type TelemetryEventName,
-  telemetryEventRegistry,
-} from "../services/telemetry";
+} from "./telemetry-events";
 import { validateModuleViews } from "./view-validation";
 
 export const MODULE_IDS = [
@@ -156,7 +156,7 @@ export function validateModuleManifests(
     }
 
     for (const eventName of manifest.telemetryEvents) {
-      if (!Object.hasOwn(telemetryEventRegistry, eventName)) {
+      if (!isTelemetryEventName(eventName)) {
         errors.push(`模块 ${manifest.id} 发布未登记事件 ${eventName}`);
         continue;
       }

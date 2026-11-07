@@ -17,7 +17,11 @@ const REPOSITORY_ONLY_SCRIPT_PREFIXES: readonly string[] = [
   "palette:",
   "visual:",
 ];
-const REPOSITORY_ONLY_SCRIPTS: readonly string[] = ["skin:check", "skin:hash"];
+const REPOSITORY_ONLY_SCRIPTS: readonly string[] = [
+  "prepare:demo-contract",
+  "skin:check",
+  "skin:hash",
+];
 const REPOSITORY_SCRIPT_REWRITES: Readonly<
   Record<string, { from: string; to: string }>
 > = {
@@ -26,6 +30,7 @@ const REPOSITORY_SCRIPT_REWRITES: Readonly<
     to: "biome lint .",
   },
 };
+const DEMO_CONTRACT_PREPARE_PREFIX = "pnpm run prepare:demo-contract && ";
 
 /**
  * 从 package.json 片段中删除仓库专用 devDependencies 与脚本。
@@ -58,10 +63,14 @@ export function pruneRepositoryOnlyPackageEntries<
         delete packageJson.scripts[name];
         continue;
       }
-      const rewrite = REPOSITORY_SCRIPT_REWRITES[name];
-      if (rewrite && packageJson.scripts[name] === rewrite.from) {
-        packageJson.scripts[name] = rewrite.to;
+      let command = packageJson.scripts[name];
+      if (command === undefined) continue;
+      if (command.startsWith(DEMO_CONTRACT_PREPARE_PREFIX)) {
+        command = command.slice(DEMO_CONTRACT_PREPARE_PREFIX.length);
       }
+      const rewrite = REPOSITORY_SCRIPT_REWRITES[name];
+      if (rewrite && command === rewrite.from) command = rewrite.to;
+      packageJson.scripts[name] = command;
     }
   }
   return packageJson;

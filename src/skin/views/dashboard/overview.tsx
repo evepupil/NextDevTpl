@@ -6,21 +6,18 @@ import {
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { DashboardOverviewViewProps } from "@/features/dashboard/view";
 import { Link } from "@/i18n/routing";
 
-export async function DashboardOverviewView({
+export function DashboardOverviewView({
   locale,
   data,
 }: DashboardOverviewViewProps) {
-  const t = await getTranslations({
-    locale,
-    namespace: "DashboardPages.dashboard",
-  });
+  const t = useTranslations("DashboardPages.dashboard");
   const credits = data.credits;
   const plan = data.plan;
   const transactions = credits?.transactions ?? [];

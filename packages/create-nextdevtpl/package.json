@@ -42,11 +42,12 @@
   },
   "scripts": {
     "assemble-template": "node scripts/assemble-template.mjs",
-    "build": "tsc -p tsconfig.json",
+    "prepare-demo-contract": "node scripts/prepare-demo-contract.mjs",
+    "build": "pnpm run prepare-demo-contract && tsc -p tsconfig.json",
     "skin:check": "pnpm run build && node scripts/verify-skin.mjs check",
     "skin:hash": "pnpm run build && node scripts/verify-skin.mjs hash",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "prepack": "pnpm run assemble-template && pnpm run build"
+    "typecheck": "pnpm run prepare-demo-contract && tsc -p tsconfig.json --noEmit",
+    "prepack": "pnpm run prepare-demo-contract && pnpm run assemble-template && pnpm run build"
   },
   "dependencies": {
     "colorjs.io": "0.7.1",

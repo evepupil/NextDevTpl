@@ -5,9 +5,15 @@
  */
 
 import {
+  getPricingPlanFeatureLabels,
+  PLAN_CATALOG,
+} from "@/core/plans/catalog";
+import { PLAN_IDS, type PlanId } from "@/core/plans/contracts";
+import {
   type PaymentConfig,
   PaymentType,
   type Plan,
+  type PlanConfig,
   PlanInterval,
   type PriceConfig,
   type PricingConfig,
@@ -29,15 +35,45 @@ export const PRICE_IDS = {
   ULTRA_YEARLY: process.env.NEXT_PUBLIC_PRICE_ULTRA_YEARLY ?? "",
 } as const;
 
-// ============================================
-// 订阅积分配额（每月）
-// ============================================
-
 export const SUBSCRIPTION_MONTHLY_CREDITS = {
-  starter: 3000,
-  pro: 8000,
-  ultra: 16000,
+  starter: PLAN_CATALOG.plans.starter.monthlyCredits,
+  pro: PLAN_CATALOG.plans.pro.monthlyCredits,
+  ultra: PLAN_CATALOG.plans.ultra.monthlyCredits,
 } as const;
+
+const PLAN_PRICE_ID_KEYS = {
+  starter: { month: "STARTER_MONTHLY", year: "STARTER_YEARLY" },
+  pro: { month: "PRO_MONTHLY", year: "PRO_YEARLY" },
+  ultra: { month: "ULTRA_MONTHLY", year: "ULTRA_YEARLY" },
+} as const satisfies Record<
+  Exclude<PlanId, "free">,
+  Record<"month" | "year", keyof typeof PRICE_IDS>
+>;
+
+function createPlanConfig(planId: PlanId): PlanConfig {
+  const plan = PLAN_CATALOG.plans[planId];
+  if (planId === "free") return { id: planId, isFree: true };
+
+  const priceIdKeys = PLAN_PRICE_ID_KEYS[planId];
+  return {
+    id: planId,
+    ...("popular" in plan && plan.popular ? { popular: true } : {}),
+    prices: [
+      {
+        type: PaymentType.SUBSCRIPTION,
+        priceId: PRICE_IDS[priceIdKeys.month],
+        amount: plan.prices.month,
+        interval: PlanInterval.MONTH,
+      },
+      {
+        type: PaymentType.SUBSCRIPTION,
+        priceId: PRICE_IDS[priceIdKeys.year],
+        amount: plan.prices.year,
+        interval: PlanInterval.YEAR,
+      },
+    ],
+  };
+}
 
 // ============================================
 // 支付系统配置
@@ -51,10 +87,10 @@ export const paymentConfig: PaymentConfig = {
   provider: "creem",
 
   /** 货币 */
-  currency: "USD",
+  currency: PLAN_CATALOG.currency,
 
   /** 年付折扣百分比（约等于送 5 个月） */
-  yearlyDiscount: 40,
+  yearlyDiscount: PLAN_CATALOG.yearlyDiscount,
 
   /** 支付完成后重定向 */
   redirectAfterCheckout: "/dashboard",
@@ -64,65 +100,10 @@ export const paymentConfig: PaymentConfig = {
 
   /** 计划配置 */
   plans: {
-    free: {
-      id: "free",
-      isFree: true,
-    },
-
-    starter: {
-      id: "starter",
-      prices: [
-        {
-          type: PaymentType.SUBSCRIPTION,
-          priceId: PRICE_IDS.STARTER_MONTHLY,
-          amount: 5,
-          interval: PlanInterval.MONTH,
-        },
-        {
-          type: PaymentType.SUBSCRIPTION,
-          priceId: PRICE_IDS.STARTER_YEARLY,
-          amount: 35,
-          interval: PlanInterval.YEAR,
-        },
-      ],
-    },
-
-    pro: {
-      id: "pro",
-      popular: true,
-      prices: [
-        {
-          type: PaymentType.SUBSCRIPTION,
-          priceId: PRICE_IDS.PRO_MONTHLY,
-          amount: 9,
-          interval: PlanInterval.MONTH,
-        },
-        {
-          type: PaymentType.SUBSCRIPTION,
-          priceId: PRICE_IDS.PRO_YEARLY,
-          amount: 65,
-          interval: PlanInterval.YEAR,
-        },
-      ],
-    },
-
-    ultra: {
-      id: "ultra",
-      prices: [
-        {
-          type: PaymentType.SUBSCRIPTION,
-          priceId: PRICE_IDS.ULTRA_MONTHLY,
-          amount: 15,
-          interval: PlanInterval.MONTH,
-        },
-        {
-          type: PaymentType.SUBSCRIPTION,
-          priceId: PRICE_IDS.ULTRA_YEARLY,
-          amount: 109,
-          interval: PlanInterval.YEAR,
-        },
-      ],
-    },
+    free: createPlanConfig("free"),
+    starter: createPlanConfig("starter"),
+    pro: createPlanConfig("pro"),
+    ultra: createPlanConfig("ultra"),
   },
 };
 
@@ -136,90 +117,16 @@ export const paymentConfig: PaymentConfig = {
  * 返回用于定价页面展示的完整计划信息
  */
 export function getPricingPlans(_t?: (key: string) => string): Plan[] {
-  const plans: Plan[] = [];
-  const config = paymentConfig;
-
-  // 免费计划
-  if (config.plans.free) {
-    plans.push({
-      ...config.plans.free,
-      name: "Free",
-      description: "Try NextDevTpl with no commitment",
-      features: [
-        "200 credits (one-time)",
-        "Text & file input",
-        "Up to 10K characters per task",
-        "Max 5MB file size",
-        "Export to Anki & Markdown",
-        "Deck history saved forever",
-      ],
-      cta: "Get Started",
-    });
-  }
-
-  // Starter 计划
-  if (config.plans.starter) {
-    plans.push({
-      ...config.plans.starter,
-      name: "Starter",
-      description: "For casual learners",
-      features: [
-        "3,000 credits / month",
-        "Text & file input",
-        "Up to 100K characters per task",
-        "Max 20MB file size",
-        "Export to Anki & Markdown",
-        "Deck history saved forever",
-        "Email support",
-      ],
-      cta: "Subscribe",
-    });
-  }
-
-  // Pro 计划
-  if (config.plans.pro) {
-    plans.push({
-      ...config.plans.pro,
-      name: "Pro",
-      description: "For serious learners",
-      features: [
-        "8,000 credits / month",
-        "All input sources (URL, video, etc.)",
-        "Up to 300K characters per task",
-        "Max 50MB file size",
-        "Priority generation queue",
-        "Export to Anki & Markdown",
-        "Deck history saved forever",
-        "🚧 Custom card styles (coming soon)",
-        "Priority support",
-      ],
-      cta: "Subscribe",
-    });
-  }
-
-  // Ultra 计划
-  if (config.plans.ultra) {
-    plans.push({
-      ...config.plans.ultra,
-      name: "Ultra",
-      description: "For power users & educators",
-      features: [
-        "16,000 credits / month",
-        "All input sources (URL, video, etc.)",
-        "Up to 1M characters per task",
-        "Max 100MB file size",
-        "Highest priority queue",
-        "Export to Anki & Markdown",
-        "Deck history saved forever",
-        "🚧 Custom card styles (coming soon)",
-        "🚧 AI-assisted card making (coming soon)",
-        "Dedicated support",
-      ],
-      cta: "Subscribe",
-    });
-  }
-
-  return plans;
+  return PLAN_IDS.map((planId) => {
+    const plan = PLAN_CATALOG.plans[planId];
+    return {
+      ...paymentConfig.plans[planId]!,
+      name: plan.name,
+      description: plan.description,
+      features: getPricingPlanFeatureLabels(planId),
+      cta: plan.cta,
+    };
+  });
 }
 
 /**
@@ -228,8 +135,7 @@ export function getPricingPlans(_t?: (key: string) => string): Plan[] {
 export function getPricingConfig(): PricingConfig {
   return {
     title: "Simple, transparent pricing",
-    subtitle:
-      "Start free, upgrade when you need more. Save 40% with yearly billing.",
+    subtitle: `Start free, upgrade when you need more. Save ${PLAN_CATALOG.yearlyDiscount}% with yearly billing.`,
     frequencies: ["Monthly", "Yearly"],
     yearlyDiscount: paymentConfig.yearlyDiscount,
     plans: getPricingPlans(),

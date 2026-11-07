@@ -9,6 +9,7 @@ import type {
   MarketingPricingPlanModel,
 } from "@/features/marketing/view";
 import {
+  marketingSiteNavigation,
   useMarketingFooterController,
   usePricingController,
 } from "@/features/marketing/view";
@@ -107,9 +108,11 @@ export function MarketingHome({ locale }: MarketingHomeViewProps) {
                 <ArrowUpRight aria-hidden="true" />
               </Link>
             </Button>
-            <Button asChild variant="outline">
-              <Link href="/docs">{tHero("seeDemo")}</Link>
-            </Button>
+            {marketingSiteNavigation.docsHref !== null && (
+              <Button asChild variant="outline">
+                <Link href="/docs">{tHero("seeDemo")}</Link>
+              </Button>
+            )}
           </div>
           <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 border-t border-border pt-4 text-xs text-muted-foreground">
             <span>{tFeatures("label")}</span>

@@ -1,25 +1,18 @@
 import { boolean, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
-
+import {
+  TICKET_CATEGORIES,
+  TICKET_PRIORITIES,
+  TICKET_STATUSES,
+} from "@/core/support/contracts";
 import { user } from "./auth";
 
 export const ticketCategoryEnum = pgEnum("ticket_category", [
-  "billing",
-  "technical",
-  "bug",
-  "feature",
-  "other",
+  ...TICKET_CATEGORIES,
 ]);
 export const ticketPriorityEnum = pgEnum("ticket_priority", [
-  "low",
-  "medium",
-  "high",
+  ...TICKET_PRIORITIES,
 ]);
-export const ticketStatusEnum = pgEnum("ticket_status", [
-  "open",
-  "in_progress",
-  "resolved",
-  "closed",
-]);
+export const ticketStatusEnum = pgEnum("ticket_status", [...TICKET_STATUSES]);
 
 export const ticket = pgTable("ticket", {
   id: text("id").primaryKey(),

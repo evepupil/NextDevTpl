@@ -2,15 +2,13 @@
 
 import { useLocale } from "next-intl";
 
-import type { WorkspaceUser } from "@/features/shared/view";
 import type { Locale } from "@/i18n/routing";
 import { signOut, useSession } from "@/lib/auth/client";
 import { navigateAfterSignOut } from "@/lib/auth/navigation";
 
-export interface WorkspaceSessionController {
-  user: WorkspaceUser | null;
-  onSignOut: () => Promise<void>;
-}
+import type { WorkspaceSessionController } from "./contracts";
+
+export type { WorkspaceSessionController } from "./contracts";
 
 export function useWorkspaceSessionController(): WorkspaceSessionController {
   const { data: session } = useSession();

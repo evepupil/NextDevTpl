@@ -3,13 +3,12 @@
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
 
+import { PLAN_IDS } from "@/core/plans/contracts";
 import { getMyPlanAction } from "@/features/subscription/actions";
 
-const PLAN_IDS = ["free", "starter", "pro", "ultra"] as const;
+import type { PlanBadgeController } from "./contracts";
 
-export interface PlanBadgeController {
-  id: (typeof PLAN_IDS)[number];
-}
+export type { PlanBadgeController } from "./contracts";
 
 export function usePlanBadgeController(): PlanBadgeController {
   const { execute, result } = useAction(getMyPlanAction);

@@ -1,12 +1,9 @@
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 
 import type { EmptyDashboardViewProps } from "@/features/shared/view";
 
-export async function EmptyDashboardView({ locale }: EmptyDashboardViewProps) {
-  const t = await getTranslations({
-    locale,
-    namespace: "DashboardPages.dashboard",
-  });
+export function EmptyDashboardView(_props: EmptyDashboardViewProps) {
+  const t = useTranslations("DashboardPages.dashboard");
 
   return (
     <div className="space-y-2">

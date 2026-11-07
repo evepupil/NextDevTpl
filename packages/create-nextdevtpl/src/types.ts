@@ -7,6 +7,8 @@ export type DeploymentTarget = "cloudflare" | "docker" | "server" | "vercel";
 
 export type PresetName = "ai-saas" | "custom" | "minimal" | "saas";
 
+export type GenerationMode = "demo" | "full";
+
 export type ServiceKind =
   | "ai"
   | "alerts"
@@ -62,6 +64,7 @@ export interface GeneratorOptions {
   adapterOverrides?: Readonly<Partial<Record<ServiceKind, string | null>>>;
   catalogPath?: string;
   install?: boolean;
+  mode?: GenerationMode;
   modules?: readonly string[];
   palette?: string;
   packageManager?: string;
@@ -89,10 +92,13 @@ export interface GeneratedProjectManifest {
   adapters: Readonly<Partial<Record<ServiceKind, string>>>;
   bindings: readonly string[];
   catalogVersion: number;
+  demo?: { dataSha256: string };
+  mode: GenerationMode;
   modules: readonly string[];
   preset: PresetName;
   skin: GeneratedSkinRecord;
   target: DeploymentTarget;
+  viewModules?: readonly string[];
 }
 
 export interface GeneratorAssets {

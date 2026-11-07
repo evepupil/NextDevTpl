@@ -1,51 +1,25 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/routing";
-import { useState } from "react";
 import type { FormEventHandler } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
-
 import { createTicketAction } from "@/features/support/actions";
 import {
+  type CreateTicketInput,
   ticketCategories,
   ticketPriorities,
-  type CreateTicketInput,
 } from "@/features/support/schemas";
+import { useRouter } from "@/i18n/routing";
 
-export interface CreateTicketModel {
-  category: CreateTicketInput["category"];
-  categoryOptions: readonly Pick<
-    (typeof ticketCategories)[number],
-    "label" | "value"
-  >[];
-  message: string;
-  messageCharacterCount: number;
-  priority: CreateTicketInput["priority"];
-  priorityOptions: readonly Pick<
-    (typeof ticketPriorities)[number],
-    "label" | "value"
-  >[];
-  subject: string;
-}
+import type { CreateTicketController } from "./contracts";
 
-export interface CreateTicketState {
-  isLoading: boolean;
-}
-
-export interface CreateTicketActions {
-  onSubmit: FormEventHandler<HTMLFormElement>;
-  setCategory: (value: string) => void;
-  setMessage: (value: string) => void;
-  setPriority: (value: string) => void;
-  setSubject: (value: string) => void;
-}
-
-export interface CreateTicketController {
-  actions: CreateTicketActions;
-  model: CreateTicketModel;
-  state: CreateTicketState;
-}
+export type {
+  CreateTicketActions,
+  CreateTicketController,
+  CreateTicketModel,
+  CreateTicketState,
+} from "./contracts";
 
 export function useCreateTicketController(): CreateTicketController {
   const router = useRouter();

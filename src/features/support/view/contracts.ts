@@ -1,3 +1,7 @@
+import type { FormEventHandler } from "react";
+
+import type { TicketCategory, TicketPriority } from "@/core/support/contracts";
+
 export interface SupportTicketSummary {
   category: string;
   createdAt: string;
@@ -35,6 +39,53 @@ export interface SupportDetailViewProps {
   locale: string;
   messages: readonly SupportTicketMessage[];
   ticket: SupportTicketDetail;
+}
+
+export interface CreateTicketModel {
+  category: TicketCategory;
+  categoryOptions: readonly { label: string; value: TicketCategory }[];
+  message: string;
+  messageCharacterCount: number;
+  priority: TicketPriority;
+  priorityOptions: readonly { label: string; value: TicketPriority }[];
+  subject: string;
+}
+
+export interface CreateTicketState {
+  isLoading: boolean;
+}
+
+export interface CreateTicketActions {
+  onSubmit: FormEventHandler<HTMLFormElement>;
+  setCategory: (value: string) => void;
+  setMessage: (value: string) => void;
+  setPriority: (value: string) => void;
+  setSubject: (value: string) => void;
+}
+
+export interface CreateTicketController {
+  actions: CreateTicketActions;
+  model: CreateTicketModel;
+  state: CreateTicketState;
+}
+
+export interface SupportReplyModel {
+  content: string;
+}
+
+export interface SupportReplyState {
+  isLoading: boolean;
+}
+
+export interface SupportReplyActions {
+  onSubmit: FormEventHandler<HTMLFormElement>;
+  setContent: (value: string) => void;
+}
+
+export interface SupportReplyController {
+  actions: SupportReplyActions;
+  model: SupportReplyModel;
+  state: SupportReplyState;
 }
 
 export interface ViewContracts {

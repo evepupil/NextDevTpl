@@ -6,31 +6,14 @@ import { toast } from "sonner";
 
 import { changePassword } from "@/lib/auth/client";
 
-export interface SettingsSecurityModel {
-  confirmPassword: string;
-  currentPassword: string;
-  newPassword: string;
-  showPasswords: boolean;
-}
+import type { SettingsSecurityController } from "./contracts";
 
-export interface SettingsSecurityState {
-  error: string | null;
-  isLoading: boolean;
-}
-
-export interface SettingsSecurityActions {
-  onChangePassword: () => Promise<void>;
-  setConfirmPassword: (value: string) => void;
-  setCurrentPassword: (value: string) => void;
-  setNewPassword: (value: string) => void;
-  toggleShowPasswords: () => void;
-}
-
-export interface SettingsSecurityController {
-  actions: SettingsSecurityActions;
-  model: SettingsSecurityModel;
-  state: SettingsSecurityState;
-}
+export type {
+  SettingsSecurityActions,
+  SettingsSecurityController,
+  SettingsSecurityModel,
+  SettingsSecurityState,
+} from "./contracts";
 
 export function useSettingsSecurityController(): SettingsSecurityController {
   const t = useTranslations("Settings.security");

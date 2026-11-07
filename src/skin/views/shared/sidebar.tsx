@@ -20,6 +20,8 @@ import { useDashboardRuntime } from "@/modules/view-runtime";
 import { AccountCreditsBadge, AccountPlanBadge } from "./account-badges";
 import { useSidebar } from "./sidebar-context";
 
+type AccountPopoverView = "desktop" | "mobile" | null;
+
 function initials(name: string): string {
   return name
     .split(" ")
@@ -36,19 +38,34 @@ export function DashboardSidebar() {
   const { isCollapsed, isMobileOpen, setMobileOpen, toggleSidebar } =
     useSidebar();
   const t = useTranslations("Dashboard");
-  const [open, setOpen] = useState(false);
+  const [openAccountPopover, setOpenAccountPopover] =
+    useState<AccountPopoverView>(null);
   const user = runtime.user;
+
+  const closeMobileSidebar = () => {
+    setMobileOpen(false);
+    setOpenAccountPopover((current) => (current === "mobile" ? null : current));
+  };
+
+  const handleMobileSidebarOpenChange = (open: boolean) => {
+    setMobileOpen(open);
+    if (!open) {
+      setOpenAccountPopover((current) =>
+        current === "mobile" ? null : current
+      );
+    }
+  };
 
   const getNavTitle = (title: string, translationKey?: string) =>
     translationKey ? t(translationKey) : title;
 
   const handleSignOut = async () => {
-    setOpen(false);
+    setOpenAccountPopover(null);
     await runtime.actions.onSignOut();
   };
 
   const handleSettingsClick = () => {
-    setOpen(false);
+    setOpenAccountPopover(null);
     router.push("/dashboard/settings");
   };
 
@@ -62,7 +79,7 @@ export function DashboardSidebar() {
             className="flex items-center gap-2"
             onClick={(event) => {
               if (mobile) {
-                setMobileOpen(false);
+                closeMobileSidebar();
               } else if (collapsed) {
                 event.preventDefault();
                 toggleSidebar();
@@ -125,7 +142,7 @@ export function DashboardSidebar() {
                       key={item.href}
                       href={item.href}
                       title={collapsed ? translatedTitle : undefined}
-                      onClick={() => mobile && setMobileOpen(false)}
+                      onClick={() => mobile && closeMobileSidebar()}
                       className={cn(
                         "flex items-center gap-3 rounded-md px-2 py-1.5 text-sm font-medium transition-colors",
                         isActive
@@ -148,7 +165,14 @@ export function DashboardSidebar() {
 
         <div className="border-t border-sidebar-border p-3">
           {user ? (
-            <Popover open={open} onOpenChange={setOpen}>
+            <Popover
+              open={openAccountPopover === (mobile ? "mobile" : "desktop")}
+              onOpenChange={(open) =>
+                setOpenAccountPopover(
+                  open ? (mobile ? "mobile" : "desktop") : null
+                )
+              }
+            >
               <PopoverTrigger asChild>
                 <button
                   type="button"
@@ -276,7 +300,7 @@ export function DashboardSidebar() {
       >
         {renderSidebarContent(false)}
       </aside>
-      <Sheet open={isMobileOpen} onOpenChange={setMobileOpen}>
+      <Sheet open={isMobileOpen} onOpenChange={handleMobileSidebarOpenChange}>
         <SheetContent
           side="left"
           className="w-64 bg-sidebar p-0 md:hidden [&>button:last-child]:hidden"

@@ -54,12 +54,12 @@ export function BillingSection() {
         </div>
 
         <div className="rounded-lg border p-6">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-4">
               <PlanBadge plan={model.currentPlan} size="lg" showLabel={false} />
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-semibold">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="min-w-0 break-words text-lg font-semibold">
                     {model.currentPlanName} Plan
                   </h3>
                   <Badge variant="secondary">{t("currentPlan.current")}</Badge>
@@ -80,7 +80,7 @@ export function BillingSection() {
               </Button>
             )}
             {model.currentPlan !== "free" && (
-              <div className="flex items-center gap-2">
+              <div className="flex max-w-full flex-wrap items-center gap-2">
                 {state.isCancelPending ? (
                   <>
                     <Badge variant="secondary" className="text-warning">

@@ -3,6 +3,7 @@ import { getLocale } from "next-intl/server";
 
 import { siteConfig } from "@/config";
 import { ThemeProvider } from "@/features/shared";
+import { AppRuntimeProvider } from "@/modules/app-runtime";
 import { skinConfig } from "@/skin/config";
 import { fontClassName, fontVariables } from "@/skin/fonts";
 
@@ -68,7 +69,7 @@ export default async function RootLayout({
         style={fontVariables}
       >
         <ThemeProvider defaultTheme={skinConfig.defaultTheme}>
-          {children}
+          <AppRuntimeProvider>{children}</AppRuntimeProvider>
         </ThemeProvider>
       </body>
     </html>

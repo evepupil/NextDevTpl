@@ -4,6 +4,12 @@
  * 定义各计划的特权限制和功能访问权限
  */
 
+import { PLAN_CATALOG } from "@/core/plans/catalog";
+import {
+  type QueuePriority as CoreQueuePriority,
+  PLAN_IDS,
+  type PlanId,
+} from "@/core/plans/contracts";
 import { PRICE_IDS } from "./payment";
 
 // ============================================
@@ -13,12 +19,12 @@ import { PRICE_IDS } from "./payment";
 /**
  * 订阅计划类型
  */
-export type SubscriptionPlan = "free" | "starter" | "pro" | "ultra";
+export type SubscriptionPlan = PlanId;
 
 /**
  * 队列优先级
  */
-export type QueuePriority = "normal" | "priority" | "highest";
+export type QueuePriority = CoreQueuePriority;
 
 /**
  * 计划特权配置
@@ -41,32 +47,19 @@ export interface PlanPrivileges {
 /**
  * 各计划的特权配置
  */
-export const PLAN_PRIVILEGES: Record<SubscriptionPlan, PlanPrivileges> = {
-  free: {
-    name: "Free",
-    maxFileSizeBytes: 5 * 1024 * 1024, // 5MB
-    queuePriority: "normal",
-    monthlyCredits: 200, // 一次性
-  },
-  starter: {
-    name: "Starter",
-    maxFileSizeBytes: 20 * 1024 * 1024, // 20MB
-    queuePriority: "normal",
-    monthlyCredits: 3_000,
-  },
-  pro: {
-    name: "Pro",
-    maxFileSizeBytes: 50 * 1024 * 1024, // 50MB
-    queuePriority: "priority",
-    monthlyCredits: 8_000,
-  },
-  ultra: {
-    name: "Ultra",
-    maxFileSizeBytes: 100 * 1024 * 1024, // 100MB
-    queuePriority: "highest",
-    monthlyCredits: 16_000,
-  },
-};
+function createPlanPrivileges(plan: PlanId): PlanPrivileges {
+  const config = PLAN_CATALOG.plans[plan];
+  return {
+    name: config.name,
+    maxFileSizeBytes: config.maxFileSizeBytes,
+    queuePriority: config.queuePriority,
+    monthlyCredits: config.monthlyCredits,
+  };
+}
+
+export const PLAN_PRIVILEGES = Object.fromEntries(
+  PLAN_IDS.map((planId) => [planId, createPlanPrivileges(planId)])
+) as Record<SubscriptionPlan, PlanPrivileges>;
 
 // ============================================
 // Price ID 到计划的映射

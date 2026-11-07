@@ -1,8 +1,10 @@
 import { z } from "zod";
 
 import { redactValue } from "@/lib/redaction";
-
+import type { TelemetryEventName } from "../modules/telemetry-events";
 import type { AdapterDescriptor, JsonObject, JsonValue } from "./common";
+
+export type { TelemetryEventName } from "../modules/telemetry-events";
 
 export type TelemetryProvider = "ga4" | "logger" | "noop" | "posthog" | "umami";
 export type TelemetrySource = "client" | "server" | "system";
@@ -474,9 +476,7 @@ export const telemetryEventRegistry = {
       1: { attributes: emptyAttributesSchema, sources: ["server"] },
     },
   },
-} as const;
-
-export type TelemetryEventName = keyof typeof telemetryEventRegistry;
+} as const satisfies Record<TelemetryEventName, unknown>;
 
 function addEventDefinitionIssues(
   value: {

@@ -3,6 +3,7 @@ import { siteNavigation } from "@/modules/site-navigation";
 export interface MarketingSiteNavigation {
   blogHref: string | null;
   cookiePolicyHref: string | null;
+  docsHref?: string | null;
   pseoHref: string | null;
   privacyHref: string | null;
   termsHref: string | null;
@@ -11,6 +12,7 @@ export interface MarketingSiteNavigation {
 export const marketingSiteNavigation: MarketingSiteNavigation = {
   blogHref: siteNavigation.blogHref,
   cookiePolicyHref: siteNavigation.cookiePolicyHref,
+  docsHref: siteNavigation.docsHref,
   pseoHref: siteNavigation.pseoHref,
   privacyHref: siteNavigation.privacyHref,
   termsHref: siteNavigation.termsHref,
@@ -21,6 +23,7 @@ export function filterMarketingNavigation<T extends { href: string }>(
   routes: MarketingSiteNavigation
 ): T[] {
   return links.filter((link) => {
+    if (link.href === "/docs") return routes.docsHref !== null;
     if (link.href === "/blog") return routes.blogHref !== null;
     if (link.href === "/pseo") return routes.pseoHref !== null;
     if (link.href === "/legal/cookie-policy") {

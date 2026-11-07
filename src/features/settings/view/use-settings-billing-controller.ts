@@ -21,45 +21,15 @@ import {
 } from "@/features/settings/utils";
 import { getMyPlanAction } from "@/features/subscription/actions";
 
-export interface SettingsBillingHistoryItem {
-  createdAt: string;
-  effectiveAt: string;
-  eventType: string;
-  fromPlanName: string | null;
-  id: string;
-  toPlanName: string | null;
-}
+import type { SettingsBillingController } from "./contracts";
 
-export interface SettingsBillingModel {
-  currentPeriodEnd: string | null;
-  currentPlan: SubscriptionPlan;
-  currentPlanName: string;
-  history: SettingsBillingHistoryItem[];
-  monthlyCredits: number;
-  pendingPlan: { name: string } | null;
-  pendingPriceEffectiveAt: string | null;
-  priceDisplay: string;
-  priceInterval: string;
-}
-
-export interface SettingsBillingState {
-  cancelDialogOpen: boolean;
-  isCancelling: boolean;
-  isCancelPending: boolean;
-}
-
-export interface SettingsBillingActions {
-  onCancelSubscription: () => void;
-  onResumeSubscription: () => void;
-  refreshBilling: () => void;
-  setCancelDialogOpen: (open: boolean) => void;
-}
-
-export interface SettingsBillingController {
-  actions: SettingsBillingActions;
-  model: SettingsBillingModel;
-  state: SettingsBillingState;
-}
+export type {
+  SettingsBillingActions,
+  SettingsBillingController,
+  SettingsBillingHistoryItem,
+  SettingsBillingModel,
+  SettingsBillingState,
+} from "./contracts";
 
 const SUBSCRIPTION_PLANS = ["free", "starter", "pro", "ultra"] as const;
 

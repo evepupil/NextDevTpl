@@ -18,6 +18,7 @@ export type {
   SignUpModel,
   SignUpState,
   ViewContracts,
+  WorkspaceSessionController,
 } from "./contracts";
 export { authSiteName } from "./site-data";
 export type { AuthSiteNavigation } from "./site-navigation";
@@ -26,5 +27,4 @@ export { useForgotPasswordController } from "./use-forgot-password-controller";
 export { useResetPasswordController } from "./use-reset-password-controller";
 export { useSignInController } from "./use-sign-in-controller";
 export { useSignUpController } from "./use-sign-up-controller";
-export type { WorkspaceSessionController } from "./use-workspace-session-controller";
 export { useWorkspaceSessionController } from "./use-workspace-session-controller";

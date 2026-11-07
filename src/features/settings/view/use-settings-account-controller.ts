@@ -6,10 +6,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import type { ChangeEvent } from "react";
 import { useState, useTransition } from "react";
-import type { SubmitHandler, UseFormReturn } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import type { z } from "zod";
 
 import {
   deleteAccountAction,
@@ -24,41 +22,19 @@ import { usePathname, useRouter } from "@/i18n/routing";
 import { signOut } from "@/lib/auth/client";
 import { navigateAfterSignOut } from "@/lib/auth/navigation";
 
-import type { SettingsPageViewProps } from "./contracts";
+import type {
+  SettingsAccountController,
+  SettingsPageViewProps,
+  SettingsProfileValues,
+} from "./contracts";
 
-type SettingsProfileValues = z.infer<typeof updateProfileSchema>;
-
-export interface SettingsAccountModel {
-  avatarUrl: string | undefined;
-  locale: string;
-  maxAvatarSizeMegabytes: number;
-  supportedImageTypes: string;
-  user: SettingsPageViewProps["user"];
-  form: UseFormReturn<SettingsProfileValues>;
-}
-
-export interface SettingsAccountState {
-  avatarPreview: string | null;
-  isChangingLocale: boolean;
-  isDeleteDialogOpen: boolean;
-  isDeletingAccount: boolean;
-  isProfileSaving: boolean;
-  isUploadingAvatar: boolean;
-}
-
-export interface SettingsAccountActions {
-  onAvatarFileChange: (event: ChangeEvent<HTMLInputElement>) => Promise<void>;
-  onDeleteAccount: () => void;
-  onLanguageChange: (locale: string) => void;
-  onProfileSubmit: SubmitHandler<SettingsProfileValues>;
-  setDeleteDialogOpen: (open: boolean) => void;
-}
-
-export interface SettingsAccountController {
-  actions: SettingsAccountActions;
-  model: SettingsAccountModel;
-  state: SettingsAccountState;
-}
+export type {
+  SettingsAccountActions,
+  SettingsAccountController,
+  SettingsAccountModel,
+  SettingsAccountState,
+  SettingsProfileValues,
+} from "./contracts";
 
 export function useSettingsAccountController(
   user: SettingsPageViewProps["user"]

@@ -1,6 +1,4 @@
-import { type Locale, redirect } from "@/i18n/routing";
-import { getServerSession } from "@/lib/auth/server";
-import { skinViews } from "@/modules/skin-views";
+import { SettingsPage as SettingsPageView } from "@/modules/view-pages";
 
 /**
  * 设置页面元数据
@@ -22,25 +20,5 @@ export default async function SettingsPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  // 获取当前用户会话
-  const session = await getServerSession();
-
-  // 如果用户未登录，重定向到登录页
-  if (!session?.user) {
-    redirect({ href: "/sign-in", locale: locale as Locale });
-    return null;
-  }
-
-  const SettingsPageView = skinViews["settings.page"];
-
-  return (
-    <SettingsPageView
-      user={{
-        id: session.user.id,
-        name: session.user.name || "",
-        email: session.user.email || "",
-        image: session.user.image ?? null,
-      }}
-    />
-  );
+  return <SettingsPageView locale={locale} />;
 }

@@ -19,6 +19,7 @@ const ROOT_DIRECTORIES = new Set([
   "ui",
   "views",
 ]);
+const MAX_DEMO_DATA_BYTES = 262_144;
 
 export interface SkinPackageFiles {
   files: readonly string[];
@@ -50,6 +51,20 @@ export async function validateSkinPackageFiles(
         : !ROOT_FILES.has(file)
     ) {
       failSkin(["Package contains a file outside the skin package layout"]);
+    }
+  }
+
+  if (manifest.demo) {
+    const demoPath = resolvePackagePath(directory, manifest.demo.data);
+    const demoStat = await lstat(demoPath);
+    if (
+      !demoStat.isFile() ||
+      demoStat.isSymbolicLink() ||
+      demoStat.size > MAX_DEMO_DATA_BYTES
+    ) {
+      failSkin([
+        "demo.data must be a regular JSON file no larger than 256 KiB",
+      ]);
     }
   }
 

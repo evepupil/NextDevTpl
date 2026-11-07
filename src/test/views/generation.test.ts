@@ -97,9 +97,15 @@ describe("generated view ownership", () => {
       join(target, "src/modules/view-runtime.ts"),
       "utf8"
     );
+    const pageFacades = await readFile(
+      join(target, "src/modules/view-pages.tsx"),
+      "utf8"
+    );
     expect(runtime).not.toContain("@/features/dashboard");
     expect(runtime).not.toContain("@/features/credits");
     expect(runtime).not.toContain("@/features/subscription");
+    expect(pageFacades).not.toContain("getWorkspaceSession");
+    expect(pageFacades).not.toContain("@/i18n/routing");
   });
 
   it("keeps an authless dashboard free of authentication imports", async () => {
@@ -152,8 +158,15 @@ describe("generated view ownership", () => {
       join(target, "src/app/[locale]/(dashboard)/dashboard/page.tsx"),
       "utf8"
     );
+    const pageFacades = await readFile(
+      join(target, "src/modules/view-pages.tsx"),
+      "utf8"
+    );
     expect(data).not.toContain("@/features/subscription/server");
+    expect(data).not.toContain("@/features/dashboard/server");
     expect(runtime).toContain("@/features/subscription/view");
-    expect(page).toContain('skinViews["shared.empty-dashboard"]');
+    expect(pageFacades).not.toContain("getDashboardViewData");
+    expect(page).toContain("<DashboardPage locale={locale} />");
+    expect(pageFacades).toContain('skinViews["shared.empty-dashboard"]');
   });
 });

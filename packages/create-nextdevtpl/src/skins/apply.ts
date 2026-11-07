@@ -83,11 +83,28 @@ export async function applySkinPackage(
   });
 
   const selectedFiles = new Set<string>(REQUIRED_ROOT_FILES);
+  const declaredFileAssets = new Set(
+    currentManifest.assets
+      .filter((asset) => asset.kind === "file")
+      .flatMap((asset) => asset.files ?? [])
+  );
+  if (
+    (options.additionalAssetFiles ?? []).some(
+      (file) => !declaredFileAssets.has(file)
+    )
+  ) {
+    failSkin(["Additional skin assets must be declared file assets"]);
+  }
+  for (const file of options.additionalAssetFiles ?? []) {
+    selectedFiles.add(file);
+  }
   for (const locale of ["en", "zh"] as const) {
     const messageFile = `messages/${locale}.json`;
     if (fileContents.has(messageFile)) selectedFiles.add(messageFile);
   }
-  for (const file of analysis.reachableFiles) selectedFiles.add(file);
+  for (const file of analysis.reachableFiles) {
+    if (!file.startsWith("demo/")) selectedFiles.add(file);
+  }
   for (const file of fileInfo.files) {
     if (file === "DESIGN.md") selectedFiles.add(file);
   }
@@ -157,7 +174,7 @@ export async function applySkinPackage(
       },
     ];
   });
-  const outputManifest = parseSkinManifest({
+  const outputManifestInput = {
     ...currentManifest,
     modules: selectedModules,
     viewEntries: Object.fromEntries(
@@ -174,7 +191,9 @@ export async function applySkinPackage(
       )
     ),
     files: outputFiles,
-  });
+  };
+  delete outputManifestInput.demo;
+  const outputManifest = parseSkinManifest(outputManifestInput);
   const outputManifestJson = serializeSkinManifest(outputManifest);
   const outputManifestPath = resolve(skinRoot, "skin.json");
   await writeFile(outputManifestPath, outputManifestJson, "utf8");

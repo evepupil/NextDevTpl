@@ -55,6 +55,7 @@ export interface SkinManifest {
   customization: SkinCustomization;
   supportsPalettes: boolean;
   dependencies: Readonly<Record<string, string>>;
+  demo?: { data: string };
   assets: readonly SkinAsset[];
   files: Readonly<Record<string, string>>;
 }
@@ -78,6 +79,7 @@ export interface ApplySkinOptions {
   targetDirectory: string;
   catalog: RecipeCatalog;
   selectedModules: readonly string[];
+  additionalAssetFiles?: readonly string[];
 }
 
 export interface ApplySkinResult {

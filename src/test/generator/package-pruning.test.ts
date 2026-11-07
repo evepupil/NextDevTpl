@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import repositoryPackage from "../../../package.json";
 import { pruneRepositoryOnlyPackageEntries } from "../../../packages/create-nextdevtpl/src/package-pruning";
 
 // 构造一份带仓库专用截图基线条目的 package.json，避免依赖仓库根
@@ -92,6 +93,31 @@ describe("pruneRepositoryOnlyPackageEntries", () => {
     });
 
     expect(packageJson.scripts.lint).toBe(customCommand);
+  });
+
+  it("keeps current repository commands runnable without repository preparation", () => {
+    const generated = pruneRepositoryOnlyPackageEntries(
+      structuredClone(repositoryPackage)
+    );
+
+    expect(generated.scripts).not.toHaveProperty("prepare:demo-contract");
+    expect(generated.scripts).toMatchObject({
+      build: "next build --webpack",
+      lint: "biome lint .",
+      format: "biome format --write .",
+      check: "biome check --write .",
+      typecheck: "tsc --noEmit",
+      postinstall: "fumadocs-mdx",
+      test: "vitest",
+      "test:ui": "vitest --ui",
+      "test:run": "vitest run",
+      "test:coverage": "vitest run --coverage",
+    });
+    expect(
+      Object.values(generated.scripts).some((command) =>
+        command.includes("prepare:demo-contract")
+      )
+    ).toBe(false);
   });
 
   it("prunes any script matching the visual: prefix", () => {

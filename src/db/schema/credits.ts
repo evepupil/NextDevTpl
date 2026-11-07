@@ -8,7 +8,7 @@ import {
   timestamp,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
-
+import { CREDIT_TRANSACTION_TYPES } from "@/core/credits/contracts";
 import { user } from "./auth";
 
 export const creditsBalanceStatusEnum = pgEnum("credits_balance_status", [
@@ -27,13 +27,7 @@ export const creditsBatchSourceEnum = pgEnum("credits_batch_source", [
   "refund",
 ]);
 export const creditsTransactionTypeEnum = pgEnum("credits_transaction_type", [
-  "purchase",
-  "consumption",
-  "monthly_grant",
-  "registration_bonus",
-  "admin_grant",
-  "expiration",
-  "refund",
+  ...CREDIT_TRANSACTION_TYPES,
 ]);
 
 export const creditsBalance = pgTable("credits_balance", {

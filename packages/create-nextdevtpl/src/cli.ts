@@ -13,6 +13,7 @@ import type {
 const HELP = `create-nextdevtpl <directory> [options]
 
 Options:
+  --mode full|demo
   --preset minimal|saas|ai-saas|custom
   --modules auth,dashboard,...
   --target server|docker|vercel|cloudflare
@@ -63,6 +64,7 @@ export function parseCliArguments(
 
   let targetDirectory: string | undefined;
   let preset: PresetName | undefined;
+  let mode: GeneratorOptions["mode"];
   let target: DeploymentTarget | undefined;
   let modules: string[] | undefined;
   let install = true;
@@ -81,6 +83,16 @@ export function parseCliArguments(
     }
     if (argument === "--preset") {
       preset = readValue(args, index, argument) as PresetName;
+      index += 1;
+      continue;
+    }
+    if (argument === "--mode") {
+      if (mode !== undefined) throw new Error("Duplicate --mode option");
+      const value = readValue(args, index, argument);
+      if (value !== "full" && value !== "demo") {
+        throw new Error("Mode must be full or demo");
+      }
+      mode = value;
       index += 1;
       continue;
     }
@@ -189,6 +201,7 @@ export function parseCliArguments(
   return {
     targetDirectory,
     install,
+    ...(mode ? { mode } : {}),
     ...(preset ? { preset } : {}),
     ...(target ? { target } : {}),
     skin,

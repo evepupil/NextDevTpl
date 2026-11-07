@@ -5,10 +5,9 @@ import { useEffect } from "react";
 
 import { getMyCreditsBalance } from "@/features/credits/actions";
 
-export interface BalanceBadgeController {
-  balance: number;
-  isPending: boolean;
-}
+import type { BalanceBadgeController } from "./contracts";
+
+export type { BalanceBadgeController } from "./contracts";
 
 export function useBalanceBadgeController(): BalanceBadgeController {
   const { execute, result, isPending } = useAction(getMyCreditsBalance);

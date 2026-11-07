@@ -1,7 +1,4 @@
-import { getSupportListViewData } from "@/features/support/server";
-import { redirect } from "@/i18n/routing";
-import { getServerSession } from "@/lib/auth/server";
-import { skinViews } from "@/modules/skin-views";
+import { SupportListPage as SupportListPageView } from "@/modules/view-pages";
 
 /**
  * 用户工单列表页面
@@ -14,15 +11,5 @@ export default async function SupportPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  // 获取当前用户会话
-  const session = await getServerSession();
-  if (!session?.user) {
-    redirect({ href: "/sign-in", locale });
-    return null;
-  }
-
-  const data = await getSupportListViewData(session.user.id, locale);
-  const View = skinViews["support.list"];
-
-  return <View {...data} />;
+  return <SupportListPageView locale={locale} />;
 }

@@ -1,5 +1,5 @@
 import { and, desc, eq, inArray } from "drizzle-orm";
-
+import type { SubscriptionHistoryEventType } from "@/core/plans/contracts";
 import type { DatabaseTransaction } from "@/db";
 import {
   type NewSubscriptionHistory,
@@ -7,19 +7,7 @@ import {
   subscriptionHistory,
 } from "@/db/schema/subscription";
 
-export type SubscriptionHistoryEventType =
-  | "created"
-  | "upgraded"
-  | "downgraded"
-  | "upgrade_requested"
-  | "upgrade_confirmed"
-  | "downgrade_requested"
-  | "downgrade_confirmed"
-  | "cancellation_requested"
-  | "cancellation_resumed"
-  | "canceled"
-  | "renewed"
-  | "changed";
+export type { SubscriptionHistoryEventType } from "@/core/plans/contracts";
 
 export type SubscriptionHistorySourceType = "action" | "system" | "webhook";
 

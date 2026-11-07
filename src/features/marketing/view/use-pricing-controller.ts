@@ -9,6 +9,8 @@ import {
   PLAN_PRIVILEGES,
   type SubscriptionPlan,
 } from "@/config/subscription-plan";
+import { PLAN_CATALOG } from "@/core/plans/catalog";
+import { PLAN_IDS } from "@/core/plans/contracts";
 import {
   changeSubscriptionPlan,
   createCheckoutSession,
@@ -20,50 +22,7 @@ import { useSession } from "@/lib/auth/client";
 
 import type { MarketingPricingController } from "./contracts";
 
-const planFeatureKeys: Record<SubscriptionPlan, readonly string[]> = {
-  free: [
-    "creditsNeverExpire",
-    "input",
-    "characters",
-    "fileSize",
-    "export",
-    "history",
-  ],
-  starter: [
-    "creditsNeverExpire",
-    "input",
-    "characters",
-    "fileSize",
-    "export",
-    "history",
-    "support",
-  ],
-  pro: [
-    "creditsNeverExpire",
-    "input",
-    "characters",
-    "fileSize",
-    "queue",
-    "export",
-    "history",
-    "customCards",
-    "support",
-  ],
-  ultra: [
-    "creditsNeverExpire",
-    "input",
-    "characters",
-    "fileSize",
-    "queue",
-    "export",
-    "history",
-    "customCards",
-    "aiAssist",
-    "support",
-  ],
-};
-
-const planIds = Object.keys(PLAN_PRIVILEGES) as SubscriptionPlan[];
+const planIds: readonly SubscriptionPlan[] = PLAN_IDS;
 
 export function usePricingController(
   currentPriceId?: string | null
@@ -173,6 +132,7 @@ export function usePricingController(
 
   const plans = planIds.map((planId) => {
     const config = paymentConfig.plans[planId];
+    const catalogPlan = PLAN_CATALOG.plans[planId];
     const price = getCurrentPrice(planId);
     const isCurrent =
       !!config &&
@@ -195,8 +155,8 @@ export function usePricingController(
       isCurrent,
       isPending,
       isLoading: loadingPlan === planId,
-      isPopular: !!config && "popular" in config && !!config.popular,
-      featureKeys: planFeatureKeys[planId],
+      isPopular: "popular" in catalogPlan ? catalogPlan.popular : false,
+      featureKeys: catalogPlan.featureKeys,
     };
   });
 
@@ -204,7 +164,7 @@ export function usePricingController(
     plans,
     isYearly,
     setIsYearly,
-    yearlyDiscount: paymentConfig.yearlyDiscount,
+    yearlyDiscount: PLAN_CATALOG.yearlyDiscount,
     isPending,
     hasSubscription,
     onSubscribe: handleSubscribe,

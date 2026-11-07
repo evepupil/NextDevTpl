@@ -66,6 +66,48 @@ ${viewSpreads.join("\n")}
 `;
 }
 
+export function createDemoSkinViewsSource(
+  catalog: RecipeCatalog,
+  viewEntries: Readonly<Record<string, string>>
+): string {
+  const entries = [
+    ["dashboard", "dashboard.overview", "DemoDashboardSkinView"],
+    ["settings", "settings.page", "DemoSettingsSkinView"],
+    ["support", "support.list", "DemoSupportListSkinView"],
+    ["support", "support.detail", "DemoSupportDetailSkinView"],
+    ["shared", "shared.empty-dashboard", "DemoEmptyDashboardSkinView"],
+  ] as const;
+  const imports = new Map<string, string>();
+  for (const [moduleId, viewId] of entries) {
+    const entry = viewEntries[moduleId];
+    const recipe = catalog.modules[moduleId];
+    if (!entry || !recipe?.views?.some((view) => view.id === viewId)) {
+      throw new Error(`Demo skin is missing the ${viewId} view entry`);
+    }
+    const alias = `Demo${moduleId[0]?.toUpperCase()}${moduleId.slice(1)}Views`;
+    imports.set(alias, sourceAlias(`src/skin/${entry}`));
+  }
+  const importLines = [...imports].map(
+    ([alias, path]) => `import { views as ${alias} } from "${path}";`
+  );
+  const properties = entries.map(([moduleId, viewId, exportName]) => {
+    const alias = `Demo${moduleId[0]?.toUpperCase()}${moduleId.slice(1)}Views`;
+    return `export const ${exportName} = ${alias}[${JSON.stringify(viewId)}];`;
+  });
+  return `"use client";\n\n${importLines.join("\n")}\n\n${properties.join("\n")}\n`;
+}
+
+export async function writeDemoSkinViews(
+  target: string,
+  catalog: RecipeCatalog,
+  viewEntries: Readonly<Record<string, string>>
+): Promise<void> {
+  await writeText(
+    resolve(target, "src", "modules", "demo-skin-views.ts"),
+    createDemoSkinViewsSource(catalog, viewEntries)
+  );
+}
+
 export async function writeSelectedSkinViews(
   target: string,
   selectedModules: readonly string[],
