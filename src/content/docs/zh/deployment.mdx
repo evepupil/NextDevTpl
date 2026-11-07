@@ -1,15 +1,17 @@
 ---
 title: 部署
-description: 部署到 Server、Docker Compose、Vercel 或 Cloudflare Workers。
+description: 按完整或演示模式部署到受支持的运行目标。
 ---
 
 # 部署
 
-生成器会根据 `--target` 只保留一个平台的配置。先确认
-`nextdevtpl.generated.json` 中的 `target`，完成生产迁移和环境变量配置，再执行
-对应流程。
+先检查 `nextdevtpl.generated.json` 中的 `mode` 和 `target`，再按对应模式准备环境。完整模式
+支持 `server`、`docker`、`vercel` 和 `cloudflare`；演示模式只支持 `server`，没有数据库、
+业务密钥或 API 健康端点。
 
-## 通用发布门禁
+## 完整项目的发布检查
+
+安装并运行项目门禁：
 
 ```bash
 pnpm install --frozen-lockfile
@@ -19,52 +21,54 @@ pnpm test:run
 pnpm build
 ```
 
-生产 URL 至少同步到 `NEXT_PUBLIC_APP_URL` 和 `BETTER_AUTH_URL`。OAuth 回调、支付
-webhook、Inngest、对象存储 CORS 等外部后台也要使用正式域名。
+生产站点 URL 和 OAuth、支付 webhook、Inngest、对象存储 CORS 等服务后台应使用同一正式域名。
+只配置当前生成清单与 `.env.example` 中保留的能力。
 
 ## Server
 
-要求 Node.js 24、pnpm 10、PostgreSQL 和 systemd。
+完整项目要求 Node.js 24 和 pnpm 10。选中数据库时，准备 PostgreSQL 连接并在生产发布前应用
+迁移。
 
-1. 填写 `.env.production`，把它留在服务器安全目录。
-2. 生成并审核首次迁移：`pnpm db:generate:init`。
-3. 加载生产环境后执行 `pnpm deploy:server:build`。
+1. 在受保护目录准备 `.env.production`。
+2. 首次部署时生成并审查迁移：`pnpm db:generate:init`，然后按发布流程执行 `pnpm db:migrate`。
+3. 加载生产环境并执行 `pnpm deploy:server:build`。
 4. 上传 `.release/`，按实际用户和路径调整 `deploy/server/nextdevtpl.service`。
-5. 通过 Nginx、Caddy 等反向代理提供 TLS，并转发原始协议和主机头。
+5. 用 Nginx、Caddy 等反向代理提供 TLS，并转发原始协议和主机头。
 
-详细文件说明见 `deploy/server/README.md`。
+没有选中数据库的项目跳过数据库步骤。详细文件说明见 `deploy/server/README.md`。
 
 ## Docker Compose
 
-Compose 包含 PostgreSQL、一次性迁移服务和应用服务，数据库使用 named volume。
+Docker 目标仅用于完整模式。Compose 为数据库、一次性迁移和应用提供部署配置；实际变量以
+生成项目的 `.env.example` 与 Compose 文件为准。数据库使用 named volume。
 
 ```bash
 docker compose --env-file .env.production up -d --build
 ```
 
-至少修改 `POSTGRES_PASSWORD`、`BETTER_AUTH_SECRET` 和站点 URL。`migrate` 成功后
-应用才启动；升级前先备份 named volume 或外部数据库。详见
-`deploy/docker/README.md`。
+替换 `POSTGRES_PASSWORD`、`BETTER_AUTH_SECRET` 和站点 URL 等保留变量。升级前备份 named
+volume 或外部数据库。详见 `deploy/docker/README.md`。
 
 ## Vercel
 
-1. 把项目导入 Vercel，使用 Node.js 24 和 pnpm。
-2. 在各环境填写生成后的 `.env.example` 所需变量。
-3. 在本机或单实例发布任务运行 `pnpm db:migrate`。
-4. 发布应用，配置 OAuth、支付和 Inngest 回调。
-5. 用正式域名做健康检查。
+Vercel 目标仅用于完整模式。
 
-不要把迁移放进 Vercel `buildCommand`，并发构建可能重复执行迁移。Vercel 目标
-适合 Neon、S3 Compatible、Upstash 和 Inngest，实际组合以生成清单为准。
+1. 导入项目，选择 Node.js 24 和 pnpm。
+2. 为每个环境配置生成后的 `.env.example` 中保留的变量。
+3. 选中数据库时，在本机或单实例发布任务运行 `pnpm db:migrate`。
+4. 发布应用，并配置所选 OAuth、支付和 Inngest 回调。
+5. 对正式域名执行健康检查。
+
+不要把迁移放进 Vercel `buildCommand`，并发构建可能重复执行迁移。可用服务组合以生成清单为准。
 
 ## Cloudflare Workers
 
-Cloudflare 目标使用 OpenNext。生成器会输出 `open-next.config.ts`、Worker 入口、
-`wrangler.jsonc` 和 `cf:*` 脚本，并按选择加入 R2、AI、Email、Workflow 和 Rate
-Limiting Binding。
+Cloudflare 目标仅用于完整模式，使用 OpenNext。生成器会输出 Worker 入口、
+`open-next.config.ts`、`wrangler.jsonc` 和 `cf:*` 脚本，并按选择加入 R2、AI、Email、Workflow
+和 Rate Limiting Binding。
 
-1. 创建并绑定实际资源，检查 `wrangler.jsonc` 中的服务名和 bucket 配置。
-2. 用 `wrangler secret put` 写入 `DATABASE_URL`、认证密钥和供应商凭证。
+1. 创建或绑定实际资源，检查 `wrangler.jsonc` 中的 Worker 与 bucket 配置。
+2. 通过 `wrangler secret put` 或 Cloudflare 密钥管理添加数据库 URL、认证密钥和所选服务凭证。
 3. 生成 Worker 类型并构建：
 
 ```bash
@@ -80,16 +84,32 @@ pnpm exec wrangler deploy --dry-run --minify
 pnpm cf:deploy
 ```
 
-Workers 首版数据库使用 Neon HTTP 或 Hyperdrive 连接 PostgreSQL。D1 不在 3.x
-支持范围内。Worker 包使用 console logger，并移除 Pino 的 Node 文件写入依赖。
+当前完整模式的 Cloudflare 数据库路径使用 PostgreSQL 兼容服务（例如 Neon HTTP）；生成器
+尚未提供 D1 数据库选项。旧文档中关于 D1 的 3.x 说法只记录当时的支持范围；4.x 的其他部署
+目标按各自生成配置提供能力。Windows 本机 OpenNext 构建可能遇到符号链接限制，遇到时使用
+WSL 或 Linux CI 构建。
 
-## 上线检查
+## 演示项目
 
-四种目标都提供 `/api/health`：
+演示项目只有 `server` 目标，不需要业务环境变量、数据库迁移或供应商资源。部署时按普通 Next.js
+服务器构建和启动：
+
+```bash
+pnpm install --frozen-lockfile
+pnpm build
+pnpm start
+```
+
+演示项目不保留 `/api/health`；通过打开页面并操作本地样例验证运行状态。所有业务改动只存在于
+当前标签页内存中，刷新后恢复默认数据。
+
+## 完整项目的上线检查
+
+完整项目提供 `/api/health`：
 
 ```bash
 pnpm deploy:check -- https://your-domain.example/api/health
 ```
 
-返回 HTTP 200 且 `status` 为 `healthy` 后，再验证登录、数据库和所选支付、邮件、
-存储、AI、任务、限流流程。健康接口不会返回密钥原值。
+返回 HTTP 200 且 `status` 为 `healthy` 后，再验证登录、数据库以及所选支付、邮件、存储、AI、
+任务和限流流程。健康接口不会返回密钥原值。

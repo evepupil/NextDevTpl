@@ -230,6 +230,117 @@
         "vercel.json",
         "src/adapters/alerts/email.ts"
       ]
+    },
+    {
+      "id": "skin-local-server",
+      "mode": "full",
+      "preset": "minimal",
+      "skin": {
+        "kind": "local",
+        "directory": "tests/fixtures/skins/contrast"
+      },
+      "expectedSkinId": "contrast",
+      "target": "server",
+      "buildScript": "build",
+      "healthCheck": true,
+      "requiredPaths": ["src/skin/skin.json", "src/skin/tokens.css"],
+      "forbiddenPaths": [
+        "Dockerfile",
+        "compose.yaml",
+        "vercel.json",
+        "wrangler.jsonc"
+      ]
+    },
+    {
+      "id": "palette-minimal-server",
+      "mode": "full",
+      "preset": "minimal",
+      "palette": "glassmorphism",
+      "target": "server",
+      "buildScript": "build",
+      "healthCheck": true,
+      "requiredPaths": ["STYLEKIT-LICENSE.txt", "src/skin/tokens.css"],
+      "forbiddenPaths": [
+        "palettes",
+        "Dockerfile",
+        "compose.yaml",
+        "wrangler.jsonc"
+      ]
+    },
+    {
+      "id": "demo-minimal-server",
+      "mode": "demo",
+      "expectedPreset": "custom",
+      "target": "server",
+      "buildScript": "build",
+      "healthCheck": false,
+      "requiredPaths": [
+        "src/core/plans/catalog.ts",
+        "src/core/skin/demo/index.ts",
+        "src/modules/app-runtime.tsx",
+        "src/modules/demo-skin-views.ts",
+        "src/modules/view-pages.tsx",
+        "src/skin/skin.json"
+      ],
+      "forbiddenPaths": [
+        "src/app/api",
+        "src/app/[locale]/(admin)",
+        "src/app/[locale]/docs",
+        "src/adapters",
+        "src/db",
+        "src/services",
+        "Dockerfile",
+        "compose.yaml",
+        "vercel.json",
+        "open-next.config.ts",
+        "cloudflare",
+        "deploy/check-health.mjs",
+        "deploy/verify-production-health.mjs",
+        "deploy/server/build.sh",
+        "deploy/docker",
+        "deploy/vercel",
+        "drizzle.config.ts",
+        "wrangler.jsonc"
+      ]
+    },
+    {
+      "id": "demo-palette-server",
+      "mode": "demo",
+      "expectedPreset": "custom",
+      "palette": "glassmorphism",
+      "target": "server",
+      "buildScript": "build",
+      "healthCheck": false,
+      "requiredPaths": [
+        "STYLEKIT-LICENSE.txt",
+        "src/core/plans/catalog.ts",
+        "src/core/skin/demo/index.ts",
+        "src/modules/app-runtime.tsx",
+        "src/modules/demo-skin-views.ts",
+        "src/modules/view-pages.tsx",
+        "src/skin/skin.json"
+      ],
+      "forbiddenPaths": [
+        "palettes",
+        "src/app/api",
+        "src/app/[locale]/(admin)",
+        "src/app/[locale]/docs",
+        "src/adapters",
+        "src/db",
+        "src/services",
+        "Dockerfile",
+        "compose.yaml",
+        "vercel.json",
+        "open-next.config.ts",
+        "cloudflare",
+        "deploy/check-health.mjs",
+        "deploy/verify-production-health.mjs",
+        "deploy/server/build.sh",
+        "deploy/docker",
+        "deploy/vercel",
+        "drizzle.config.ts",
+        "wrangler.jsonc"
+      ]
     }
   ]
 }

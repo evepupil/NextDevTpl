@@ -1,74 +1,57 @@
 ---
-title: Introduction
-description: Learn how NextDevTpl 3.x generates apps and adds an optional operations kit.
+title: NextDevTpl Documentation
+description: Learn how NextDevTpl 4.0.0 generates projects, skins, full apps, and frontend demos.
 ---
 
 # NextDevTpl Documentation
 
-NextDevTpl 3.x is a composable Next.js SaaS starter. Select product modules,
-external service implementations, and a deployment platform; the generator
-keeps only the chosen source, packages, environment variables, database schema,
-and deployment files. Your project owns the generated code.
+NextDevTpl 4.0.0 selects one skin at generation time and produces an independent app for the chosen runtime mode. Full mode keeps the selected authentication, payment, credits, storage, mail, jobs, and deployment capabilities. Demo mode keeps the same product views and uses local sample data for interface interactions.
 
-The optional operations kit gives independent SaaS projects a typed event
-contract, consent-aware attribution, an admin metrics dashboard, revenue and AI
-cost read models, daily snapshots, and safe notifications without a hosted
-NextDevTpl analytics service.
+## Choose a Runtime Mode
 
-## Confirm what your project contains
+| Mode | Use it for | Generated result |
+| --- | --- | --- |
+| `full` (default) | Building a real product | Keeps product modules, service adapters, environment variables, database schema, and deployment files selected by a preset or custom configuration |
+| `demo` | Showing or evaluating the frontend | Keeps 17 user-facing routes and 20 skin views; generates a `server` project without business APIs, a database, auth, or payment services |
 
-`nextdevtpl.generated.json` in a generated project records the effective
-selection:
+Sign-in, profile, plan, and ticket actions in demo mode update only the current tab's in-memory data. Soft navigation and locale changes preserve those updates; refreshing or opening a new tab restores the default sample. Business data is not written to `localStorage` or cookies.
+
+The following excerpt shows the demo record's key fields; the actual file also contains catalog and skin source records:
 
 ```json
 {
-  "preset": "saas",
-  "target": "vercel",
-  "modules": ["auth", "dashboard", "marketing"],
-  "adapters": { "payment": "payment:creem" }
+  "mode": "demo",
+  "preset": "custom",
+  "target": "server",
+  "modules": [],
+  "adapters": {},
+  "bindings": [],
+  "viewModules": ["auth", "blog", "dashboard", "marketing", "pseo", "settings", "shared", "support"],
+  "demo": { "dataSha256": "..." }
 }
 ```
 
-Read this file first, then follow the matching feature pages. Unselected
-capabilities have already been removed and require no configuration.
+## Skins Are Selected During Generation
 
-## 3.x capabilities
+Use the built-in default skin, a local skin directory, or a remote HTTPS archive with `--skin`. Remote sources require an archive SHA-256 digest. Optional access tokens are read from the command environment and are not recorded in the generated manifest. See the [skin authoring guide](/en/docs/skin-authoring) for package structure, view IDs, asset licenses, and validation rules.
 
-| Area | Supported capabilities |
-| --- | --- |
-| Generation | `minimal`, `saas`, `ai-saas`, and custom selections with dependency resolution and source pruning |
-| Product | Auth, dashboard, marketing, settings, subscriptions, credits, admin, support, blog, and PSEO |
-| Payments | Shared contract with Creem or Stripe, subscriptions, one-time payments, and verified webhooks |
-| Mail | Disabled, Resend, SMTP, or Cloudflare Email |
-| Storage | S3-compatible presigned uploads or a Cloudflare R2 binding |
-| AI | OpenAI-compatible providers, Anthropic, or Workers AI |
-| Jobs | Inngest or Cloudflare Workflows plus protected cron handlers |
-| Rate limiting | No-op, Upstash Redis, or Cloudflare Rate Limiting bindings |
-| Platforms | Server, Docker Compose, Vercel, and Cloudflare Workers |
-| Operations | Typed telemetry, product/revenue/AI metrics, snapshots, alerts, health checks, structured logs, Sentry, Axiom, and compatibility gates |
+`--palette` is available only for the built-in default skin. The package includes an offline snapshot of 149 StyleKit themes. Selecting one adds its MIT attribution to the generated app.
 
-## Recommended path
+## Recommended Reading
 
 For a first project:
 
 1. [Quick Start](/en/docs/quick-start)
 2. [Generator and Presets](/en/docs/generator)
-3. [Feature Modules](/en/docs/feature-modules)
-4. [Configuration](/en/docs/configuration)
-5. [Operations](/en/docs/operations)
+3. [Skin Authoring](/en/docs/skin-authoring)
+4. [Feature Modules](/en/docs/feature-modules)
+5. [Configuration](/en/docs/configuration)
 
-For external services:
+For an upgrade:
 
-1. [Service Adapters](/en/docs/service-adapters)
-2. The matching payments, email, storage, AI, jobs, or observability page
+1. [Upgrade and Compatibility](/en/docs/upgrade)
+2. [Full repository upgrade guide](https://github.com/evepupil/NextDevTpl/blob/master/docs/%E5%8D%87%E7%BA%A7%E6%8C%87%E5%8D%97.md)
 
-Before production:
+## Two Ways to Use the Project
 
-1. [Deployment](/en/docs/deployment)
-2. [Upgrade and Compatibility](/en/docs/upgrade)
-
-## Two ways to use the project
-
-Use `create-nextdevtpl` for a clean product application. Clone the full
-repository when contributing to the template, extending official modules,
-running the compatibility matrix, or preparing a generator release.
+Use `create-nextdevtpl` to generate independently maintained product source. The full repository is for maintaining the template, official skins, modules, and generator; repository implementation details are documented in the corresponding public module guides.

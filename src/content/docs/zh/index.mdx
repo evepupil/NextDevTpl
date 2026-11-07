@@ -1,68 +1,57 @@
 ---
-title: 介绍
-description: 了解 NextDevTpl 3.x 的生成方式、内置能力和运营工具包。
+title: NextDevTpl 文档
+description: 了解 NextDevTpl 4.0.0 的项目生成、皮肤系统、完整模式和前端演示模式。
 ---
 
 # NextDevTpl 文档
 
-NextDevTpl 3.x 是可组合的 Next.js SaaS 模板。你可以选择产品模块、外部服务实现
-和部署平台，生成器只把选中的源码、依赖、环境变量、数据库表和部署文件放进
-新项目。生成后的代码归项目自己维护。
+NextDevTpl 4.0.0 在生成时选择一套皮肤，并根据运行模式生成独立应用。完整模式保留所选的认证、支付、积分、存储、邮件、任务和部署能力；演示模式保留同一套产品视图，以本地样例数据展示界面操作。
 
-可选的运营工具包提供类型化事件契约、遵循同意状态的来源归因、管理员指标驾驶舱、
-收入与 AI 成本读模型、每日快照和安全通知，不依赖 NextDevTpl 托管分析服务。
+## 先选择运行模式
 
-## 先确认项目包含什么
+| 模式 | 适合场景 | 生成结果 |
+| --- | --- | --- |
+| `full`（默认） | 构建真实产品 | 按预设或自定义选择保留产品模块、服务适配器、环境变量、数据库 Schema 和部署文件 |
+| `demo` | 展示或评估前端 | 固定保留 17 条用户路由、20 个皮肤视图；只生成 `server` 项目，不含业务 API、数据库、认证或支付服务 |
 
-生成项目根目录的 `nextdevtpl.generated.json` 是实际选择清单：
+演示模式中的登录、资料、套餐与工单动作只更新当前标签页内存。站内软导航和切换语言会保留改动；刷新或新开标签页后恢复默认样例。业务资料不写入 `localStorage` 或 Cookie。
+
+演示导出的生成记录关键字段如下；实际文件还包含 catalog 和皮肤来源记录：
 
 ```json
 {
-  "preset": "saas",
-  "target": "vercel",
-  "modules": ["auth", "dashboard", "marketing"],
-  "adapters": { "payment": "payment:creem" }
+  "mode": "demo",
+  "preset": "custom",
+  "target": "server",
+  "modules": [],
+  "adapters": {},
+  "bindings": [],
+  "viewModules": ["auth", "blog", "dashboard", "marketing", "pseo", "settings", "shared", "support"],
+  "demo": { "dataSha256": "..." }
 }
 ```
 
-先看这份文件，再阅读对应功能文档。未选能力已经从生成结果删除，无需配置。
+## 皮肤在生成时选定
 
-## 3.x 能力
+默认皮肤可直接使用，也可通过 `--skin` 指定本地皮肤目录或远端 HTTPS 归档。远端来源必须提供归档 SHA-256；可选的访问令牌只从命令执行环境读取，不保存在生成记录中。皮肤结构、视图编号、资源授权及检查要求见[皮肤制作指南](/zh/docs/skin-authoring)。
 
-| 类别 | 已支持内容 |
-| --- | --- |
-| 生成 | `minimal`、`saas`、`ai-saas`、自定义组合，自动补依赖并裁剪源码 |
-| 产品 | 认证、Dashboard、营销页、设置、订阅、积分、管理后台、工单、博客、PSEO |
-| 支付 | 统一接口，Creem 或 Stripe，支持订阅、一次性购买和验签 webhook |
-| 邮件 | Disabled、Resend、SMTP、Cloudflare Email |
-| 存储 | S3 Compatible 预签名上传或 Cloudflare R2 Binding |
-| AI | OpenAI Compatible、Anthropic、Workers AI |
-| 后台任务 | Inngest 或 Cloudflare Workflows，另有受保护 cron |
-| 限流 | No-op、Upstash Redis 或 Cloudflare Rate Limiting Binding |
-| 平台 | Server、Docker Compose、Vercel、Cloudflare Workers |
-| 运维 | 类型化埋点、产品/收入/AI 指标、快照、告警、健康检查、结构化日志、Sentry、Axiom、组合兼容性门禁 |
+`--palette` 只适用于内置默认皮肤。生成器随包提供 149 套 StyleKit 离线配色快照，选中后会把对应 MIT 署名写入生成项目。
 
-## 推荐路径
+## 推荐阅读
 
 第一次使用：
 
 1. [快速开始](/zh/docs/quick-start)
 2. [生成器与预设](/zh/docs/generator)
-3. [功能模块](/zh/docs/feature-modules)
-4. [配置说明](/zh/docs/configuration)
-5. [运营说明](/zh/docs/operations)
+3. [皮肤制作指南](/zh/docs/skin-authoring)
+4. [功能模块](/zh/docs/feature-modules)
+5. [配置说明](/zh/docs/configuration)
 
-接入外部服务：
+准备升级：
 
-1. [服务适配器](/zh/docs/service-adapters)
-2. 对应的支付、邮件、存储、AI、后台任务或可观测性页面
-
-准备上线：
-
-1. [部署](/zh/docs/deployment)
-2. [升级与兼容性](/zh/docs/upgrade)
+1. [升级与兼容性](/zh/docs/upgrade)
+2. [完整仓库升级指南](https://github.com/evepupil/NextDevTpl/blob/master/docs/%E5%8D%87%E7%BA%A7%E6%8C%87%E5%8D%97.md)
 
 ## 两种使用方式
 
-产品项目推荐使用 `create-nextdevtpl` 创建干净项目。克隆完整仓库适合参与模板
-开发、扩展官方模块、运行组合矩阵或准备生成器发布包。
+产品项目使用 `create-nextdevtpl` 生成独立源码。完整仓库用于维护模板、官方皮肤、模块和生成器；仓库实现细节请参考公开仓库中的对应模块文档。

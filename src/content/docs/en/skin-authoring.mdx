@@ -1,0 +1,162 @@
+---
+title: Skin Authoring
+description: Create, validate, and accept reusable skins for NextDevTpl 4.0.0.
+---
+
+# Skin Authoring
+
+A skin is a set of pages, shells, styles, fonts, and assets copied into an app during generation. A generated app contains one selected skin; it does not download or switch skins at runtime. Full apps and `demo` exports use the same skin views.
+
+## Directory Structure
+
+The skin root contains `skin.json` directly. The built-in skin uses the following organization; subdirectories can reflect the skin's needs:
+
+```text
+my-skin/
+├── skin.json
+├── tokens.css
+├── config.ts
+├── fonts.ts
+├── layouts/
+├── views/
+├── assets/
+└── demo/
+```
+
+`tokens.css`, `config.ts`, and `fonts.ts` are required. `layouts/` contains the marketing, auth, and workspace shells. Each `views/<module>/index.ts` exports that module's view map. Put licensed images and fonts in `assets/`; an optional demo data patch can live in `demo/`. Do not add APIs, Server Actions, databases, or deployment services to a skin package.
+
+## `skin.json`
+
+The manifest schema version is currently 1. Its important fields are:
+
+| Field | Purpose |
+| --- | --- |
+| `id`, `name`, `version` | Skin identifier, display name, and skin version |
+| `compatibility.template` | Supported template versions, for example `^4.0.0` |
+| `compatibility.viewApi` | View API version; currently `1` |
+| `modules` | Template modules supported by this skin |
+| `viewEntries` | Module IDs mapped to `views/<module>/index.ts` |
+| `uiOverrides` | Optional replacement files for named base UI components |
+| `customization` | Supported brand color, radius, font choices, and default light/dark theme |
+| `supportsPalettes` | Whether the skin declares StyleKit palette support; the CLI currently accepts palettes only with the built-in default skin |
+| `dependencies` | npm packages used by the skin, with fixed versions |
+| `assets` | Asset author, source, license, purpose, and file list |
+| `files` | SHA-256 for every package file except `skin.json` |
+| `demo.data` | Optional POSIX-relative path to a demo data patch |
+
+Generate a project with a local skin:
+
+```bash
+pnpm dlx create-nextdevtpl@4.0.0 my-app \
+  --skin ./my-skin \
+  --preset saas \
+  --target server
+```
+
+`modules` must include every module for which the skin declares a view entry, and the application's selected modules must be supported by the skin. The generator rejects unknown fields, missing or undeclared files, path traversal, digest mismatches, and incompatible versions. Use `/` in manifest paths on every operating system.
+
+## View IDs and Typed Contracts
+
+The default View API is version 1. Export a `views` object from each module entry. Keys match these fixed IDs and the props declared in the module's `view/contracts.ts`:
+
+| Module | View IDs |
+| --- | --- |
+| `auth` | `auth.layout`, `auth.sign-in`, `auth.sign-up`, `auth.forgot-password`, `auth.reset-password` |
+| `blog` | `blog.list`, `blog.post` |
+| `dashboard` | `dashboard.overview` |
+| `marketing` | `marketing.header`, `marketing.layout`, `marketing.home`, `marketing.legal` |
+| `pseo` | `pseo.list`, `pseo.detail` |
+| `settings` | `settings.page` |
+| `shared` | `shared.dashboard-layout`, `shared.empty-dashboard` |
+| `support` | `support.list`, `support.new`, `support.detail` |
+
+There are 20 registered views. The 17 user-facing routes also include two credit redirects. Skins provide view content; they do not add routes, copy the app route tree, or introduce selectable page-layout systems.
+
+Views communicate through public props, models, and action functions. Use the corresponding feature's public `view` entry and its controller contracts. Do not call databases, Server Actions, provider SDKs, or internal services directly. Full and demo modes share the same view contracts; the generator selects the controller implementation when it composes the app.
+
+## Styles, Shells, and Base Components
+
+- Declare skin tokens in `tokens.css`. Use the documented CSS variable names instead of hard-coding a second copy of the same colors in view components.
+- Use `config.ts` for skin-level configuration and the font variable interface in `fonts.ts`.
+- Implement the marketing, auth, and workspace shells under `layouts/`. They consume existing route state and do not perform session guards inside the skin.
+- Views may use registered base components. To replace one, map its existing component name to a skin file in `uiOverrides` and keep its public props, composition, and accessible behavior.
+- List only packages imported by reachable skin view code in `dependencies`, with explicit versions. The generator validates declared dependency compatibility and prunes from actual references; do not list the full application or build tools as skin dependencies.
+
+Skin choices apply only during generation. Do not add runtime skin downloads, a theme store, or Hero/workspace layout selection.
+
+## Asset Licensing and Brand Cleanup
+
+Register every third-party image, font, icon set, trademark, or other asset in `assets` with author, source, license, purpose, and exact files. Every package file except `skin.json` must appear in `files` with its SHA-256. Avatar paths use `assets/...`; demo avatar references must resolve to a declared, hashed skin file asset.
+
+Before distribution, inspect pages for default brand marks, sample domains, screenshots, email addresses, social accounts, OAuth brand assets, and hidden metadata. Remove NextDevTpl marks and any third-party branding you are not licensed to use. The repository's MIT license does not automatically cover fonts, trademarks, images, or external components.
+
+## Built-in, Local, and Remote Sources
+
+Omitting `--skin` uses built-in `default`. Local source paths are not recorded in the generated project. Remote skins use an HTTPS `.tgz` archive whose root directly contains `skin.json`; the generator does not strip a common outer folder. Remote sources require a trusted SHA-256 digest:
+
+```bash
+pnpm dlx create-nextdevtpl@4.0.0 my-app \
+  --skin https://skins.example.test/team/skin.tgz \
+  --skin-sha256 <trusted-64-digit-sha256> \
+  --target server
+```
+
+Private archives can use `--skin-token-env NAME`; the default variable is `NEXTDEVTPL_SKIN_TOKEN`. Do not put token values in flags. The generated record omits URLs, tokens, and local absolute paths. The built-in skin comes from the package's pinned snapshot; consumers are responsible for reviewing third-party skin sources.
+
+## StyleKit Palettes
+
+The bundled snapshot currently contains 149 StyleKit themes and is read offline during generation. `--palette <slug>` is available only for the built-in default skin; it is rejected for local or remote skins. The generated project contains only the selected palette variables and `STYLEKIT-LICENSE.txt`, not the theme catalog or a runtime theme switcher.
+
+To support palettes, declare the available color variables and radius range. Missing success, warning, and background decoration values are filled by generator rules; key foreground/background pairs receive contrast checks. A palette does not change view structure.
+
+## Demo Data and the Client Boundary
+
+Declare an optional data entry in the manifest:
+
+```json
+{
+  "demo": {
+    "data": "demo/data.json"
+  }
+}
+```
+
+The entry must be a regular JSON file under `demo/`, listed in `files`, and no larger than 256 KiB. Its root requires `schemaVersion: 1` and may include `snapshotAt`, `workspace`, and `support`; each object accepts only registered fields. The generator parses JSON with duplicate-key rejection, merges the patch into the default sample, and validates the complete result. Objects merge recursively; arrays replace as a whole; `null` is accepted only for explicitly nullable fields.
+
+Only `--mode demo` parses, merges, and validates the patch content. Full mode still compares each declared file's SHA-256 with its `files` digest, but does not parse or copy files under `demo/`.
+
+Demo output removes the `/docs` site. The generator passes `null` through the public `marketingSiteNavigation.docsHref` field, and the core marketing navigation filters its Docs item accordingly. A skin-authored Hero, footer, or button must also read `marketingSiteNavigation` from the public `@/features/marketing/view` export, show the link only when `docsHref !== null`, and use the supplied target when present. The field is optional: older full projects may leave it `undefined`, which preserves the legacy behavior where `/docs` is available. Do not hard-code an unconditional `/docs` link in demo UI. Authors do not need to edit internal `src/modules` files.
+
+The allowed data covers `workspace.user` identity, name, email, and avatar; `workspace.plan` ID, month/year interval, subscription state, period end, and pending change; `workspace.credits` balance, cumulative totals, batches, and transactions; `workspace.billingHistory`; and full support tickets and messages. Unknown fields, invalid references, duplicate IDs within a collection, unsafe integers, invalid enums, and non-canonical UTC timestamps are rejected.
+
+Validation limits:
+
+- IDs contain at most 64 ASCII letters, digits, underscores, or hyphens and are unique within their collection. User names are at most 80 characters; email strings are at most 254.
+- Credit balances and cumulative totals are non-negative safe integers. Batch remaining amounts and transaction amounts are positive safe integers. Batch totals must equal the balance. There can be up to 12 batches, 100 transactions, and 50 billing records.
+- A `monthly_grant` transaction requires a paid plan ID and `month` or `year` interval; other transaction types cannot include `grant`. Descriptions are at most 500 characters.
+- Plan IDs are `free`, `starter`, `pro`, or `ultra`. The free plan is monthly and cannot be active, scheduled for cancellation, or pending a plan change. Scheduled cancellation requires an active plan and period end; a pending plan and its effective date must either both be set or both be null.
+- Ticket categories are `billing`, `technical`, `bug`, `feature`, and `other`; priorities are `low`, `medium`, and `high`; statuses are `open`, `in_progress`, `resolved`, and `closed`. Subjects are 5–200 characters; messages are 1–5000 characters. There can be up to 50 tickets and 50 messages per ticket; message time cannot precede ticket creation.
+- Dates use the round-trip validated UTC form `YYYY-MM-DDTHH:mm:ss.sssZ`. `snapshotAt` is the sample's fixed UTC reference point, defaulting to `2026-11-07T00:00:00.000Z`; credit batch expiry is checked against it instead of the current clock.
+
+When changing the credit balance, supply batches whose remaining amounts still sum to that balance. A local patch is merged with the default sample and must satisfy the full relationship rules afterward.
+
+Allowed overrides include sample user, plan ID and interval, credit totals and ledger, billing history, and support tickets. Prices, currency, monthly plan credits, file limits, queue priority, and feature keys come from the shared plan catalog and cannot be changed by skin data.
+
+Demo mode uses the fixed view modules `auth`, `blog`, `dashboard`, `marketing`, `pseo`, `settings`, `shared`, and `support`. Only dynamic views that take over demo state need to run on the client; static blog and legal content may keep the application's asynchronous server content path. The preflight covers JSX and `React.createElement` forms and permits async event handlers. From code reachable by a dynamic view, do not import `server-only`, `next/headers`, a database, or server translation APIs, and do not use an async Server Component as a dynamic view.
+
+Shared core relative imports use `.js` specifiers for NodeNext compatibility. The generated demo project's Next webpack config maps `.js` requests to `.ts`/`.tsx` sources; keep those extensions when reusing shared code and do not copy the core source into the skin.
+
+The root provider owns one in-memory data copy per browser tab. Soft navigation and locale changes preserve it; a full refresh or new tab restores the generated sample. Do not store business profiles, passwords, tickets, or transactions in `localStorage`, cookies, or a server process.
+
+## Release Acceptance
+
+For every skin change, complete and record these checks:
+
+- Generate the default skin and new skin in the intended full-mode combinations; pass manifest, digest, reference, and generation checks.
+- When supporting demo mode, verify all 20 views and eight view modules against the same contracts; client preflight applies only to dynamic views that take over demo state.
+- Check full and demo output in English and Chinese, light and dark themes, and desktop and mobile layouts.
+- Exercise auth forms, monthly/yearly plan selection, profile forms, credit pagination, ticket creation, and replies. In demo mode, verify navigation preserves in-memory state and refresh resets it.
+- Install and build demo output without business environment variables or a database. Verify requests contain no business API, Server Action, or auth/payment/storage provider traffic. Normal Next soft-navigation requests are allowed.
+- Check long text, empty/loading/error states, keyboard operation, contrast, brand cleanup, and every asset license.
+
+Confirm the release's supported flags with CLI help. See the [Generator Guide](/en/docs/generator) and [Upgrade Guide](/en/docs/upgrade).

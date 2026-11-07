@@ -1,74 +1,91 @@
 ---
 title: 项目结构
-description: 了解 3.x 的模块内核、服务适配器、业务功能和部署目录。
+description: 了解生成项目的皮肤视图、共享核心、业务模块与部署配置。
 ---
 
 # 项目结构
 
-生成项目按职责分层。业务页面放在 `app` 和 `features`，可组合规则放在
-`core/modules`，供应商差异放在 `adapters`，业务统一从 `services` 调用外部能力。
+生成项目按职责划分。皮肤负责页面外观；核心提供视图约定、套餐配置和共享运行规则；完整
+模式中的业务模块通过服务接口使用外部能力。演示模式用浏览器内存中的样例数据替代业务
+后端。
 
 ## 核心目录
 
 ```text
 src/
-├── app/                 # 页面、Layout、API、webhook、health
-├── core/modules/        # 模块契约与校验
-├── core/services/       # 支付、邮件、存储、AI、任务、限流契约
-├── modules/             # 当前生成项目的模块注册表
-├── adapters/            # 当前选中的供应商实现
-├── services/            # 业务层使用的服务实例
-├── features/            # 产品功能模块
-├── db/schema/           # 按模块拆分的 Drizzle Schema
-├── content/             # 文档、博客和法律页 MDX
-├── config/              # 站点、导航、价格和套餐
-└── test/                # 核心逻辑和集成测试
+├── app/                       # 页面路由、布局和完整模式 API
+├── core/
+│   ├── modules/               # 模块合同与验证
+│   ├── plans/                 # 完整与演示模式共用的套餐数据
+│   ├── services/              # 支付、邮件、存储、AI、任务和限流合同
+│   └── skin/demo/             # 仅演示模式保留：样例数据、校验、状态和本地动作
+├── modules/
+│   ├── registry.ts             # 当前生成项目保留的模块
+│   ├── app-runtime.tsx         # 按模式装配应用运行入口
+│   ├── skin-views.ts           # 当前皮肤视图组合入口
+│   ├── view-pages.tsx          # 工作区页面的稳定入口
+│   └── demo-skin-views.ts      # 仅演示模式保留：客户端皮肤视图入口
+├── skin/
+│   ├── tokens.css              # 颜色、字体、圆角等外观变量
+│   ├── ui/                     # 皮肤覆盖的基础组件
+│   ├── layouts/                # 营销、认证和工作区外壳
+│   └── views/                  # 按业务模块分组的页面视图
+├── features/                   # 按模块组织的业务页面与逻辑
+├── adapters/                   # 完整模式实际选中的供应商实现
+├── services/                   # 业务使用的统一服务入口
+├── db/schema/                  # 完整模式所选数据库表
+├── config/                     # 站点、导航、套餐及功能配置
+└── content/                    # 博客、法律页等内容
 ```
 
-## 生成与选择
+`core/skin/demo/` 与 `modules/demo-skin-views.ts` 只会进入演示生成结果。完整模式会移除
+演示数据和本地状态实现；两种模式共用套餐配置与皮肤视图合同。各模式保留的业务源码以
+生成清单和实际目录为准。
+
+## 生成记录与配置
 
 | 路径 | 作用 |
 | --- | --- |
-| `nextdevtpl.generated.json` | 当前项目实际模块、适配器、目标和 catalog 版本 |
-| `src/modules/registry.ts` | 运行时代码能看到的模块清单 |
-| `src/adapters/registry.ts` | 当前适配器声明和环境要求 |
-| `.env.example` | 按生成选择留下的环境变量 |
+| `nextdevtpl.generated.json` | 实际模式、模块、适配器、皮肤、配色和部署目标 |
+| `src/modules/registry.ts` | 当前项目运行时可见的模块 |
+| `src/modules/skin-views.ts` | 当前皮肤提供的完整视图组合 |
+| `.env.example` | 完整模式按选择保留的变量；演示模式不要求业务变量 |
+| `wrangler.jsonc` | 仅 Cloudflare 完整项目使用的 Worker 与 Binding 配置 |
 
-模板仓库还包含 `recipes/catalog.json`、`templates/base/manifest.json`、
-`packages/create-nextdevtpl` 和 `tests/compatibility`。普通生成项目不会携带这些
-生成器维护文件。
+模板仓库自身还包含 `recipes/catalog.json`、`templates/base/manifest.json`、
+`packages/create-nextdevtpl` 和 `tests/compatibility`。这些生成器维护文件不会复制到
+普通生成项目。
 
-## 路由
+## 页面与路由
 
 ```text
 src/app/
 ├── [locale]/
-│   ├── (marketing)/     # 首页、定价、博客、法律页、PSEO
-│   ├── (auth)/          # 登录、注册、找回密码
-│   ├── (dashboard)/     # 用户工作台、积分、设置、工单
-│   ├── (admin)/         # 管理后台
-│   └── docs/            # Fumadocs 文档
-└── api/
-    ├── auth/            # Better Auth
-    ├── webhooks/payment # 当前支付适配器的统一 webhook
-    ├── upload/          # 预签名上传
-    ├── jobs/            # 受保护 cron
-    └── health/          # 部署健康检查
+│   ├── (marketing)/     # 首页、定价、博客、法律页和 PSEO
+│   ├── (auth)/          # 登录、注册和密码重置
+│   ├── (dashboard)/     # 工作区、积分、设置和工单
+│   ├── (admin)/          # 完整模式按选择保留的管理页面
+│   └── docs/             # 完整模式按选择保留的 Fumadocs 文档
+└── api/                  # 完整模式的认证、支付、上传、任务与健康接口
 ```
 
-生成器会删除未选模块对应的路由。直接访问缺失路由得到 404 属于预期行为。
+完整模式会删除未选择模块的页面和接口。演示模式固定保留 17 条用户路由和 20 个视图，
+不保留管理后台、文档站或业务 API；工作区页面直接使用本地样例数据，不要求登录。
 
-## 改代码时放哪里
+## 改动放在哪里
 
 | 改动 | 目录 |
 | --- | --- |
-| 页面或业务流程 | `src/features/<模块>` 与对应 `src/app` 路由 |
-| 外部供应商 API | `src/adapters/<服务>` |
-| 业务调用的统一入口 | `src/services/<服务>.ts` |
-| 新模块声明 | `src/features/<模块>/manifest.ts` |
+| 页面外观与皮肤组件 | `src/skin/views`、`src/skin/layouts`、`src/skin/ui` |
+| 皮肤颜色、圆角与字体 | `src/skin/tokens.css`、`src/skin/fonts.ts` |
+| 完整模式业务流程 | `src/features/<模块>` 与对应 `src/app` 路由 |
+| 演示数据和本地操作 | `src/core/skin/demo` |
+| 套餐价格与权益 | `src/core/plans` |
+| 外部供应商调用 | `src/adapters/<服务>` 与 `src/services/<服务>.ts` |
 | 数据表 | `src/db/schema/<分组>.ts` |
 | UI 文案 | `messages/en.json`、`messages/zh.json` |
-| 文档 | `src/content/docs/en`、`src/content/docs/zh` |
+| 应用内文档 | `src/content/docs/en`、`src/content/docs/zh` |
 | 部署 | `deploy/`、`Dockerfile`、`compose.yaml`、`vercel.json`、`wrangler.jsonc` |
 
-业务代码优先依赖 `src/services` 和公开模块出口，避免跨目录导入适配器内部文件。
+业务模块通过核心合同和 `src/services` 使用外部服务。皮肤只控制外观并接收视图数据，不直接
+访问数据库、适配器或服务端模块。

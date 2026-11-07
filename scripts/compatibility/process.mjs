@@ -17,7 +17,7 @@ export function redact(output, environment = process.env) {
   return result;
 }
 
-export function runCommand({ command, args, cwd, retries = 0 }) {
+export function runCommand({ command, args, cwd, env = process.env, retries = 0 }) {
   let attempt = 0;
   while (attempt <= retries) {
     attempt += 1;
@@ -31,15 +31,18 @@ export function runCommand({ command, args, cwd, retries = 0 }) {
         : args;
     const result = spawnSync(executable, commandArgs, {
       cwd,
-      env: process.env,
+      env,
       encoding: "utf8",
       maxBuffer: 20 * 1024 * 1024,
     });
     if (result.status === 0) return;
     if (attempt <= retries) continue;
 
-    const invocation = redact(`${command} ${args.join(" ")}`);
-    const output = redact(`${result.stdout ?? ""}\n${result.stderr ?? ""}`);
+    const invocation = redact(`${command} ${args.join(" ")}`, env);
+    const output = redact(
+      `${result.stdout ?? ""}\n${result.stderr ?? ""}`,
+      env
+    );
     const detail = result.error ? `: ${result.error.message}` : "";
     throw new Error(
       `${invocation} failed after ${attempt} attempt(s)${detail}\n${output.slice(-12_000)}`

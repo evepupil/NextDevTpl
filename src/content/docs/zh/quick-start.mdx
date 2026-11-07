@@ -1,55 +1,56 @@
 ---
 title: 快速开始
-description: 生成一个项目，配置数据库与认证，并完成首次本地验证。
+description: 生成完整项目或前端演示，按实际选择配置并完成首次验证。
 ---
 
 # 快速开始
 
 ## 前置要求
 
-| 工具 | 版本 | 说明 |
+| 工具 | 版本 | 用途 |
 | --- | --- | --- |
-| Node.js | 24.x | 生成器和项目锁定在 Node 24 |
-| pnpm | 10.x | 项目使用 pnpm workspace 与 lockfile |
-| PostgreSQL | 14+ | 本地 PostgreSQL、Neon 或其他兼容服务 |
+| Node.js | 24.x | 运行生成器和生成项目 |
+| pnpm | 10.x | 安装依赖、运行检查与构建 |
+| PostgreSQL | 按完整模式选择 | 仅完整项目选中数据库能力时需要；演示模式不需要 |
 
-## 生成项目
+## 选择生成模式
 
-常规 SaaS 项目：
+### 完整项目
+
+按预设生成带所选业务能力的项目：
 
 ```bash
-pnpm dlx create-nextdevtpl@latest my-app --preset saas --target vercel
+pnpm dlx create-nextdevtpl@4.0.0 my-app --preset saas --target vercel
 cd my-app
 ```
 
-只需要认证和 Dashboard 时：
+默认模式是 `full`。它根据预设或自定义选项保留模块、服务适配器和部署文件；省略
+`--preset` 时使用 `minimal`。需要调整组合时，查看[生成器说明](/zh/docs/generator)。
+
+### 前端演示
+
+生成可本地浏览和操作的演示项目：
 
 ```bash
-pnpm dlx create-nextdevtpl@latest my-app --preset minimal
+pnpm dlx create-nextdevtpl@4.0.0 my-demo --mode demo --target server
+cd my-demo
+pnpm dev
 ```
 
-需要运营工具包时：
+演示模式只支持 `server`，固定包含 17 条用户路由和 20 个皮肤视图。它不包含真实认证、
+付款、API、数据库或供应商服务。资料、套餐和工单操作只更新当前标签页的内存样例；刷新
+页面或打开新标签页会恢复默认样例。演示模式无需业务环境变量或数据库，也不接受预设、
+模块及服务适配器选择。
 
-```bash
-pnpm dlx create-nextdevtpl@latest my-ops \
-  --preset custom \
-  --modules auth,analytics,operations \
-  --payment stripe \
-  --alerts webhook \
-  --analytics posthog
-```
+## 检查生成选择
 
-三个官方预设和自定义参数见[生成器与预设](/zh/docs/generator)。
+完整和演示项目都会生成 `nextdevtpl.generated.json`。查看其中的 `mode`、`target`、
+`modules` 和 `adapters`，确认项目实际保留了哪些能力。演示项目的后端能力集合为空，
+但它仍保留自己的前端页面和视图。
 
-## 查看生成清单
+## 完整项目的本地配置
 
-```powershell
-Get-Content nextdevtpl.generated.json
-```
-
-其中记录实际模块、适配器和部署目标。后续只配置这里列出的能力。
-
-## 配置环境变量
+根据生成后的 `.env.example` 创建本地配置：
 
 ```powershell
 Copy-Item .env.example .env.local
@@ -61,19 +62,21 @@ macOS 或 Linux：
 cp .env.example .env.local
 ```
 
-基础启动至少需要：
+完整模式始终需要站点 URL `NEXT_PUBLIC_APP_URL`。选中数据库和认证时，再配置数据库 URL、
+认证密钥和 `BETTER_AUTH_URL`。例如：
 
-```bash
-DATABASE_URL="postgresql://postgres:password@localhost:5432/nextdevtpl"
+```dotenv
+DATABASE_URL="replace-with-your-database-url"
 BETTER_AUTH_SECRET="replace-with-a-long-random-secret"
 BETTER_AUTH_URL="http://localhost:3000"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 
-`.env.example` 已按生成选择裁剪。OAuth、支付、邮件、存储、AI、任务和限流按需
-填写，详细变量见[配置说明](/zh/docs/configuration)。
+`.env.example` 已按生成选择裁剪。OAuth、支付、邮件、存储、AI、任务、限流和分析只需
+配置当前项目保留的部分。逐项说明见[配置说明](/zh/docs/configuration)。演示项目不需要
+复制或填写 `.env` 文件。
 
-## 初始化并启动
+## 初始化并启动完整项目
 
 新本地数据库可以直接同步 Schema：
 
@@ -82,27 +85,28 @@ pnpm db:push
 pnpm dev
 ```
 
-打开 `http://localhost:3000`。共享环境和生产环境使用迁移：
+共享环境和生产环境使用迁移：
 
 ```bash
 pnpm db:generate:init
 pnpm db:migrate
 ```
 
-检查生成的 SQL 后再提交迁移文件。
+检查生成的 SQL 后再提交迁移文件。没有选择数据库功能的项目不需要执行数据库命令。
 
 ## 首次验证
 
-| 检查 | 预期结果 |
-| --- | --- |
-| 首页 | 带 `marketing` 时 `/en` 和 `/zh` 可访问 |
-| 注册登录 | 邮箱密码账号可以进入 `/dashboard` |
-| 文档 | 带 `marketing` 时 `/en/docs` 和 `/zh/docs` 可访问 |
-| 健康检查 | `/api/health` 返回 HTTP 200 和 `healthy` |
-| 可选服务 | 只验证 `nextdevtpl.generated.json` 中选中的适配器 |
-| 运营模块 | 选择后用管理员账号打开 `/admin/operations`，再使用 `CRON_SECRET` 调用快照和告警接口 |
+| 模式 | 检查 | 预期结果 |
+| --- | --- | --- |
+| 完整 | 页面与登录 | 检查所选页面；选择认证时，邮箱密码账号可以进入工作区 |
+| 完整且包含认证与数据库 | 健康检查 | 配置生成的环境变量并初始化数据库后，`/api/health` 返回 HTTP 200 和 `healthy` |
+| 完整 | 可选服务 | 只验证生成清单中选择的适配器 |
+| 演示 | 页面与操作 | 可直接浏览工作区、设置和工单；操作只改变当前标签页的演示状态 |
+| 演示 | 后端边界 | 无需数据库或密钥；没有业务 API，刷新后样例恢复默认值 |
 
-提交前运行：
+当前健康探针固定检查认证配置和数据库连接。无数据库的自定义完整组合应按所选页面、构建及适配器验证，不以该探针作为可用性标准。
+
+提交前运行项目检查：
 
 ```bash
 pnpm format
@@ -112,4 +116,4 @@ pnpm test:run
 pnpm build
 ```
 
-准备上线时进入[部署](/zh/docs/deployment)。
+准备部署完整项目时查看[部署](/zh/docs/deployment)。演示模式仅提供服务器目标。

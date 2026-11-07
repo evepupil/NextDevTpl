@@ -1,94 +1,120 @@
 ---
 title: 生成器与预设
-description: 使用 create-nextdevtpl 选择模块、服务适配器和部署目标。
+description: 使用 create-nextdevtpl 4.0.0 选择运行模式、皮肤、配色、模块和部署目标。
 ---
 
 # 生成器与预设
 
-`create-nextdevtpl` 会生成一份独立项目。它会复制模板、解析模块依赖、删除未选
-源码和依赖、组合数据库 Schema 与翻译、生成环境变量和部署文件。生成后的应用
-运行时不依赖生成器。
+`create-nextdevtpl` 在生成时复制所选皮肤和应用源码，解析完整模式的模块依赖，裁剪未选择的代码，并写入 `nextdevtpl.generated.json`。生成项目是独立源码，不需要在运行时安装或调用生成器。
 
-## 基本命令
-
-需要 Node.js 24 和 pnpm 10：
+需要 Node.js 24 和 pnpm 10。查看当前 CLI 随包提供的全部选项：
 
 ```bash
-pnpm dlx create-nextdevtpl@latest my-app --preset saas --target vercel
+pnpm dlx create-nextdevtpl@4.0.0 --help
 ```
 
-当前 CLI 通过参数选择配置。省略 `--preset` 时使用 `minimal`，省略目标时使用
-预设默认目标。查看全部参数：
+## 完整模式
+
+完整模式是默认模式。选择预设和目标：
 
 ```bash
-pnpm dlx create-nextdevtpl@latest --help
+pnpm dlx create-nextdevtpl@4.0.0 my-app --preset saas --target vercel
 ```
 
-## 官方预设
+| 预设 | 默认目标 | 主要范围 |
+| --- | --- | --- |
+| `minimal` | `server` | 认证和工作区基础页面 |
+| `saas` | `vercel` | 营销、认证、设置、管理、支持、订阅和积分 |
+| `ai-saas` | `cloudflare` | SaaS 页面以及 AI、博客和 PSEO |
+| `custom` | `server` | 显式选择模块和服务适配器 |
 
-| 预设 | 适合场景 | 默认目标 | 主要内容 |
-| --- | --- | --- | --- |
-| `minimal` | 从小骨架开始 | `server` | 认证、Dashboard、禁用邮件、空限流 |
-| `saas` | 常规订阅产品 | `vercel` | 营销页、设置、管理、工单、Creem、S3、Resend、Inngest、Upstash |
-| `ai-saas` | Cloudflare 上的 AI SaaS | `cloudflare` | 完整产品页、Stripe、R2、Email Binding、Workers AI、Workflows、原生限流 |
-| `custom` | 精确控制源码 | `server` | 通过参数选择模块与适配器 |
-
-可以覆盖预设的部署目标和服务：
+完整模式支持 `server`、`docker`、`vercel` 和 `cloudflare`。模块依赖会自动补齐；Worker 专用适配器要求 `cloudflare` 目标，Node 专用适配器不能用于该目标。
 
 ```bash
-pnpm dlx create-nextdevtpl@latest my-app \
-  --preset saas \
-  --target docker \
-  --payment stripe \
-  --mail smtp \
-  --rate-limit noop
-```
-
-## 自定义组合
-
-```bash
-pnpm dlx create-nextdevtpl@latest my-app \
+pnpm dlx create-nextdevtpl@4.0.0 my-app \
   --preset custom \
   --modules auth,analytics,operations \
   --target docker \
   --payment stripe \
-  --alerts webhook \
-  --analytics posthog \
-  --rate-limit noop
+  --analytics posthog
 ```
 
-可用模块见[功能模块](/zh/docs/feature-modules)，可用服务见
-[服务适配器](/zh/docs/service-adapters)。生成器会自动补齐模块依赖；选择
-Worker 专用适配器时必须使用 `cloudflare` 目标，Node 专用适配器不能用于该目标。
+完整模式的旧生成记录如果没有 `mode` 字段，仍按 `full` 解释。新生成记录会明确写入 `mode: "full"`。
+
+## 演示模式
+
+演示模式固定导出 17 条用户路由和 20 个皮肤视图，只支持 `server` 目标。省略目标时默认为 `server`。
+
+```bash
+pnpm dlx create-nextdevtpl@4.0.0 my-demo --mode demo --target server
+```
+
+演示模式会拒绝显式 `--preset`、`--modules` 和服务适配器参数。保留皮肤来源与 `--palette` 选项，但配色仍只支持内置默认皮肤。演示模式没有数据库、业务 API、Server Actions、后端服务或业务环境变量；本地交互只更新当前标签页内存，刷新后恢复默认样例。演示导出不是静态导出。
+
+## 选择皮肤
+
+省略 `--skin` 等同于 `--skin default`。生成器接受三种来源：
+
+| 来源 | 参数 |
+| --- | --- |
+| 内置默认皮肤 | `--skin default` |
+| 本地目录 | `--skin ./my-skin` |
+| 远端 HTTPS 归档 | `--skin https://example.test/skin.tgz --skin-sha256 <64位SHA-256>` |
+
+远端 URL 必须是纯 HTTPS URL，不能带账号口令、查询参数或片段；归档 SHA-256 必填。可选令牌使用 `--skin-token-env NAME` 指定环境变量名，默认读取 `NEXTDEVTPL_SKIN_TOKEN`。令牌值不应写入命令参数；如果显式指定的环境变量不存在或为空，生成会失败。下载令牌不会保存到生成记录，也不会传递给项目安装脚本。
+
+```bash
+pnpm dlx create-nextdevtpl@4.0.0 my-app \
+  --skin ./my-skin \
+  --preset saas
+```
+
+生成记录保存皮肤编号、版本、源包摘要和来源类型。远端记录只保留归档摘要，不保存 URL；本地来源不保存绝对目录。
+
+## 选择配色
+
+`--palette <slug>` 仅对内置默认皮肤有效。随包快照包含 149 套 StyleKit 主题，生成期间离线读取。未选配色时默认皮肤 CSS 保持原样；选中后生成记录保存主题编号、快照日期和主题摘要，项目附带所选主题的 `STYLEKIT-LICENSE.txt`。
+
+```bash
+pnpm dlx create-nextdevtpl@4.0.0 my-app \
+  --preset saas \
+  --palette glassmorphism
+```
+
+在本地皮肤或远端皮肤上指定配色会被拒绝。配色不提供运行时切换，也不会选择不同页面或布局。
 
 ## 常用参数
 
-| 参数 | 值 |
+| 参数 | 取值或用途 |
 | --- | --- |
-| `--preset` | `minimal`、`saas`、`ai-saas`、`custom` |
-| `--modules` | 逗号分隔的模块 id，仅自定义组合使用 |
-| `--target` | `server`、`docker`、`vercel`、`cloudflare` |
+| `--mode` | `full` 或 `demo`；省略为 `full` |
+| `--preset` | 完整模式：`minimal`、`saas`、`ai-saas`、`custom` |
+| `--modules` | 完整模式自定义模块编号，以逗号分隔 |
+| `--target` | 完整模式：`server`、`docker`、`vercel`、`cloudflare`；demo 仅 `server` |
 | `--payment` | `creem`、`stripe`、`none` |
 | `--storage` | `s3-compatible`、`r2-binding`、`none` |
 | `--mail` | `disabled`、`resend`、`smtp`、`cloudflare-email` |
 | `--ai` | `openai-compatible`、`anthropic`、`workers-ai`、`none` |
-| `--alerts` | `noop`、`email`、`webhook`（选择 `operations` 时使用） |
+| `--alerts` | `noop`、`email`、`webhook` |
 | `--analytics` | `noop`、`logger`、`posthog`、`ga4`、`umami`、`none` |
 | `--jobs` | `inngest`、`cloudflare-workflows`、`none` |
 | `--rate-limit` | `noop`、`upstash`、`cloudflare-rate-limit` |
-| `--no-install` | 只生成文件，跳过依赖安装 |
+| `--skin` | `default`、本地目录或 HTTPS 归档 |
+| `--skin-sha256` | 远端归档的 64 位十六进制 SHA-256 |
+| `--skin-token-env` | 远端皮肤令牌的环境变量名 |
+| `--palette` | 内置默认皮肤的 StyleKit 主题编号 |
+| `--yes` | 接受默认提示 |
+| `--no-install` | 只生成文件，不安装依赖 |
 
 ## 生成后
 
-`nextdevtpl.generated.json` 记录本次实际选择，不含密钥。先查看该文件，再复制
-`.env.example` 并填写其中留下的变量：
+完整模式按 `.env.example` 配置所选服务并按项目需要初始化数据库。演示模式无需数据库或业务环境变量，安装后可直接启动 Next.js 应用。
 
-```powershell
-Set-Location my-app
-Get-Content nextdevtpl.generated.json
-Copy-Item .env.example .env.local
-pnpm db:push
+```bash
+cd my-demo
 pnpm dev
 ```
 
-保留 `nextdevtpl.generated.json`。后续升级时需要用它还原相同组合并比较差异。
+演示记录的 `modules`、`adapters` 和 `bindings` 为空；`viewModules` 记录八个实际登记视图的模块；`demo.dataSha256` 是合并后演示数据的摘要，不是样例 JSON 原文。演示页面通过内存仓库读取数据；分页、表单输入和业务数据不会写入浏览器持久存储。
+
+查看[皮肤制作指南](/zh/docs/skin-authoring)、[功能模块](/zh/docs/feature-modules)和[升级说明](/zh/docs/upgrade)。

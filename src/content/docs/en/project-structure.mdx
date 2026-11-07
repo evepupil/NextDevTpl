@@ -1,78 +1,94 @@
 ---
 title: Project Structure
-description: Understand the 3.x module core, service adapters, product features, and deployment files.
+description: Understand skin views, the shared core, product modules, and deployment configuration.
 ---
 
 # Project Structure
 
-Generated projects separate responsibilities. Product pages live in `app` and
-`features`, composition rules in `core/modules`, provider details in
-`adapters`, and business code calls external capabilities through `services`.
+Generated projects separate responsibilities. Skins define page appearance; the core provides
+view contracts, plan data, and shared runtime rules. In full mode, product modules use external
+capabilities through service interfaces. Demo mode replaces the business backend with sample
+data held in browser memory.
 
 ## Core directories
 
 ```text
 src/
-├── app/                 # Pages, layouts, APIs, webhooks, and health
-├── core/modules/        # Module contract and validation
-├── core/services/       # Payment, mail, storage, AI, jobs, and rate-limit contracts
-├── modules/             # Registry for this generated project
-├── adapters/            # Selected provider implementations
-├── services/            # Business-facing service instances
-├── features/            # Product feature modules
-├── db/schema/           # Drizzle schema split by module
-├── content/             # Docs, blog, and legal MDX
-├── config/              # Site, navigation, pricing, and plans
-└── test/                # Core logic and integration tests
+├── app/                       # Page routes, layouts, and full-mode APIs
+├── core/
+│   ├── modules/               # Module contracts and validation
+│   ├── plans/                 # Plan data shared by full and demo modes
+│   ├── services/              # Payment, mail, storage, AI, jobs, and rate-limit contracts
+│   └── skin/demo/             # Demo only: sample data, validation, state, and local actions
+├── modules/
+│   ├── registry.ts             # Modules retained by this generated project
+│   ├── app-runtime.tsx         # Mode-specific application runtime entry
+│   ├── skin-views.ts           # Combined views for the selected skin
+│   ├── view-pages.tsx          # Stable entry for workspace pages
+│   └── demo-skin-views.ts      # Demo only: client skin-view entry
+├── skin/
+│   ├── tokens.css              # Appearance variables such as colors, fonts, and radii
+│   ├── ui/                     # Base components replaced by the skin
+│   ├── layouts/                # Marketing, auth, and workspace shells
+│   └── views/                  # Page views grouped by product module
+├── features/                   # Business pages and logic grouped by module
+├── adapters/                   # Provider implementations selected in full mode
+├── services/                   # Shared service entry points used by product code
+├── db/schema/                  # Database tables selected in full mode
+├── config/                     # Site, navigation, plans, and feature settings
+└── content/                    # Blog, legal, and other content
 ```
 
-## Generated selection
+`core/skin/demo/` and `modules/demo-skin-views.ts` appear only in demo output. Full mode removes
+demo data and local-state implementations; both modes share the plan catalog and skin-view
+contracts. The generated selection and actual directory tree determine which business source
+remains.
+
+## Generated record and configuration
 
 | Path | Purpose |
 | --- | --- |
-| `nextdevtpl.generated.json` | Effective modules, adapters, target, and catalog version |
-| `src/modules/registry.ts` | Modules visible to runtime code |
-| `src/adapters/registry.ts` | Selected adapter manifests and requirements |
-| `.env.example` | Variables retained for the selected combination |
+| `nextdevtpl.generated.json` | Effective mode, modules, adapters, skin, palette, and deployment target |
+| `src/modules/registry.ts` | Modules visible to this project's runtime |
+| `src/modules/skin-views.ts` | Complete view set provided by the selected skin |
+| `.env.example` | Variables retained by a full-mode selection; demo needs no business variables |
+| `wrangler.jsonc` | Worker and binding configuration for a full Cloudflare project |
 
-The template repository also contains `recipes/catalog.json`,
-`templates/base/manifest.json`, `packages/create-nextdevtpl`, and
-`tests/compatibility`. Normal generated apps do not carry generator maintenance
-files.
+The template repository also contains `recipes/catalog.json`, `templates/base/manifest.json`,
+`packages/create-nextdevtpl`, and `tests/compatibility`. These generator-maintenance files are
+not copied into a normal generated project.
 
-## Routes
+## Pages and routes
 
 ```text
 src/app/
 ├── [locale]/
-│   ├── (marketing)/     # Home, pricing, blog, legal, and PSEO
-│   ├── (auth)/          # Sign in, sign up, password reset
-│   ├── (dashboard)/     # Workspace, credits, settings, and support
-│   ├── (admin)/         # Admin area
-│   └── docs/            # Fumadocs documentation
-└── api/
-    ├── auth/            # Better Auth
-    ├── webhooks/payment # Shared endpoint for the selected payment adapter
-    ├── upload/          # Presigned uploads
-    ├── jobs/            # Protected cron handlers
-    └── health/          # Deployment health check
+│   ├── (marketing)/     # Home, pricing, blog, legal pages, and PSEO
+│   ├── (auth)/          # Sign in, sign up, and password reset
+│   ├── (dashboard)/     # Workspace, credits, settings, and support tickets
+│   ├── (admin)/          # Admin pages retained by a full-mode selection
+│   └── docs/             # Fumadocs pages retained by a full-mode selection
+└── api/                  # Full-mode auth, payment, upload, jobs, and health APIs
 ```
 
-Routes belonging to unselected modules are removed. A 404 for one of those
-routes is expected.
+Full mode removes pages and endpoints for unselected modules. Demo mode keeps a fixed set of 17
+user-facing routes and 20 views, but has no admin area, docs site, or business APIs. Workspace
+pages use local sample data and do not require sign-in.
 
 ## Where changes belong
 
 | Change | Location |
 | --- | --- |
-| Page or product flow | `src/features/<module>` and its `src/app` route |
-| Provider API | `src/adapters/<service>` |
-| Business-facing service | `src/services/<service>.ts` |
-| New module declaration | `src/features/<module>/manifest.ts` |
-| Database table | `src/db/schema/<group>.ts` |
+| Page appearance and skin components | `src/skin/views`, `src/skin/layouts`, `src/skin/ui` |
+| Skin colors, radii, and fonts | `src/skin/tokens.css`, `src/skin/fonts.ts` |
+| Full-mode business flow | `src/features/<module>` and its `src/app` route |
+| Demo data and local actions | `src/core/skin/demo` |
+| Plan prices and entitlements | `src/core/plans` |
+| Provider calls | `src/adapters/<service>` and `src/services/<service>.ts` |
+| Database tables | `src/db/schema/<group>.ts` |
 | UI copy | `messages/en.json`, `messages/zh.json` |
-| Documentation | `src/content/docs/en`, `src/content/docs/zh` |
+| In-app docs | `src/content/docs/en`, `src/content/docs/zh` |
 | Deployment | `deploy/`, `Dockerfile`, `compose.yaml`, `vercel.json`, `wrangler.jsonc` |
 
-Product code should depend on `src/services` and public module exports instead
-of importing adapter internals across boundaries.
+Product modules use external services through core contracts and `src/services`. Skins control
+appearance and receive view data; they do not access the database, adapters, or server modules.

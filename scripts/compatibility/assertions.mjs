@@ -1,4 +1,4 @@
-import { access, readFile, stat } from "node:fs/promises";
+import { access, readFile, readdir, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
 
@@ -11,14 +11,59 @@ async function exists(path) {
   }
 }
 
+const forbiddenDemoDependencyPatterns = [
+  /^@aws-sdk\//u,
+  /^@neondatabase\//u,
+  /^@sentry\//u,
+  /^@upstash\//u,
+  /^@react-email\//u,
+  /^@opennextjs\//u,
+  /^@fingerprintjs\//u,
+  /^@next\/third-parties$/u,
+  /^better-auth$/u,
+  /^next-safe-action$/u,
+  /^drizzle/u,
+  /^pg$/u,
+  /^ws$/u,
+  /^pino/u,
+  /^creem$/u,
+  /^stripe$/u,
+  /^openai$/u,
+  /^resend$/u,
+  /^nodemailer$/u,
+  /^inngest$/u,
+  /^wrangler$/u,
+];
+
 export async function assertGeneratedProject(target, matrixCase, manifest) {
+  const expectedMode = matrixCase.mode ?? "full";
+  const expectedPreset =
+    matrixCase.expectedPreset ?? matrixCase.preset ?? "custom";
   if (
-    manifest.preset !== matrixCase.preset ||
+    manifest.mode !== expectedMode ||
+    manifest.preset !== expectedPreset ||
     manifest.target !== matrixCase.target
   ) {
     throw new Error(
-      `Generated manifest does not match ${matrixCase.id}: ${manifest.preset}/${manifest.target}`
+      `Generated manifest does not match ${matrixCase.id}: ` +
+        `${manifest.mode}/${manifest.preset}/${manifest.target}`
     );
+  }
+
+  const expectedSkinKind = matrixCase.skin?.kind ?? "builtin";
+  const expectedSkinId =
+    matrixCase.expectedSkinId ??
+    (matrixCase.skin?.kind === "builtin" ? matrixCase.skin.id : "default");
+  if (manifest.skin?.source?.kind !== expectedSkinKind) {
+    throw new Error(
+      `${matrixCase.id} skin source does not match ${expectedSkinKind}`
+    );
+  }
+  if (manifest.skin?.id !== expectedSkinId) {
+    throw new Error(`${matrixCase.id} skin id does not match ${expectedSkinId}`);
+  }
+  if (manifest.skin?.palette?.id !== matrixCase.palette) {
+    throw new Error(`${matrixCase.id} palette record does not match`);
   }
 
   for (const [service, adapter] of Object.entries(
@@ -56,7 +101,9 @@ export async function assertGeneratedProject(target, matrixCase, manifest) {
     }
     for (const name of matrixCase.forbiddenEnv ?? []) {
       if (names.has(name)) {
-        throw new Error(`${matrixCase.id} retained forbidden environment variable: ${name}`);
+        throw new Error(
+          `${matrixCase.id} retained forbidden environment variable: ${name}`
+        );
       }
     }
   }
@@ -68,6 +115,66 @@ export async function assertGeneratedProject(target, matrixCase, manifest) {
     throw new Error(
       `${matrixCase.id} is missing build script: ${matrixCase.buildScript}`
     );
+  }
+
+  const hasPaletteLicense = await exists(join(target, "STYLEKIT-LICENSE.txt"));
+  if (hasPaletteLicense !== Boolean(matrixCase.palette)) {
+    throw new Error(`${matrixCase.id} palette license presence does not match`);
+  }
+  if (matrixCase.palette) {
+    const notice = await readFile(join(target, "STYLEKIT-LICENSE.txt"), "utf8");
+    if (!notice.includes("MIT License")) {
+      throw new Error(`${matrixCase.id} palette license is incomplete`);
+    }
+    if (await exists(join(target, "palettes"))) {
+      throw new Error(`${matrixCase.id} contains the complete palette snapshot`);
+    }
+  }
+
+  if (expectedMode === "demo") {
+    if (
+      manifest.modules.length !== 0 ||
+      Object.keys(manifest.adapters).length !== 0 ||
+      manifest.bindings.length !== 0 ||
+      manifest.viewModules?.length !== 8 ||
+      !/^[a-f0-9]{64}$/u.test(manifest.demo?.dataSha256 ?? "")
+    ) {
+      throw new Error(`${matrixCase.id} demo record contains an invalid selection`);
+    }
+
+    const environment = await readFile(join(target, ".env.example"), "utf8");
+    if (/^\s*[A-Z_][A-Z0-9_]*\s*=/mu.test(environment)) {
+      throw new Error(`${matrixCase.id} demo requires environment variables`);
+    }
+    const rootFiles = await readdir(target);
+    if (
+      rootFiles.some(
+        (name) => /^\.env(?:$|\.)/u.test(name) && name !== ".env.example"
+      )
+    ) {
+      throw new Error(`${matrixCase.id} contains a real environment file`);
+    }
+
+    const scripts = Object.entries(packageJson.scripts ?? {});
+    if (
+      scripts.some(
+        ([name, command]) =>
+          /db:|cf:|migrat|telemetry/iu.test(name) ||
+          /drizzle|wrangler|check-health|verify-production-health/iu.test(command)
+      )
+    ) {
+      throw new Error(`${matrixCase.id} retains a backend-only script`);
+    }
+    const dependencies = Object.keys({
+      ...packageJson.dependencies,
+      ...packageJson.devDependencies,
+    });
+    const dependency = dependencies.find((name) =>
+      forbiddenDemoDependencyPatterns.some((pattern) => pattern.test(name))
+    );
+    if (dependency) {
+      throw new Error(`${matrixCase.id} retains backend dependency ${dependency}`);
+    }
   }
 
   if (matrixCase.target === "docker") {
@@ -123,7 +230,8 @@ export async function assertBuildArtifact(target, matrixCase) {
   const freeLimitBytes = 3 * 1024 * 1024;
   if (compressedBytes > freeLimitBytes) {
     throw new Error(
-      `Cloudflare worker exceeds the free compressed limit: ${compressedBytes} > ${freeLimitBytes}`
+      "Cloudflare worker exceeds the free compressed limit: " +
+        `${compressedBytes} > ${freeLimitBytes}`
     );
   }
   return { compressedBytes, sourceBytes };

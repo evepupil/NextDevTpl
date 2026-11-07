@@ -1,51 +1,71 @@
 ---
 title: Upgrade and Compatibility
-description: Merge a newer NextDevTpl release safely and diagnose combination checks.
+description: Manually compare and merge a NextDevTpl 3.x project with a 4.0.0 generation.
 ---
 
 # Upgrade and Compatibility
 
-A generated app is an independent source tree. NextDevTpl 3.x does not
-overwrite existing projects. Upgrades recreate the same selection in a
-comparison directory, review its diff, and merge changes in small groups.
+Generated projects are independent source trees. NextDevTpl 4.0.0 does not overwrite or automatically upgrade an existing project. Upgrade by generating a temporary comparison project, reviewing its differences, and merging changes manually in small groups.
 
-## Upgrade steps
+## Before Upgrading
 
-1. Commit current work, back up the database, and pass the current quality gate.
-2. Inspect and keep `nextdevtpl.generated.json`.
-3. Generate a temporary project with the target version and original choices:
+1. Ensure the current project has a recoverable code commit and back up its production database.
+2. Keep `nextdevtpl.generated.json` and record the current Node/pnpm versions, target, and service configuration.
+3. Run the existing type, test, build, and deployment health checks to retain a baseline.
+4. Separately record information omitted from the manifest: remote skin URL, archive SHA-256, secret-store location for access tokens, and local skin directory.
+5. Record the skin changes, StyleKit palette ID, and app-specific pages and business code.
 
-```bash
-pnpm dlx create-nextdevtpl@<target-version> ../nextdevtpl-upgrade \
-  --preset <original-preset> --target <original-target> --no-install --yes
-```
+## Generate a 4.0.0 Comparison Project
 
-4. Compare tooling, `src/core`, `src/adapters`, `src/services`, feature code,
-   schema, environment variables, and deployment configuration in that order.
-5. Create forward-only database migrations and test them on a non-production DB.
-6. Pass lint, type checking, tests, build, and a Preview health check before release.
+Read the 3.x `nextdevtpl.generated.json` and translate its preset, modules, service adapters, and target into 4.0.0 CLI flags. There is no command that reads the old manifest and upgrades or overwrites the existing app.
 
-Repository maintainers can use the repository's
-[upgrade guide](https://github.com/evepupil/NextDevTpl/blob/master/docs/%E5%8D%87%E7%BA%A7%E6%8C%87%E5%8D%97.md).
-
-## Combination checks
-
-Template maintainers can run:
+Full-mode example:
 
 ```bash
-pnpm verify:generated
-pnpm verify:compatibility:structure
-pnpm verify:compatibility --case minimal-server
-pnpm release:check
+pnpm dlx create-nextdevtpl@4.0.0 ../nextdevtpl-v4-compare \
+  --preset custom \
+  --modules auth,dashboard,support \
+  --target server \
+  --payment stripe \
+  --skin ./my-skin \
+  --no-install --yes
 ```
 
-Compatibility reports are written to `artifacts/compatibility/<case>.json`.
-See upstream
-[compatibility troubleshooting](https://github.com/evepupil/NextDevTpl/blob/master/docs/%E5%85%BC%E5%AE%B9%E6%80%A7%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5.md)
-for common failures and Cloudflare Worker runtime diagnostics.
+Replace the sample preset, modules, adapters, target, and skin with the current project's choices. Omit `--skin` for the built-in default. Confirm local or remote skin paths and credentials before running. A palette is supported only with the built-in default skin:
 
-## Rollback principle
+```bash
+pnpm dlx create-nextdevtpl@4.0.0 ../nextdevtpl-v4-compare \
+  --preset saas \
+  --target vercel \
+  --skin default \
+  --palette glassmorphism \
+  --no-install --yes
+```
 
-Return application code to the pre-upgrade commit. Repair migrations already
-executed in production with a reviewed forward migration instead of rewriting
-migration history or risking existing data.
+An older record without a `mode` field is treated as full mode. For an existing full product, omit `--mode` or pass `--mode full`. `--mode demo` generates a separate presentation app and is not a replacement for a production app.
+
+## Review and Merge
+
+Generate into a temporary directory and compare:
+
+- `nextdevtpl.generated.json`, including its new `mode`, skin source/digest, and optional palette record.
+- The `src/skin/` directory, `skin.json` compatibility range, 20 view entries, and base-component overrides.
+- `src/core/skin/` view contracts, fixed page exports, and in-memory runtime boundary.
+- The single plan catalog in `src/core/plans/` and the full-mode payment configuration mapping.
+- `src/features/*/view/contracts.ts` and skin pages; move app-specific view changes into the skin without depending on private `src/core/skin/demo/` implementations.
+- `package.json`, lockfile, `messages/`, environment examples, `drizzle/` schema, and deployment files.
+- Project-owned pages, views, actions, services, migrations, and business rules.
+
+Port custom pages and components into skin views first, then merge the original business modules and adapters. Do not treat template repository paths, the M6 draft directory, or demo-only controllers as generated runtime dependencies. Remote skin URLs are omitted from generated manifests; recover them from the source information saved by your team.
+
+## Database and Verification
+
+Compare the Drizzle schema and migrations in the 4.0.0 project with the current app. Merge only required migrations. Generate, review, and apply forward migrations in a test database first; schedule the production change only after verifying its data results. Do not rewrite migrations that have already run in production or run generation over the existing project.
+
+At minimum, verify strict type checking, project tests, production build, auth and core business flows, selected service adapters, and deployment health. Database configuration and migrations belong to full mode; demo exports require neither a database nor business environment variables.
+
+## Rollback
+
+Return app code to the pre-upgrade commit. Repair database migrations already applied in production with a separately reviewed forward migration instead of deleting history or rolling back committed data. Restore deployment variables and external service configuration from the change record.
+
+See the [Generator Guide](/en/docs/generator) and [Skin Authoring](/en/docs/skin-authoring) for skin flags and demo boundaries. The [repository upgrade guide](https://github.com/evepupil/NextDevTpl/blob/master/docs/%E5%8D%87%E7%BA%A7%E6%8C%87%E5%8D%97.md) covers source-level comparison.

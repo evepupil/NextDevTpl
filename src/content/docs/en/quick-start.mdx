@@ -1,57 +1,58 @@
 ---
 title: Quick Start
-description: Generate an app, configure database and auth, and complete the first local verification.
+description: Generate a full project or frontend demo, configure its selection, and verify it.
 ---
 
 # Quick Start
 
 ## Requirements
 
-| Tool | Version | Notes |
+| Tool | Version | Purpose |
 | --- | --- | --- |
-| Node.js | 24.x | The generator and project target Node 24 |
-| pnpm | 10.x | The workspace and lockfile use pnpm |
-| PostgreSQL | 14+ | Local PostgreSQL, Neon, or another compatible service |
+| Node.js | 24.x | Run the generator and generated project |
+| pnpm | 10.x | Install dependencies, run checks, and build |
+| PostgreSQL | Depends on full-mode selection | Required only when the full project selects database features; demo mode does not need it |
 
-## Generate a project
+## Choose a mode
 
-For a conventional SaaS app:
+### Full project
+
+Generate a project with the capabilities selected by a preset:
 
 ```bash
-pnpm dlx create-nextdevtpl@latest my-app --preset saas --target vercel
+pnpm dlx create-nextdevtpl@4.0.0 my-app --preset saas --target vercel
 cd my-app
 ```
 
-For auth and a dashboard only:
+The default mode is `full`. It retains modules, service adapters, and deployment files from a
+preset or custom selection. When `--preset` is omitted, the generator uses `minimal`. See the
+[generator guide](/en/docs/generator) to customize the selection.
+
+### Frontend demo
+
+Generate a demo project that can be browsed and exercised locally:
 
 ```bash
-pnpm dlx create-nextdevtpl@latest my-app --preset minimal
+pnpm dlx create-nextdevtpl@4.0.0 my-demo --mode demo --target server
+cd my-demo
+pnpm dev
 ```
 
-For the operations kit:
-
-```bash
-pnpm dlx create-nextdevtpl@latest my-ops \
-  --preset custom \
-  --modules auth,analytics,operations \
-  --payment stripe \
-  --alerts webhook \
-  --analytics posthog
-```
-
-See [Generator and Presets](/en/docs/generator) for all three official presets
-and custom flags.
+Demo mode supports only `server` and retains 17 user-facing routes and 20 skin views. It has no
+real authentication, payments, APIs, database, or provider services. Profile, plan, and ticket
+actions update sample state in the current tab's memory. Refreshing or opening another tab
+restores the default sample. Demo mode needs no business environment variables or database and
+rejects preset, module, and service-adapter selections.
 
 ## Inspect the generated selection
 
-```powershell
-Get-Content nextdevtpl.generated.json
-```
+Both modes create `nextdevtpl.generated.json`. Check `mode`, `target`, `modules`, and `adapters`
+to see what the project retained. A demo project's backend capability lists are empty; its
+frontend pages and views are still present.
 
-It records the effective modules, adapters, and target. Configure only the
-capabilities listed there.
+## Configure a full project locally
 
-## Configure environment variables
+Create a local configuration from the generated `.env.example`:
 
 ```powershell
 Copy-Item .env.example .env.local
@@ -63,20 +64,21 @@ On macOS or Linux:
 cp .env.example .env.local
 ```
 
-A basic boot needs:
+Every full project requires `NEXT_PUBLIC_APP_URL`. When database and authentication are selected,
+also configure the database URL, auth secret, and `BETTER_AUTH_URL`. For example:
 
-```bash
-DATABASE_URL="postgresql://postgres:password@localhost:5432/nextdevtpl"
+```dotenv
+DATABASE_URL="replace-with-your-database-url"
 BETTER_AUTH_SECRET="replace-with-a-long-random-secret"
 BETTER_AUTH_URL="http://localhost:3000"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 
-The generated `.env.example` is selection-specific. Fill OAuth, payment, mail,
-storage, AI, jobs, and rate limiting only when selected. See
-[Configuration](/en/docs/configuration) for the variable map.
+The generated `.env.example` is selection-specific. Configure only the retained OAuth, payment,
+mail, storage, AI, jobs, rate-limit, and analytics services. See [Configuration](/en/docs/configuration)
+for the variable map. Demo projects do not need an `.env` file.
 
-## Initialize and run
+## Initialize and run a full project
 
 For a new local database, push the schema and start the app:
 
@@ -85,28 +87,29 @@ pnpm db:push
 pnpm dev
 ```
 
-Open `http://localhost:3000`. Use migrations for shared and production
-databases:
+Use migrations for shared and production databases:
 
 ```bash
 pnpm db:generate:init
 pnpm db:migrate
 ```
 
-Review generated SQL before committing migration files.
+Review generated SQL before committing migration files. Projects without a database selection
+do not need database commands.
 
 ## First verification
 
-| Check | Expected result |
-| --- | --- |
-| Home | `/en` and `/zh` work when `marketing` is selected |
-| Auth | An email/password user can reach `/dashboard` |
-| Docs | `/en/docs` and `/zh/docs` work when `marketing` is selected |
-| Health | `/api/health` returns HTTP 200 and `healthy` |
-| Optional services | Verify only adapters listed in `nextdevtpl.generated.json` |
-| Operations | When selected, sign in as an admin, open `/admin/operations`, then call the snapshot and alert cron routes with `CRON_SECRET` |
+| Mode | Check | Expected result |
+| --- | --- | --- |
+| Full | Pages and auth | Check selected pages; when auth is selected, an email/password user can reach the workspace |
+| Full with auth and a database | Health | After configuring the generated environment and initializing the database, `/api/health` returns HTTP 200 with `healthy` |
+| Full | Optional services | Verify only adapters listed in the generated selection |
+| Demo | Pages and actions | Workspace, settings, and tickets are browsable; actions change only this tab's demo state |
+| Demo | Backend boundary | No database or secrets are required; there are no business APIs, and refresh restores the default sample |
 
-Before committing:
+The current health probe always checks auth configuration and database connectivity. Validate custom full projects without a database through their selected pages, build, and adapters; this probe does not establish readiness for those selections.
+
+Before committing, run the project checks:
 
 ```bash
 pnpm format
@@ -116,4 +119,4 @@ pnpm test:run
 pnpm build
 ```
 
-Continue with [Deployment](/en/docs/deployment) when preparing production.
+See [Deployment](/en/docs/deployment) for a full project. Demo mode provides only the server target.

@@ -1,0 +1,162 @@
+---
+title: 皮肤制作指南
+description: 为 NextDevTpl 4.0.0 制作、校验和验收可复用皮肤。
+---
+
+# 皮肤制作指南
+
+皮肤是一组在生成时复制进应用的页面、外壳、样式、字体和素材。生成后的应用只包含一套选定皮肤；皮肤不会在运行时下载或切换。默认完整应用和 `demo` 演示导出复用同一套皮肤视图。
+
+## 目录结构
+
+皮肤包根目录必须直接包含 `skin.json`。默认皮肤使用以下组织方式，可按实际功能调整子目录：
+
+```text
+my-skin/
+├── skin.json
+├── tokens.css
+├── config.ts
+├── fonts.ts
+├── layouts/
+├── views/
+├── assets/
+└── demo/
+```
+
+`tokens.css`、`config.ts` 和 `fonts.ts` 是必须文件。`layouts/` 放三组页面外壳，`views/<module>/index.ts` 导出对应模块的视图表；`assets/` 放经授权的图片和字体；`demo/` 可放演示数据补丁。不要在皮肤包中添加 API、Server Actions、数据库或部署服务代码。
+
+## `skin.json`
+
+清单版本目前固定为 1。关键字段如下：
+
+| 字段 | 含义 |
+| --- | --- |
+| `id`、`name`、`version` | 皮肤唯一编号、显示名称和皮肤版本 |
+| `compatibility.template` | 支持的模板版本范围，例如 `^4.0.0` |
+| `compatibility.viewApi` | 皮肤视图接口版本；当前为 `1` |
+| `modules` | 此皮肤支持的模板模块编号 |
+| `viewEntries` | 模块编号到 `views/<module>/index.ts` 的映射 |
+| `uiOverrides` | 可选的基础 UI 组件文件替换表 |
+| `customization` | 允许调整的品牌色、圆角、字体选项和默认明暗主题 |
+| `supportsPalettes` | 皮肤是否声明兼容 StyleKit 配色；CLI 目前只接受内置默认皮肤 |
+| `dependencies` | 皮肤用到的 npm 包及固定版本 |
+| `assets` | 素材作者、来源、许可、用途和文件清单 |
+| `files` | `skin.json` 以外每个包文件对应的 SHA-256 |
+| `demo.data` | 可选演示数据补丁的 POSIX 相对路径 |
+
+本地皮肤可用以下命令生成：
+
+```bash
+pnpm dlx create-nextdevtpl@4.0.0 my-app \
+  --skin ./my-skin \
+  --preset saas \
+  --target server
+```
+
+`modules` 必须覆盖你声明的视图入口；应用选择的模块必须属于皮肤声明的模块。生成器会拒绝未知字段、缺失文件、未登记文件、路径越界、摘要不符和不兼容版本。每个相对路径使用 `/`，不要依赖 Windows 反斜杠。
+
+## 视图编号与类型合同
+
+默认视图 API 为 1。皮肤通过模块入口导出 `views`，每个键对应以下固定编号，并匹配模块 `view/contracts.ts` 的参数类型：
+
+| 模块 | 视图编号 |
+| --- | --- |
+| `auth` | `auth.layout`、`auth.sign-in`、`auth.sign-up`、`auth.forgot-password`、`auth.reset-password` |
+| `blog` | `blog.list`、`blog.post` |
+| `dashboard` | `dashboard.overview` |
+| `marketing` | `marketing.header`、`marketing.layout`、`marketing.home`、`marketing.legal` |
+| `pseo` | `pseo.list`、`pseo.detail` |
+| `settings` | `settings.page` |
+| `shared` | `shared.dashboard-layout`、`shared.empty-dashboard` |
+| `support` | `support.list`、`support.new`、`support.detail` |
+
+完整视图注册共 20 项；其中 17 条用户路由还包括两个积分重定向。皮肤实现的是视图内容，不新增路由、不复制应用路由树，也不把不同页面拼成可配置布局系统。
+
+视图以公共参数、模型和操作函数通信。通过对应 feature 的公开 `view` 出口使用控制器，不直接调用数据库、Server Actions、供应商 SDK 或内部服务。完整模式和演示模式使用同一份视图合同；它们的控制器实现由生成器在装配时选择。
+
+## 样式、外壳与基础组件
+
+- `tokens.css` 声明皮肤令牌；保留模板约定的 CSS 变量名，不把同一颜色再硬编码到页面组件。
+- `config.ts` 声明站点级皮肤配置；`fonts.ts` 使用皮肤的字体变量接口。
+- `layouts/` 实现营销、认证和工作区外壳；它们消费现有路由状态，不在皮肤内执行会话守卫。
+- 页面可使用已登记的基础组件。需要替换基础组件时，在 `uiOverrides` 中映射已有组件名到皮肤文件，并保持其公开参数、组合方式和无障碍行为。
+- `dependencies` 只列皮肤视图可达代码实际导入的依赖，并使用明确版本。生成器按依赖引用和声明校验兼容性；不要把完整应用或构建工具当作皮肤依赖。
+
+皮肤选项只在生成时生效。不要加入运行时皮肤下载器、主题商店或 Hero/控制台布局选择器。
+
+## 素材许可与品牌清理
+
+每个第三方图片、字体、图标集、商标或其他素材都要在 `assets` 中登记作者、来源、许可和用途，并列出具体文件。所有包文件都要列入 `files` 并写入其 SHA-256；`skin.json` 自身不在这个映射内。头像路径使用 `assets/...`，在 demo 数据中引用时也必须对应已登记、已哈希的皮肤文件。
+
+发布前逐页检查默认品牌标记、示例域名、截图、邮件地址、社交账号、OAuth 品牌标识和隐藏元数据。移除 NextDevTpl 标记和无权使用的第三方品牌；仓库的 MIT 许可不代表字体、商标、图片或外部组件自动获得许可。
+
+## 本地、远端和内置来源
+
+省略 `--skin` 时使用内置 `default`。本地目录不复制到生成项目记录中。远端只接受 HTTPS `.tgz` 归档，根目录直接包含 `skin.json`，不自动剥除外层目录。远端 SHA-256 必填：
+
+```bash
+pnpm dlx create-nextdevtpl@4.0.0 my-app \
+  --skin https://skins.example.test/team/skin.tgz \
+  --skin-sha256 <trusted-64-digit-sha256> \
+  --target server
+```
+
+私有归档可通过 `--skin-token-env NAME` 指定令牌变量名；省略时默认读取 `NEXTDEVTPL_SKIN_TOKEN`。不要把令牌值写在参数中。生成器不记录 URL、令牌或本地绝对路径。内置皮肤来自发布包中的固定快照；第三方皮肤来源由使用者自行审核。
+
+## StyleKit 配色
+
+当前随包快照含 149 个 StyleKit 主题，生成过程离线读取。`--palette <slug>` 仅适用于内置默认皮肤；自制、本地或远端皮肤使用该参数会被拒绝。生成项目只包含选中的配色变量和 `STYLEKIT-LICENSE.txt`，不包含整个主题快照，也没有运行时换色功能。
+
+皮肤如需支持配色，应声明可用颜色变量与圆角范围。颜色快照缺少的成功色、警告色和背景装饰由生成器规则补齐；关键文字和背景组合会执行对比度检查。配色不改变视图结构。
+
+## 演示数据与客户端边界
+
+在清单中声明可选数据入口：
+
+```json
+{
+  "demo": {
+    "data": "demo/data.json"
+  }
+}
+```
+
+入口必须是 `demo/` 下的普通 JSON 文件，列在 `files` 中，最大 256 KiB。入口内容是版本化补丁，根节点必填 `schemaVersion: 1`，可选 `snapshotAt`、`workspace` 和 `support`；每层对象只接受已登记字段。生成器用 JSON 规则解析并拒绝重复键，然后先与默认样例合并，再对完整结果做 schema 校验。对象递归覆盖、数组整组替换；`null` 只适用于明确可空的字段。
+
+只有 `--mode demo` 会解析、合并和校验补丁内容。完整模式仍会核对 `files` 中每个声明文件的 SHA-256，但不会解析或复制 `demo/` 文件。
+
+演示模式会裁掉 `/docs` 文档站。生成器通过公开的 `marketingSiteNavigation.docsHref` 显式传入 `null`，核心营销导航据此过滤 Docs 菜单项。皮肤自写的 Hero、页脚或按钮也必须读取公开出口 `@/features/marketing/view` 的 `marketingSiteNavigation`，仅在 `docsHref !== null` 时显示文档链接，并优先使用该字段给出的目标。`docsHref` 是可选字段：旧完整项目未提供它时为 `undefined`，沿用 `/docs` 可用的完整模式行为；不要在演示界面无条件写死 `/docs`。无需修改 `src/modules` 等内部文件。
+
+数据可覆盖范围为：`workspace.user` 的编号、姓名、邮箱和头像；`workspace.plan` 的套餐编号、月/年周期、订阅状态、周期结束和待生效状态；`workspace.credits` 的余额、累计收支、批次和交易；`workspace.billingHistory`；以及 `support.tickets` 的主题、分类、优先级、状态和完整消息列表。未知字段、无效引用、同一集合内重复编号、非安全整数、错误枚举及非规范 UTC 日期都会被拒绝。
+
+校验边界：
+
+- 编号最多 64 个 ASCII 字母、数字、下划线或连字符，且集合内唯一；用户姓名最多 80 字符，邮箱最多 254 字符。
+- 积分余额和累计数为非负安全整数；批次剩余数与交易金额为正安全整数。所有批次剩余数之和必须等于余额。批次最多 12 个，交易最多 100 笔，账单历史最多 50 条。
+- `monthly_grant` 交易必须包含付费套餐编号及 `month` 或 `year` 周期；其他交易类型不得带 `grant`。交易描述最多 500 字符。
+- 套餐编号来自 `free`、`starter`、`pro`、`ultra`。免费套餐固定为月周期，不得标记为有效订阅、周期取消或待切换；周期取消必须同时有有效订阅和周期结束时间；待生效套餐与生效日期必须同时出现或同时为空。
+- 支持分类为 `billing`、`technical`、`bug`、`feature`、`other`；优先级为 `low`、`medium`、`high`；状态为 `open`、`in_progress`、`resolved`、`closed`。工单主题为 5–200 字符，消息为 1–5000 字符。最多 50 张工单、每张最多 50 条消息；消息时间不得早于工单创建时间。
+- 所有日期都使用可往返校验的规范 UTC 格式 `YYYY-MM-DDTHH:mm:ss.sssZ`。`snapshotAt` 是样例的固定 UTC 参考时点，默认 `2026-11-07T00:00:00.000Z`；积分批次是否到期按这个时间判断，不读取运行当天时间。
+
+如果修改积分余额，也要一起提供合计匹配的 `batches`；局部补丁会与默认样例合并，合并后仍须满足完整关系约束。
+
+可以覆盖的内容包括样例用户、计划编号与周期、积分汇总和账目、账单历史及支持工单。金额、货币、套餐月额度、文件限制、队列优先级和权益键来自统一计划目录，不能由皮肤数据改写。
+
+演示固定视图模块为 `auth`、`blog`、`dashboard`、`marketing`、`pseo`、`settings`、`shared` 和 `support`。其中需要由演示状态接管的动态视图必须能在客户端运行；博客、法律等静态内容仍可沿用应用的异步服务端内容链路。预检覆盖 JSX 与 `React.createElement` 写法，并允许异步事件回调。动态视图可达代码中不要导入 `server-only`、`next/headers`、数据库或服务端翻译 API，也不要把异步 Server Component 用作动态视图。
+
+共享 core 的相对导入使用 `.js` 扩展名以兼容 NodeNext。生成的 demo 项目会为 Next webpack 配置 `.js` 到 `.ts`/`.tsx` 源码的解析映射；皮肤引用这类共享代码时保留原扩展名，不需要在皮肤中复制源码或改成无扩展路径。
+
+演示数据由根 Provider 持有，每个浏览器标签页单独创建副本。页面软导航与语言切换保留当前状态；整页刷新和新标签恢复生成时的样例。不得将业务资料、密码、工单或交易写入 `localStorage`、Cookie 或服务器进程。
+
+## 发布前验收
+
+每次皮肤更新都要完成以下检查，并保留可供交接的记录：
+
+- 默认皮肤和新皮肤在目标完整模式组合中通过清单、哈希、引用和生成校验。
+- 需要支持 demo 时，确认固定 20 个视图和八个视图模块使用同一份视图合同生成；客户端预检只覆盖需由浏览器接管演示状态的动态视图。
+- 完整模式与 demo 模式分别检查中文/英文、浅色/深色和桌面/手机布局。
+- 真实操作认证表单、套餐月/年切换、资料表单、积分分页、工单新建与回复；demo 中确认导航保留内存状态、刷新复位。
+- demo 安装和构建不要求业务环境变量或数据库；检查网络请求中没有业务 API、Server Action 或支付/存储/认证供应商请求。正常 Next 软导航请求允许存在。
+- 检查长文本、空状态、加载态、错误态、键盘操作、对比度、品牌清理和所有素材许可。
+
+先用 CLI 帮助确认发布版本支持的参数，再参考[生成器指南](/zh/docs/generator)和[升级说明](/zh/docs/upgrade)。

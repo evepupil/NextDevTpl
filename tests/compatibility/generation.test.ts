@@ -1,6 +1,6 @@
 import { access, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -32,17 +32,51 @@ describe("generated compatibility cases", () => {
       const target = join(root, matrixCase.id);
       const { manifest } = await generateProject({
         targetDirectory: target,
-        preset: matrixCase.preset,
+        ...(matrixCase.mode ? { mode: matrixCase.mode } : {}),
+        ...(matrixCase.preset ? { preset: matrixCase.preset } : {}),
         ...(matrixCase.modules ? { modules: matrixCase.modules } : {}),
         ...(matrixCase.adapterOverrides
           ? { adapterOverrides: matrixCase.adapterOverrides }
           : {}),
+        ...(matrixCase.skin
+          ? {
+              skin:
+                matrixCase.skin.kind === "local"
+                  ? {
+                      ...matrixCase.skin,
+                      directory: resolve(
+                        process.cwd(),
+                        matrixCase.skin.directory
+                      ),
+                    }
+                  : matrixCase.skin,
+            }
+          : {}),
+        ...(matrixCase.palette ? { palette: matrixCase.palette } : {}),
         target: matrixCase.target,
         install: false,
       });
 
-      expect(manifest.preset).toBe(matrixCase.preset);
+      expect(manifest.preset).toBe(
+        matrixCase.expectedPreset ?? matrixCase.preset
+      );
+      expect(manifest.mode).toBe(matrixCase.mode ?? "full");
       expect(manifest.target).toBe(matrixCase.target);
+      expect(manifest.skin.source.kind).toBe(
+        matrixCase.skin?.kind ?? "builtin"
+      );
+      expect(manifest.skin.id).toBe(
+        matrixCase.expectedSkinId ??
+          (matrixCase.skin?.kind === "builtin" ? matrixCase.skin.id : "default")
+      );
+      expect(manifest.skin.palette?.id).toBe(matrixCase.palette);
+      if (matrixCase.mode === "demo") {
+        expect(manifest.modules).toEqual([]);
+        expect(manifest.adapters).toEqual({});
+        expect(manifest.bindings).toEqual([]);
+        expect(manifest.viewModules).toHaveLength(8);
+        expect(manifest.demo?.dataSha256).toMatch(/^[a-f0-9]{64}$/u);
+      }
       for (const path of matrixCase.requiredPaths) {
         expect(await exists(join(target, path)), `${path} should exist`).toBe(
           true

@@ -1,15 +1,17 @@
 ---
 title: Deployment
-description: Deploy to a server, Docker Compose, Vercel, or Cloudflare Workers.
+description: Deploy full projects and frontend demos to their supported runtime targets.
 ---
 
 # Deployment
 
-The generator retains one platform configuration based on `--target`. Confirm
-`target` in `nextdevtpl.generated.json`, apply production migrations and
-environment variables, then follow the matching flow.
+Check `mode` and `target` in `nextdevtpl.generated.json` before preparing an environment. Full
+mode supports `server`, `docker`, `vercel`, and `cloudflare`. Demo mode supports only `server`
+and has no database, business secrets, or API health endpoint.
 
-## Shared release gate
+## Release checks for full projects
+
+Install dependencies and run the project gates:
 
 ```bash
 pnpm install --frozen-lockfile
@@ -19,55 +21,61 @@ pnpm test:run
 pnpm build
 ```
 
-Set both `NEXT_PUBLIC_APP_URL` and `BETTER_AUTH_URL` to the production URL.
-Update OAuth callbacks, payment webhooks, Inngest, storage CORS, and other
-provider dashboards to use the same domain.
+Use the production domain for the site URL and for OAuth, payment webhooks, Inngest, storage CORS,
+and other provider dashboards. Configure only capabilities retained in the generated record and
+`.env.example`.
 
 ## Server
 
-The server target requires Node.js 24, pnpm 10, PostgreSQL, and systemd.
+A full project requires Node.js 24 and pnpm 10. When a database is selected, prepare a PostgreSQL
+connection and apply migrations before production traffic.
 
-1. Fill `.env.production` and keep it in a protected server directory.
-2. Generate and review the initial migration with `pnpm db:generate:init`.
+1. Prepare `.env.production` in a protected directory.
+2. For the first deployment, generate and review the migration with `pnpm db:generate:init`, then
+   run `pnpm db:migrate` through the release process.
 3. Load production variables and run `pnpm deploy:server:build`.
 4. Upload `.release/` and adjust `deploy/server/nextdevtpl.service` for the real user and path.
-5. Terminate TLS with Nginx, Caddy, or another proxy and forward original protocol and host headers.
+5. Terminate TLS with Nginx, Caddy, or another proxy and forward the original protocol and host headers.
 
-See `deploy/server/README.md` for file-level instructions.
+Skip database steps when the project has no database selection. See `deploy/server/README.md` for
+file-level instructions.
 
 ## Docker Compose
 
-Compose contains PostgreSQL, a one-shot migration service, and the app. The
-database uses a named volume.
+The Docker target is for full mode. Compose provides deployment configuration for the database,
+one-shot migration, and app; use the generated `.env.example` and Compose file as the source of
+truth. The database uses a named volume.
 
 ```bash
 docker compose --env-file .env.production up -d --build
 ```
 
-At minimum, replace `POSTGRES_PASSWORD`, `BETTER_AUTH_SECRET`, and site URLs.
-The app starts only after `migrate` succeeds. Back up the named volume or
-external database before upgrades. See `deploy/docker/README.md`.
+Replace retained values such as `POSTGRES_PASSWORD`, `BETTER_AUTH_SECRET`, and site URLs. Back up
+the named volume or external database before upgrades. See `deploy/docker/README.md`.
 
 ## Vercel
 
-1. Import the project into Vercel with Node.js 24 and pnpm.
+The Vercel target is for full mode.
+
+1. Import the project with Node.js 24 and pnpm.
 2. Configure variables retained in the generated `.env.example` for each environment.
-3. Run `pnpm db:migrate` locally or in a controlled single-instance release job.
-4. Deploy and configure OAuth, payment, and Inngest callbacks.
+3. When a database is selected, run `pnpm db:migrate` locally or in a controlled single-instance
+   release job.
+4. Deploy and configure the selected OAuth, payment, and Inngest callbacks.
 5. Run the health check against the production domain.
 
-Do not put migrations in Vercel's `buildCommand`; concurrent builds can execute
-them more than once. Vercel works well with Neon, S3-compatible storage,
-Upstash, and Inngest, subject to the generated selection.
+Do not put migrations in Vercel's `buildCommand`; concurrent builds can execute them more than
+once. Available service combinations depend on the generated selection.
 
 ## Cloudflare Workers
 
-The Cloudflare target uses OpenNext. It generates `open-next.config.ts`, the
-Worker entry, `wrangler.jsonc`, and `cf:*` scripts, then adds R2, AI, Email,
-Workflow, and Rate Limiting bindings when selected.
+The Cloudflare target is for full mode and uses OpenNext. The generator writes the Worker entry,
+`open-next.config.ts`, `wrangler.jsonc`, and `cf:*` scripts, then adds R2, AI, Email, Workflow, and
+Rate Limiting bindings when selected.
 
-1. Create the real resources and check service and bucket names in `wrangler.jsonc`.
-2. Add `DATABASE_URL`, auth secrets, and provider credentials with `wrangler secret put`.
+1. Create or bind the required resources and check Worker and bucket settings in `wrangler.jsonc`.
+2. Add the database URL, auth secrets, and selected service credentials with `wrangler secret put`
+   or Cloudflare's secret manager.
 3. Generate Worker types and build:
 
 ```bash
@@ -83,18 +91,33 @@ pnpm exec wrangler deploy --dry-run --minify
 pnpm cf:deploy
 ```
 
-The 3.x Worker target uses PostgreSQL through Neon HTTP or Hyperdrive. D1 is
-outside the 3.x support scope. Generated Worker projects use a console logger
-and remove Pino's Node file-writing dependencies.
+The current full-mode Cloudflare database path uses a PostgreSQL-compatible service such as Neon
+HTTP; the generator does not yet offer D1 as a database option. The older 3.x wording about D1
+records that release's support boundary. Other 4.x deployment targets provide the capabilities in
+their own generated configuration. OpenNext builds on Windows can encounter symlink restrictions;
+use WSL or Linux CI when that happens.
 
-## Production check
+## Demo projects
 
-All four targets expose `/api/health`:
+Demo projects support only `server` and need no business environment variables, database
+migrations, or provider resources. Build and start the Next.js server normally:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm build
+pnpm start
+```
+
+Demo output has no `/api/health` route. Verify it by opening the pages and exercising local sample
+actions. Business changes exist only in the current tab's memory and reset on refresh.
+
+## Production checks for full projects
+
+Full projects expose `/api/health`:
 
 ```bash
 pnpm deploy:check -- https://your-domain.example/api/health
 ```
 
-After it returns HTTP 200 with `status: healthy`, verify login, database access,
-and each selected payment, mail, storage, AI, jobs, and rate-limit flow. The
-health response never returns secret values.
+After it returns HTTP 200 with `status: healthy`, verify login, database access, and each selected
+payment, mail, storage, AI, jobs, and rate-limit flow. The health response never returns secret values.

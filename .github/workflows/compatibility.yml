@@ -46,6 +46,8 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm exec drizzle-kit push --force
       - run: pnpm test:run
+      # Run after the package and 4.x roadmap both record candidate version 4.0.0.
+      - run: pnpm release:check
 
   generated-project:
     needs: quality
@@ -58,6 +60,10 @@ jobs:
           - saas-docker
           - saas-vercel
           - ai-saas-cloudflare
+          - skin-local-server
+          - palette-minimal-server
+          - demo-minimal-server
+          - demo-palette-server
     services:
       postgres:
         image: postgres:17-alpine

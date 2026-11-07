@@ -4,7 +4,7 @@
   <br>
   <h1 align="center">NextDevTpl</h1>
   <p align="center">
-    A composable, production-ready Next.js SaaS starter.
+    Generate an independently maintained Next.js SaaS app with a selected skin, features, and runtime mode.
   </p>
   <p align="center">
     <a href="https://www.npmjs.com/package/create-nextdevtpl"><img src="https://img.shields.io/npm/v/create-nextdevtpl" alt="npm version"></a>
@@ -17,211 +17,81 @@
 
 [中文](README.md) | [English](README.en.md)
 
-NextDevTpl 3.x creates a standalone application containing only the modules,
-service adapters, dependencies, environment variables, database schema, and
-deployment files you select. Generated source belongs to your project and has
-no runtime dependency on the generator.
+NextDevTpl 4.0.0 composes a skin, product features, and deployment target at generation time. The result is an independent source tree with no runtime dependency on the generator. Full mode keeps the selected product capabilities; demo mode uses the same views without a business backend.
 
-The 3.x operations kit adds typed, consent-aware telemetry, an optional admin
-dashboard for product, revenue, AI cost, and system-health metrics, plus
-de-duplicated email or signed-webhook alerts. It stores the operational read
-model in the generated project's own database.
-
-## Create an app
+## Quick Start
 
 Node.js 24 and pnpm 10 are required.
 
+Generate a full SaaS project:
+
 ```bash
-pnpm dlx create-nextdevtpl@latest my-app --preset saas --target vercel
+pnpm dlx create-nextdevtpl@4.0.0 my-app --preset saas --target vercel
 cd my-app
-Copy-Item .env.example .env.local # Windows PowerShell
+```
+
+Configure the retained services in the generated `.env.example`, then initialize the database and start the app:
+
+```bash
 pnpm db:push
 pnpm dev
 ```
 
-On macOS or Linux, use `cp .env.example .env.local`.
-
-Omitting `--preset` creates the `minimal` preset. The current CLI is driven by
-flags, so use `--help` to inspect every option:
+Generate a frontend demo project for local evaluation:
 
 ```bash
-pnpm dlx create-nextdevtpl@latest --help
+pnpm dlx create-nextdevtpl@4.0.0 my-demo --mode demo --target server
+cd my-demo
+pnpm dev
 ```
 
-## Presets
+The demo needs no business environment variables or database. Sign-in, profile edits, plan changes, and ticket actions update only the current tab's in-memory state. Refreshing or opening a new tab restores the default sample. Demo mode does not provide real authentication, payments, or business APIs.
 
-| Preset | Included product surface | Default services | Default target |
-| --- | --- | --- | --- |
-| `minimal` | Auth and dashboard | Disabled mail, no-op rate limit | Server |
-| `saas` | Marketing, auth, dashboard, settings, admin, support, subscriptions, credits | Creem, S3-compatible storage, Resend, Inngest, Upstash | Vercel |
-| `ai-saas` | Full SaaS surface plus analytics, blog and PSEO | Stripe, R2 binding, Cloudflare Email, Workers AI, Workflows, Cloudflare rate limits | Cloudflare Workers |
-| `custom` | Modules and adapters supplied with flags | Disabled mail and no-op rate limit | Server |
+## Full Mode
 
-Dependencies between modules are included automatically. For example,
-`support` also brings in credits, payments, subscriptions, mail, auth, shared
-UI, and the required database schema.
+Omitting `--mode` is equivalent to `--mode full`. Full mode keeps the modules, service adapters, and deployment files selected by a preset or custom configuration.
+
+| Preset | Main surface | Default target |
+| --- | --- | --- |
+| `minimal` | Authentication and basic workspace pages | `server` |
+| `saas` | Marketing, auth, settings, subscriptions, credits, admin, and support | `vercel` |
+| `ai-saas` | SaaS features with AI, blog, and PSEO | `cloudflare` |
+| `custom` | Modules and services selected with flags | `server` |
+
+Full mode supports `server`, `docker`, `vercel`, and `cloudflare`. Select payment, storage, mail, AI, jobs, rate limiting, analytics, and alerts with generator flags. The generator resolves module dependencies and records the effective selection in `nextdevtpl.generated.json`.
 
 ```bash
-pnpm dlx create-nextdevtpl@latest my-app \
+pnpm dlx create-nextdevtpl@4.0.0 my-app \
   --preset custom \
   --modules auth,analytics,operations \
   --target docker \
   --payment stripe \
-  --alerts webhook \
-  --analytics posthog \
-  --rate-limit noop
+  --analytics posthog
 ```
 
-`operations` automatically includes the admin and payment dependencies. Keep
-the generated `nextdevtpl.generated.json` as the source of truth, then fill the
-retained analytics and alert variables in `.env.example`.
+## Skins and Palettes
 
-After generation, `nextdevtpl.generated.json` is the source of truth for the
-selected preset, modules, adapters, and deployment target.
-
-## Included capabilities
-
-| Area | Capabilities |
-| --- | --- |
-| Framework | Next.js 16 App Router, React 19, Tailwind CSS 4, Shadcn/UI, strict TypeScript |
-| Authentication | Better Auth email/password, GitHub and Google OAuth, sessions, user/admin roles |
-| Database | PostgreSQL, Drizzle ORM, split schema groups, migrations and integration tests |
-| Payments | Shared payment contract with Creem and Stripe adapters, subscriptions, one-time purchases and verified webhooks |
-| Credits | Double-entry ledger, FIFO consumption, batch expiry and idempotent subscription grants |
-| Mail | Shared mail contract with disabled, Resend, SMTP and Cloudflare Email adapters |
-| Storage | S3-compatible presigned uploads or a native Cloudflare R2 binding |
-| AI | OpenAI-compatible providers, Anthropic and Workers AI behind one service interface |
-| Jobs | Inngest or Cloudflare Workflows behind one job interface, plus protected cron endpoints |
-| Rate limiting | Upstash Redis, Cloudflare Rate Limiting bindings, or a no-op local adapter |
-| Product UI | Localized marketing site, docs, blog, PSEO, dashboard, settings, admin and support tickets |
-| Operations | Health checks, structured logs, optional Axiom and Sentry, typed telemetry, operations dashboard, AI cost estimates, daily snapshots, alerts, compatibility matrix and deployment smoke checks |
-
-## Service adapters
-
-Choose one adapter per service during generation. Worker-only adapters require
-the `cloudflare` target; Node-only adapters cannot be used on that target.
-
-| Service | Available adapters |
-| --- | --- |
-| Payment | `creem`, `stripe`, `none` |
-| Storage | `s3-compatible`, `r2-binding`, `none` |
-| Mail | `disabled`, `resend`, `smtp`, `cloudflare-email` |
-| AI | `openai-compatible`, `anthropic`, `workers-ai`, `none` |
-| Jobs | `inngest`, `cloudflare-workflows`, `none` |
-| Rate limit | `noop`, `upstash`, `cloudflare-rate-limit` |
-| Alerts | `noop`, `email`, `webhook` (when `operations` is selected) |
-| Analytics | `noop`, `logger`, `posthog`, `ga4`, `umami`, `none` |
-
-Business code imports stable services from `src/services`. Provider-specific
-SDKs and bindings stay under `src/adapters`, which keeps later replacements
-small and reviewable.
-
-## Operations kit
-
-Select the `operations` module for an admin page at `/admin/operations`,
-server-side revenue and subscription health, AI usage and estimated cost,
-daily snapshots, and protected alert evaluation at
-`/api/jobs/operations/alerts`. The module does not automatically refund,
-disable users, change plans, or shut down a service.
-
-The built-in event contract includes `landing.viewed`, `signup.completed`,
-`first_value.completed`, `subscription.activated`, `core_action.completed`,
-`api.request.failed`, `action.failed`, and `job.failed`. Define the product's
-first-value and core-action meanings in the generated project; the template
-does not guess them.
-
-See the generated [operations guide](src/content/docs/en/operations.mdx) for
-the metric dictionary, privacy boundary, provider setup, cron calls, and
-troubleshooting steps.
-
-## Deployment targets
-
-| Target | Generated deployment files | Build or launch command |
-| --- | --- | --- |
-| `server` | Standalone Next.js build, systemd example, server build/start scripts | `pnpm deploy:server:build` |
-| `docker` | Multi-stage `Dockerfile`, Compose app, migration and PostgreSQL services | `docker compose --env-file .env.production up -d --build` |
-| `vercel` | `vercel.json`, health endpoint and optional cron configuration | Vercel Git deployment or CLI |
-| `cloudflare` | OpenNext config, Worker entry, Wrangler bindings and Worker-safe replacements | `pnpm cf:build` / `pnpm cf:deploy` |
-
-Every target exposes `/api/health`. Run a post-deployment check with:
+A skin is selected when the app is generated. Each output contains one skin and does not switch skins at runtime. `--skin` accepts the built-in default, a local directory, or an HTTPS archive with a trusted SHA-256 digest. Remote credentials come from an environment variable and are excluded from arguments, logs, generated projects, and the generated manifest.
 
 ```bash
-pnpm deploy:check -- https://your-domain.example/api/health
+pnpm dlx create-nextdevtpl@4.0.0 my-app --skin ./my-skin --preset saas
 ```
 
-## Project layout
+`--palette` is available only for the built-in default skin. The package includes an offline snapshot of 149 StyleKit themes. A selected theme adds its attribution and MIT license to the generated app. Palettes do not change page structure or add runtime network requests.
 
-```text
-src/
-├── app/                 # Localized App Router pages and API handlers
-├── core/modules/        # Module contract and validation
-├── core/services/       # Provider-neutral service contracts
-├── modules/             # Registry generated from selected modules
-├── adapters/            # Selected provider implementations
-├── services/            # Business-facing service instances
-├── features/            # Auth, payments, credits, support, marketing, etc.
-├── db/schema/           # Schema groups selected by the generator
-└── content/docs/        # Built-in English and Chinese user documentation
+A skin must match the template and view API versions, declare view entries, dependencies, asset licenses, and file SHA-256 digests. Dynamic views must also meet demo mode's client compatibility requirements. Full projects that retain the docs feature can open the [generator guide](/en/docs/generator) and [skin authoring guide](/en/docs/skin-authoring).
 
-recipes/catalog.json                 # Modules, adapters and presets
-packages/create-nextdevtpl/          # Published project generator
-nextdevtpl.generated.json            # Selection recorded in a generated app
-tests/compatibility/                  # Supported combination matrix
-deploy/                              # Target-specific deployment guides
-```
+## Demo Mode
+
+Demo export retains 17 user-facing routes and 20 skin views, and supports only the `server` target. It rejects explicit `--preset`, `--modules`, and service-adapter options so the output cannot imply backend choices that are not present.
+
+A skin may provide `demo/data.json` as a strictly validated data patch. It can define the sample user, plan ID and interval, credit ledger, billing history, and support tickets. Plan prices, monthly allowances, and feature entitlements still come from the template's shared plan catalog. Sample dates use a fixed UTC reference point rather than the runtime clock.
 
 ## Documentation
 
-Generated `saas` and `ai-saas` projects include documentation at `/en/docs`
-and `/zh/docs`. The source pages in this repository cover:
+Full projects that include the docs feature expose built-in help at `/en/docs` and `/zh/docs`, including [Upgrade and Compatibility](/en/docs/upgrade).
 
-- [Quick start](src/content/docs/en/quick-start.mdx)
-- [Generator and presets](src/content/docs/en/generator.mdx)
-- [Feature modules](src/content/docs/en/feature-modules.mdx)
-- [Service adapters](src/content/docs/en/service-adapters.mdx)
-- [Configuration](src/content/docs/en/configuration.mdx)
-- [Operations](src/content/docs/en/operations.mdx)
-- [Deployment](src/content/docs/en/deployment.mdx)
-- [Upgrade and compatibility](src/content/docs/en/upgrade.mdx)
-
-Chinese pages live beside them under `src/content/docs/zh`.
-
-## Working on the template repository
-
-Clone the source repository when contributing to NextDevTpl itself:
-
-```bash
-git clone git@github.com:evepupil/NextDevTpl.git
-cd NextDevTpl
-pnpm install
-Copy-Item .env.example .env.local
-pnpm db:push
-pnpm dev
-```
-
-Quality gates:
-
-```bash
-pnpm format
-pnpm lint
-pnpm typecheck
-pnpm test:run
-pnpm build
-pnpm verify:generated
-pnpm verify:compatibility:structure
-pnpm release:check
-```
-
-## Upgrade model
-
-Generated projects are independently owned source trees. NextDevTpl 3.x does
-not overwrite them. To upgrade, generate a temporary comparison project with
-the same `nextdevtpl.generated.json` selection, review the diff, merge changes
-in small groups, run migrations in a test database, and pass the full quality
-gate before production.
-
-See [the upgrade guide](docs/升级指南.md) and
-[compatibility troubleshooting](docs/兼容性故障排查.md).
+Generated projects are independently maintained source trees. The generator does not overwrite them. Upgrade by comparing the original selection with a temporary project generated by the new version, then review and merge changes manually. Test database migrations outside production first.
 
 ## License
 

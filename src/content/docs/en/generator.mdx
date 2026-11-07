@@ -1,97 +1,120 @@
 ---
 title: Generator and Presets
-description: Use create-nextdevtpl to select modules, service adapters, and a deployment target.
+description: Select a runtime mode, skin, palette, modules, and target with create-nextdevtpl 4.0.0.
 ---
 
 # Generator and Presets
 
-`create-nextdevtpl` produces a standalone project. It copies the template,
-resolves module dependencies, removes unselected source and packages, composes
-the database schema and translations, and writes environment and deployment
-files. The generated app has no runtime dependency on the generator.
+`create-nextdevtpl` copies the selected skin and application source during generation, resolves module dependencies in full mode, prunes unselected code, and writes `nextdevtpl.generated.json`. The generated project is independent source and does not install or call the generator at runtime.
 
-## Basic command
-
-Node.js 24 and pnpm 10 are required:
+Node.js 24 and pnpm 10 are required. Show the options shipped with the current CLI:
 
 ```bash
-pnpm dlx create-nextdevtpl@latest my-app --preset saas --target vercel
+pnpm dlx create-nextdevtpl@4.0.0 --help
 ```
 
-The current CLI is flag-driven. Omitting `--preset` uses `minimal`; omitting the
-target uses the preset default. List every option with:
+## Full Mode
+
+Full mode is the default. Choose a preset and target:
 
 ```bash
-pnpm dlx create-nextdevtpl@latest --help
+pnpm dlx create-nextdevtpl@4.0.0 my-app --preset saas --target vercel
 ```
 
-## Official presets
+| Preset | Default target | Main surface |
+| --- | --- | --- |
+| `minimal` | `server` | Authentication and basic workspace pages |
+| `saas` | `vercel` | Marketing, auth, settings, admin, support, subscriptions, and credits |
+| `ai-saas` | `cloudflare` | SaaS pages plus AI, blog, and PSEO |
+| `custom` | `server` | Explicitly selected modules and services |
 
-| Preset | Best for | Default target | Main selection |
-| --- | --- | --- | --- |
-| `minimal` | Starting from a small shell | `server` | Auth, dashboard, disabled mail, no-op rate limit |
-| `saas` | A conventional subscription product | `vercel` | Marketing, settings, admin, support, Creem, S3, Resend, Inngest, Upstash |
-| `ai-saas` | An AI SaaS on Cloudflare | `cloudflare` | Full product surface, Stripe, R2, Email Binding, Workers AI, Workflows, native rate limits |
-| `custom` | Exact source control | `server` | Modules and adapters supplied with flags |
-
-Preset services and targets can be overridden:
+Full mode supports `server`, `docker`, `vercel`, and `cloudflare`. Module dependencies are included automatically. Worker-only adapters require the `cloudflare` target; Node-only adapters cannot be used on that target.
 
 ```bash
-pnpm dlx create-nextdevtpl@latest my-app \
-  --preset saas \
-  --target docker \
-  --payment stripe \
-  --mail smtp \
-  --rate-limit noop
-```
-
-## Custom selection
-
-```bash
-pnpm dlx create-nextdevtpl@latest my-app \
+pnpm dlx create-nextdevtpl@4.0.0 my-app \
   --preset custom \
   --modules auth,analytics,operations \
   --target docker \
   --payment stripe \
-  --alerts webhook \
-  --analytics posthog \
-  --rate-limit noop
+  --analytics posthog
 ```
 
-See [Feature Modules](/en/docs/feature-modules) and
-[Service Adapters](/en/docs/service-adapters) for valid choices. Dependencies
-are added automatically. Worker-only adapters require the `cloudflare` target;
-Node-only adapters are rejected for that target.
+Older full-project records without a `mode` field are still treated as full projects. New records explicitly contain `mode: "full"`.
 
-## Common flags
+## Demo Mode
 
-| Flag | Values |
+Demo mode retains 17 user-facing routes and 20 skin views and supports only the `server` target. The target defaults to `server` when omitted.
+
+```bash
+pnpm dlx create-nextdevtpl@4.0.0 my-demo --mode demo --target server
+```
+
+Demo mode rejects explicit `--preset`, `--modules`, and service-adapter flags. Skin sources and `--palette` remain available, with palettes limited to the built-in default skin. Demo mode has no database, business APIs, Server Actions, backend services, or business environment variables. Local interactions update only in-memory state for the current tab; refreshing restores the default sample. Demo mode is not a static export.
+
+## Select a Skin
+
+Omitting `--skin` is equivalent to `--skin default`. Three source forms are accepted:
+
+| Source | Flag |
 | --- | --- |
-| `--preset` | `minimal`, `saas`, `ai-saas`, `custom` |
-| `--modules` | Comma-separated module IDs for a custom selection |
-| `--target` | `server`, `docker`, `vercel`, `cloudflare` |
+| Built-in default skin | `--skin default` |
+| Local directory | `--skin ./my-skin` |
+| Remote HTTPS archive | `--skin https://example.test/skin.tgz --skin-sha256 <64-digit-SHA-256>` |
+
+The remote URL must be a plain HTTPS URL without credentials, query, or fragment; the archive SHA-256 is required. Use `--skin-token-env NAME` to select an environment variable for an optional access token. The default name is `NEXTDEVTPL_SKIN_TOKEN`. Do not put the token value in command arguments. Generation fails when an explicitly named variable is missing or empty. The token is not written to generated records or passed to project installation scripts.
+
+```bash
+pnpm dlx create-nextdevtpl@4.0.0 my-app \
+  --skin ./my-skin \
+  --preset saas
+```
+
+The generated record stores the skin ID, version, package digest, and source type. Remote records retain the archive digest, not its URL; local records omit the absolute directory.
+
+## Select a Palette
+
+`--palette <slug>` is available only for the built-in default skin. The bundled snapshot contains 149 StyleKit themes and is read offline during generation. Without a palette, the default skin CSS remains unchanged. With a palette, the generated record stores its ID, snapshot date, and digest, and the app receives the selected theme's `STYLEKIT-LICENSE.txt`.
+
+```bash
+pnpm dlx create-nextdevtpl@4.0.0 my-app \
+  --preset saas \
+  --palette glassmorphism
+```
+
+Palettes with local or remote skins are rejected. Palettes do not provide runtime switching or select different pages or layouts.
+
+## Common Flags
+
+| Flag | Values or purpose |
+| --- | --- |
+| `--mode` | `full` or `demo`; defaults to `full` |
+| `--preset` | Full mode: `minimal`, `saas`, `ai-saas`, `custom` |
+| `--modules` | Comma-separated custom module IDs in full mode |
+| `--target` | Full mode: `server`, `docker`, `vercel`, `cloudflare`; demo: `server` only |
 | `--payment` | `creem`, `stripe`, `none` |
 | `--storage` | `s3-compatible`, `r2-binding`, `none` |
 | `--mail` | `disabled`, `resend`, `smtp`, `cloudflare-email` |
 | `--ai` | `openai-compatible`, `anthropic`, `workers-ai`, `none` |
-| `--alerts` | `noop`, `email`, `webhook` (with `operations`) |
+| `--alerts` | `noop`, `email`, `webhook` |
 | `--analytics` | `noop`, `logger`, `posthog`, `ga4`, `umami`, `none` |
 | `--jobs` | `inngest`, `cloudflare-workflows`, `none` |
 | `--rate-limit` | `noop`, `upstash`, `cloudflare-rate-limit` |
+| `--skin` | `default`, a local directory, or an HTTPS archive |
+| `--skin-sha256` | 64-character hexadecimal SHA-256 for a remote archive |
+| `--skin-token-env` | Environment variable name for a remote skin token |
+| `--palette` | StyleKit theme ID for the built-in default skin |
+| `--yes` | Accept prompts using defaults |
 | `--no-install` | Generate files without installing dependencies |
 
-## After generation
+## After Generation
 
-`nextdevtpl.generated.json` records the effective selection without secrets.
-Inspect it, copy `.env.example`, and fill only the variables that remain:
+Full mode uses `.env.example` to configure the selected services and may require database initialization. Demo mode requires no database or business environment variables; install and start the Next.js app directly.
 
-```powershell
-Set-Location my-app
-Get-Content nextdevtpl.generated.json
-Copy-Item .env.example .env.local
-pnpm db:push
+```bash
+cd my-demo
 pnpm dev
 ```
 
-Keep `nextdevtpl.generated.json`; it recreates the same comparison project for
-future upgrades.
+Demo records have empty `modules`, `adapters`, and `bindings`; `viewModules` lists the eight registered view modules; `demo.dataSha256` is a digest of the merged sample data, not the sample JSON. Demo pages read from an in-memory store. Pagination, form input, and business data are not written to browser persistence.
+
+See [Skin Authoring](/en/docs/skin-authoring), [Feature Modules](/en/docs/feature-modules), and [Upgrade and Compatibility](/en/docs/upgrade).

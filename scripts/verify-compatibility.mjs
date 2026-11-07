@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 
 import { config } from "dotenv";
 
+import { demoEnvironment } from "../e2e/demo/environment.ts";
 import { generateProject } from "../packages/create-nextdevtpl/dist/index.js";
 import {
   assertBuildArtifact,
@@ -13,11 +14,28 @@ import {
 import { runCommand, toWslPath } from "./compatibility/process.mjs";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-config({ path: join(repositoryRoot, ".env.test"), quiet: true });
 
 const matrix = JSON.parse(
   await readFile(join(repositoryRoot, "tests/compatibility/matrix.json"), "utf8")
 );
+const compatibilityCaseIdPattern = /^[a-z][a-z0-9-]*$/u;
+if (!Array.isArray(matrix.cases)) {
+  throw new Error("Compatibility matrix cases must be an array");
+}
+const matrixCaseIds = new Set();
+for (const matrixCase of matrix.cases) {
+  if (
+    !matrixCase ||
+    typeof matrixCase.id !== "string" ||
+    !compatibilityCaseIdPattern.test(matrixCase.id)
+  ) {
+    throw new Error(`Invalid compatibility case ID: ${matrixCase?.id}`);
+  }
+  if (matrixCaseIds.has(matrixCase.id)) {
+    throw new Error(`Duplicate compatibility case ID: ${matrixCase.id}`);
+  }
+  matrixCaseIds.add(matrixCase.id);
+}
 const exemptionDocument = JSON.parse(
   await readFile(
     join(repositoryRoot, "tests/compatibility/exemptions.json"),
@@ -37,6 +55,9 @@ const selectedCases = requestedCase
 if (requestedCase && selectedCases.length === 0) {
   throw new Error(`Unknown compatibility case: ${requestedCase}`);
 }
+if (selectedCases.some((entry) => entry.mode !== "demo")) {
+  config({ path: join(repositoryRoot, ".env.test"), quiet: true });
+}
 
 for (const exemption of exemptionDocument.exemptions) {
   if (Date.parse(exemption.expiresAt) <= Date.now()) {
@@ -50,6 +71,42 @@ const reportsRoot = join(repositoryRoot, "artifacts", "compatibility");
 await mkdir(reportsRoot, { recursive: true });
 const workingRoot = await mkdtemp(join(tmpdir(), "nextdevtpl-compatibility-"));
 let failed = false;
+
+function caseMode(matrixCase) {
+  return matrixCase.mode ?? "full";
+}
+
+function skinSelection(matrixCase) {
+  if (!matrixCase.skin) return undefined;
+  if (matrixCase.skin.kind === "local") {
+    return {
+      ...matrixCase.skin,
+      directory: resolve(repositoryRoot, matrixCase.skin.directory),
+    };
+  }
+  return matrixCase.skin;
+}
+
+function withEnvironment(environment, operation) {
+  const original = { ...process.env };
+  for (const name of Object.keys(process.env)) delete process.env[name];
+  Object.assign(process.env, environment);
+  return Promise.resolve()
+    .then(operation)
+    .finally(() => {
+      for (const name of Object.keys(process.env)) delete process.env[name];
+      Object.assign(process.env, original);
+    });
+}
+
+function stageEnvironment(matrixCase, stage) {
+  if (caseMode(matrixCase) !== "demo") return process.env;
+  return {
+    ...demoEnvironment(),
+    NODE_ENV:
+      stage === "install" ? "development" : stage === "test" ? "test" : "production",
+  };
+}
 
 async function runStage(report, matrixCase, stage, operation) {
   const startedAt = new Date().toISOString();
@@ -83,10 +140,18 @@ async function runStage(report, matrixCase, stage, operation) {
 try {
   for (const matrixCase of selectedCases) {
     const target = join(workingRoot, matrixCase.id);
+    const mode = caseMode(matrixCase);
+    const expectedPreset =
+      matrixCase.expectedPreset ?? matrixCase.preset ?? null;
     const report = {
       schemaVersion: 1,
       caseId: matrixCase.id,
-      preset: matrixCase.preset,
+      mode,
+      preset: expectedPreset,
+      skin: matrixCase.skin
+        ? { kind: matrixCase.skin.kind }
+        : { kind: "builtin", id: "default" },
+      palette: matrixCase.palette ?? null,
       target: matrixCase.target,
       startedAt: new Date().toISOString(),
       stages: [],
@@ -95,18 +160,35 @@ try {
 
     try {
       let manifest;
-      await runStage(report, matrixCase, "generate", async () => {
+      const generate = async () => {
         const result = await generateProject({
           targetDirectory: target,
-          preset: matrixCase.preset,
+          ...(matrixCase.mode ? { mode: matrixCase.mode } : {}),
+          ...(matrixCase.preset ? { preset: matrixCase.preset } : {}),
           ...(matrixCase.modules ? { modules: matrixCase.modules } : {}),
           ...(matrixCase.adapterOverrides
             ? { adapterOverrides: matrixCase.adapterOverrides }
             : {}),
+          ...(matrixCase.skin ? { skin: skinSelection(matrixCase) } : {}),
+          ...(matrixCase.palette ? { palette: matrixCase.palette } : {}),
           target: matrixCase.target,
           install: false,
         });
         manifest = result.manifest;
+        report.mode = manifest.mode;
+        report.preset = manifest.preset;
+        report.skin = {
+          kind: manifest.skin.source.kind,
+          id: manifest.skin.id,
+        };
+        report.palette = manifest.skin.palette?.id ?? null;
+      };
+      await runStage(report, matrixCase, "generate", async () => {
+        if (mode === "demo") {
+          await withEnvironment(demoEnvironment(), generate);
+        } else {
+          await generate();
+        }
       });
       await runStage(report, matrixCase, "target-config", () =>
         assertGeneratedProject(target, matrixCase, manifest)
@@ -143,22 +225,33 @@ try {
             command: "pnpm",
             args: ["install", "--frozen-lockfile", "--prefer-offline"],
             cwd: target,
+            env: stageEnvironment(matrixCase, "install"),
             retries: 1,
           })
         );
-        await runStage(report, matrixCase, "migration", () =>
-          runCommand({
-            command: "pnpm",
-            args: ["db:generate:init"],
-            cwd: target,
-          })
-        );
+        if (mode === "demo") {
+          report.stages.push({
+            stage: "migration",
+            status: "skipped",
+            reason: "demo mode has no database",
+          });
+        } else {
+          await runStage(report, matrixCase, "migration", () =>
+            runCommand({
+              command: "pnpm",
+              args: ["db:generate:init"],
+              cwd: target,
+              env: stageEnvironment(matrixCase, "migration"),
+            })
+          );
+        }
         for (const stage of ["lint", "typecheck", "test"]) {
           await runStage(report, matrixCase, stage, () =>
             runCommand({
               command: "pnpm",
               args: [stage === "test" ? "test:run" : stage],
               cwd: target,
+              env: stageEnvironment(matrixCase, stage),
             })
           );
         }
@@ -167,15 +260,23 @@ try {
             command: "pnpm",
             args: [matrixCase.buildScript],
             cwd: target,
+            env: stageEnvironment(matrixCase, "build"),
           });
           return assertBuildArtifact(target, matrixCase);
         });
-        if (matrixCase.healthCheck) {
+        if (mode === "demo") {
+          report.stages.push({
+            stage: "health",
+            status: "skipped",
+            reason: "demo mode has no health endpoint",
+          });
+        } else if (matrixCase.healthCheck) {
           await runStage(report, matrixCase, "health", () =>
             runCommand({
               command: "pnpm",
               args: ["verify:health"],
               cwd: target,
+              env: stageEnvironment(matrixCase, "health"),
             })
           );
         }

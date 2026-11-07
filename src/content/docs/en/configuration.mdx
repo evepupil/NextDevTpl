@@ -1,23 +1,37 @@
 ---
 title: Configuration
-description: Configure the base environment, selected service adapters, and Cloudflare bindings.
+description: Configure environment variables and Cloudflare bindings for the selected mode and adapters.
 ---
 
 # Configuration
 
-Start with `nextdevtpl.generated.json` and the generated `.env.example`. The
-generator removes variables for unselected capabilities, so configure only the
-entries that remain.
+Check `mode`, `modules`, `adapters`, `bindings`, and `target` in
+`nextdevtpl.generated.json`, then review the generated `.env.example`. Full mode always requires
+the site URL (`NEXT_PUBLIC_APP_URL`); configure other variables according to the generated
+selection. Demo mode needs no business environment variables or database.
 
-## Base variables
+## Demo mode
+
+Demo mode keeps sample state in the current browser tab's memory and does not connect to real
+services. It needs no `.env` file, database, auth secret, or provider credentials. Plan prices and
+entitlements come from the project's shared plan catalog; skin demo data can override only
+permitted sample fields.
+
+## Full-mode base variables
+
+Full mode always requires the site URL `NEXT_PUBLIC_APP_URL`. Set database, auth, and provider
+variables only when the generated selection includes the corresponding capability:
 
 | Variable | Purpose |
 | --- | --- |
-| `DATABASE_URL` | PostgreSQL connection for Drizzle, auth, and health checks |
+| `DATABASE_URL` | PostgreSQL connection for database features, Drizzle, and health checks |
 | `BETTER_AUTH_SECRET` | Session signing; use a long random production value |
 | `BETTER_AUTH_URL` | Site URL used by Better Auth callbacks and cookies |
 | `NEXT_PUBLIC_APP_URL` | Browser links, metadata, and return URLs |
 | `NEXT_PUBLIC_APP_NAME` | Display name for the site and email |
+
+After creating `.env.local`, use the generated `.env.example` as the source of truth. A custom
+project without database or auth features should not copy requirements from another combination.
 
 ## Authentication and product
 
@@ -25,57 +39,63 @@ entries that remain.
 | --- | --- |
 | GitHub OAuth | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` |
 | Google OAuth | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
-| Plan prices | Six `NEXT_PUBLIC_PRICE_*` IDs |
+| Plan prices | Six `NEXT_PUBLIC_PRICE_*` IDs for STARTER, PRO, and ULTRA monthly and yearly plans |
 | Credit expiry cron | `CRON_SECRET` |
-| Analytics browser consent | `NEXT_PUBLIC_GA_ID` only for the GA4 page script |
-| Product analytics | `POSTHOG_API_KEY`, `POSTHOG_HOST`; or `GA4_MEASUREMENT_ID`, `GA4_API_SECRET`; or `UMAMI_WEBSITE_ID`, `UMAMI_API_KEY`, `UMAMI_HOST` |
-| Operations alerts | `CRON_SECRET`, thresholds, and the selected alert adapter variables |
+| GA4 browser script | `NEXT_PUBLIC_GA_ID` |
+| Product analytics | PostHog: `POSTHOG_API_KEY`, `POSTHOG_HOST`; GA4: `GA4_MEASUREMENT_ID`, `GA4_API_SECRET`; Umami: `UMAMI_WEBSITE_ID`, `UMAMI_API_KEY`, `UMAMI_HOST` |
+| Operations alerts | `CRON_SECRET`, optional thresholds, and selected alert adapter variables |
 | Sentry | `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_AUTH_TOKEN` |
 | Axiom | `AXIOM_TOKEN`, `AXIOM_DATASET` |
 
-OAuth callbacks are `/api/auth/callback/github` and
-`/api/auth/callback/google`. Production provider settings must use the final
-domain.
+OAuth callbacks are `/api/auth/callback/github` and `/api/auth/callback/google`. Production provider
+settings must use the final domain.
 
-## Adapter configuration
+## Service adapters
 
 | Selection | Variables or bindings |
 | --- | --- |
 | Creem | `CREEM_API_KEY`, `CREEM_WEBHOOK_SECRET` |
 | Stripe | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` |
-| S3 Compatible | `STORAGE_ENDPOINT`, `STORAGE_REGION`, `STORAGE_BUCKET_NAME`, access key and secret |
+| S3 Compatible | `STORAGE_ENDPOINT`, `STORAGE_REGION`, `STORAGE_BUCKET_NAME`, `STORAGE_ACCESS_KEY_ID`, `STORAGE_SECRET_ACCESS_KEY` |
 | R2 Binding | `NEXTDEVTPL_STORAGE` |
 | Resend | `RESEND_API_KEY`, `EMAIL_FROM` |
 | SMTP | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, optional credentials |
 | Cloudflare Email | `NEXTDEVTPL_EMAIL`, `EMAIL_FROM` |
-| OpenAI Compatible | `AI_PROVIDER` and the matching OpenAI/DeepSeek/MiMo key and model |
+| OpenAI Compatible | `AI_PROVIDER` and the selected OpenAI/DeepSeek/MiMo key and model |
 | Anthropic | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` |
 | Workers AI | `AI` binding, `WORKERS_AI_MODEL` |
 | Inngest | `INNGEST_EVENT_KEY`, `INNGEST_SIGNING_KEY` |
-| Workflows | `NEXTDEVTPL_WORKFLOW` |
+| Cloudflare Workflows | `NEXTDEVTPL_WORKFLOW` |
 | Upstash | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` |
-| Cloudflare rate limits | Seven bindings including `RATE_LIMIT_GLOBAL` |
+| Cloudflare rate limits | Bindings including `RATE_LIMIT_GLOBAL` |
 | Alert email | `ALERT_EMAIL_TO`, `EMAIL_FROM` |
 | Alert webhook | `ALERT_WEBHOOK_URL`, optional `ALERT_WEBHOOK_SECRET` |
 
-Operations thresholds are optional and apply to the generated alert rules:
-`ALERT_COOLDOWN_MINUTES`, `ALERT_PAYMENT_FAILURE_RATE_THRESHOLD`, and
-`ALERT_AI_COST_THRESHOLD_MINOR`. Amount thresholds use the smallest unit of the
-configured currency. The generated alert adapter is selected with `--alerts`;
-`ALERT_PROVIDER` is only used by the full template source, not by a generated
-project whose adapter is already fixed.
+Operations thresholds are optional: `ALERT_COOLDOWN_MINUTES`,
+`ALERT_PAYMENT_FAILURE_RATE_THRESHOLD`, and `ALERT_AI_COST_THRESHOLD_MINOR`. Amount thresholds
+use the smallest unit of the configured currency. The generated alert adapter is fixed with
+`--alerts`; `ALERT_PROVIDER` is used only by the full template source and is not read by a generated
+project.
 
-Cloudflare bindings live in `wrangler.jsonc`. Configure secrets through
-`wrangler secret put` or the platform secret manager, never in source control.
+## Cloudflare bindings and secrets
+
+Cloudflare bindings live in `wrangler.jsonc`; binding names and resource types must match the
+selected adapters. Configure secrets with `wrangler secret put` or the platform secret manager.
+Never put real secrets in source control or `wrangler.jsonc`. Full-mode Cloudflare projects use a
+PostgreSQL-compatible database service; D1 is not currently a generator database option.
+
+Demo mode supports only `server` and does not generate Cloudflare bindings.
 
 ## Missing configuration
 
-- Missing database or auth base variables causes startup or health checks to fail.
-- Missing credentials for a selected service produce an explicit error when called.
+- In full mode, missing database or auth variables required by selected features cause startup,
+  health checks, or the corresponding operation to fail.
+- Missing credentials for a selected service produce an explicit configuration error when called.
 - Disabled mail and no-op rate limiting are useful locally but provide no delivery or abuse protection.
 - Local logs and console errors remain available without Axiom or Sentry.
-- Analytics capture is consent-aware on the client and drops redacted fields;
-  missing credentials do not block the business request.
+- Browser analytics respects consent and removes sensitive fields; missing analytics credentials do
+  not block the business request.
+- Demo mode makes no provider calls; profile, plan, and ticket changes do not persist to a server.
 
 ## Common edit points
 
@@ -83,7 +103,7 @@ Cloudflare bindings live in `wrangler.jsonc`. Configure secrets through
 | --- | --- |
 | `src/config/site.ts` | Name, URL, metadata, and social links |
 | `src/config/nav.ts` | Header, footer, dashboard, and admin navigation |
-| `src/config/payment.ts` | Product IDs and checkout settings |
-| `src/config/subscription-plan.ts` | Plan allowances and display |
+| `src/config/payment.ts` | Full-mode product IDs and checkout settings |
+| `src/core/plans/` | Plan limits and display data shared by full and demo modes |
 | `src/services/*.ts` | Active adapter instances |
 | `.env.local` | Local variables and secrets |

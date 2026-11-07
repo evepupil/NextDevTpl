@@ -1,48 +1,71 @@
 ---
 title: 升级与兼容性
-description: 安全合并 NextDevTpl 新版本并排查组合门禁问题。
+description: 手动比较并合并 NextDevTpl 3.x 项目与 4.0.0 生成结果。
 ---
 
 # 升级与兼容性
 
-生成项目是独立源码，3.x 没有覆盖已有项目的升级命令。升级采用“还原相同选择、
-生成对照项目、审查差异、分批合并”的方式。
+生成项目是独立源码。NextDevTpl 4.0.0 不会覆盖或自动升级已有项目；升级要通过新版本生成临时对照项目，人工审查差异并分批合并。
 
-## 升级步骤
+## 升级前
 
-1. 提交当前改动，备份数据库，跑完现版本门禁。
-2. 查看并保存 `nextdevtpl.generated.json`。
-3. 用目标版本和相同参数生成临时项目：
+1. 确认当前项目有可恢复的代码提交，并备份生产数据库。
+2. 保存 `nextdevtpl.generated.json`，记录当前 Node/pnpm、部署目标和服务配置。
+3. 运行当前项目已有的类型、测试、构建和部署健康检查，保留基线结果。
+4. 单独记录生成记录没有保存的信息：远端皮肤 URL、归档 SHA-256、授权令牌的密钥来源，以及本地皮肤目录位置。
+5. 记录皮肤修改、StyleKit 配色编号及生成项目中自行修改的页面和业务代码。
 
-```bash
-pnpm dlx create-nextdevtpl@<目标版本> ../nextdevtpl-upgrade \
-  --preset <原预设> --target <原目标> --no-install --yes
-```
+## 生成 4.0.0 对照项目
 
-4. 依次比较工具链、`src/core`、`src/adapters`、`src/services`、业务模块、Schema、
-   环境变量和部署配置。
-5. 数据库变更生成新的向前迁移，先在测试库执行。
-6. 跑 lint、类型检查、测试、构建和 Preview 健康检查后再发布。
+阅读 3.x 的 `nextdevtpl.generated.json`，把预设、模块、服务适配器和目标翻译成 4.0.0 CLI 参数。没有自动读取旧生成记录并覆盖项目的升级命令。
 
-完整仓库维护说明见仓库的
-[升级指南](https://github.com/evepupil/NextDevTpl/blob/master/docs/%E5%8D%87%E7%BA%A7%E6%8C%87%E5%8D%97.md)。
-
-## 组合验证
-
-模板仓库维护者可以运行：
+完整模式示例：
 
 ```bash
-pnpm verify:generated
-pnpm verify:compatibility:structure
-pnpm verify:compatibility --case minimal-server
-pnpm release:check
+pnpm dlx create-nextdevtpl@4.0.0 ../nextdevtpl-v4-compare \
+  --preset custom \
+  --modules auth,dashboard,support \
+  --target server \
+  --payment stripe \
+  --skin ./my-skin \
+  --no-install --yes
 ```
 
-兼容性报告写入 `artifacts/compatibility/<case>.json`。常见问题与 Cloudflare Worker
-运行时排查见上游仓库的
-[兼容性故障排查](https://github.com/evepupil/NextDevTpl/blob/master/docs/%E5%85%BC%E5%AE%B9%E6%80%A7%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5.md)。
+将示例中的预设、模块、适配器、目标和皮肤替换为当前项目对应选择。默认皮肤可省略 `--skin`；本地或远端皮肤及其参数应在运行前核实。配色仅适用于内置默认皮肤：
 
-## 回退原则
+```bash
+pnpm dlx create-nextdevtpl@4.0.0 ../nextdevtpl-v4-compare \
+  --preset saas \
+  --target vercel \
+  --skin default \
+  --palette glassmorphism \
+  --no-install --yes
+```
 
-代码回到升级前提交。已经在生产执行过的数据库迁移用新的向前修复迁移处理，
-避免直接改写迁移历史或破坏已有数据。
+旧记录没有 `mode` 字段时按完整模式处理。明确升级完整产品时可省略 `--mode` 或使用 `--mode full`。`--mode demo` 是供展示使用的另一种导出结果，不能替代现有生产应用。
+
+## 审查与合并
+
+在临时目录生成新项目后，逐项比较：
+
+- `nextdevtpl.generated.json` 中新增的 `mode`、皮肤来源/摘要及可选配色记录。
+- `src/skin/` 皮肤目录、`skin.json` 兼容范围、20 个视图入口和基础组件覆盖。
+- `src/core/skin/` 视图接口、固定页面出口和内存运行时边界。
+- `src/core/plans/` 套餐单一配置，以及完整模式中的支付配置映射。
+- `src/features/*/view/contracts.ts` 和皮肤页面：将自己的视图修改迁入皮肤，不依赖 `src/core/skin/demo/` 私有实现。
+- `package.json`、锁文件、`messages/`、环境变量示例、`drizzle/` 数据库结构和部署文件。
+- 生成项目自行维护的页面、视图、动作、服务、迁移和业务规则。
+
+先将自定义页面与组件迁入皮肤视图，再按原有业务模块和适配器合并。不要把模板的源仓库路径、M6 文档准备目录或 demo 专用控制器当作生成项目的运行依赖。远端皮肤来源 URL 不写入生成记录，升级时要从团队保存的来源信息中恢复。
+
+## 数据库和验证
+
+检查 4.0.0 对照项目与当前项目的 Drizzle schema 和迁移。只合并确有需要的迁移；先在测试数据库生成、审阅和执行向前迁移，确认数据结果后再安排生产发布。不要改写已经运行过的生产迁移，也不要对现有项目执行覆盖式生成。
+
+至少验证应用的严格类型检查、项目测试、生产构建、登录和核心业务流程、选定服务适配器及部署健康检查。数据库配置和迁移属于完整模式；演示导出不要求数据库或业务环境变量。
+
+## 回退
+
+应用代码回到升级前的提交。已经在生产执行的数据库迁移使用单独审核过的向前修复迁移处理，不直接删除或回滚已提交数据。按变更记录恢复部署变量和外部服务配置。
+
+皮肤参数和 demo 边界见[生成器指南](/zh/docs/generator)与[皮肤制作指南](/zh/docs/skin-authoring)。仓库级源码对照流程见[升级指南](https://github.com/evepupil/NextDevTpl/blob/master/docs/%E5%8D%87%E7%BA%A7%E6%8C%87%E5%8D%97.md)。
