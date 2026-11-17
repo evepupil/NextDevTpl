@@ -1,3 +1,4 @@
+import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
@@ -75,6 +76,7 @@ export default async function LocaleLayout({
         <CookieConsent />
         <Toaster richColors position="top-right" />
         <Analytics />
+        <VercelAnalytics />
         <TelemetryIdentityProvider />
       </Providers>
     </NextIntlClientProvider>

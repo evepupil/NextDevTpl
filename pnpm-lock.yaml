@@ -95,6 +95,9 @@ importers:
       '@upstash/redis':
         specifier: ^1.36.1
         version: 1.36.1
+      '@vercel/analytics':
+        specifier: ^2.0.1
+        version: 2.0.1(next@16.2.11(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.64.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
       better-auth:
         specifier: ^1.4.17
         version: 1.4.17(drizzle-kit@0.31.8)(drizzle-orm@0.45.1(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.16.0)(@upstash/redis@1.36.1)(kysely@0.28.10)(pg@8.17.2))(next@16.2.11(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.64.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(pg@8.17.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(vitest@4.0.18(@opentelemetry/api@1.9.0)(@types/node@20.19.30)(jiti@2.6.1)(jsdom@27.4.0(@noble/hashes@2.0.1))(lightningcss@1.30.2)(terser@5.46.0)(yaml@2.8.2))
@@ -4427,6 +4430,35 @@ packages:
 
   '@upstash/redis@1.36.1':
     resolution: {integrity: sha512-N6SjDcgXdOcTAF+7uNoY69o7hCspe9BcA7YjQdxVu5d25avljTwyLaHBW3krWjrP0FfocgMk94qyVtQbeDp39A==}
+
+  '@vercel/analytics@2.0.1':
+    resolution: {integrity: sha512-MTQG6V9qQrt1tsDeF+2Uoo5aPjqbVPys1xvnIftXSJYG2SrwXRHnqEvVoYID7BTruDz4lCd2Z7rM1BdkUehk2g==}
+    peerDependencies:
+      '@remix-run/react': ^2
+      '@sveltejs/kit': ^1 || ^2
+      next: '>= 13'
+      nuxt: '>= 3'
+      react: ^18 || ^19 || ^19.0.0-rc
+      svelte: '>= 4'
+      vue: ^3
+      vue-router: ^4
+    peerDependenciesMeta:
+      '@remix-run/react':
+        optional: true
+      '@sveltejs/kit':
+        optional: true
+      next:
+        optional: true
+      nuxt:
+        optional: true
+      react:
+        optional: true
+      svelte:
+        optional: true
+      vue:
+        optional: true
+      vue-router:
+        optional: true
 
   '@vitejs/plugin-react@5.1.2':
     resolution: {integrity: sha512-EcA07pHJouywpzsoTUqNh5NwGayl2PPVEJKUSinGGSxFGYn+shYbqMGBg6FXDqgXum9Ou/ecb+411ssw8HImJQ==}
@@ -12451,6 +12483,11 @@ snapshots:
   '@upstash/redis@1.36.1':
     dependencies:
       uncrypto: 0.1.3
+
+  '@vercel/analytics@2.0.1(next@16.2.11(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.64.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)':
+    optionalDependencies:
+      next: 16.2.11(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.64.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      react: 19.2.3
 
   '@vitejs/plugin-react@5.1.2(vite@7.3.1(@types/node@20.19.30)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(yaml@2.8.2))':
     dependencies:

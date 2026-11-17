@@ -1,5 +1,12 @@
+import { unstable_doesMiddlewareMatch } from "next/experimental/testing/server";
 import type { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+// Next.js 会初始化这个全局对象，独立测试需在加载框架工具前补齐。
+vi.hoisted(async () => {
+  const { AsyncLocalStorage } = await import("node:async_hooks");
+  vi.stubGlobal("AsyncLocalStorage", AsyncLocalStorage);
+});
 
 const mocks = vi.hoisted(() => ({
   authNavigation: {
@@ -45,7 +52,7 @@ vi.mock("next/server", () => ({
   },
 }));
 
-import { middleware } from "@/middleware";
+import { config, middleware } from "@/middleware";
 
 function createRequest(pathname: string, sessionToken?: string): NextRequest {
   const url = new URL(`https://app.test${pathname}`);
@@ -96,5 +103,35 @@ describe("auth middleware destinations", () => {
     const redirectUrl = mocks.redirect.mock.calls[0]?.[0] as URL | undefined;
     expect(redirectUrl?.pathname).toBe("/zh/sign-in");
     expect(redirectUrl?.searchParams.get("callbackUrl")).toBe("/zh/dashboard");
+  });
+});
+
+describe("platform analytics routing", () => {
+  it.each([
+    "/_vercel/insights/script.js",
+    "/_vercel/insights/view",
+    "/_vercel/insights/event",
+  ])("leaves %s to the platform without locale redirects", (pathname) => {
+    expect(
+      unstable_doesMiddlewareMatch({
+        config,
+        nextConfig: {},
+        url: `https://app.test${pathname}`,
+      })
+    ).toBe(false);
+  });
+
+  it.each([
+    "/en/dashboard",
+    "/zh/sign-in",
+    "/api/auth/sign-in/email",
+  ])("keeps authentication and rate limiting enabled for %s", (pathname) => {
+    expect(
+      unstable_doesMiddlewareMatch({
+        config,
+        nextConfig: {},
+        url: `https://app.test${pathname}`,
+      })
+    ).toBe(true);
   });
 });

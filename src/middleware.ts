@@ -156,11 +156,12 @@ export const config = {
      * 匹配所有路径除了:
      * - _next/static (static files)
      * - _next/image (image optimization files)
+     * - _vercel (平台统计脚本与上报接口)
      * - favicon.ico (favicon file)
      * - public folder files
      *
      * 注意: 现在包含 /api 路由以便进行限流
      */
-    "/((?!_next/static|_next/image|favicon.ico|sitemap\\.xml|robots\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!_next/static|_next/image|_vercel(?:/|$)|favicon.ico|sitemap\\.xml|robots\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

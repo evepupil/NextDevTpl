@@ -110,6 +110,7 @@ describe("project generation", () => {
     expect(packageJson.dependencies).not.toHaveProperty("inngest");
     expect(packageJson.dependencies).not.toHaveProperty("@upstash/ratelimit");
     expect(packageJson.dependencies).not.toHaveProperty("@aws-sdk/client-s3");
+    expect(packageJson.dependencies).not.toHaveProperty("@vercel/analytics");
     expect(packageJson.devDependencies).not.toHaveProperty(
       "@opennextjs/cloudflare"
     );
@@ -155,6 +156,7 @@ describe("project generation", () => {
       "utf8"
     );
     expect(localeLayout).not.toContain("skinConfig");
+    expect(localeLayout).not.toContain("@vercel/analytics");
     expect(localeLayout).not.toContain("defaultTheme");
     expect(localeLayout).toContain("<Providers locale={locale}>");
     const rootLayout = await readFile(
@@ -250,7 +252,11 @@ describe("project generation", () => {
     expect(packageJson.dependencies).toHaveProperty("resend");
     expect(packageJson.dependencies).toHaveProperty("inngest");
     expect(packageJson.dependencies).not.toHaveProperty("openai");
+    expect(packageJson.dependencies).not.toHaveProperty("@vercel/analytics");
     expect(packageJson.scripts.postinstall).toBe("fumadocs-mdx");
+    expect(
+      await readFile(join(target, "src/app/[locale]/layout.tsx"), "utf8")
+    ).not.toContain("@vercel/analytics");
     expect(await exists(join(target, "src/features/analytics"))).toBe(false);
     expect(await exists(join(target, "src/features/blog"))).toBe(false);
     expect(
@@ -396,6 +402,10 @@ describe("project generation", () => {
     expect(packageJson.devDependencies).not.toHaveProperty("@types/pg");
     expect(packageJson.devDependencies).not.toHaveProperty("@types/ws");
     expect(packageJson.dependencies).not.toHaveProperty("pg");
+    expect(packageJson.dependencies).not.toHaveProperty("@vercel/analytics");
+    expect(
+      await readFile(join(target, "src/app/[locale]/layout.tsx"), "utf8")
+    ).not.toContain("@vercel/analytics");
     expect(packageJson.dependencies).not.toHaveProperty("ws");
     expect(packageJson.dependencies).not.toHaveProperty("@sentry/nextjs");
     expect(packageJson.dependencies).not.toHaveProperty("pino");

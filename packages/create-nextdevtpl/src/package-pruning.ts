@@ -2,9 +2,12 @@
  * 生成项目 package.json 的仓库专用裁剪与命令替换规则。
  *
  * 仓库根目录的 package.json 会被直接复制进生成项目，其中包含仓库自用
- * 的截图工具和皮肤包校验器。相关脚本与开发依赖需从生成项目移除；仓库
+ * 的官网统计、截图工具和皮肤包校验器。相关脚本与依赖需从生成项目移除；仓库
  * lint 则只保留其中可独立运行的 Biome 检查。
  */
+
+/** 官网的访问统计只用于本仓库，生成项目自行选择统计服务。 */
+const REPOSITORY_ONLY_DEPENDENCIES: readonly string[] = ["@vercel/analytics"];
 
 /** 仓库专用的截图基线依赖，生成项目不带 e2e 目录，也不需要它们。 */
 const REPOSITORY_ONLY_DEV_DEPENDENCIES: readonly string[] = [
@@ -33,7 +36,7 @@ const REPOSITORY_SCRIPT_REWRITES: Readonly<
 const DEMO_CONTRACT_PREPARE_PREFIX = "pnpm run prepare:demo-contract && ";
 
 /**
- * 从 package.json 片段中删除仓库专用 devDependencies 与脚本。
+ * 从 package.json 片段中删除仓库专用依赖与脚本。
  *
  * 仅对仓库专用依赖、已知命令名和 `visual:` 命名前缀操作；lint 转换要求
  * 命令值精确匹配仓库链，避免改写用户自定义 lint 命令。
@@ -43,10 +46,16 @@ const DEMO_CONTRACT_PREPARE_PREFIX = "pnpm run prepare:demo-contract && ";
  */
 export function pruneRepositoryOnlyPackageEntries<
   T extends {
+    dependencies?: Record<string, string>;
     devDependencies?: Record<string, string>;
     scripts?: Record<string, string>;
   },
 >(packageJson: T): T {
+  if (packageJson.dependencies) {
+    for (const name of REPOSITORY_ONLY_DEPENDENCIES) {
+      delete packageJson.dependencies[name];
+    }
+  }
   if (packageJson.devDependencies) {
     for (const name of REPOSITORY_ONLY_DEV_DEPENDENCIES) {
       delete packageJson.devDependencies[name];

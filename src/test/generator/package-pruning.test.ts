@@ -10,6 +10,7 @@ function buildRepositoryPackageJson() {
     name: "NextjsTpl",
     private: true,
     dependencies: {
+      "@vercel/analytics": "^2.0.0",
       next: "^16.2.11",
       react: "^19.2.0",
     },
@@ -40,11 +41,12 @@ function buildRepositoryPackageJson() {
 }
 
 describe("pruneRepositoryOnlyPackageEntries", () => {
-  it("removes the repository-only playwright devDependency and visual scripts", () => {
+  it("removes repository-only analytics, tooling dependencies, and scripts", () => {
     const packageJson = pruneRepositoryOnlyPackageEntries(
       buildRepositoryPackageJson()
     );
 
+    expect(packageJson.dependencies).not.toHaveProperty("@vercel/analytics");
     expect(packageJson.devDependencies).not.toHaveProperty("@playwright/test");
     expect(packageJson.devDependencies).not.toHaveProperty("tar-stream");
     expect(Object.keys(packageJson.scripts)).not.toContain("visual:baseline");
@@ -68,7 +70,10 @@ describe("pruneRepositoryOnlyPackageEntries", () => {
 
     expect(packageJson.name).toBe(input.name);
     expect(packageJson.private).toBe(input.private);
-    expect(packageJson.dependencies).toEqual(input.dependencies);
+    expect(packageJson.dependencies).toEqual({
+      next: "^16.2.11",
+      react: "^19.2.0",
+    });
     expect(packageJson.devDependencies).toEqual({
       "@biomejs/biome": "^2.3.11",
       typescript: "^5",
